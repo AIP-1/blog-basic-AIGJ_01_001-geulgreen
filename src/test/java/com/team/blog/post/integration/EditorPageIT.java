@@ -26,8 +26,20 @@ class EditorPageIT extends IntegrationTestBase {
         // 058 강성찬 개인 확장: 글을 드래그하면 뜨는 서식 창
         assertThat(html).contains("/js/editor/format-toolbar.js").contains("id=\"format-hint\"")
                 .contains("data-writing-ai=\"false\"").doesNotContain("J AI에게 부탁"); // 059: Gemini 키가 없으면 AI 칸 없음
+        // 060 보이는 대로 쓰기: 변환 도구와 편집 칸 스크립트(Markdown 칸은 그대로 남아 저장·자동 저장에 쓰인다)
+        assertThat(html).contains("/js/editor/visual-editor.js").contains("/webjars/marked/").contains("/webjars/turndown/")
+                .contains("id=\"post-content\"");
         // 임시글에는 [변경 취소]가 없다
         assertThat(html).doesNotContain("discard-working-copy");
+    }
+
+    /** 060: 보이는 대로 쓰기 칸이 쓰는 라이브러리를 우리 서버가 내준다(CSP script-src 'self'). */
+    @Test
+    void visualEditorLibrariesAreServed() throws Exception {
+        for (String path : java.util.List.of("/webjars/marked/15.0.12/marked.min.js", "/webjars/turndown/7.2.0/dist/turndown.js",
+                "/webjars/turndown-plugin-gfm/1.0.2/dist/turndown-plugin-gfm.js", "/js/editor/visual-editor.js")) {
+            mockMvc.perform(get(path)).andExpect(status().isOk());
+        }
     }
 
     @Test

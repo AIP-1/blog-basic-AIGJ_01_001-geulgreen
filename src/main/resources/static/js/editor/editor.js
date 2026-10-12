@@ -52,7 +52,11 @@
 
     function content() { return { title: titleInput.value, contentMd: contentInput.value }; }
 
-    function setContent(c) { titleInput.value = c.title || ''; contentInput.value = c.contentMd || ''; }
+    function setContent(c) {
+      titleInput.value = c.title || '';
+      contentInput.value = c.contentMd || '';
+      contentInput.dispatchEvent(new Event('blog:content-replaced')); // 060 보이는 대로 쓰기 칸이 다시 그린다
+    }
 
     function showNotice(text) { notice.textContent = text; notice.hidden = !text; }
 

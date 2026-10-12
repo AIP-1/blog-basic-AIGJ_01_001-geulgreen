@@ -33,8 +33,9 @@
         <label for="post-content" class="visually-hidden">본문 (Markdown)</label>
         <textarea id="post-content" placeholder="Markdown으로 써 보세요. 글을 드래그하면 서식 창이 떠요" aria-describedby="format-hint"
                   th:data-writing-ai="${writingAi}" th:text="${post.contentMd()}"></textarea>
-        <!-- 058·059 강성찬 개인 확장: 서식 창 안내 -->
-        <p id="format-hint" class="help">글을 드래그하면 서식 창이 떠요(제목·목록·글자 색·밑줄·링크<th:block th:if="${writingAi}">·AI로 고치기</th:block>).
+        <!-- 058~060 강성찬 개인 확장: 서식 창 안내 -->
+        <p id="format-hint" class="help">글을 고르면 서식 창이 떠요(제목·목록·글자 색·밑줄·링크<th:block th:if="${writingAi}">·AI로 고치기</th:block>).
+            줄 처음에 #, -, 1., &gt; 를 쓰고 띄어쓰면 제목·목록·인용이 돼요.
             단축키 Ctrl/⌘+B 굵게, I 기울임, U 밑줄, K 링크, E 코드<th:block th:if="${writingAi}">, J AI에게 부탁</th:block></p>
     </div>
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
@@ -160,6 +161,11 @@
     <script src="/js/editor/diff.js" defer></script>
     <script src="/js/editor/autosave.js" defer></script>
     <script src="/js/editor/editor.js" defer></script>
+    <!-- 060 강성찬 개인 확장: 보이는 대로 쓰기(Markdown ↔ 화면 변환) -->
+    <script src="/webjars/marked/15.0.12/marked.min.js" defer></script>
+    <script src="/webjars/turndown/7.2.0/dist/turndown.js" defer></script>
+    <script src="/webjars/turndown-plugin-gfm/1.0.2/dist/turndown-plugin-gfm.js" defer></script>
+    <script src="/js/editor/visual-editor.js" defer></script>
     <script src="/js/editor/format-toolbar.js" defer></script>
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
     <script src="/js/code-highlight.js" defer></script>

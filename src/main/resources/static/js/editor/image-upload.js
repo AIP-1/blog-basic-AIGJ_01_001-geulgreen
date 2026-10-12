@@ -119,13 +119,17 @@
 
     function say(text) { notice.textContent = text || ''; notice.hidden = !text; }
 
+    function visual() { return window.blogVisual && window.blogVisual.active(); }
+
     function replaceMarker(id, markdown) {
+      if (visual()) { window.blogVisual.replaceLocal(id, markdown); return; } // 060 보이는 대로 쓰기 칸
       var re = new RegExp('!\\[[^\\]]*\\]\\(local:' + id + '\\)', 'g');
       textarea.value = textarea.value.replace(re, markdown);
       textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     function insertAtCursor(text) {
+      if (visual()) { window.blogVisual.insertMarkdown(text); return; }
       var start = textarea.selectionStart, end = textarea.selectionEnd;
       var before = textarea.value.slice(0, start), after = textarea.value.slice(end);
       var pad = before && !/\n$/.test(before) ? '\n\n' : '';
@@ -194,6 +198,7 @@
       });
     }
 
+    window.blogImageUpload.add = add; // 060: 보이는 대로 쓰기 칸에 붙여넣거나 끌어 놓은 사진
     button.addEventListener('click', function () { input.click(); });
     input.addEventListener('change', function () {
       Array.prototype.forEach.call(input.files, add);

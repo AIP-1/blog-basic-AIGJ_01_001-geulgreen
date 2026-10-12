@@ -44,6 +44,10 @@ dependencies {
     implementation("com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20260924.2")
     // 코드 문법 강조(브라우저, 우리 서버의 /webjars/에서 제공 — 02 기술 표)
     runtimeOnly("org.webjars.npm:highlightjs__cdn-assets:11.11.1")
+    // 060 보이는 대로 쓰기(강성찬 개인 확장): Markdown ↔ 화면 변환(브라우저, /webjars/에서 제공)
+    runtimeOnly("org.webjars.npm:marked:15.0.12")
+    runtimeOnly("org.webjars.npm:turndown:7.2.0") { isTransitive = false } // Node용 DOM(domino)은 필요 없음
+    runtimeOnly("org.webjars.npm:turndown-plugin-gfm:1.0.2")
     runtimeOnly("org.postgresql:postgresql")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")

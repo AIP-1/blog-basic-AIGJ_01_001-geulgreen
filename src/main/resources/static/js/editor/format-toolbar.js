@@ -1,7 +1,8 @@
 /*
  * 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 본문에서 글을 고르면 창이 떠서 서식 종류(본문·제목·목록·인용·코드 블록),
  * 글자 색·굵게·기울임·밑줄·서식 지우기·링크·취소선·코드를 바꾸고, 059 AI로 고치기(다듬기·맞춤법·짧게·쉽게·직접 부탁)를 한다.
- * 저장은 그대로 Markdown(밑줄·색은 <u>·<span class="md-…">만 렌더러가 살린다). 바꾼 글은 "글자 넣기"로 넣어 되돌리기가 된다.
+ * 060 보이는 대로 쓰기 칸이면 그 칸에 바로 적용되고(visual-editor.js), Markdown 칸이면 Markdown 표시를 씌운다.
+ * 저장은 그대로 Markdown(밑줄·색은 <u>·<span class="md-…">만 렌더러가 살린다). 바꾼 글은 브라우저 편집 명령으로 넣어 되돌리기가 된다.
  * 단축키: Ctrl/⌘ + B 굵게, I 기울임, U 밑줄, K 링크, E 코드, Shift+X 취소선, J AI에게 부탁.
  * 브라우저에서는 window.blogFormat, Node에서는 module.exports(src/test/js/format-toolbar.test.mjs).
  */
@@ -466,10 +467,54 @@
 
     function coarse() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
 
+    // 바꾼 글 넣기(Markdown 칸): 되돌리기가 되도록 "글자 넣기"를 쓰고, 안 되는 브라우저는 직접 바꾼 뒤 입력 이벤트를 보낸다
+    function apply(change) {
+      ta.focus();
+      if (!change) { return; }
+      ta.setSelectionRange(change.from, change.to);
+      var done = false;
+      try { done = document.execCommand('insertText', false, change.text); } catch (err) { done = false; }
+      if (!done) {
+        ta.setRangeText(change.text, change.from, change.to, 'end');
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      ta.setSelectionRange(change.selStart, change.selEnd);
+    }
+
+    // Markdown 칸(textarea)을 다루는 방법. 060 보이는 대로 쓰기 칸은 window.blogVisual.adapter가 같은 모양으로 다룬다
+    var textSurface = {
+      el: function () { return ta; },
+      hasSelection: function () { return ta.selectionStart !== ta.selectionEnd; },
+      snapshot: function () { return { start: ta.selectionStart, end: ta.selectionEnd }; },
+      same: function (x, y) { return !!x && !!y && x.start === y.start && x.end === y.end; },
+      rects: function (snap) { return { a: caretPoint(ta, snap.start), b: caretPoint(ta, snap.end) }; },
+      active: function () { return activeFormats(ta.value, ta.selectionStart, ta.selectionEnd); },
+      run: function (key) { apply(format(ta.value, ta.selectionStart, ta.selectionEnd, key)); },
+      setBlock: function (kind) { apply(setBlock(ta.value, ta.selectionStart, ta.selectionEnd, kind)); },
+      setColor: function (cls) { apply(setColor(ta.value, ta.selectionStart, ta.selectionEnd, cls)); },
+      linkUrl: function () { var l = findLink(ta.value, ta.selectionStart, ta.selectionEnd); return l ? l.url : null; },
+      link: function (sel, url) { apply(link(ta.value, sel.start, sel.end, url)); },
+      unlink: function () { apply(unlink(ta.value, ta.selectionStart, ta.selectionEnd)); },
+      save: function () { var s = ta.selectionStart, e = ta.selectionEnd; return { start: s, end: e, text: ta.value.slice(s, e) }; },
+      restore: function (sel) { ta.focus(); ta.setSelectionRange(sel.start, sel.end); },
+      markdownOf: function (sel) { return sel.text; },
+      unchanged: function (sel) { return ta.value.slice(sel.start, sel.end) === sel.text; },
+      replace: function (sel, md) { apply({ from: sel.start, to: sel.end, text: md, selStart: sel.start, selEnd: sel.start + md.length }); },
+      insertBelow: function (sel, md) {
+        var at = ta.value.indexOf('\n', sel.end);
+        if (at < 0) { at = ta.value.length; }
+        apply({ from: at, to: at, text: '\n\n' + md, selStart: at + 2, selEnd: at + 2 + md.length });
+      },
+      focus: function () { ta.focus(); }
+    };
+
+    function S() { return window.blogVisual && window.blogVisual.active() ? window.blogVisual.adapter : textSurface; }
+
     // 넓은 화면은 본문 칸 오른쪽(노션처럼), 아니면 고른 글 아래(자리가 없으면 위). 휴대폰은 늘 아래(기본 복사 메뉴를 가리지 않게)
     function place() {
-      var s = anchor ? anchor.start : ta.selectionStart, e = anchor ? anchor.end : ta.selectionEnd;
-      var box = ta.getBoundingClientRect(), a = caretPoint(ta, s), b = caretPoint(ta, e);
+      var surface = S(), snap = anchor || surface.snapshot();
+      if (!snap) { return; }
+      var box = surface.el().getBoundingClientRect(), r = surface.rects(snap), a = r.a, b = r.b;
       var w = panel.offsetWidth, h = panel.offsetHeight, cw = document.documentElement.clientWidth, vh = window.innerHeight;
       var header = document.querySelector('.site-header');
       var minTop = header ? header.getBoundingClientRect().bottom + 8 : 8;
@@ -504,7 +549,7 @@
 
     // 버튼 눌림·서식 종류·색 표시
     function update() {
-      var active = activeFormats(ta.value, ta.selectionStart, ta.selectionEnd);
+      var active = S().active();
       Object.keys(WRAPS).forEach(function (k) { gridButtons[k].setAttribute('aria-pressed', active[k] ? 'true' : 'false'); });
       typeLabel.textContent = BLOCK_LABEL[active.block];
       var item = BLOCK_ITEMS.filter(function (b) { return b[0] === active.block; })[0];
@@ -517,11 +562,12 @@
 
     // 고른 글이 바뀌면 첫 화면으로, 그대로면 지금 화면을 둔다. 글을 안 골랐으면 닫는다
     function refresh() {
-      if (document.activeElement !== ta) { return; }
-      var s = ta.selectionStart, e = ta.selectionEnd;
-      if (s === e || composing) { close(); return; }
-      if (panel.hidden || !anchor || anchor.start !== s || anchor.end !== e) {
-        anchor = { start: s, end: e };
+      var surface = S();
+      if (document.activeElement !== surface.el()) { return; }
+      if (!surface.hasSelection() || composing) { close(); return; }
+      var snap = surface.snapshot();
+      if (panel.hidden || !anchor || !surface.same(anchor, snap)) {
+        anchor = snap;
         saved = null;
         aiBusy = false;
         view = 'main';
@@ -533,50 +579,35 @@
 
     function later() { window.setTimeout(refresh, 0); }
 
-    // 바꾼 글 넣기: 되돌리기가 되도록 "글자 넣기"를 쓰고, 안 되는 브라우저는 직접 바꾼 뒤 입력 이벤트를 보낸다(자동 저장·미리보기)
-    function apply(change) {
-      ta.focus();
-      if (change) {
-        ta.setSelectionRange(change.from, change.to);
-        var done = false;
-        try { done = document.execCommand('insertText', false, change.text); } catch (err) { done = false; }
-        if (!done) {
-          ta.setRangeText(change.text, change.from, change.to, 'end');
-          ta.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        ta.setSelectionRange(change.selStart, change.selEnd);
-      }
+    // 서식을 바꾼 뒤: 고른 자리가 달라졌으니 첫 화면으로 다시 그린다
+    function afterChange() {
       anchor = null;
       refresh();
     }
 
     // 입력 칸(링크·AI 부탁)으로 가기 전에 고른 자리를 기억해 두고, 돌아올 때 다시 고른다
     function remember() {
-      if (!saved) { saved = { start: ta.selectionStart, end: ta.selectionEnd }; }
-      saved.text = ta.value.slice(saved.start, saved.end);
+      if (!saved) { saved = S().save(); }
       return saved;
     }
 
     function backToText() {
       var sel = saved;
       saved = null;
-      ta.focus();
-      if (sel) { ta.setSelectionRange(sel.start, sel.end); }
+      if (sel) { S().restore(sel); } else { S().focus(); }
       return sel;
     }
 
     function run(key) {
-      var s = ta.selectionStart, e = ta.selectionEnd;
-      if (key === 'unlink') { apply(unlink(ta.value, s, e)); return; }
       if (key === 'link') { openView('link'); return; }
       if (key === 'ask') { showView('main'); remember(); askInput.focus(); return; }
-      apply(format(ta.value, s, e, key));
+      if (key === 'unlink') { S().unlink(); } else { S().run(key); }
+      afterChange();
     }
 
     function openView(name) {
       if (name === 'link') {
-        var l = findLink(ta.value, ta.selectionStart, ta.selectionEnd);
-        linkInput.value = l ? l.url : '';
+        linkInput.value = S().linkUrl() || '';
         remember();
         showView('link');
         linkInput.focus();
@@ -588,7 +619,8 @@
     linkForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var url = normalizeUrl(linkInput.value), sel = backToText();
-      apply(sel ? link(ta.value, sel.start, sel.end, url) : null);
+      if (sel && url) { S().link(sel, url); }
+      afterChange();
     });
 
     function showAi(text, withActions, needConsent) {
@@ -599,9 +631,10 @@
       showView('ai');
     }
 
-    // AI로 고치기: 고른 글만 보내고, 결과는 [바꾸기]·[아래에 넣기]를 눌러야 본문에 들어간다
+    // AI로 고치기: 고른 글만(Markdown으로) 보내고, 결과는 [바꾸기]·[아래에 넣기]를 눌러야 본문에 들어간다
     function runAi(action, ask) {
       var sel = remember(), editor = window.blogEditor, tagsApi = window.blogEditorTags;
+      if (!sel) { return; }
       lastAi = { action: action, ask: ask || '' };
       if (!consented) { showAi('', false, true); return; }
       if (!editor) { return; }
@@ -609,7 +642,8 @@
       showAi('AI가 고치는 중…', false, false);
       fetch('/api/posts/' + editor.state.postId + '/writing-ai', {
         method: 'POST', credentials: 'same-origin', headers: headers(),
-        body: JSON.stringify({ text: sel.text, action: action, ask: lastAi.ask, visibility: tagsApi ? tagsApi.visibility() : 'PUBLIC' })
+        body: JSON.stringify({ text: S().markdownOf(sel), action: action, ask: lastAi.ask,
+          visibility: tagsApi ? tagsApi.visibility() : 'PUBLIC' })
       }).then(function (r) {
         return r.json().catch(function () { return {}; }).then(function (body) { return { ok: r.ok, body: body }; });
       }).then(function (res) {
@@ -634,15 +668,10 @@
       }
       if (what === 'again') { runAi(lastAi.action, lastAi.ask); return; }
       var sel = saved;
-      if (!sel || ta.value.slice(sel.start, sel.end) !== sel.text) { showAi('그 사이 글이 바뀌어서 넣지 못했어요. 다시 골라 주세요', false, false); return; }
-      backToText();
-      if (what === 'replace') {
-        apply({ from: sel.start, to: sel.end, text: aiText, selStart: sel.start, selEnd: sel.start + aiText.length });
-      } else {
-        var at = ta.value.indexOf('\n', sel.end);
-        if (at < 0) { at = ta.value.length; }
-        apply({ from: at, to: at, text: '\n\n' + aiText, selStart: at + 2, selEnd: at + 2 + aiText.length });
-      }
+      if (!sel || !S().unchanged(sel)) { showAi('그 사이 글이 바뀌어서 넣지 못했어요. 다시 골라 주세요', false, false); return; }
+      saved = null;
+      if (what === 'replace') { S().replace(sel, aiText); } else { S().insertBelow(sel, aiText); }
+      afterChange();
     }
 
     // 창의 버튼을 눌러도 본문의 고른 글이 풀리지 않게(입력 칸·링크는 빼고)
@@ -656,8 +685,8 @@
       if (d.back) { if (saved) { backToText(); } showView('main'); return; }
       if (d.view) { openView(d.view); return; }
       if (d.key) { run(d.key); return; }
-      if (d.block) { apply(setBlock(ta.value, ta.selectionStart, ta.selectionEnd, d.block)); return; }
-      if (d.color !== undefined) { apply(setColor(ta.value, ta.selectionStart, ta.selectionEnd, d.color)); return; }
+      if (d.block) { S().setBlock(d.block); afterChange(); return; }
+      if (d.color !== undefined) { S().setColor(d.color); afterChange(); return; }
       if (d.ai) { runAi(d.ai); return; }
       if (d.aiDo) { aiDo(d.aiDo); }
     });
@@ -669,21 +698,41 @@
     });
     panel.addEventListener('focusout', function () {
       window.setTimeout(function () {
-        if (document.activeElement !== ta && !panel.contains(document.activeElement)) { close(); }
+        if (document.activeElement !== S().el() && !panel.contains(document.activeElement)) { close(); }
       }, 0);
     });
 
-    document.addEventListener('mouseup', later);
-    ta.addEventListener('keyup', later);
-    ta.addEventListener('select', later);
-    ta.addEventListener('touchend', function () { window.setTimeout(refresh, 300); });
-    ta.addEventListener('input', function () { if (ta.selectionStart === ta.selectionEnd) { close(); } });
-    ta.addEventListener('scroll', function () { if (!panel.hidden) { place(); } });
-    ta.addEventListener('blur', function () {
-      window.setTimeout(function () {
-        if (document.activeElement !== ta && !panel.contains(document.activeElement)) { close(); }
-      }, 0);
+    // 단축키: 한글 입력 중에도 같은 자판 자리로 듣는다(ev.code)
+    function onKeydown(ev) {
+      if (ev.key === 'Escape' && !panel.hidden) { ev.preventDefault(); if (view !== 'main') { showView('main'); } else { close(); } return; }
+      if (composing || ev.isComposing || !(ev.ctrlKey || ev.metaKey) || ev.altKey || !S().hasSelection()) { return; }
+      var key = SHORTCUTS[(ev.shiftKey ? 'Shift+' : '') + ev.code];
+      if (!key || (key === 'ask' && !askInput)) { return; }
+      ev.preventDefault();
+      refresh();
+      run(key);
+    }
+
+    // Markdown 칸과 보이는 대로 쓰기 칸 모두에서 고르면 뜬다
+    [ta, window.blogVisual && window.blogVisual.adapter.el()].forEach(function (el) {
+      if (!el) { return; }
+      el.addEventListener('keyup', later);
+      el.addEventListener('keydown', onKeydown);
+      el.addEventListener('touchend', function () { window.setTimeout(refresh, 300); });
+      el.addEventListener('input', function () { if (S().el() === el && !S().hasSelection()) { close(); } else { later(); } });
+      el.addEventListener('scroll', function () { if (!panel.hidden) { place(); } });
+      el.addEventListener('blur', function () {
+        window.setTimeout(function () {
+          if (document.activeElement !== S().el() && !panel.contains(document.activeElement)) { close(); }
+        }, 0);
+      });
+      // 한글 조합 중인 글자를 고른 것으로 알리는 브라우저가 있어 조합 중에는 띄우지 않는다
+      el.addEventListener('compositionstart', function () { composing = true; close(); });
+      el.addEventListener('compositionend', function () { composing = false; });
     });
+    ta.addEventListener('select', later);
+    document.addEventListener('mouseup', later);
+    document.addEventListener('selectionchange', function () { if (S() !== textSurface) { later(); } });
     window.addEventListener('resize', function () { if (!panel.hidden) { place(); } });
     // 고른 글이 머리말 뒤로 스크롤되면 창도 가린다(돌아오면 다시 보인다)
     window.addEventListener('scroll', function () {
@@ -691,20 +740,6 @@
       var header = document.querySelector('.site-header');
       panel.style.visibility = header && panel.getBoundingClientRect().top < header.getBoundingClientRect().bottom ? 'hidden' : '';
     }, { passive: true });
-    // 한글 조합 중인 글자를 고른 것으로 알리는 브라우저가 있어 조합 중에는 띄우지 않는다
-    ta.addEventListener('compositionstart', function () { composing = true; close(); });
-    ta.addEventListener('compositionend', function () { composing = false; });
-
-    // 단축키: 한글 입력 중에도 같은 자판 자리로 듣는다(ev.code)
-    ta.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape' && !panel.hidden) { ev.preventDefault(); if (view !== 'main') { showView('main'); } else { close(); } return; }
-      if (composing || ev.isComposing || !(ev.ctrlKey || ev.metaKey) || ev.altKey || ta.selectionStart === ta.selectionEnd) { return; }
-      var key = SHORTCUTS[(ev.shiftKey ? 'Shift+' : '') + ev.code];
-      if (!key || (key === 'ask' && !askInput)) { return; }
-      ev.preventDefault();
-      refresh();
-      run(key);
-    });
   }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
