@@ -601,3 +601,60 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .pin-form { margin: 8px 0; }
 .pinned-post { margin: 0 0 18px; }
 .pinned-label { margin: 0 0 8px; font-weight: 700; }
+/* 홈 리뉴얼(강성찬 개인 확장, 10-12 시안) — 머리말 */
+.menu-main a[aria-current="page"] { color: var(--color-brand); background: transparent; border-radius: 0;
+    box-shadow: inset 0 -2px 0 var(--color-brand); font-weight: 700; }
+.btn-write { display: inline-flex; align-items: center; gap: 6px; }
+.profile-menu { position: relative; }
+.profile-menu summary { list-style: none; cursor: pointer; display: inline-flex; border-radius: 999px; }
+.profile-menu summary::-webkit-details-marker { display: none; }
+.profile-menu summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.profile-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 180px; display: flex; flex-direction: column;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; box-shadow: 0 8px 22px var(--color-shadow); }
+.profile-menu-panel a, .profile-menu-panel button { display: block; width: 100%; text-align: left; padding: 8px 12px; border-radius: 8px;
+    color: var(--color-text); text-decoration: none; }
+.profile-menu-panel a:hover, .profile-menu-panel button:hover { background: var(--color-surface-muted); }
+/* 바로가기 카드 */
+.home-quick { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 24px 0 32px; }
+.quick-card { flex: 0 1 230px; display: flex; gap: 14px; align-items: center; padding: 16px 20px; border-radius: 16px;
+    background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; }
+.quick-card:hover { box-shadow: 0 6px 18px var(--color-shadow); }
+.quick-card strong { display: block; }
+.quick-card .help { font-size: .85em; }
+.quick-icon { display: inline-flex; color: var(--color-accent); }
+.quick-all { margin-left: auto; color: var(--color-brand); text-decoration: none; font-weight: 600; font-size: .92em; }
+/* 본문 2단 */
+.home-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+@media (min-width: 1000px) { .home-layout { grid-template-columns: minmax(0, 1fr) 280px; } }
+.home-section-title { margin: 0 12px 6px 0; font-size: 1.35em; font-weight: 800; }
+.home-tabs-row { align-items: center; }
+.home-tabs-row .home-tabs { flex: 1; }
+.home-more { color: var(--color-brand); text-decoration: none; font-weight: 600; font-size: .92em; }
+/* 가로 카드 2열 */
+main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+@media (min-width: 700px) { main.list-page .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.home-cards .post-card { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "body" "foot"; gap: 10px; }
+.home-cards .post-card:has(.card-thumb) { grid-template-columns: 150px minmax(0, 1fr); grid-template-areas: "thumb body" "thumb foot"; }
+.home-cards .card-thumb { grid-area: thumb; aspect-ratio: auto; height: 100%; min-height: 150px; }
+.home-cards .card-body { grid-area: body; }
+.home-cards .card-foot { grid-area: foot; }
+.home-cards .card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* 오른쪽 */
+.home-side { display: flex; flex-direction: column; gap: 18px; }
+.side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
+.side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
+.side-box h2 .icon { width: 18px; height: 18px; }
+.side-tags { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.side-tags li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.side-tags a { padding: 4px 10px; border-radius: 999px; text-decoration: none; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-cat { background: var(--color-cat-art-bg); text-align: center; padding: 20px 14px 0; overflow: hidden; }
+.side-cat-text { font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.35em; line-height: 1.4; margin: 0 0 8px; color: var(--color-cat-art-text); }
+.side-cat-text .icon-paw { width: .8em; height: .8em; }
+.side-cat img { display: block; width: 100%; height: auto; margin-top: 4px; }
+/* 꼬리말 */
+.footer-inner { justify-content: space-between; }
+.footer-slogan { color: var(--color-text-muted); margin: 0; }
+.footer-links { display: flex; gap: 16px; margin: 0; }
+.footer-links a { color: var(--color-text-muted); text-decoration: none; font-size: .9em; }
+.footer-links a:hover { color: var(--color-text); text-decoration: underline; }

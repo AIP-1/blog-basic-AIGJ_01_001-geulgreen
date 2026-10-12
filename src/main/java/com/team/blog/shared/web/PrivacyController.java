@@ -11,4 +11,10 @@ public class PrivacyController {
     public String privacy() {
         return "privacy";
     }
+
+    /** 이용약관(가입 동의 대상, 강성찬 개인 확장 홈 리뉴얼의 꼬리말 링크). */
+    @GetMapping("/terms")
+    public String terms() {
+        return "terms";
+    }
 }

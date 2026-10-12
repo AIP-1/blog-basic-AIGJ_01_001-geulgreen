@@ -40,25 +40,22 @@
         <!-- 좁은 화면에서는 ☰ 안으로 접힌다(스크립트가 없으면 지금처럼 모두 펼친다) -->
         <div id="site-menu" class="site-menu">
             <div class="menu-main">
-                <a href="/">홈</a>
-                <a href="/tags">태그</a>
-                <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}">미션</a>
+                <a href="/" th:attr="aria-current=${currentPath == '/' ? 'page' : null}">홈</a>
+                <a href="/tags" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/tags') ? 'page' : null}">태그</a>
+                <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
+                   th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
                 <th:block th:if="${currentMemberId != null}">
-                    <a href="/feed">피드</a>
-                    <a href="/manage/posts">내 글</a>
-                    <a href="/settings">설정</a>
-                    <a href="/admin" th:if="${currentIsAdmin}">관리</a>
+                    <a href="/feed" th:attr="aria-current=${currentPath == '/feed' ? 'page' : null}">피드</a>
+                    <a href="/manage/posts" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/manage') ? 'page' : null}">내 글</a>
+                    <a href="/settings" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/settings') ? 'page' : null}">설정</a>
+                    <a href="/admin" th:if="${currentIsAdmin}" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/admin') ? 'page' : null}">관리</a>
                 </th:block>
             </div>
             <div class="menu-account">
                 <th:block th:if="${currentMemberId != null}">
                     <form method="post" action="/write">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button type="submit" class="btn btn-primary btn-sm">새 글</button>
-                    </form>
-                    <form method="post" action="/logout" data-logout-form th:attr="data-member-id=${currentMemberId}">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button type="submit" class="btn-text">로그아웃</button>
+                        <button type="submit" class="btn btn-primary btn-sm btn-write"><th:block th:replace="~{fragments/icons :: pen}"></th:block>새 글</button>
                     </form>
                 </th:block>
                 <th:block th:unless="${currentMemberId != null}">
@@ -76,6 +73,23 @@
                 <div id="notif-panel" class="notif-panel" hidden></div>
             </span>
             <button type="button" id="theme-toggle" class="theme-toggle" hidden aria-label="테마 바꾸기">🖥</button>
+            <!-- 홈 리뉴얼(강성찬 개인 확장): 내 프로필 메뉴(스크립트 없이 details) -->
+            <details class="profile-menu" th:if="${currentMemberId != null}">
+                <summary aria-label="내 메뉴">
+                    <th:block th:if="${currentAvatar != null}"><th:block th:replace="~{fragments/avatar :: avatar(${currentAvatar}, 32)}"></th:block></th:block>
+                    <span th:if="${currentAvatar == null}" class="avatar avatar-default" aria-hidden="true">나</span>
+                </summary>
+                <div class="profile-menu-panel">
+                    <a th:if="${currentAvatar != null}" th:href="${'/@' + currentAvatar.handle()}" th:text="${currentAvatar.nickname() + '의 블로그'}">내 블로그</a>
+                    <a href="/manage/posts">내 글 관리</a>
+                    <a href="/manage/stats">통계</a>
+                    <a href="/settings">설정</a>
+                    <form method="post" action="/logout" data-logout-form th:attr="data-member-id=${currentMemberId}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="btn-text">로그아웃</button>
+                    </form>
+                </div>
+            </details>
             <button type="button" id="menu-toggle" class="menu-toggle" hidden aria-expanded="false" aria-controls="site-menu"
                     aria-label="메뉴 열기">☰</button>
         </span>
@@ -93,8 +107,9 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <p class="footer-brand"><th:block th:replace="~{fragments/icons :: paw}"></th:block><span>글그린</span></p>
-    <p class="footer-slogan">좋은 글이 머무는 곳</p>
-    <p class="footer-links"><a href="/privacy">개인정보 처리방침</a></p>
+    <p class="footer-slogan">좋은 글이 머무는 곳, 글그린</p>
+    <p class="footer-links"><a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a>
+        <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a></p>
   </div>
 </footer>
 <script src="/js/auth/auth-logout.js" defer></script>

@@ -43,6 +43,12 @@ public class LayoutModelAdvice {
         return currentUserProvider.current().map(u -> "ADMIN".equals(u.role())).orElse(false);
     }
 
+    /** 머리말 메뉴의 지금 위치 밑줄(강성찬 개인 확장 홈 리뉴얼). */
+    @ModelAttribute("currentPath")
+    public String currentPath(jakarta.servlet.http.HttpServletRequest request) {
+        return request.getRequestURI();
+    }
+
     @ModelAttribute("currentMemberId")
     public Long currentMemberId() {
         return currentUserProvider.current().map(CurrentUser::memberId).orElse(null);
