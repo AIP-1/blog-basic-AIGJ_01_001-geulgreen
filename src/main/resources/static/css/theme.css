@@ -49,12 +49,6 @@
     --color-chip2-bg: #ECE6FA; --color-chip2-text: #5B3FA0;
     --color-chip3-bg: #FCE7E9; --color-chip3-text: #9C2F44;
     /* 그림 색(라이트·다크 같음): 로고 발자국·고양이 그림·Google 로고 */
-    --color-cat-fur: #F6DDC1;
-    --color-cat-stripe: #D9A06E;
-    --color-cat-line: #6B4E3D;
-    --color-cat-pink: #F2A7A4;
-    --color-cat-paw: #FBEBDB;
-    --color-cat-shadow: rgba(120, 80, 40, .12);
     --color-google-blue: #4285F4;
     --color-google-green: #34A853;
     --color-google-yellow: #FBBC05;
