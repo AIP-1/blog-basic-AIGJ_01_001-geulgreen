@@ -63,13 +63,13 @@ class ThemeIT extends IntegrationTestBase {
 
     @Test
     void colorsComeOnlyFromRoleFile() throws IOException {
-        String theme = Files.readString(Path.of("src/main/resources/static/css/theme.css"));
+        String theme = Files.readString(Path.of("../frontend/src/main/resources/static/css/theme.css"));
         assertThat(theme).contains("--color-bg: #121212").contains("prefers-color-scheme: dark").contains(":root[data-theme=\"dark\"]")
                 .doesNotContain("transition");
-        String site = Files.readString(Path.of("src/main/resources/static/css/site.css"));
+        String site = Files.readString(Path.of("../frontend/src/main/resources/static/css/site.css"));
         assertThat(HEX.matcher(site).find()).as("site.css에 직접 쓴 색").isFalse();
         assertThat(site).doesNotContain("rgba(").doesNotContain("filter: invert");
-        try (Stream<Path> files = Files.walk(Path.of("src/main/resources/templates"))) {
+        try (Stream<Path> files = Files.walk(Path.of("../frontend/src/main/resources/templates"))) {
             files.filter(f -> f.toString().endsWith(".html") && !f.toString().contains("/mail/")).forEach(f -> {
                 try {
                     String html = Files.readString(f);
@@ -79,7 +79,7 @@ class ThemeIT extends IntegrationTestBase {
                 }
             });
         }
-        try (Stream<Path> files = Files.walk(Path.of("src/main/resources/static/js"))) {
+        try (Stream<Path> files = Files.walk(Path.of("../frontend/src/main/resources/static/js"))) {
             files.filter(f -> f.toString().endsWith(".js")).forEach(f -> {
                 try {
                     assertThat(HEX.matcher(Files.readString(f)).find()).as(f.toString()).isFalse();
@@ -94,7 +94,7 @@ class ThemeIT extends IntegrationTestBase {
     @Test
     void codeHighlightServedFromOwnOrigin() throws Exception {
         mockMvc.perform(get("/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js")).andExpect(status().isOk());
-        String theme = Files.readString(Path.of("src/main/resources/static/css/theme.css"));
+        String theme = Files.readString(Path.of("../frontend/src/main/resources/static/css/theme.css"));
         assertThat(theme).contains("--code-keyword").contains("--code-string");
         long author = members.localMember("hlauthor", "hlauthor", "hlauthor@example.com", "Blog#2026ok", true);
         long post = posts.published(author, "코드 글", "본문", 1, java.time.Instant.parse("2026-10-01T00:00:00Z"));
