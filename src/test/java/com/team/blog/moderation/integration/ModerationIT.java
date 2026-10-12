@@ -141,9 +141,9 @@ class ModerationIT extends IntegrationTestBase {
         String members = mockMvc.perform(get("/admin/members?q=adm").with(TestAuth.admin(ad))).andReturn().getResponse().getContentAsString();
         assertThat(members).contains("@adm1").contains("관리자");
         assertThat(mockMvc.perform(get("/").with(TestAuth.admin(ad))).andReturn().getResponse().getContentAsString())
-                .contains("href=\"/admin/reports\"");
+                .contains("href=\"/admin\"");
         assertThat(mockMvc.perform(get("/").with(TestAuth.member(m))).andReturn().getResponse().getContentAsString())
-                .doesNotContain("href=\"/admin/reports\"");
+                .doesNotContain("href=\"/admin\"");
     }
 
     @Test

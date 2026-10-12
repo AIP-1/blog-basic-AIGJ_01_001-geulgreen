@@ -7,10 +7,10 @@
 <body>
 <main class="list-page">
     <h1>회원 관리</h1>
-    <p><a href="/admin/reports">신고 관리</a></p>
+    <nav th:replace="~{fragments/admin-nav :: nav('members')}"></nav>
     <form method="get" action="/admin/members" class="search-form">
-        <label for="member-q" class="visually-hidden">닉네임·주소</label>
-        <input id="member-q" type="search" name="q" th:value="${q}" placeholder="닉네임·주소">
+        <label for="member-q" class="visually-hidden">닉네임·주소·이메일</label>
+        <input id="member-q" type="search" name="q" th:value="${q}" placeholder="닉네임·주소·이메일">
         <button type="submit">찾기</button>
     </form>
     <ul class="post-rows">
@@ -18,6 +18,8 @@
             <div class="row-main">
                 <span th:text="${m.nickname()}">닉네임</span> <a th:href="${'/@' + m.handle()}" th:text="${'@' + m.handle()}">@주소</a>
                 <span class="badge" th:if="${m.role() == 'ADMIN'}">관리자</span>
+                <!-- 046 강성찬 개인 확장: 이메일·가입일·글 수 -->
+                <span class="help" th:text="${(m.email() != null ? m.email() + ' · ' : '') + '가입 ' + m.joinedLabel() + ' · 글 ' + m.postCount()}">이메일 · 가입일 · 글 수</span>
                 <span class="badge" th:if="${m.suspended()}"
                       th:text="${m.suspendedLabel()}">정지</span>
             </div>

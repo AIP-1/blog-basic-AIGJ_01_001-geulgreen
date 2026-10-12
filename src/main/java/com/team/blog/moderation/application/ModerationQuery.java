@@ -36,8 +36,13 @@ public class ModerationQuery {
     public record CaseDetail(CaseRow row, List<ReportRow> reports, String currentState, AuthorInfo author) {
     }
 
+    /** {@code email}·{@code postCount}: 046 회원 관리 강화(강성찬 개인 확장). */
     public record MemberRow(long id, String handle, String nickname, String role, Instant joinedAt, boolean suspended,
-                            Instant suspendedUntil, boolean permanent) {
+                            Instant suspendedUntil, boolean permanent, String email, long postCount) {
+
+        public String joinedLabel() {
+            return com.team.blog.shared.web.KoreanDateFormatter.yearMonthDay(joinedAt);
+        }
 
         public String suspendedLabel() {
             return permanent ? "영구 정지" : "정지 ~" + com.team.blog.shared.web.KoreanDateFormatter.dateTime(suspendedUntil);
@@ -123,15 +128,19 @@ public class ModerationQuery {
         adminGuard.requireAdmin(current);
         String pattern = "%" + (q == null ? "" : q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")) + "%";
         return jdbc.query("""
-                SELECT m.id, m.handle, m.nickname, m.role, m.created_at, s.ends_at, s.id AS sid
+                SELECT m.id, m.handle, m.nickname, m.role, m.created_at, s.ends_at, s.id AS sid,
+                       (SELECT a.email FROM auth_identity a WHERE a.member_id = m.id AND a.email IS NOT NULL ORDER BY a.id LIMIT 1) AS email,
+                       (SELECT count(*) FROM post p WHERE p.author_id = m.id AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL) AS post_count
                 FROM member m
                 LEFT JOIN LATERAL (SELECT id, ends_at FROM member_suspension x WHERE x.member_id = m.id AND x.lifted_at IS NULL
                                    AND (x.ends_at IS NULL OR x.ends_at > now()) ORDER BY started_at DESC LIMIT 1) s ON TRUE
-                WHERE m.deleted_at IS NULL AND (m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\')
+                WHERE m.deleted_at IS NULL AND (m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\'
+                      OR EXISTS (SELECT 1 FROM auth_identity a WHERE a.member_id = m.id AND a.email ILIKE ? ESCAPE '\\'))
                 ORDER BY m.id DESC LIMIT 50
                 """, (rs, n) -> new MemberRow(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("role"),
                 rs.getTimestamp("created_at").toInstant(), rs.getObject("sid") != null,
                 rs.getTimestamp("ends_at") == null ? null : rs.getTimestamp("ends_at").toInstant(),
-                rs.getObject("sid") != null && rs.getTimestamp("ends_at") == null), pattern, pattern);
+                rs.getObject("sid") != null && rs.getTimestamp("ends_at") == null, rs.getString("email"), rs.getLong("post_count")),
+                pattern, pattern, pattern);
     }
 }

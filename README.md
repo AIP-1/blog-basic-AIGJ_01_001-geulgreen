@@ -16,7 +16,7 @@
 | 반응 | 댓글·답글(014), 좋아요(015), 조회수(016), 팔로우·피드(018), 인앱 알림(017) |
 | 운영 | 접근 권한 공통 규칙(012), 신고·관리자 숨김·회원 정지(022), 개인정보 처리방침(`/privacy`), sitemap·robots |
 
-### 강성찬 개인 확장 (명세 025~044)
+### 강성찬 개인 확장 (명세 025~050)
 
 팀은 공통만 맞추고 각자 **추가만** 하기로 했다(docs/01 §2-4). 아래는 강성찬 개인 확장이며 공통 완료 기준은 그대로 통과한다.
 
@@ -42,6 +42,8 @@
 | 042 | 예약 발행 — 정한 시각에 발행 | `blog.schedule.enabled` |
 | 043 | 비밀 댓글 — 글쓴이와 쓴 사람만 | `blog.comment.secret-enabled` |
 | 044 | RSS 구독 — `/rss`, `/@주소/rss` | `blog.rss.enabled` |
+| 045~050 | 관리자 화면 확장 — `/admin` 대시보드, 회원(이메일 검색), 글·댓글 바로 숨기기, 방명록, 사이트 공지, 관리 기록 | — |
+| 050 | 관리자 지정 — 이 이메일로 가입·인증하면 관리자 | `blog.admin.emails`(서버 `ADMIN_EMAILS`) |
 
 그 밖에 디자인 시안(크림·세이지, 사진 배너, 한 줄 4개 카드·한 쪽 12개)도 강성찬 개인 확장으로 적용했다. 변경 내역: [`CHANGELOG.md`](CHANGELOG.md).
 
@@ -100,7 +102,7 @@ node src/test/js/diff.test.mjs   # 편집 비교 창 diff 자체 검사(선택)
 | `.specify/memory/constitution.md` | 프로젝트 헌법(원칙) |
 | `specs/README.md` | 문서 간 차이와 팀 결정 기록 |
 | `specs/NNN-기능/` | 기능별 `spec.md`(명세) → `plan.md`·`research.md`(설계·결정) → `tasks.md`(작업, 모두 완료) |
-| `src/main/resources/db/migration/` | 실제 DB 스키마: V1 공통(테이블 20개), V2~V9 강성찬 개인 확장(테이블 14개 추가, 공통 테이블은 CHECK 교체와 `comment.secret` 칸 추가만) |
+| `src/main/resources/db/migration/` | 실제 DB 스키마: V1 공통(테이블 20개), V2~V10 강성찬 개인 확장(테이블 16개 추가, 공통 테이블은 CHECK 교체와 `comment.secret` 칸 추가만) |
 | `db/demo/` | 앱에 바로 넣는 한국어 데모 데이터(PostgreSQL)와 데모 계정 |
 | `db/mysql/` | 같은 스키마의 MySQL 사본과 데모 데이터(ERD 도구용) |
 | Crowfoot ERD | https://crowfoot.java21.net/workspaces/62/models/672 (테이블 20개·관계 41개, 명세 001~024와 연결) |

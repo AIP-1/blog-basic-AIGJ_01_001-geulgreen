@@ -18,7 +18,9 @@ public class DatabaseCleaner {
             "post_link_share", "friend_group", "group_member", "post_group_visibility", "short_note", "mission",
             "mission_participant", "post_teaser",
             // 강성찬 개인 확장(037~043)
-            "category", "post_category", "guestbook_entry", "series", "series_post", "post_schedule");
+            "category", "post_category", "guestbook_entry", "series", "series_post", "post_schedule",
+            // 강성찬 개인 확장(049~050)
+            "site_notice", "admin_log");
 
     private final JdbcTemplate jdbc;
     private final StringRedisTemplate redis;
