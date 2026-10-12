@@ -61,8 +61,11 @@
         </fieldset>
         <div class="field">
             <label for="tag-input">태그</label>
-            <div class="tag-chips" id="tag-chips"></div>
-            <input type="text" id="tag-input" placeholder="Enter나 쉼표로 추가" autocomplete="off">
+            <!-- 인스타그램처럼: 칩과 입력 칸을 한 상자에, 띄어쓰기·Enter로 태그가 된다 -->
+            <div class="tag-box">
+                <span class="tag-chips" id="tag-chips"></span>
+                <input type="text" id="tag-input" placeholder="#태그 입력 후 띄어쓰기" autocomplete="off">
+            </div>
             <p class="help" id="tag-count"></p>
             <!-- 021 AI 태그 추천: 누를 때만 요청, 누른 후보만 태그로 -->
             <div id="ai-tags" class="ai-tags" hidden>

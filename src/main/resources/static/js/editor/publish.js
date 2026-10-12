@@ -77,7 +77,7 @@
         chip.appendChild(remove);
         chips.appendChild(chip);
       });
-      count.textContent = tags.length + ' / ' + maxTags + '   Enter나 쉼표로 추가';
+      count.textContent = tags.length + ' / ' + maxTags + '   띄어쓰기·Enter로 추가';
     }
 
     // 021 AI 태그 추천이 칩을 읽고 더할 수 있게(누른 것만 더한다)
@@ -89,7 +89,7 @@
     };
 
     function addTag() {
-      var parts = input.value.split(',');
+      var parts = input.value.split(/[\s,#]+/);
       parts.forEach(function (p) {
         var t = shape(p);
         if (t && tags.indexOf(t) < 0) { tags.push(t); }
@@ -103,6 +103,10 @@
       if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); }
       else if (e.key === 'Backspace' && input.value === '' && tags.length) { tags.pop(); renderChips(); }
     });
+    // 띄어쓰기·붙여 넣기("#여행 #일상")도 바로 태그로(한글 조합이 끝난 뒤에만)
+    input.addEventListener('input', function () {
+      if (!composing && /[\s,]/.test(input.value)) { addTag(); }
+    });
     input.addEventListener('blur', function () { setTimeout(function () { if (input.value.trim()) { addTag(); } closeSuggest(); }, 150); });
 
     /* 013 자동완성: 0.3초 멈추면, 한글 조합 중에는 부르지 않는다. 내 태그 먼저. */
@@ -114,7 +118,7 @@
     var composing = false, suggestTimer = null;
     function closeSuggest() { suggestBox.hidden = true; suggestBox.textContent = ''; }
     input.addEventListener('compositionstart', function () { composing = true; });
-    input.addEventListener('compositionend', function () { composing = false; scheduleSuggest(); });
+    input.addEventListener('compositionend', function () { composing = false; if (/[\s,]/.test(input.value)) { addTag(); } else { scheduleSuggest(); } });
     input.addEventListener('input', function () { if (!composing) { scheduleSuggest(); } });
     function scheduleSuggest() {
       clearTimeout(suggestTimer);
