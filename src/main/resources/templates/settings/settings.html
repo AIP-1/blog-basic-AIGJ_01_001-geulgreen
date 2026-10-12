@@ -142,6 +142,17 @@
         <h2 id="friends-heading">친구</h2>
         <p class="help">친구 공개 글은 나와 친구만 볼 수 있어요. <a href="/settings/friends">친구·받은 요청 관리</a> · <a href="/settings/groups">친구 그룹</a></p>
     </section>
+    <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
+    <section aria-labelledby="theme-heading" id="theme-setting" hidden>
+        <h2 id="theme-heading">화면 테마</h2>
+        <fieldset class="theme-choices">
+            <legend class="visually-hidden">화면 테마</legend>
+            <label><input type="radio" name="theme" value="system"> 시스템 설정(기기를 따라가요)</label>
+            <label><input type="radio" name="theme" value="light"> 라이트</label>
+            <label><input type="radio" name="theme" value="dark"> 다크</label>
+        </fieldset>
+        <p class="help">고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요. 로그아웃해도 그대로예요.</p>
+    </section>
     <!-- 017 알림 종류 끄기(FR-031) -->
     <section aria-labelledby="notification-heading">
         <h2 id="notification-heading">알림</h2>
@@ -180,6 +191,7 @@
     <script src="/js/profile/settings.js" defer></script>
     <script src="/js/account/storage-usage.js" defer></script>
     <script src="/js/account/ai-consent.js" defer></script>
+    <script src="/js/theme-toggle.js" defer></script>
 </main>
 </body>
 </html>

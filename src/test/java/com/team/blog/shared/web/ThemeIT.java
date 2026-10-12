@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** 024 다크 모드: 그리기 전 테마 결정(외부 스크립트), 색 역할만 쓰기, 인라인 스크립트 없음, 스크립트 없으면 버튼 숨김. */
+/** 024 다크 모드: 그리기 전 테마 결정(외부 스크립트), 색 역할만 쓰기, 인라인 스크립트 없음, 스크립트 없으면 고르는 칸 숨김(061: 설정 화면). */
 class ThemeIT extends IntegrationTestBase {
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -38,6 +38,11 @@ class ThemeIT extends IntegrationTestBase {
         mockMvc.perform(get("/css/theme.css")).andExpect(status().isOk());
         mockMvc.perform(get("/css/site.css")).andExpect(status().isOk());
         mockMvc.perform(get("/js/theme-init.js")).andExpect(status().isOk());
+        // 061: 설정 화면의 화면 테마(시스템·라이트·다크), 스크립트가 없으면 숨김
+        String settings = mockMvc.perform(get("/settings").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        assertThat(settings).contains("id=\"theme-setting\" hidden").contains("value=\"system\"").contains("value=\"light\"")
+                .contains("value=\"dark\"").contains("/js/theme-toggle.js");
+        mockMvc.perform(get("/js/theme-toggle.js")).andExpect(status().isOk());
     }
 
     private static void assertHead(String path, String html) {
@@ -45,7 +50,8 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(head).as(path).contains("<meta name=\"color-scheme\" content=\"light dark\">")
                 .contains("<script src=\"/js/theme-init.js\"></script>").contains("/css/theme.css");
         assertThat(head.indexOf("theme-init.js")).as(path).isLessThan(head.indexOf("/css/site.css"));
-        assertThat(html).as(path).contains("id=\"theme-toggle\" class=\"theme-toggle\" hidden")
+        // 061 강성찬 개인 확장: 테마 버튼은 머리말이 아니라 설정 화면에
+        assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"")
                 .doesNotContain("<style>").doesNotContainPattern("<script>(?!</script>)");
         assertThat(Pattern.compile("<script(?![^>]*\\ssrc=)[^>]*>").matcher(html).find()).as(path + " 인라인 스크립트").isFalse();
     }

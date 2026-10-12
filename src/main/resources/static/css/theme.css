@@ -240,6 +240,3 @@
 /* 포커스는 색 역할로(키보드 사용자) */
 :focus-visible { outline-color: var(--color-focus); }
 
-/* 테마 전환 버튼: 스크립트가 있을 때만 보인다(FR-011) */
-.theme-toggle { background: none; border: 1px solid var(--color-border); border-radius: 999px; padding: 0 8px; color: var(--color-text);
-    cursor: pointer; font: inherit; line-height: 1.8; }

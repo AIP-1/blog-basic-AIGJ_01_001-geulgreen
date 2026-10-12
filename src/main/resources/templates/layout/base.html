@@ -64,7 +64,7 @@
                 </th:block>
             </div>
         </div>
-        <!-- 항상 보이는 것: 검색, 알림 종, 테마 전환(024, 맨 오른쪽), 좁은 화면의 메뉴 버튼 -->
+        <!-- 항상 보이는 것: 검색, 알림 종, 좁은 화면의 메뉴 버튼(테마 전환은 061부터 설정 화면에) -->
         <span class="header-quick">
             <a href="/search" class="icon-btn" aria-label="검색"><th:block th:replace="~{fragments/icons :: search}"></th:block></a>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
@@ -72,7 +72,6 @@
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
                 <div id="notif-panel" class="notif-panel" hidden></div>
             </span>
-            <button type="button" id="theme-toggle" class="theme-toggle" hidden aria-label="테마 바꾸기">🖥</button>
             <!-- 홈 리뉴얼(강성찬 개인 확장): 내 프로필 메뉴(스크립트 없이 details) -->
             <details class="profile-menu" th:if="${currentMemberId != null}">
                 <summary aria-label="내 메뉴">
@@ -146,7 +145,6 @@
   </div>
 </footer>
 <script src="/js/auth/auth-logout.js" defer></script>
-<script src="/js/theme-toggle.js" defer></script>
 <script src="/js/menu.js" defer></script>
 <script th:if="${currentMemberId != null}" src="/js/notification/bell.js" defer></script>
 </body>
