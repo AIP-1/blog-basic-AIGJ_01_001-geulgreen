@@ -36,25 +36,33 @@
 
 <!-- 잠자는 고양이(소개 영역·로그인·오류 화면) -->
 <svg th:fragment="cat" class="cat-art" viewBox="0 0 360 220" aria-hidden="true" focusable="false">
-    <ellipse class="cat-shadow" cx="190" cy="196" rx="150" ry="14"/>
-    <path class="cat-fur" d="M70 170c-6-50 40-92 120-92 76 0 132 34 132 82 0 22-14 34-40 36H104c-22 0-32-10-34-26z"/>
-    <path class="cat-stripe" d="M196 82c-6 14-6 28 2 40M236 90c-8 14-8 30 0 42M274 108c-10 10-12 24-6 36" fill="none" stroke-width="9" stroke-linecap="round"/>
-    <path class="cat-fur" d="M300 176c34-4 46-26 34-44-8-12-24-10-26 2 12 0 16 10 8 20-6 8-18 12-34 12z"/>
-    <path class="cat-stripe" d="M322 140c6 4 8 10 6 16" fill="none" stroke-width="7" stroke-linecap="round"/>
-    <path class="cat-fur" d="M42 92l10-44 30 28z"/>
-    <path class="cat-fur" d="M128 74l20-40 12 44z"/>
-    <path class="cat-pink" d="M52 62l6-18 14 14z"/>
-    <path class="cat-pink" d="M143 52l6-12 5 16z"/>
-    <ellipse class="cat-fur" cx="100" cy="124" rx="70" ry="56"/>
-    <path class="cat-stripe" d="M84 74c2 10 2 18-2 26M104 70c0 10-2 18-6 26M124 76c-2 8-6 16-10 22" fill="none" stroke-width="6" stroke-linecap="round"/>
-    <ellipse class="cat-cheek" cx="60" cy="140" rx="12" ry="7"/>
-    <ellipse class="cat-cheek" cx="142" cy="140" rx="12" ry="7"/>
-    <path class="cat-line" d="M64 124c6 6 16 6 22 0M114 124c6 6 16 6 22 0" fill="none" stroke-width="4" stroke-linecap="round"/>
-    <path class="cat-pink" d="M94 136h12l-6 7z"/>
-    <path class="cat-line" d="M100 143v4c-2 4-8 4-10 0M100 147c2 4 8 4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/>
-    <ellipse class="cat-paw" cx="92" cy="176" rx="20" ry="12"/>
-    <ellipse class="cat-paw" cx="136" cy="178" rx="20" ry="12"/>
-    <path class="cat-line" d="M276 54q8-6 16 0M292 34q6-5 12 0M306 18q5-4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/>
+    <ellipse class="cat-shadow" cx="190" cy="202" rx="150" ry="12"/>
+    <!-- 몸통과 등 무늬 -->
+    <ellipse class="cat-fur" cx="210" cy="146" rx="118" ry="56"/>
+    <path class="cat-stripe" d="M200 96q6 14 0 28M236 92q8 16 2 32M270 100q8 14 4 30M300 118q6 10 2 22" fill="none" stroke-width="8" stroke-linecap="round"/>
+    <!-- 앞으로 감아 온 꼬리 -->
+    <path class="cat-tail-edge" d="M318 160c10 30-40 44-140 40" fill="none" stroke-width="28" stroke-linecap="round"/>
+    <path class="cat-tail" d="M318 160c10 30-40 44-140 40" fill="none" stroke-width="23" stroke-linecap="round"/>
+    <path class="cat-stripe" d="M268 194v-10M240 198v-12M212 200v-12" fill="none" stroke-width="6" stroke-linecap="round"/>
+    <!-- 귀(머리 뒤) -->
+    <path class="cat-fur" d="M58 112L66 52l44 34z"/>
+    <path class="cat-fur" d="M118 84l40-30-2 60z"/>
+    <path class="cat-pink" d="M70 92l3-26 18 15z"/>
+    <path class="cat-pink" d="M128 82l20-14-1 26z"/>
+    <!-- 머리 -->
+    <ellipse class="cat-fur" cx="108" cy="134" rx="64" ry="52"/>
+    <path class="cat-stripe" d="M96 84v12M108 82v14M120 84v12" fill="none" stroke-width="5" stroke-linecap="round"/>
+    <ellipse class="cat-cheek" cx="70" cy="152" rx="11" ry="6"/>
+    <ellipse class="cat-cheek" cx="146" cy="152" rx="11" ry="6"/>
+    <path class="cat-line" d="M74 134q11 9 22 0M120 134q11 9 22 0" fill="none" stroke-width="4" stroke-linecap="round"/>
+    <path class="cat-pink" d="M102 146h12l-6 6z"/>
+    <path class="cat-line" d="M108 152v3q-4 6-9 2M108 155q4 6 9 2" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+    <path class="cat-line" d="M58 146l-22-4M58 154l-22 4M158 146l22-4M158 154l22 4" fill="none" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+    <!-- 앞발 -->
+    <ellipse class="cat-paw" cx="92" cy="186" rx="20" ry="11"/>
+    <ellipse class="cat-paw" cx="134" cy="188" rx="20" ry="11"/>
+    <!-- 쿨쿨 -->
+    <path class="cat-line" d="M182 66h12l-12 12h12M204 42h9l-9 9h9M222 22h7l-7 7h7" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 </body>
 </html>

@@ -334,12 +334,14 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
 .hero-search-button:hover { background: var(--color-brand); color: var(--color-surface); }
 .hero-art { display: flex; justify-content: center; }
 .cat-art { width: 100%; max-width: 420px; height: auto; }
-.cat-fur { fill: var(--color-cat-fur); }
+.cat-fur { fill: var(--color-cat-fur); stroke: var(--color-cat-stripe); stroke-width: 2.5; stroke-linejoin: round; }
+.cat-tail { stroke: var(--color-cat-fur); }
+.cat-tail-edge { stroke: var(--color-cat-stripe); }
 .cat-stripe { stroke: var(--color-cat-stripe); }
 .cat-line { stroke: var(--color-cat-line); }
 .cat-pink { fill: var(--color-cat-pink); }
 .cat-cheek { fill: var(--color-cat-pink); opacity: .55; }
-.cat-paw { fill: var(--color-cat-paw); }
+.cat-paw { fill: var(--color-cat-paw); stroke: var(--color-cat-stripe); stroke-width: 2; }
 .cat-shadow { fill: var(--color-cat-shadow); }
 @media (max-width: 720px) {
     .hero-inner { grid-template-columns: 1fr; padding: 32px 20px 8px; min-height: 0; }
