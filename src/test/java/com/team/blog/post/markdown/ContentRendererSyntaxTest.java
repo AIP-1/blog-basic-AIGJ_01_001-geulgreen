@@ -99,6 +99,19 @@ class ContentRendererSyntaxTest {
         assertThat(html("<b>직접 쓴 HTML</b>")).contains("&lt;b&gt;직접 쓴 HTML&lt;/b&gt;");
     }
 
+    /** 058 강성찬 개인 확장: 서식 도구가 넣는 밑줄·글자 색 태그만 살고, 조금이라도 다르면 글자로 보인다. 요약에는 글자만. */
+    @Test
+    void underlineAndColorTagsFromFormatToolbar() {
+        String md = "<u>밑줄</u> <span class=\"md-c-red\">빨강</span> <span class=\"md-bg-yellow\">**형광**</span>";
+        assertThat(html(md)).contains("<u>밑줄</u>").contains("<span class=\"md-c-red\">빨강</span>")
+                .contains("<span class=\"md-bg-yellow\"><strong>형광</strong></span>");
+        assertThat(html("<span class=\"evil\">x</span> <span class='md-c-red'>y</span> <U>z</U>"))
+                .contains("&lt;span class&#61;&#34;evil&#34;&gt;x").contains("&lt;U&gt;z").doesNotContain("<span")
+                .doesNotContain("<u>");
+        assertThat(html("<u>닫지 않은 밑줄")).contains("<u>닫지 않은 밑줄</u>");
+        assertThat(RENDERER.render(md).excerpt()).isEqualTo("밑줄 빨강 형광");
+    }
+
     @Test
     void autolinkAndStrikethroughAndHardBreak() {
         String html = html("https://example.com 방문\\\n다음 줄");

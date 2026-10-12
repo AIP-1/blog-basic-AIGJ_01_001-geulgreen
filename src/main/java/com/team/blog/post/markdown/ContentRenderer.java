@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 public class ContentRenderer {
 
     /** 렌더링 규칙 버전. 렌더러·변환·정화 규칙을 바꾸면 올리고 다시 렌더링 배치를 돌린다(12 §7-7). */
-    public static final int RENDER_VERSION = 2; // 2: 008 GIF 정지 장면 규칙
+    public static final int RENDER_VERSION = 3; // 2: 008 GIF 정지 장면 규칙, 3: 058 밑줄·글자 색(강성찬 개인 확장)
 
     private static final List<Extension> EXTENSIONS = List.of(TablesExtension.create(), StrikethroughExtension.create(),
             TaskListItemsExtension.create(), AutolinkExtension.create());
@@ -106,6 +106,17 @@ public class ContentRenderer {
                 .escapeHtml(true)
                 .sanitizeUrls(true)
                 .attributeProviderFactory(context -> new HtmlAttributes(linkRules))
+                .nodeRendererFactory(context -> new org.commonmark.renderer.NodeRenderer() {
+                    @Override
+                    public java.util.Set<Class<? extends Node>> getNodeTypes() {
+                        return java.util.Set.of(MarkdownTransformer.InlineTag.class);
+                    }
+
+                    @Override
+                    public void render(Node node) {
+                        context.getWriter().raw(((MarkdownTransformer.InlineTag) node).literal);
+                    }
+                })
                 .build();
         String rendered = renderer.render(document);
         String html = policy.sanitize(rendered);

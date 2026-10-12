@@ -16,7 +16,7 @@
 | 반응 | 댓글·답글(014), 좋아요(015), 조회수(016), 팔로우·피드(018), 인앱 알림(017) |
 | 운영 | 접근 권한 공통 규칙(012), 신고·관리자 숨김·회원 정지(022), 개인정보 처리방침(`/privacy`), sitemap·robots |
 
-### 강성찬 개인 확장 (명세 025~058)
+### 강성찬 개인 확장 (명세 025~059)
 
 팀은 공통만 맞추고 각자 **추가만** 하기로 했다(docs/01 §2-4). 아래는 강성찬 개인 확장이며 공통 완료 기준은 그대로 통과한다.
 
@@ -51,7 +51,8 @@
 | 055 | 카드 대표 사진 — 자동/본문 사진/새로 올리기 | `blog.cover.enabled` |
 | 056 | 태그 화면 리뉴얼·태그 아이콘(내장 규칙 + AI 다듬기) | `blog.tag-icons.enabled` |
 | 057 | 오늘의 미션 — 매일 주제 3개(AI 또는 내장 120개), 고르면 글쓰기, 발행하면 완료, 친구 글·알림, 완료 횟수·연속 일수 | `blog.missions.enabled` |
-| 058 | 글쓰기 서식 도구 — 노션처럼 글을 드래그하면 굵게·제목·목록·링크 도구가 뜸(저장은 그대로 Markdown), 단축키 | — |
+| 058 | 글쓰기 서식 창 — 노션처럼 글을 고르면 창이 뜸: 서식 종류(본문·제목·목록·인용·코드 블록), 글자 색·배경색, 굵게·기울임·밑줄·취소선·코드·링크, 서식 지우기, 단축키(저장은 그대로 Markdown) | — |
+| 059 | AI로 글 다듬기 — 서식 창에서 고른 글을 다듬기·맞춤법·짧게·쉽게·직접 부탁, [바꾸기]·[아래에 넣기](Gemini 키가 있을 때) | `blog.writing-ai.enabled` |
 
 그 밖에 디자인 시안(크림·세이지, 사진 배너, 한 줄 4개 카드·한 쪽 12개)도 강성찬 개인 확장으로 적용했다. 변경 내역: [`CHANGELOG.md`](CHANGELOG.md).
 
@@ -92,9 +93,9 @@ docker compose up -d        # PostgreSQL·Redis·Mailpit·사진 저장소(MinIO
 ## 테스트
 
 ```bash
-./gradlew test              # 통합 테스트 647개(Testcontainers로 PostgreSQL·Redis·Mailpit·MinIO를 띄움)
+./gradlew test              # 통합 테스트 653개(Testcontainers로 PostgreSQL·Redis·Mailpit·MinIO를 띄움)
 node src/test/js/diff.test.mjs   # 편집 비교 창 diff 자체 검사(선택)
-node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 도구 자체 검사(선택, 058)
+node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(선택, 058)
 ```
 
 ## 배포

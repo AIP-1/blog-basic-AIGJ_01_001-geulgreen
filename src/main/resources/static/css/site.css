@@ -775,20 +775,62 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-editor-note strong { margin-right: 6px; }
 .mission-done-note a { color: var(--color-brand); }
 
-/* 058 서식 도구(강성찬 개인 확장): 본문에서 글을 드래그하면 뜨는 작은 도구 */
-.format-toolbar { position: absolute; z-index: 40; display: flex; align-items: center; padding: 4px; max-width: calc(100vw - 16px);
-    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 10px;
-    box-shadow: 0 6px 20px var(--color-shadow); }
-.fmt-buttons, .fmt-link-box { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
-.fmt-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px;
-    border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: .9rem; line-height: 1; cursor: pointer; }
+/* 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 글을 고르면 뜨는 창. 059 AI로 고치기 칸 */
+.format-panel { position: absolute; z-index: 40; width: 256px; max-width: calc(100vw - 16px); padding: 6px;
+    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 14px;
+    box-shadow: 0 10px 28px var(--color-shadow); font-size: .92rem; line-height: 1.4; }
+.fmt-row { display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-height: 36px; padding: 6px 10px; border: 0; border-radius: 8px;
+    background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.fmt-row:hover { background: var(--color-surface-muted); }
+.fmt-ico { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 22px; font-size: .8rem; font-weight: 800;
+    color: var(--color-text-muted); }
+.fmt-end { margin-left: auto; color: var(--color-text-muted); }
+.fmt-type { font-weight: 600; }
+.fmt-check { visibility: hidden; color: var(--color-brand); }
+.fmt-row.is-current .fmt-check { visibility: visible; }
+.fmt-back { color: var(--color-text-muted); font-size: .85rem; }
+.fmt-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; margin: 4px 0; padding: 6px 2px;
+    border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.fmt-btn { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 36px; white-space: nowrap; border: 0; border-radius: 8px;
+    background: transparent; color: inherit; font: inherit; font-size: 1rem; line-height: 1; cursor: pointer; }
 .fmt-btn:hover { background: var(--color-surface-muted); }
 .fmt-btn[aria-pressed="true"] { background: var(--color-brand-soft); color: var(--color-brand); }
-.fmt-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.fmt-btn:focus-visible, .fmt-row:focus-visible, .fmt-swatch:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
 .fmt-bold { font-weight: 800; }
 .fmt-italic { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+.fmt-underline { text-decoration: underline; }
 .fmt-strike { text-decoration: line-through; }
-.fmt-code, .fmt-codeblock { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
-.fmt-sep { width: 1px; height: 20px; margin: 0 4px; background: var(--color-border); }
-.fmt-link-box input { width: min(260px, 60vw); height: 32px; padding: 0 10px; }
-.fmt-link-ok { color: var(--color-brand); font-weight: 700; }
+.fmt-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
+.fmt-a { display: inline-block; min-width: 22px; padding: 1px 4px; border: 1px solid var(--color-border); border-radius: 6px; font-weight: 700; }
+.fmt-section { margin: 8px 10px 2px; font-size: .78rem; color: var(--color-text-muted); }
+.fmt-ask { display: flex; gap: 4px; margin: 6px 4px 2px; }
+.fmt-ask input { flex: 1; min-width: 0; height: 34px; padding: 0 10px; font-size: .88rem; }
+.fmt-send { width: 34px; height: 34px; color: var(--color-brand); }
+.fmt-swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 2px 6px 6px; }
+.fmt-swatch { height: 32px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-text);
+    font: inherit; font-weight: 700; cursor: pointer; }
+.fmt-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--color-brand); }
+.fmt-ai-out { margin: 6px 10px; max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .9rem; }
+.fmt-ai-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 6px; }
+.fmt-consent { padding: 4px 10px 8px; }
+.fmt-consent .help { margin: 0 0 8px; font-size: .82rem; }
+/* 058 글자 색·배경색: 본문(<span class="md-…">)과 서식 창 견본에 같이 쓴다 */
+.md-c-gray { color: var(--color-text-muted); }
+.md-c-brown { color: var(--tone-sand-fg); }
+.md-c-orange { color: var(--tone-orange-fg); }
+.md-c-yellow { color: var(--tone-yellow-fg); }
+.md-c-green { color: var(--tone-green-fg); }
+.md-c-blue { color: var(--tone-blue-fg); }
+.md-c-purple { color: var(--tone-purple-fg); }
+.md-c-pink { color: var(--tone-pink-fg); }
+.md-c-red { color: var(--color-danger); }
+.md-bg-gray { background: var(--tone-gray-bg); }
+.md-bg-brown { background: var(--tone-sand-bg); }
+.md-bg-orange { background: var(--tone-orange-bg); }
+.md-bg-yellow { background: var(--tone-yellow-bg); }
+.md-bg-green { background: var(--tone-green-bg); }
+.md-bg-blue { background: var(--tone-blue-bg); }
+.md-bg-purple { background: var(--tone-purple-bg); }
+.md-bg-pink { background: var(--tone-pink-bg); }
+.md-bg-red { background: var(--color-danger-soft); }
+.post-body span[class^="md-bg-"] { padding: 0 3px; border-radius: 4px; }

@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-/** 007 T405·SC-001: 12 §9-1의 공격 문자열 32개가 모두 무해화된다. */
+/** 007 T405·SC-001: 12 §9-1의 공격 문자열 32개(+058 밑줄·글자 색 4개)가 모두 무해화된다. */
 class ContentRendererXssTest {
 
     private static final ContentRenderer RENDERER = TestRenderers.create();
@@ -51,7 +51,12 @@ class ContentRendererXssTest {
                 "- [ ] <script>alert(1)</script>\n- [x] <img src=x onerror=alert(1)>",
                 "# <script>alert(1)</script>",
                 "> <iframe src=javascript:alert(1)>",
-                "**<svg/onload=alert(1)>**");
+                "**<svg/onload=alert(1)>**",
+                // 058 밑줄·글자 색 태그를 빌린 공격 (4)
+                "<span class=\"md-c-red\" onclick=\"alert(1)\">x</span>",
+                "<span class=\"md-c-red\"><script>alert(1)</script></span>",
+                "<u onmouseover=alert(1)>x</u>",
+                "<span class=\"md-c-red\"><img src=x onerror=alert(1)></span><span style=\"color:red\">y</span>");
     }
 
     @ParameterizedTest
@@ -65,6 +70,6 @@ class ContentRendererXssTest {
 
     @org.junit.jupiter.api.Test
     void thereAreThirtyTwoAttacks() {
-        assertThat(attacks().count()).isEqualTo(32);
+        assertThat(attacks().count()).isEqualTo(32 + 4);
     }
 }

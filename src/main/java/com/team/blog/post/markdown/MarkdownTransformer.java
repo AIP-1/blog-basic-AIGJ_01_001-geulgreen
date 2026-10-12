@@ -6,7 +6,9 @@ import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.BlockQuote;
 import org.commonmark.node.BulletList;
 import org.commonmark.node.Code;
+import org.commonmark.node.CustomNode;
 import org.commonmark.node.Heading;
+import org.commonmark.node.HtmlInline;
 import org.commonmark.node.Image;
 import org.commonmark.node.Link;
 import org.commonmark.node.Node;
@@ -15,9 +17,13 @@ import org.commonmark.node.Text;
 
 /**
  * AST 변환(12 §2 ②): 제목 한 단계 낮추기, 외부 이미지 → {@code [이미지] 대체글} 링크, 중첩 깊이 검사, 우리 저장소 이미지 주소 모으기.
- * 008이 GIF 규칙(23 §5-2)을 여기에 더한다.
+ * 008이 GIF 규칙(23 §5-2)을 여기에 더한다. 058(강성찬 개인 확장)이 밑줄·글자 색 태그 몇 개만 HTML로 살린다.
  */
 final class MarkdownTransformer extends AbstractVisitor {
+
+    /** 058: 서식 도구가 넣는 태그 그대로만(속성·띄어쓰기가 하나라도 다르면 지금처럼 글자로 보인다). 정화기가 다시 거른다. */
+    static final java.util.regex.Pattern INLINE_TAG = java.util.regex.Pattern.compile(
+            "</?u>|<span class=\"md-(?:c|bg)-(?:gray|brown|orange|yellow|green|blue|purple|pink|red)\">|</span>");
 
     /** GIF 정지 장면(썸네일) 주소 찾기. 없으면 원본 GIF를 그대로 보인다. */
     interface GifThumbnails {
@@ -129,6 +135,23 @@ final class MarkdownTransformer extends AbstractVisitor {
             }
         });
         return out.toString();
+    }
+
+    @Override
+    public void visit(HtmlInline htmlInline) {
+        if (INLINE_TAG.matcher(htmlInline.getLiteral()).matches()) {
+            htmlInline.insertBefore(new InlineTag(htmlInline.getLiteral()));
+            htmlInline.unlink();
+        }
+    }
+
+    /** 058: 살린 인라인 태그 하나(렌더러가 글자 그대로 내보낸다). 요약에는 안 들어간다. */
+    static final class InlineTag extends CustomNode {
+        final String literal;
+
+        InlineTag(String literal) {
+            this.literal = literal;
+        }
     }
 
     /** 중첩 한도 초과 신호(렌더러가 {@code ContentTooComplexException}으로 바꾼다). */

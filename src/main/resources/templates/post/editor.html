@@ -31,10 +31,11 @@
     </div>
     <div class="field">
         <label for="post-content" class="visually-hidden">본문 (Markdown)</label>
-        <textarea id="post-content" placeholder="Markdown으로 써 보세요. 글을 드래그하면 서식 도구가 떠요" aria-describedby="format-hint"
-                  th:text="${post.contentMd()}"></textarea>
-        <!-- 058 강성찬 개인 확장: 서식 도구 안내 -->
-        <p id="format-hint" class="help">글을 드래그하면 굵게·제목·목록·링크 같은 서식 도구가 떠요. 단축키 Ctrl/⌘+B 굵게, I 기울임, K 링크, E 코드</p>
+        <textarea id="post-content" placeholder="Markdown으로 써 보세요. 글을 드래그하면 서식 창이 떠요" aria-describedby="format-hint"
+                  th:data-writing-ai="${writingAi}" th:text="${post.contentMd()}"></textarea>
+        <!-- 058·059 강성찬 개인 확장: 서식 창 안내 -->
+        <p id="format-hint" class="help">글을 드래그하면 서식 창이 떠요(제목·목록·글자 색·밑줄·링크<th:block th:if="${writingAi}">·AI로 고치기</th:block>).
+            단축키 Ctrl/⌘+B 굵게, I 기울임, U 밑줄, K 링크, E 코드<th:block th:if="${writingAi}">, J AI에게 부탁</th:block></p>
     </div>
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
     <section id="preview-panel" class="preview-panel" aria-label="미리보기" hidden>

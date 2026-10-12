@@ -15,7 +15,8 @@ import java.util.regex.Pattern;
 final class DangerousHtmlChecker {
 
     static final Set<String> ALLOWED = Set.of("p", "br", "hr", "blockquote", "h2", "h3", "h4", "h5", "h6", "strong",
-            "em", "del", "ul", "ol", "li", "input", "code", "pre", "table", "thead", "tbody", "tr", "th", "td", "a", "img");
+            "em", "del", "ul", "ol", "li", "input", "code", "pre", "table", "thead", "tbody", "tr", "th", "td", "a", "img",
+            "u", "span");
 
     private static final Pattern TAG = Pattern.compile("<\\s*(/?)\\s*([a-zA-Z][a-zA-Z0-9-]*)((?:[^>\"']|\"[^\"]*\"|'[^']*')*)>");
     private static final Pattern ATTR = Pattern.compile("([^\\s=/\"'>]+)\\s*(?:=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+))?");

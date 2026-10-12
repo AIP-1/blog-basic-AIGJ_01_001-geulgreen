@@ -1,7 +1,8 @@
 /*
- * 058 서식 도구(강성찬 개인 확장): 본문에서 글을 드래그하면 그 위에 작은 도구가 떠서 Markdown 서식을 씌우거나 벗긴다.
- * 저장 형식은 그대로 Markdown(공통 007 정화 흐름 유지). 바꾼 글은 "글자 넣기"로 넣어 되돌리기(Ctrl/⌘+Z)가 된다.
- * 단축키: Ctrl/⌘ + B 굵게, I 기울임, K 링크, E 코드, Shift+X 취소선.
+ * 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 본문에서 글을 고르면 창이 떠서 서식 종류(본문·제목·목록·인용·코드 블록),
+ * 글자 색·굵게·기울임·밑줄·서식 지우기·링크·취소선·코드를 바꾸고, 059 AI로 고치기(다듬기·맞춤법·짧게·쉽게·직접 부탁)를 한다.
+ * 저장은 그대로 Markdown(밑줄·색은 <u>·<span class="md-…">만 렌더러가 살린다). 바꾼 글은 "글자 넣기"로 넣어 되돌리기가 된다.
+ * 단축키: Ctrl/⌘ + B 굵게, I 기울임, U 밑줄, K 링크, E 코드, Shift+X 취소선, J AI에게 부탁.
  * 브라우저에서는 window.blogFormat, Node에서는 module.exports(src/test/js/format-toolbar.test.mjs).
  */
 (function (root) {
@@ -9,18 +10,14 @@
 
   /* ---------- 글 바꾸기(화면과 무관). 결과 {from, to, text, selStart, selEnd}: value[from, to)를 text로 바꾸고 selStart~selEnd를 고른다 ---------- */
 
-  var WRAPS = { bold: '**', italic: '*', strike: '~~', code: '`' };
-  // 줄 앞 표시(인용·제목·목록). 줄 처음부터 골랐다면 강조 안쪽에 넣지 않는다
+  var WRAPS = { bold: ['**', '**'], italic: ['*', '*'], strike: ['~~', '~~'], code: ['`', '`'], underline: ['<u>', '</u>'] };
+  var COLORS = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'red'];
+  var SPAN_OPEN_END = /<span class="(md-(?:c|bg)-[a-z]+)">$/;
+  var SPAN_WHOLE = /^<span class="(md-(?:c|bg)-[a-z]+)">([\s\S]*)<\/span>$/;
+  var SPAN_TAGS = /<span class="md-(?:c|bg)-[a-z]+">|<\/span>/g;
+  // 줄 앞 표시(인용·제목·목록). 줄 처음부터 골랐다면 서식 안쪽에 넣지 않는다
   var BLOCK_PREFIX = /^(?:>\s?)*(?:#{1,6}\s+|[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)?/;
-  var LIST_OR_HEADING = /^(?:#{1,6}\s+|[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)/;
-  var LINE_KINDS = {
-    h2: { re: /^##\s+/, make: function () { return '## '; } },
-    h3: { re: /^###\s+/, make: function () { return '### '; } },
-    quote: { re: /^>\s?/, make: function () { return '> '; }, keep: true },
-    ul: { re: /^[-*+]\s+(?!\[[ xX]\]\s)/, make: function () { return '- '; } },
-    ol: { re: /^\d+[.)]\s+/, make: function (i) { return (i + 1) + '. '; } },
-    task: { re: /^[-*+]\s+\[[ xX]\]\s+/, make: function () { return '- [ ] '; } }
-  };
+  var BLOCKS = { h2: '## ', h3: '### ', ul: '- ', task: '- [ ] ', quote: '> ' };
   var LINK_RE = /^\[([^\]]*)\]\(([^)\s]*)\)$/;
 
   function lineStartOf(value, pos) { return pos > 0 ? value.lastIndexOf('\n', pos - 1) + 1 : 0; }
@@ -32,21 +29,27 @@
   }
 
   // 별표는 굵게(2개)와 기울임(1개)이 겹치므로 개수로 가른다: 기울임은 홀수 개, 굵게는 2개 이상
-  function starsMatch(l, r, marker) { return marker === '*' ? l % 2 === 1 && r % 2 === 1 : l >= 2 && r >= 2; }
+  function starsMatch(l, r, open) { return open === '*' ? l % 2 === 1 && r % 2 === 1 : l >= 2 && r >= 2; }
 
-  function wrappedOutside(value, s, e, marker) {
-    if (marker.charAt(0) === '*') { return starsMatch(stars(value.slice(0, s), true), stars(value.slice(e), false), marker); }
-    return value.slice(0, s).slice(-marker.length) === marker && value.slice(e, e + marker.length) === marker;
+  function wrappedOutside(value, s, e, pair) {
+    if (pair[0].charAt(0) === '*') { return starsMatch(stars(value.slice(0, s), true), stars(value.slice(e), false), pair[0]); }
+    return value.slice(0, s).slice(-pair[0].length) === pair[0] && value.slice(e, e + pair[1].length) === pair[1];
   }
 
-  function wrappedInside(sel, marker) {
-    var m = marker.length;
-    if (sel.length <= m * 2) { return false; }
-    var inner = sel.slice(m, sel.length - m);
-    var ends = marker.charAt(0) === '*' ? starsMatch(stars(sel, false), stars(sel, true), marker)
-      : sel.slice(0, m) === marker && sel.slice(-m) === marker;
-    // "**가** 와 **나**"처럼 따로 강조된 두 덩어리는 하나로 보지 않는다
-    return ends && (marker === '*' ? inner.replace(/\*\*/g, '') : inner).indexOf(marker) < 0;
+  function wrappedInside(sel, pair) {
+    var o = pair[0], c = pair[1];
+    if (sel.length <= o.length + c.length) { return false; }
+    var inner = sel.slice(o.length, sel.length - c.length);
+    var ends = o.charAt(0) === '*' ? starsMatch(stars(sel, false), stars(sel, true), o) : sel.slice(0, o.length) === o && sel.slice(-c.length) === c;
+    // "**가** 와 **나**"처럼 따로 씌운 두 덩어리는 하나로 보지 않는다
+    var probe = o === '*' ? inner.replace(/\*\*/g, '') : inner;
+    return ends && probe.indexOf(o) < 0 && probe.indexOf(c) < 0;
+  }
+
+  // 씌우기 전에 안쪽의 같은 표시는 지운다("**가** 와 **나**" 전체를 굵게 → "**가 와 나**"). 기울임은 굵게(**)는 남긴다
+  function strip(inner, pair) {
+    if (pair[0] === '*') { return inner.replace(/\*\*|\*/g, function (t) { return t === '**' ? t : ''; }); }
+    return inner.split(pair[0]).join('').split(pair[1]).join('');
   }
 
   // 한 줄 안에서 서식을 씌울 부분: 앞뒤 공백과, 줄 처음부터 골랐다면 줄 앞 표시는 뺀다
@@ -57,48 +60,92 @@
     return s < e ? { s: s, e: e } : null;
   }
 
-  // 고른 글을 줄마다 나눈 조각(강조는 문단·목록 항목을 넘지 못하므로 줄마다 따로 씌운다)
-  function spansOf(value, start, end, marker) {
+  // 고른 글을 줄마다 나눈 조각(서식은 문단·목록 항목을 넘지 못하므로 줄마다 따로 씌운다)
+  function lineSpans(value, start, end) {
     var spans = [];
     for (var pos = start; pos <= end;) {
       var stop = value.indexOf('\n', pos);
       if (stop < 0 || stop > end) { stop = end; }
       var sp = inlineSpan(value, pos, stop);
-      if (sp) {
-        sp.out = wrappedOutside(value, sp.s, sp.e, marker);
-        sp.on = sp.out || wrappedInside(value.slice(sp.s, sp.e), marker);
-        spans.push(sp);
-      }
+      if (sp) { spans.push(sp); }
       pos = stop + 1;
     }
     return spans;
   }
 
-  function isOn(sp) { return sp.on; }
+  function wrapState(value, sp, pair) {
+    var out = wrappedOutside(value, sp.s, sp.e, pair);
+    return { s: sp.s, e: sp.e, out: out, on: out || wrappedInside(value.slice(sp.s, sp.e), pair) };
+  }
 
   // 여러 조각을 한 번에 바꾼다(되돌리기 한 번에 돌아가게). 조각이 하나면 서식 안쪽 글을, 여럿이면 바뀐 곳 전체를 고른다
   function join(value, edits) {
-    var from = edits[0].from, text = '', cur = from;
+    var from = edits[0].from, text = '', cur = from, one = edits.length === 1;
     edits.forEach(function (ed) { text += value.slice(cur, ed.from) + ed.text; cur = ed.to; });
-    var pad = edits.length === 1 ? edits[0].pad : 0;
-    return { from: from, to: cur, text: text, selStart: from + pad, selEnd: from + text.length - pad };
+    return { from: from, to: cur, text: text, selStart: from + (one ? edits[0].padL || 0 : 0),
+      selEnd: from + text.length - (one ? edits[0].padR || 0 : 0) };
   }
 
-  // 씌우기 전에 안쪽의 같은 표시는 지운다("**가** 와 **나**" 전체를 굵게 → "**가 와 나**"). 기울임은 굵게(**)는 남긴다
-  function strip(inner, marker) {
-    return marker === '*' ? inner.replace(/\*\*|\*/g, function (t) { return t === '**' ? t : ''; }) : inner.split(marker).join('');
-  }
-
-  // 굵게·기울임·취소선·코드: 고른 조각이 모두 씌워져 있으면 벗기고, 아니면 안 씌워진 조각에 씌운다
-  function toggleWrap(value, start, end, marker) {
-    var m = marker.length, spans = spansOf(value, start, end, marker);
+  // 굵게·기울임·취소선·코드·밑줄: 고른 조각이 모두 씌워져 있으면 벗기고, 아니면 안 씌워진 조각에 씌운다
+  function toggleWrap(value, start, end, key) {
+    var pair = WRAPS[key], o = pair[0], c = pair[1];
+    var spans = lineSpans(value, start, end).map(function (sp) { return wrapState(value, sp, pair); });
     if (!spans.length) { return null; }
-    var off = spans.every(isOn);
+    var off = spans.every(function (p) { return p.on; });
     return join(value, spans.map(function (p) {
       var inner = value.slice(p.s, p.e);
-      if (off && p.out) { return { from: p.s - m, to: p.e + m, text: inner, pad: 0 }; }
-      if (off) { return { from: p.s, to: p.e, text: inner.slice(m, inner.length - m), pad: 0 }; }
-      return { from: p.s, to: p.e, text: p.on ? inner : marker + strip(inner, marker) + marker, pad: m };
+      if (off && p.out) { return { from: p.s - o.length, to: p.e + c.length, text: inner }; }
+      if (off) { return { from: p.s, to: p.e, text: inner.slice(o.length, inner.length - c.length) }; }
+      return { from: p.s, to: p.e, text: p.on ? inner : o + strip(inner, pair) + c, padL: o.length, padR: c.length };
+    }));
+  }
+
+  // 고른 조각을 감싼 색 span(바깥에 있거나 고른 글 자체가 span일 때)
+  function spanAround(value, s, e) {
+    var open = value.slice(Math.max(0, s - 40), s).match(SPAN_OPEN_END);
+    if (open && value.slice(e, e + 7) === '</span>') {
+      return { from: s - open[0].length, to: e + 7, cls: open[1], inner: value.slice(s, e) };
+    }
+    var whole = value.slice(s, e).match(SPAN_WHOLE);
+    return whole && whole[2].indexOf('<span') < 0 && whole[2].indexOf('</span>') < 0
+      ? { from: s, to: e, cls: whole[1], inner: whole[2] } : null;
+  }
+
+  // 글자 색·배경색: cls는 'md-c-red'·'md-bg-yellow' 같은 이름, ''이면 색을 지운다(겹쳐 감싸지 않고 바꾼다)
+  function setColor(value, start, end, cls) {
+    var spans = lineSpans(value, start, end);
+    if (!spans.length) { return null; }
+    var open = cls ? '<span class="' + cls + '">' : '', close = cls ? '</span>' : '';
+    return join(value, spans.map(function (p) {
+      var around = spanAround(value, p.s, p.e);
+      var inner = around ? around.inner : value.slice(p.s, p.e);
+      return { from: around ? around.from : p.s, to: around ? around.to : p.e,
+        text: open + inner.replace(SPAN_TAGS, '') + close, padL: open.length, padR: close.length };
+    }));
+  }
+
+  // 서식 지우기: 고른 글을 감싼 표시까지 넓혀서 굵게·기울임·취소선·코드·밑줄·색·링크를 모두 벗긴다(사진은 그대로)
+  function clearFormat(value, start, end) {
+    var spans = lineSpans(value, start, end);
+    if (!spans.length) { return null; }
+    return join(value, spans.map(function (p) {
+      var s = p.s, e = p.e, grown = true;
+      while (grown) {
+        grown = false;
+        var k = Math.min(stars(value.slice(0, s), true), stars(value.slice(e), false));
+        if (k > 0) { s -= k; e += k; grown = true; }
+        [WRAPS.strike, WRAPS.code, WRAPS.underline].forEach(function (pair) {
+          if (wrappedOutside(value, s, e, pair)) { s -= pair[0].length; e += pair[1].length; grown = true; }
+        });
+        var around = spanAround(value, s, e);
+        if (around && around.from < s) { s = around.from; e = around.to; grown = true; }
+        var tail = value.slice(e).match(/^\]\([^)\s]*\)/);
+        if (tail && value[s - 1] === '[' && value[s - 2] !== '!') { s -= 1; e += tail[0].length; grown = true; }
+      }
+      var text = value.slice(s, e)
+        .replace(/(!?)\[([^\]]*)\]\([^)\s]*\)/g, function (m, bang, label) { return bang ? m : label; })
+        .replace(SPAN_TAGS, '').replace(/<\/?u>/g, '').replace(/\*\*|~~|[*`]/g, '');
+      return { from: s, to: e, text: text };
     }));
   }
 
@@ -108,43 +155,48 @@
     return { from: lineStartOf(value, start), to: to < 0 ? value.length : to };
   }
 
-  function lineOn(lines, kind) {
-    var filled = lines.filter(function (l) { return l.trim(); });
-    return filled.length > 0 && filled.every(function (l) { return LINE_KINDS[kind].re.test(l.trim()); });
+  // 고른 줄 바로 위아래가 ``` 이면 그 코드 블록(울타리 포함) 자리
+  function fenceAround(value, r) {
+    if (r.from === 0 || r.to >= value.length) { return null; }
+    var prevFrom = lineStartOf(value, r.from - 1), nextTo = value.indexOf('\n', r.to + 1);
+    if (nextTo < 0) { nextTo = value.length; }
+    return /^```/.test(value.slice(prevFrom, r.from - 1)) && /^```\s*$/.test(value.slice(r.to + 1, nextTo))
+      ? { from: prevFrom, to: nextTo } : null;
   }
 
-  // 제목·인용·목록: 고른 줄 모두에 있으면 벗기고, 아니면 씌운다(제목·목록끼리는 서로 바꾼다)
-  function toggleLine(value, start, end, kind) {
-    var k = LINE_KINDS[kind], r = lineRange(value, start, end), lines = value.slice(r.from, r.to).split('\n');
-    var all = lineOn(lines, kind), n = 0;
-    var text = lines.map(function (l) {
-      var ind = l.match(/^\s*/)[0], rest = l.slice(ind.length);
-      if (!rest) { return l; }
-      if (all) { return ind + rest.replace(k.re, ''); }
-      if (k.keep && k.re.test(rest)) { return l; }
-      return ind + k.make(n++) + (k.keep ? rest : rest.replace(LIST_OR_HEADING, ''));
-    }).join('\n');
-    return { from: r.from, to: r.to, text: text, selStart: r.from, selEnd: r.from + text.length };
+  function kindOf(line) {
+    var t = line.trim();
+    if (/^#{1,2}\s/.test(t)) { return 'h2'; }
+    if (/^#{3,6}\s/.test(t)) { return 'h3'; }
+    if (/^>/.test(t)) { return 'quote'; }
+    if (/^[-*+]\s+\[[ xX]\]\s/.test(t)) { return 'task'; }
+    if (/^[-*+]\s/.test(t)) { return 'ul'; }
+    if (/^\d+[.)]\s/.test(t)) { return 'ol'; }
+    return 'text';
   }
 
-  // 코드 블록: 고른 줄을 ``` 로 감싸고, 바로 위아래가 ``` 이면 벗긴다
-  function toggleCodeBlock(value, start, end) {
-    var r = lineRange(value, start, end), body = value.slice(r.from, r.to);
-    if (r.from > 0 && r.to < value.length) {
-      var prevFrom = lineStartOf(value, r.from - 1), nextTo = value.indexOf('\n', r.to + 1);
-      if (nextTo < 0) { nextTo = value.length; }
-      if (/^```/.test(value.slice(prevFrom, r.from - 1)) && /^```\s*$/.test(value.slice(r.to + 1, nextTo))) {
-        return { from: prevFrom, to: nextTo, text: body, selStart: prevFrom, selEnd: prevFrom + body.length };
-      }
-    }
-    var text = '```\n' + body + '\n```';
-    return { from: r.from, to: r.to, text: text, selStart: r.from + 4, selEnd: r.from + 4 + body.length };
+  // 고른 줄의 서식 종류: 모두 같으면 그 종류, 섞였으면 'mixed'(노션의 "여러 종류")
+  function blockKind(value, start, end) {
+    var r = lineRange(value, start, end);
+    if (fenceAround(value, r)) { return 'code'; }
+    var kinds = value.slice(r.from, r.to).split('\n').filter(function (l) { return l.trim(); }).map(kindOf);
+    if (!kinds.length) { return 'text'; }
+    return kinds.every(function (k) { return k === kinds[0]; }) ? kinds[0] : 'mixed';
   }
 
-  function format(value, start, end, key) {
-    if (WRAPS[key]) { return toggleWrap(value, start, end, WRAPS[key]); }
-    if (LINE_KINDS[key]) { return toggleLine(value, start, end, key); }
-    return key === 'codeblock' ? toggleCodeBlock(value, start, end) : null;
+  // 서식 종류 바꾸기: 줄마다 앞 표시(인용·제목·목록)를 지우고 새 표시를 단다. 코드 블록은 ``` 로 감싸거나 벗긴다
+  function setBlock(value, start, end, kind) {
+    var r = lineRange(value, start, end), fence = fenceAround(value, r), n = 0;
+    if (fence && kind === 'code') { return null; }
+    var lines = value.slice(r.from, r.to).split('\n').map(function (l) {
+      var body = fence ? l : l.replace(/^\s*/, '').replace(BLOCK_PREFIX, '');
+      if (!body.trim() || kind === 'code' || kind === 'text') { return body; }
+      var indent = !fence && (kind === 'ul' || kind === 'ol' || kind === 'task') ? l.match(/^\s*/)[0] : '';
+      return indent + (kind === 'ol' ? (++n) + '. ' : BLOCKS[kind]) + body;
+    });
+    var text = kind === 'code' ? '```\n' + lines.join('\n') + '\n```' : lines.join('\n');
+    var from = fence ? fence.from : r.from, pad = kind === 'code' ? 4 : 0;
+    return { from: from, to: fence ? fence.to : r.to, text: text, selStart: from + pad, selEnd: from + text.length - pad };
   }
 
   // 고른 글이 링크인지: [글](주소) 전체를 골랐거나 링크의 글 부분만 골랐을 때(사진 ![..](..)은 빼고)
@@ -163,10 +215,12 @@
     return l && { from: l.from, to: l.to, text: l.label, selStart: l.from, selEnd: l.from + l.label.length };
   }
 
+  // 링크 넣기(이미 링크면 주소만 바꾼다)
   function link(value, start, end, url) {
-    var sp = inlineSpan(value, start, end);
-    if (!sp || !url) { return null; }
-    var label = value.slice(sp.s, sp.e);
+    if (!url) { return null; }
+    var l = findLink(value, start, end), sp = l ? { s: l.from, e: l.to } : inlineSpan(value, start, end);
+    if (!sp) { return null; }
+    var label = l ? l.label : value.slice(sp.s, sp.e);
     return { from: sp.s, to: sp.e, text: '[' + label + '](' + url + ')', selStart: sp.s + 1, selEnd: sp.s + 1 + label.length };
   }
 
@@ -176,29 +230,36 @@
     return !u || /^(https?:\/\/|mailto:|\/|#)/i.test(u) ? u : 'https://' + u;
   }
 
-  // 지금 고른 글에 씌워진 서식(도구 버튼의 눌림 표시)
+  function format(value, start, end, key) {
+    if (WRAPS[key]) { return toggleWrap(value, start, end, key); }
+    return key === 'clear' ? clearFormat(value, start, end) : null;
+  }
+
+  // 지금 고른 글의 상태(버튼 눌림·서식 종류·색 표시)
   function activeFormats(value, start, end) {
-    var active = {}, r = lineRange(value, start, end), lines = value.slice(r.from, r.to).split('\n');
+    var active = {}, spans = lineSpans(value, start, end);
     Object.keys(WRAPS).forEach(function (k) {
-      var spans = spansOf(value, start, end, WRAPS[k]);
-      active[k] = spans.length > 0 && spans.every(isOn);
+      active[k] = spans.length > 0 && spans.every(function (sp) { return wrapState(value, sp, WRAPS[k]).on; });
     });
-    Object.keys(LINE_KINDS).forEach(function (k) { active[k] = lineOn(lines, k); });
+    var colors = spans.map(function (sp) { var a = spanAround(value, sp.s, sp.e); return a ? a.cls : ''; });
+    active.color = colors.length && colors.every(function (c) { return c === colors[0]; }) ? colors[0] : '';
     active.link = !!findLink(value, start, end);
+    active.block = blockKind(value, start, end);
     return active;
   }
 
-  var api = { format: format, link: link, unlink: unlink, findLink: findLink, normalizeUrl: normalizeUrl, activeFormats: activeFormats };
+  var api = { format: format, setBlock: setBlock, blockKind: blockKind, setColor: setColor, link: link, unlink: unlink,
+    findLink: findLink, normalizeUrl: normalizeUrl, activeFormats: activeFormats, COLORS: COLORS };
   root.blogFormat = api;
   if (typeof module === 'object' && module.exports) { module.exports = api; }
   if (typeof document === 'undefined') { return; }
 
-  /* ---------- 화면: 고른 글 위치 재기, 도구 띄우기, 바꾼 글 넣기 ---------- */
+  /* ---------- 화면: 고른 글 옆에 서식 창 띄우기 ---------- */
 
   var MIRROR = ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch',
     'fontSize', 'lineHeight', 'fontFamily', 'textAlign', 'textTransform', 'textIndent', 'letterSpacing', 'wordSpacing', 'tabSize',
     'whiteSpace', 'wordBreak', 'overflowWrap'];
-  var SHORTCUTS = { KeyB: 'bold', KeyI: 'italic', KeyK: 'link', KeyE: 'code', 'Shift+KeyX': 'strike' };
+  var SHORTCUTS = { KeyB: 'bold', KeyI: 'italic', KeyU: 'underline', KeyK: 'link', KeyE: 'code', 'Shift+KeyX': 'strike', KeyJ: 'ask' };
   function svg(d) {
     return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
       + ' stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
@@ -208,23 +269,18 @@
     quote: svg('<path d="M17 6H3"/><path d="M21 12H8"/><path d="M21 18H8"/><path d="M3 12v6"/>'),
     ul: svg('<path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>'),
     ol: svg('<path d="M10 6h11M10 12h11M10 18h11"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>'),
-    task: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>')
+    task: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>'),
+    code: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 9-3 3 3 3"/><path d="m14 15 3-3-3-3"/>')
   };
-  var BUTTONS = [
-    { key: 'bold', label: 'B', title: '굵게 (Ctrl/⌘+B)' },
-    { key: 'italic', label: 'I', title: '기울임 (Ctrl/⌘+I)' },
-    { key: 'strike', label: 'S', title: '취소선 (Ctrl/⌘+Shift+X)' },
-    { key: 'code', label: '</>', title: '코드 (Ctrl/⌘+E)' },
-    { key: 'link', title: '링크 (Ctrl/⌘+K)' },
-    null,
-    { key: 'h2', label: '제목', title: '큰 제목' },
-    { key: 'h3', label: '소제목', title: '작은 제목' },
-    { key: 'quote', title: '인용' },
-    { key: 'ul', title: '글머리 목록' },
-    { key: 'ol', title: '번호 목록' },
-    { key: 'task', title: '할 일 목록' },
-    { key: 'codeblock', label: '{ }', title: '코드 블록' }
-  ];
+  var BLOCK_ITEMS = [['text', '본문', 'T'], ['h2', '제목', 'H2'], ['h3', '소제목', 'H3'], ['ul', '글머리 목록'], ['ol', '번호 목록'],
+    ['task', '할 일 목록'], ['quote', '인용'], ['code', '코드 블록']];
+  var BLOCK_LABEL = { mixed: '여러 종류' };
+  BLOCK_ITEMS.forEach(function (b) { BLOCK_LABEL[b[0]] = b[1]; });
+  var GRID = [['color', '글자 색', '<span class="fmt-a">A</span>'], ['bold', '굵게 (Ctrl/⌘+B)', 'B'], ['italic', '기울임 (Ctrl/⌘+I)', 'I'],
+    ['underline', '밑줄 (Ctrl/⌘+U)', 'U'], ['clear', '서식 지우기', 'T<sub>x</sub>'], ['link', '링크 (Ctrl/⌘+K)', ICONS.link],
+    ['strike', '취소선 (Ctrl/⌘+Shift+X)', 'S'], ['code', '코드 (Ctrl/⌘+E)', '&lt;/&gt;']];
+  var COLOR_NAMES = { gray: '회색', brown: '갈색', orange: '주황', yellow: '노랑', green: '초록', blue: '파랑', purple: '보라', pink: '분홍', red: '빨강' };
+  var AI_ITEMS = [['improve', '글 다듬기'], ['fix', '맞춤법 고치기'], ['shorter', '더 짧게'], ['easier', '더 쉽게']];
 
   // textarea 안 글자 위치(pos)의 화면 좌표: 같은 모양의 숨은 상자에 앞 글을 넣고 그 다음 글자 위치를 잰다
   function caretPoint(ta, pos) {
@@ -250,76 +306,229 @@
     return point;
   }
 
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) { e.className = cls; }
+    if (html) { e.innerHTML = html; } // 이 파일에 고정된 글자·아이콘만(사용자 글과 AI 답은 textContent로)
+    return e;
+  }
+
+  function button(cls, html, label, data) {
+    var b = el('button', cls, html);
+    b.type = 'button';
+    if (label) { b.title = label; b.setAttribute('aria-label', label); }
+    Object.keys(data || {}).forEach(function (k) { b.dataset[k] = data[k]; });
+    return b;
+  }
+
+  function headers() {
+    var h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    var t = document.querySelector('meta[name="_csrf"]'), n = document.querySelector('meta[name="_csrf_header"]');
+    if (t && n) { h[n.content] = t.content; }
+    return h;
+  }
+
   function init() {
     var ta = document.getElementById('post-content');
     if (!ta) { return; }
-    var composing = false, saved = null, buttons = {};
+    var aiEnabled = ta.dataset.writingAi === 'true';
+    var composing = false, view = 'main', anchor = null, saved = null, consented = false, lastAi = null, aiText = '', aiBusy = false;
 
-    var bar = document.createElement('div');
-    bar.className = 'format-toolbar';
-    bar.setAttribute('role', 'toolbar');
-    bar.setAttribute('aria-label', '서식');
-    bar.hidden = true;
-    var group = document.createElement('div');
-    group.className = 'fmt-buttons';
-    BUTTONS.forEach(function (b) {
-      if (!b) { var sep = document.createElement('span'); sep.className = 'fmt-sep'; group.appendChild(sep); return; }
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'fmt-btn fmt-' + b.key;
-      if (ICONS[b.key]) { btn.innerHTML = ICONS[b.key]; } else { btn.textContent = b.label; }
-      btn.title = b.title;
-      btn.setAttribute('aria-label', b.title);
-      btn.setAttribute('aria-pressed', 'false');
-      btn.dataset.key = b.key;
-      buttons[b.key] = btn;
-      group.appendChild(btn);
+    var panel = el('div', 'format-panel');
+    panel.setAttribute('role', 'group');
+    panel.setAttribute('aria-label', '서식 창');
+    panel.hidden = true;
+    var views = {};
+
+    function back(title) {
+      var head = button('fmt-row fmt-back', '<span class="fmt-ico" aria-hidden="true">‹</span>', '뒤로', { back: '1' });
+      head.appendChild(document.createTextNode(title));
+      return head;
+    }
+
+    // 첫 화면: 서식 종류 · 서식 칸 · AI로 고치기
+    var main = views.main = el('div', 'fmt-view');
+    var typeButton = button('fmt-row fmt-type', '', '서식 종류 바꾸기', { view: 'type' });
+    var typeIcon = el('span', 'fmt-ico'), typeLabel = el('span', 'fmt-type-label');
+    typeIcon.setAttribute('aria-hidden', 'true');
+    typeButton.appendChild(typeIcon);
+    typeButton.appendChild(typeLabel);
+    typeButton.appendChild(el('span', 'fmt-end', '›'));
+    main.appendChild(typeButton);
+    var grid = el('div', 'fmt-grid');
+    grid.setAttribute('role', 'toolbar');
+    grid.setAttribute('aria-label', '글자 서식');
+    var gridButtons = {};
+    GRID.forEach(function (g) {
+      var b = button('fmt-btn fmt-' + g[0], g[2], g[1], g[0] === 'color' || g[0] === 'link' ? { view: g[0] } : { key: g[0] });
+      if (WRAPS[g[0]]) { b.setAttribute('aria-pressed', 'false'); }
+      gridButtons[g[0]] = b;
+      grid.appendChild(b);
     });
-    var linkBox = document.createElement('form');
-    linkBox.className = 'fmt-link-box';
-    linkBox.hidden = true;
+    main.appendChild(grid);
+    var askInput = null;
+    if (aiEnabled) {
+      var aiBox = el('div', 'fmt-ai');
+      aiBox.appendChild(el('p', 'fmt-section', '✨ AI로 고치기'));
+      AI_ITEMS.forEach(function (a) { aiBox.appendChild(button('fmt-row', a[1], null, { ai: a[0] })); });
+      var askForm = el('form', 'fmt-ask');
+      askInput = document.createElement('input');
+      askInput.type = 'text';
+      askInput.placeholder = 'AI에게 부탁하기 (예: 더 정중하게)';
+      askInput.setAttribute('aria-label', 'AI에게 부탁하기');
+      askInput.autocomplete = 'off';
+      askInput.maxLength = 200;
+      var askSend = button('fmt-btn fmt-send', '↵', '보내기');
+      askSend.type = 'submit';
+      askForm.appendChild(askInput);
+      askForm.appendChild(askSend);
+      aiBox.appendChild(askForm);
+      main.appendChild(aiBox);
+      askForm.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        if (askInput.value.trim()) { runAi('ask', askInput.value.trim()); }
+      });
+    }
+
+    // 서식 종류
+    var typeView = views.type = el('div', 'fmt-view');
+    typeView.appendChild(back('서식 종류'));
+    var blockButtons = {};
+    BLOCK_ITEMS.forEach(function (b) {
+      var item = button('fmt-row', '<span class="fmt-ico" aria-hidden="true">' + (b[2] || ICONS[b[0]]) + '</span>' + b[1]
+        + '<span class="fmt-end fmt-check" aria-hidden="true">✓</span>', null, { block: b[0] });
+      blockButtons[b[0]] = item;
+      typeView.appendChild(item);
+    });
+
+    // 색
+    var colorView = views.color = el('div', 'fmt-view');
+    colorView.appendChild(back('색'));
+    var swatches = [];
+    [['c', '글자 색', '글자'], ['bg', '배경색', '배경']].forEach(function (group) {
+      colorView.appendChild(el('p', 'fmt-section', group[1]));
+      var row = el('div', 'fmt-swatches');
+      (group[0] === 'c' ? [''].concat(COLORS) : COLORS).forEach(function (c) {
+        var cls = c ? 'md-' + group[0] + '-' + c : '';
+        var sw = button('fmt-swatch' + (cls ? ' ' + cls : ''), 'A', c ? COLOR_NAMES[c] + ' ' + group[2] : '기본 색', { color: cls });
+        sw.setAttribute('aria-pressed', 'false');
+        swatches.push(sw);
+        row.appendChild(sw);
+      });
+      colorView.appendChild(row);
+    });
+
+    // 링크
+    var linkView = views.link = el('div', 'fmt-view');
+    linkView.appendChild(back('링크'));
+    var linkForm = el('form', 'fmt-ask fmt-link');
     var linkInput = document.createElement('input');
     linkInput.type = 'text';
     linkInput.placeholder = '링크 주소 (https://…)';
     linkInput.setAttribute('aria-label', '링크 주소');
     linkInput.autocomplete = 'off';
-    var linkOk = document.createElement('button');
+    var linkOk = button('btn btn-primary btn-sm', '넣기');
     linkOk.type = 'submit';
-    linkOk.className = 'fmt-btn fmt-link-ok';
-    linkOk.textContent = '넣기';
-    linkBox.appendChild(linkInput);
-    linkBox.appendChild(linkOk);
-    bar.appendChild(group);
-    bar.appendChild(linkBox);
-    document.body.appendChild(bar);
+    linkForm.appendChild(linkInput);
+    linkForm.appendChild(linkOk);
+    linkView.appendChild(linkForm);
+    var unlinkButton = button('fmt-row', '링크 빼기', null, { key: 'unlink' });
+    linkView.appendChild(unlinkButton);
+
+    // AI 제안
+    var aiView = views.ai = el('div', 'fmt-view');
+    aiView.appendChild(back('AI 제안'));
+    var aiOut = el('div', 'fmt-ai-out');
+    aiOut.setAttribute('role', 'status');
+    aiOut.setAttribute('aria-live', 'polite');
+    aiView.appendChild(aiOut);
+    var aiActions = el('div', 'fmt-ai-actions');
+    aiActions.appendChild(button('btn btn-primary btn-sm', '바꾸기', null, { aiDo: 'replace' }));
+    aiActions.appendChild(button('btn btn-sm', '아래에 넣기', null, { aiDo: 'below' }));
+    aiActions.appendChild(button('btn btn-sm', '다시', null, { aiDo: 'again' }));
+    aiView.appendChild(aiActions);
+    var consentBox = el('div', 'fmt-consent');
+    consentBox.appendChild(el('p', 'help', '고른 글이 외부 AI 서비스(Google Gemini, 무료 등급)로 전송돼요. 무료 등급에서는 Google이 보낸 내용을 '
+      + '서비스 개선에 쓰고 사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요. '
+      + '<a href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a>'));
+    consentBox.appendChild(button('btn btn-primary btn-sm', '동의하고 쓰기', null, { aiDo: 'agree' }));
+    aiView.appendChild(consentBox);
+
+    Object.keys(views).forEach(function (k) { panel.appendChild(views[k]); });
+    document.body.appendChild(panel);
+
+    if (aiEnabled) {
+      fetch('/api/me/ai-consent', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (s) { consented = !!(s && s.consented); })
+        .catch(function () {});
+    }
 
     function coarse() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
 
-    // 고른 글 위(자리가 없거나 휴대폰이면 아래, 기본 복사 메뉴를 가리지 않게)에 도구를 둔다
+    // 넓은 화면은 본문 칸 오른쪽(노션처럼), 아니면 고른 글 아래(자리가 없으면 위). 휴대폰은 늘 아래(기본 복사 메뉴를 가리지 않게)
     function place() {
-      var s = ta.selectionStart, e = ta.selectionEnd, box = ta.getBoundingClientRect();
-      var a = caretPoint(ta, s), b = caretPoint(ta, e), w = bar.offsetWidth, h = bar.offsetHeight;
+      var s = anchor ? anchor.start : ta.selectionStart, e = anchor ? anchor.end : ta.selectionEnd;
+      var box = ta.getBoundingClientRect(), a = caretPoint(ta, s), b = caretPoint(ta, e);
+      var w = panel.offsetWidth, h = panel.offsetHeight, cw = document.documentElement.clientWidth, vh = window.innerHeight;
       var header = document.querySelector('.site-header');
-      var minTop = header ? header.getBoundingClientRect().bottom + 4 : 8;
+      var minTop = header ? header.getBoundingClientRect().bottom + 8 : 8;
       var anchorTop = Math.max(a.top, box.top), anchorBottom = Math.min(b.top + b.height, box.bottom);
-      var top = coarse() || anchorTop - h - 8 < minTop ? anchorBottom + 8 : anchorTop - h - 8;
-      var left = a.top === b.top ? (a.left + b.left - w) / 2 : a.left - 12, cw = document.documentElement.clientWidth;
-      // 본문 칸 안에 두고, 칸보다 넓으면 화면 안에만
-      left = Math.max(Math.min(left, Math.min(box.right, cw - 8) - w), Math.max(box.left, 8));
-      left = Math.max(Math.min(left, cw - w - 8), 8);
-      bar.style.top = (top + window.scrollY) + 'px';
-      bar.style.left = (left + window.scrollX) + 'px';
+      var top, left;
+      if (!coarse() && cw - box.right >= w + 24) {
+        left = box.right + 12;
+        top = Math.max(minTop, Math.min(anchorTop - 8, vh - h - 8));
+      } else {
+        top = anchorBottom + 8;
+        if (!coarse() && top + h > vh - 8 && anchorTop - h - 8 >= minTop) { top = anchorTop - h - 8; }
+        left = Math.max(Math.min(a.left - 12, cw - w - 8), 8);
+      }
+      panel.style.top = (top + window.scrollY) + 'px';
+      panel.style.left = (left + window.scrollX) + 'px';
+      panel.style.visibility = '';
     }
 
+    function showView(name) {
+      view = name;
+      Object.keys(views).forEach(function (k) { views[k].hidden = k !== name; });
+      if (!panel.hidden) { place(); }
+    }
+
+    function close() {
+      panel.hidden = true;
+      view = 'main';
+      anchor = null;
+      saved = null;
+      aiBusy = false;
+    }
+
+    // 버튼 눌림·서식 종류·색 표시
+    function update() {
+      var active = activeFormats(ta.value, ta.selectionStart, ta.selectionEnd);
+      Object.keys(WRAPS).forEach(function (k) { gridButtons[k].setAttribute('aria-pressed', active[k] ? 'true' : 'false'); });
+      typeLabel.textContent = BLOCK_LABEL[active.block];
+      var item = BLOCK_ITEMS.filter(function (b) { return b[0] === active.block; })[0];
+      typeIcon.innerHTML = item ? (item[2] || ICONS[item[0]]) : '¶';
+      Object.keys(blockButtons).forEach(function (k) { blockButtons[k].classList.toggle('is-current', k === active.block); });
+      gridButtons.color.firstChild.className = 'fmt-a' + (active.color ? ' ' + active.color : '');
+      swatches.forEach(function (sw) { sw.setAttribute('aria-pressed', sw.dataset.color === active.color ? 'true' : 'false'); });
+      unlinkButton.hidden = !active.link;
+    }
+
+    // 고른 글이 바뀌면 첫 화면으로, 그대로면 지금 화면을 둔다. 글을 안 골랐으면 닫는다
     function refresh() {
-      if (!linkBox.hidden) { return; }
+      if (document.activeElement !== ta) { return; }
       var s = ta.selectionStart, e = ta.selectionEnd;
-      // 한글 조합 중인 글자를 고른 것으로 알리는 브라우저가 있어 조합 중에는 띄우지 않는다
-      if (s === e || composing || document.activeElement !== ta) { bar.hidden = true; return; }
-      var active = activeFormats(ta.value, s, e);
-      Object.keys(buttons).forEach(function (k) { buttons[k].setAttribute('aria-pressed', active[k] ? 'true' : 'false'); });
-      bar.hidden = false;
-      place();
+      if (s === e || composing) { close(); return; }
+      if (panel.hidden || !anchor || anchor.start !== s || anchor.end !== e) {
+        anchor = { start: s, end: e };
+        saved = null;
+        aiBusy = false;
+        view = 'main';
+      }
+      update();
+      panel.hidden = false;
+      showView(view);
     }
 
     function later() { window.setTimeout(refresh, 0); }
@@ -337,80 +546,163 @@
         }
         ta.setSelectionRange(change.selStart, change.selEnd);
       }
+      anchor = null;
       refresh();
     }
 
-    function closeLink() {
-      linkBox.hidden = true;
-      group.hidden = false;
-      saved = null;
-    }
-
-    function openLink() {
-      var s = ta.selectionStart, e = ta.selectionEnd, off = unlink(ta.value, s, e);
-      if (off || s === e) { apply(off); return; }
-      saved = { start: s, end: e };
-      group.hidden = true;
-      linkBox.hidden = false;
-      bar.hidden = false;
-      linkInput.value = '';
-      place();
-      linkInput.focus();
-    }
-
-    function run(key) {
-      if (key === 'link') { openLink(); } else { apply(format(ta.value, ta.selectionStart, ta.selectionEnd, key)); }
+    // 입력 칸(링크·AI 부탁)으로 가기 전에 고른 자리를 기억해 두고, 돌아올 때 다시 고른다
+    function remember() {
+      if (!saved) { saved = { start: ta.selectionStart, end: ta.selectionEnd }; }
+      saved.text = ta.value.slice(saved.start, saved.end);
+      return saved;
     }
 
     function backToText() {
       var sel = saved;
-      closeLink();
+      saved = null;
       ta.focus();
       if (sel) { ta.setSelectionRange(sel.start, sel.end); }
       return sel;
     }
 
-    linkBox.addEventListener('submit', function (ev) {
+    function run(key) {
+      var s = ta.selectionStart, e = ta.selectionEnd;
+      if (key === 'unlink') { apply(unlink(ta.value, s, e)); return; }
+      if (key === 'link') { openView('link'); return; }
+      if (key === 'ask') { showView('main'); remember(); askInput.focus(); return; }
+      apply(format(ta.value, s, e, key));
+    }
+
+    function openView(name) {
+      if (name === 'link') {
+        var l = findLink(ta.value, ta.selectionStart, ta.selectionEnd);
+        linkInput.value = l ? l.url : '';
+        remember();
+        showView('link');
+        linkInput.focus();
+        return;
+      }
+      showView(name);
+    }
+
+    linkForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var url = normalizeUrl(linkInput.value), sel = backToText();
       apply(sel ? link(ta.value, sel.start, sel.end, url) : null);
     });
-    linkInput.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape') { ev.preventDefault(); backToText(); refresh(); }
-    });
-    linkInput.addEventListener('blur', function () {
-      window.setTimeout(function () {
-        if (document.activeElement !== ta && !bar.contains(document.activeElement)) { closeLink(); bar.hidden = true; }
-      }, 0);
-    });
 
-    // 도구를 눌러도 본문의 고른 글이 풀리지 않게
-    bar.addEventListener('mousedown', function (ev) { if (ev.target !== linkInput) { ev.preventDefault(); } });
-    group.addEventListener('click', function (ev) {
-      var btn = ev.target.closest('.fmt-btn');
-      if (btn) { run(btn.dataset.key); }
+    function showAi(text, withActions, needConsent) {
+      aiOut.textContent = text;
+      aiOut.hidden = !text;
+      aiActions.hidden = !withActions;
+      consentBox.hidden = !needConsent;
+      showView('ai');
+    }
+
+    // AI로 고치기: 고른 글만 보내고, 결과는 [바꾸기]·[아래에 넣기]를 눌러야 본문에 들어간다
+    function runAi(action, ask) {
+      var sel = remember(), editor = window.blogEditor, tagsApi = window.blogEditorTags;
+      lastAi = { action: action, ask: ask || '' };
+      if (!consented) { showAi('', false, true); return; }
+      if (!editor) { return; }
+      aiBusy = true;
+      showAi('AI가 고치는 중…', false, false);
+      fetch('/api/posts/' + editor.state.postId + '/writing-ai', {
+        method: 'POST', credentials: 'same-origin', headers: headers(),
+        body: JSON.stringify({ text: sel.text, action: action, ask: lastAi.ask, visibility: tagsApi ? tagsApi.visibility() : 'PUBLIC' })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (body) { return { ok: r.ok, body: body }; });
+      }).then(function (res) {
+        if (!aiBusy || view !== 'ai') { return; }
+        aiBusy = false;
+        if (res.ok && res.body.text) { aiText = res.body.text; showAi(aiText, true, false); return; }
+        if (res.body.code === 'WRITING_AI_CONSENT_REQUIRED') { consented = false; showAi('', false, true); return; }
+        showAi(res.body.message || '지금은 AI가 답하지 않아요', false, false);
+      }).catch(function () {
+        if (!aiBusy) { return; }
+        aiBusy = false;
+        showAi('지금은 AI가 답하지 않아요', false, false);
+      });
+    }
+
+    function aiDo(what) {
+      if (what === 'agree') {
+        fetch('/api/me/ai-consent', { method: 'POST', credentials: 'same-origin', headers: headers() }).then(function (r) {
+          if (r.ok) { consented = true; runAi(lastAi.action, lastAi.ask); } else { showAi('지금은 동의를 저장하지 못했어요', false, false); }
+        });
+        return;
+      }
+      if (what === 'again') { runAi(lastAi.action, lastAi.ask); return; }
+      var sel = saved;
+      if (!sel || ta.value.slice(sel.start, sel.end) !== sel.text) { showAi('그 사이 글이 바뀌어서 넣지 못했어요. 다시 골라 주세요', false, false); return; }
+      backToText();
+      if (what === 'replace') {
+        apply({ from: sel.start, to: sel.end, text: aiText, selStart: sel.start, selEnd: sel.start + aiText.length });
+      } else {
+        var at = ta.value.indexOf('\n', sel.end);
+        if (at < 0) { at = ta.value.length; }
+        apply({ from: at, to: at, text: '\n\n' + aiText, selStart: at + 2, selEnd: at + 2 + aiText.length });
+      }
+    }
+
+    // 창의 버튼을 눌러도 본문의 고른 글이 풀리지 않게(입력 칸·링크는 빼고)
+    panel.addEventListener('mousedown', function (ev) {
+      if (!ev.target.closest('input, a')) { ev.preventDefault(); }
+    });
+    panel.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button');
+      if (!b || b.type === 'submit') { return; }
+      var d = b.dataset;
+      if (d.back) { if (saved) { backToText(); } showView('main'); return; }
+      if (d.view) { openView(d.view); return; }
+      if (d.key) { run(d.key); return; }
+      if (d.block) { apply(setBlock(ta.value, ta.selectionStart, ta.selectionEnd, d.block)); return; }
+      if (d.color !== undefined) { apply(setColor(ta.value, ta.selectionStart, ta.selectionEnd, d.color)); return; }
+      if (d.ai) { runAi(d.ai); return; }
+      if (d.aiDo) { aiDo(d.aiDo); }
+    });
+    panel.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape') { return; }
+      ev.preventDefault();
+      backToText();
+      showView('main');
+    });
+    panel.addEventListener('focusout', function () {
+      window.setTimeout(function () {
+        if (document.activeElement !== ta && !panel.contains(document.activeElement)) { close(); }
+      }, 0);
     });
 
     document.addEventListener('mouseup', later);
     ta.addEventListener('keyup', later);
     ta.addEventListener('select', later);
     ta.addEventListener('touchend', function () { window.setTimeout(refresh, 300); });
-    ta.addEventListener('input', function () { if (ta.selectionStart === ta.selectionEnd && linkBox.hidden) { bar.hidden = true; } });
-    ta.addEventListener('scroll', function () { if (!bar.hidden) { place(); } });
+    ta.addEventListener('input', function () { if (ta.selectionStart === ta.selectionEnd) { close(); } });
+    ta.addEventListener('scroll', function () { if (!panel.hidden) { place(); } });
     ta.addEventListener('blur', function () {
-      window.setTimeout(function () { if (linkBox.hidden && document.activeElement !== ta) { bar.hidden = true; } }, 0);
+      window.setTimeout(function () {
+        if (document.activeElement !== ta && !panel.contains(document.activeElement)) { close(); }
+      }, 0);
     });
-    window.addEventListener('resize', function () { if (!bar.hidden) { place(); } });
-    ta.addEventListener('compositionstart', function () { composing = true; bar.hidden = true; });
+    window.addEventListener('resize', function () { if (!panel.hidden) { place(); } });
+    // 고른 글이 머리말 뒤로 스크롤되면 창도 가린다(돌아오면 다시 보인다)
+    window.addEventListener('scroll', function () {
+      if (panel.hidden) { return; }
+      var header = document.querySelector('.site-header');
+      panel.style.visibility = header && panel.getBoundingClientRect().top < header.getBoundingClientRect().bottom ? 'hidden' : '';
+    }, { passive: true });
+    // 한글 조합 중인 글자를 고른 것으로 알리는 브라우저가 있어 조합 중에는 띄우지 않는다
+    ta.addEventListener('compositionstart', function () { composing = true; close(); });
     ta.addEventListener('compositionend', function () { composing = false; });
 
     // 단축키: 한글 입력 중에도 같은 자판 자리로 듣는다(ev.code)
     ta.addEventListener('keydown', function (ev) {
-      if (ev.key === 'Escape' && !bar.hidden) { bar.hidden = true; return; }
+      if (ev.key === 'Escape' && !panel.hidden) { ev.preventDefault(); if (view !== 'main') { showView('main'); } else { close(); } return; }
       if (composing || ev.isComposing || !(ev.ctrlKey || ev.metaKey) || ev.altKey || ta.selectionStart === ta.selectionEnd) { return; }
       var key = SHORTCUTS[(ev.shiftKey ? 'Shift+' : '') + ev.code];
-      if (!key) { return; }
+      if (!key || (key === 'ask' && !askInput)) { return; }
       ev.preventDefault();
+      refresh();
       run(key);
     });
   }
