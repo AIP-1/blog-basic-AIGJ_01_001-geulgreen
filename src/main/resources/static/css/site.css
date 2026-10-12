@@ -351,7 +351,7 @@ main.auth-page { max-width: 960px; }
 .auth-art { display: flex; align-items: center; justify-content: center; padding: 32px;
     background: linear-gradient(160deg, var(--color-hero-from), var(--color-hero-to)); }
 /* 로그인 그림은 왼쪽 칸을 꽉 채운다(그림 바탕색 = 칸 바탕색) */
-.auth-art { padding: 0; background: #FCF2E6; overflow: hidden; }
+.auth-art { padding: 0; background: var(--color-cat-art-bg); overflow: hidden; }
 .auth-art .cat-art { width: 100%; height: 100%; max-width: none; object-fit: contain; border-radius: 0; }
 .auth-panel { padding: 48px 44px; }
 .auth-panel h1 { margin: 0 0 4px; font-size: 1.6em; }
