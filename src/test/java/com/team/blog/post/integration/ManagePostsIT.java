@@ -46,7 +46,7 @@ class ManagePostsIT extends IntegrationTestBase {
         posts.trash(trashed);
         posts.draft(other, "남의 임시글", "", 0);
 
-        String drafts = mockMvc.perform(get("/manage/posts").with(TestAuth.member(me)))
+        String drafts = mockMvc.perform(get("/manage/posts").param("tab", "drafts").with(TestAuth.member(me)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(drafts).contains("임시글 2").contains("발행 글 2").contains("휴지통 1")
                 .contains("(제목 없음)").contains("&lt;i&gt;임시&lt;/i&gt;").contains("마지막 저장").contains("이어 쓰기")
@@ -55,6 +55,10 @@ class ManagePostsIT extends IntegrationTestBase {
 
         String published = mockMvc.perform(get("/manage/posts").param("tab", "published").with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
+        // 063: 탭 없이 열면 발행 글, 발행 글 탭이 임시글 탭보다 앞
+        String byDefault = mockMvc.perform(get("/manage/posts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        assertThat(byDefault).contains("공개 발행").doesNotContain("이어 쓰기");
+        assertThat(byDefault.indexOf(">발행 글 2<")).isLessThan(byDefault.indexOf(">임시글 2<"));
         assertThat(published).contains("공개 발행").contains("비공개 발행").contains("수정 중").contains("이어서 수정")
                 .contains("변경 취소").contains(">숨김</span>").contains("조회 1.2만").contains("수정됨")
                 .contains(">공개<").contains(">비공개<").doesNotContain("버린 글");

@@ -43,6 +43,11 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(settings).contains("id=\"theme-setting\" hidden").contains("value=\"system\"").contains("value=\"light\"")
                 .contains("value=\"dark\"").contains("/js/theme-toggle.js");
         mockMvc.perform(get("/js/theme-toggle.js")).andExpect(status().isOk());
+        // 063: 설정 섹션 메뉴, 화면 테마는 [화면] 섹션 안
+        assertThat(settings).contains("class=\"settings-nav\"").contains("href=\"#settings-display\"")
+                .contains("/js/profile/settings-sections.js");
+        assertThat(settings.indexOf("id=\"settings-display\"")).isLessThan(settings.indexOf("id=\"theme-setting\""));
+        mockMvc.perform(get("/js/profile/settings-sections.js")).andExpect(status().isOk());
     }
 
     private static void assertHead(String path, String html) {

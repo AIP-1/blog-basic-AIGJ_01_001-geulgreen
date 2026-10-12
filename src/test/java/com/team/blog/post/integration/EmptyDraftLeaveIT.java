@@ -68,12 +68,12 @@ class EmptyDraftLeaveIT extends IntegrationTestBase {
         long blank = posts.draft(me, "", "", 0);
         long titled = posts.draft(me, "쓰다 만 글", "", 0);
         // 막 만든 빈 임시글은 보인다(자동 저장이 DB에 반영되기 전일 수 있음)
-        String fresh = mockMvc.perform(get("/manage/posts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        String fresh = mockMvc.perform(get("/manage/posts").param("tab", "drafts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(fresh).contains("임시글 2").contains("(제목 없음)").contains("쓰다 만 글");
         // 2분이 지나면 빈 임시글은 목록·개수에서 빠진다
         jdbc.update("UPDATE post SET updated_at = ? WHERE id IN (?, ?)", Timestamp.from(clock.instant().minus(Duration.ofMinutes(3))),
                 blank, titled);
-        String later = mockMvc.perform(get("/manage/posts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        String later = mockMvc.perform(get("/manage/posts").param("tab", "drafts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(later).contains("임시글 1").doesNotContain("(제목 없음)").contains("쓰다 만 글");
     }
 }

@@ -9,6 +9,19 @@
     <h1>설정</h1>
     <noscript><p class="notice">이 화면은 JavaScript가 필요해요.</p></noscript>
 
+    <!-- 063 강성찬 개인 확장: 설정을 섹션으로 묶고 옆 메뉴에서 골라 봄(스크립트가 없으면 모두 펼쳐 보임) -->
+    <div class="settings-layout">
+    <nav class="settings-nav" aria-label="설정 섹션">
+        <a href="#settings-profile">프로필</a>
+        <a href="#settings-account">계정</a>
+        <a href="#settings-blog">블로그·사진</a>
+        <a href="#settings-friends">친구</a>
+        <a href="#settings-display">화면</a>
+        <a href="#settings-notifications">알림</a>
+        <a href="#settings-ai">AI</a>
+    </nav>
+    <div class="settings-panels">
+    <div class="settings-panel" id="settings-profile">
     <!-- 프로필 (11 §2) -->
     <section aria-labelledby="profile-heading">
         <h2 id="profile-heading">프로필</h2>
@@ -69,6 +82,8 @@
         </form>
     </section>
 
+    </div>
+    <div class="settings-panel" id="settings-account">
     <!-- 계정 (11 §6) -->
     <section aria-labelledby="account-heading">
         <h2 id="account-heading">계정</h2>
@@ -124,6 +139,21 @@
             <p class="form-status" id="visibility-status" aria-live="polite"></p>
         </form>
     </section>
+    <!-- 회원 탈퇴 진입점(FR-029, 처리는 023) -->
+    <section aria-labelledby="withdraw-heading">
+        <h2 id="withdraw-heading">회원 탈퇴</h2>
+        <p class="help">탈퇴하면 30일 동안 복구할 수 있고, 그 뒤 익명 처리돼요.</p>
+        <a id="withdraw-link" href="/settings/withdraw">회원 탈퇴</a>
+    </section>
+
+
+    </div>
+    <div class="settings-panel" id="settings-blog">
+    <!-- 037·041 강성찬 개인 확장 -->
+    <section aria-labelledby="blog-organize-heading">
+        <h2 id="blog-organize-heading">블로그 정리</h2>
+        <p class="help"><a href="/settings/categories">카테고리 관리</a> · 시리즈는 글 화면에서 만들고 넣어요</p>
+    </section>
 
     <!-- 008 사진 저장 공간(FR-027) -->
     <section aria-labelledby="storage-heading">
@@ -131,17 +161,14 @@
         <p id="storage-usage" class="help" aria-live="polite">불러오는 중…</p>
         <p class="help">한 사람당 1GB, 하루 200장까지 올릴 수 있어요. 지운 글의 사진은 정리 작업이 지울 때 공간이 돌아와요.</p>
     </section>
-
-    <!-- 037·041 강성찬 개인 확장 -->
-    <section aria-labelledby="blog-organize-heading">
-        <h2 id="blog-organize-heading">블로그 정리</h2>
-        <p class="help"><a href="/settings/categories">카테고리 관리</a> · 시리즈는 글 화면에서 만들고 넣어요</p>
-    </section>
-
+    </div>
+    <div class="settings-panel" id="settings-friends">
     <section aria-labelledby="friends-heading">
         <h2 id="friends-heading">친구</h2>
         <p class="help">친구 공개 글은 나와 친구만 볼 수 있어요. <a href="/settings/friends">친구·받은 요청 관리</a> · <a href="/settings/groups">친구 그룹</a></p>
     </section>
+    </div>
+    <div class="settings-panel" id="settings-display">
     <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
     <section aria-labelledby="theme-heading" id="theme-setting" hidden>
         <h2 id="theme-heading">화면 테마</h2>
@@ -153,6 +180,8 @@
         </fieldset>
         <p class="help">고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요. 로그아웃해도 그대로예요.</p>
     </section>
+    </div>
+    <div class="settings-panel" id="settings-notifications">
     <!-- 017 알림 종류 끄기(FR-031) -->
     <section aria-labelledby="notification-heading">
         <h2 id="notification-heading">알림</h2>
@@ -171,6 +200,8 @@
         </form>
     </section>
 
+    </div>
+    <div class="settings-panel" id="settings-ai">
     <!-- 021 AI 전송 동의 철회(FR-010) -->
     <section aria-labelledby="ai-heading">
         <h2 id="ai-heading">AI 태그 추천</h2>
@@ -178,13 +209,10 @@
         <button type="button" id="ai-consent-withdraw" hidden>동의 철회</button>
     </section>
 
-    <!-- 회원 탈퇴 진입점(FR-029, 처리는 023) -->
-    <section aria-labelledby="withdraw-heading">
-        <h2 id="withdraw-heading">회원 탈퇴</h2>
-        <p class="help">탈퇴하면 30일 동안 복구할 수 있고, 그 뒤 익명 처리돼요.</p>
-        <a id="withdraw-link" href="/settings/withdraw">회원 탈퇴</a>
-    </section>
 
+    </div>
+    </div>
+    </div>
     <script src="/js/auth/password-rules.js" defer></script>
     <script src="/js/profile/image-upload.js" defer></script>
     <script src="/js/profile/image-cropper.js" defer></script>
@@ -192,6 +220,7 @@
     <script src="/js/account/storage-usage.js" defer></script>
     <script src="/js/account/ai-consent.js" defer></script>
     <script src="/js/theme-toggle.js" defer></script>
+    <script src="/js/profile/settings-sections.js" defer></script>
 </main>
 </body>
 </html>

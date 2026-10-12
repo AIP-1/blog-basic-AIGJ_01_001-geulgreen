@@ -13,12 +13,12 @@
             <button type="submit">새 글</button>
         </form>
     </div>
-    <!-- 세 탭(011 FR-002·FR-006) -->
+    <!-- 세 탭(011 FR-002·FR-006). 063 강성찬 개인 확장: 발행 글이 먼저·기본 -->
     <nav class="manage-tabs" aria-label="내 글 탭">
-        <a th:href="@{/manage/posts(tab='drafts')}" th:attr="aria-current=${tab == 'drafts' ? 'page' : null}"
-           th:text="${'임시글 ' + counts.get('drafts')}">임시글 0</a>
         <a th:href="@{/manage/posts(tab='published')}" th:attr="aria-current=${tab == 'published' ? 'page' : null}"
            th:text="${'발행 글 ' + counts.get('published')}">발행 글 0</a>
+        <a th:href="@{/manage/posts(tab='drafts')}" th:attr="aria-current=${tab == 'drafts' ? 'page' : null}"
+           th:text="${'임시글 ' + counts.get('drafts')}">임시글 0</a>
         <a th:href="@{/manage/posts(tab='trash')}" th:attr="aria-current=${tab == 'trash' ? 'page' : null}"
            th:text="${'휴지통 ' + counts.get('trash')}">휴지통 0</a>
         <!-- 032 강성찬 개인 확장: 작성자 통계 -->

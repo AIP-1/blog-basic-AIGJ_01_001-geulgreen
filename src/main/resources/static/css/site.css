@@ -60,6 +60,17 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
 .settings input[type=text], .settings input[type=password], .settings textarea { width: 100%; max-width: 480px; padding: 8px; font: inherit; }
 .settings textarea { min-height: 6.5em; resize: vertical; }
 .settings .readonly { color: var(--color-text-muted); }
+/* 063 강성찬 개인 확장: 설정 섹션 메뉴(넓은 화면은 왼쪽 세로 메뉴, 좁은 화면은 위쪽 가로 줄) */
+main.settings { max-width: 960px; }
+.settings-nav { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--color-border); margin: 8px 0 16px; }
+.settings-nav a { flex: none; padding: 8px 12px; border-radius: 8px; color: var(--color-text-muted); text-decoration: none; font-weight: 600; white-space: nowrap; }
+.settings-nav a:hover { color: var(--color-text); background: var(--color-surface-muted); }
+.settings-nav a[aria-current] { color: var(--color-text); background: var(--color-brand-soft); }
+.settings-layout.is-sectioned .settings-panel > section:first-of-type { border-top: 0; }
+@media (min-width: 720px) {
+  .settings-layout { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .settings-nav { flex-direction: column; border-bottom: 0; margin: 0; position: sticky; top: 16px; }
+}
 .profile-image-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .cropper { max-width: 100%; }
 .cropper canvas { max-width: 100%; height: auto; touch-action: none; border-radius: 4px; background: var(--color-border); cursor: grab; }
