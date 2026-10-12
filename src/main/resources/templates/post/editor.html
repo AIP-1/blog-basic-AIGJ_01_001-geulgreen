@@ -97,6 +97,14 @@
             <p id="alt-summary" class="help"></p>
             <div id="alt-fields"></div>
         </div>
+        <!-- 042 강성찬 개인 확장: 예약 발행(임시글만) -->
+        <div class="field schedule-field" th:if="${scheduleEnabled and !published}" th:attr="data-post-id=${post.postId()}">
+            <label><input type="checkbox" id="schedule-on"> ⏰ 예약 발행</label>
+            <label for="schedule-at" class="visually-hidden">발행할 날짜와 시각</label>
+            <input type="datetime-local" id="schedule-at" hidden>
+            <p class="help" id="schedule-status" role="status"></p>
+            <button type="button" id="schedule-cancel" class="btn-text" hidden>예약 취소</button>
+        </div>
         <ul id="publish-errors" class="field-error" role="alert"></ul>
         <button type="button" id="publish-cancel">취소</button>
         <button type="button" id="publish-submit">발행</button>

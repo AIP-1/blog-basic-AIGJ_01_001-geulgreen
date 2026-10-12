@@ -43,6 +43,8 @@
                     <a th:href="@{/write/{id}(id=${row.id()})}" th:classappend="${#strings.isEmpty(#strings.trim(row.title())) ? 'untitled' : ''}"
                        th:text="${#strings.isEmpty(#strings.trim(row.title())) ? '(제목 없음)' : row.title()}">제목</a>
                     <span class="help" th:text="${'마지막 저장 ' + savedLabels.get(row.id())}">마지막 저장</span>
+                    <span class="badge" th:if="${scheduleLabels != null and scheduleLabels.containsKey(row.id())}"
+                          th:text="${'⏰ 예약 · ' + scheduleLabels.get(row.id())}">예약</span>
                 </th:block>
                 <!-- 발행 글 -->
                 <th:block th:if="${tab == 'published'}">

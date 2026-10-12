@@ -32,6 +32,7 @@ public class BlogPageController {
     private final com.team.blog.friend.application.FriendQuery friendQuery;
     private final com.team.blog.discovery.application.ActivityQuery activityQuery;
     private final com.team.blog.note.application.NoteService noteService;
+    private final com.team.blog.category.application.CategoryService categoryService;
 
     public BlogPageController(BlogOwnerResolver blogOwnerResolver, PostListQuery listQuery,
                               CurrentUserProvider currentUserProvider, Clock clock,
@@ -40,8 +41,10 @@ public class BlogPageController {
                               SearchController searchController,
                               com.team.blog.friend.application.FriendQuery friendQuery,
                               com.team.blog.discovery.application.ActivityQuery activityQuery,
-                              com.team.blog.note.application.NoteService noteService) {
+                              com.team.blog.note.application.NoteService noteService,
+                              com.team.blog.category.application.CategoryService categoryService) {
         this.noteService = noteService;
+        this.categoryService = categoryService;
         this.activityQuery = activityQuery;
         this.friendQuery = friendQuery;
         this.followQuery = followQuery;
@@ -59,6 +62,7 @@ public class BlogPageController {
                        @RequestParam(value = "tag", required = false) String tagRaw,
                        @RequestParam(value = "q", required = false) String q,
                        @RequestParam(value = "sort", required = false) String sort,
+                       @RequestParam(value = "category", required = false) String categoryRaw,
                        jakarta.servlet.http.HttpServletRequest request, Model model) {
         BlogOwner owner = blogOwnerResolver.resolve(handle).orElseThrow(NotFoundException::new);
         // 020 FR-017: 블로그 안 검색
@@ -94,6 +98,21 @@ public class BlogPageController {
             page = blogPage(owner.memberId(), friendViewer, tag, tagId, null);
             cursor = null;
         }
+        // 037 강성찬 개인 확장: 카테고리 목록과 필터(공개 글만, 최신 N개)
+        com.team.blog.category.application.CategoryService.Category filterCategory = null;
+        if (categoryService.enabled()) {
+            model.addAttribute("blogCategories", categoryService.list(owner.memberId()));
+            if (categoryRaw != null && categoryRaw.matches("\\d{1,18}")) {
+                filterCategory = categoryService.find(owner.memberId(), Long.parseLong(categoryRaw)).orElse(null);
+            }
+            if (filterCategory != null) {
+                java.util.List<Long> ids = categoryService.postIds(filterCategory.id());
+                java.util.Map<Long, com.team.blog.post.application.PostCard> byId = listQuery.cardsByIds(ids);
+                page = new CardPage(ids.stream().map(byId::get).filter(java.util.Objects::nonNull).toList(), null);
+                tag = null;
+            }
+        }
+        model.addAttribute("filterCategory", filterCategory);
         model.addAttribute("filterTag", tag);
         model.addAttribute("blogTags", tagListingQuery.blogTags(owner.memberId(), 50));
         model.addAttribute("owner", owner);
@@ -107,11 +126,11 @@ public class BlogPageController {
                 .filter(id -> id != owner.memberId()).map(id -> followQuery.isFollowing(id, owner.memberId())).orElse(false));
         model.addAttribute("friendStatus", friendStatus.name());
         // 031 강성찬 개인 확장: 잔디·스트릭(첫 화면에서만)
-        if (activityQuery.enabled() && (cursor == null || cursor.isEmpty()) && tag == null) {
+        if (activityQuery.enabled() && (cursor == null || cursor.isEmpty()) && tag == null && filterCategory == null) {
             model.addAttribute("grass", activityQuery.grass(owner.memberId()));
         }
         // 033 강성찬 개인 확장: 짧은 기록 최근 3개(첫 화면에서만)
-        if (noteService.enabled() && (cursor == null || cursor.isEmpty()) && tag == null) {
+        if (noteService.enabled() && (cursor == null || cursor.isEmpty()) && tag == null && filterCategory == null) {
             java.util.List<com.team.blog.note.application.NoteService.Note> recent =
                     noteService.notes(owner.memberId(), currentUserProvider.current(), null, 3);
             java.util.Map<Long, String> noteDates = new java.util.HashMap<>();

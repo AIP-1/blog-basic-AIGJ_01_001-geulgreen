@@ -25,8 +25,9 @@ public class CommentFormController {
     @PostMapping("/@{handle}/posts/{postId}/comments")
     public RedirectView create(@PathVariable("handle") String handle, @PathVariable("postId") long postId,
                                @RequestParam(value = "content", required = false) String content,
-                               @RequestParam(value = "replyToCommentId", required = false) Long replyTo) {
-        CommentView created = commentService.create(currentUserProvider.current(), postId, content, replyTo);
+                               @RequestParam(value = "replyToCommentId", required = false) Long replyTo,
+                               @RequestParam(value = "secret", required = false) String secret) {
+        CommentView created = commentService.create(currentUserProvider.current(), postId, content, replyTo, secret != null);
         RedirectView view = new RedirectView("/@" + handle + "/posts/" + postId + "?comment=" + created.id() + "#comment-" + created.id());
         view.setStatusCode(HttpStatus.SEE_OTHER);
         return view;

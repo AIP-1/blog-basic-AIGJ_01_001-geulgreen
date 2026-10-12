@@ -246,7 +246,9 @@
       conflict: function (serverContent) { autosave.enterConflict(); onConflict(serverContent); openCompare(); },
       isConflict: function () { return autosave.isConflict(); },
       openCompare: openCompare,
-      published: function () { return autosave.disable(); }
+      published: function () { return autosave.disable(); },
+      /* 042 예약 발행 전에 지금 내용을 서버에 저장 */
+      saveNow: function () { return autosave.saveNow(); }
     };
 
     // ----- 열 때 로컬 데이터 판정(FR-019) -----

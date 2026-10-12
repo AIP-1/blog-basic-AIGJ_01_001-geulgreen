@@ -39,8 +39,9 @@ public class CommentApiController {
         String content = text(body, "content");
         JsonNode reply = body == null ? null : body.get("replyToCommentId");
         Long replyTo = reply != null && reply.isIntegralNumber() ? reply.longValue() : null;
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(commentService.create(currentUserProvider.current(), postId, content, replyTo));
+        JsonNode secret = body == null ? null : body.get("secret");
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.create(currentUserProvider.current(), postId,
+                content, replyTo, secret != null && secret.isBoolean() && secret.booleanValue()));
     }
 
     @GetMapping("/api/posts/{postId}/comments")

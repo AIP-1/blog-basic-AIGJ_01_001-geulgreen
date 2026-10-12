@@ -238,8 +238,68 @@
       });
     }
 
+    /* 042 강성찬 개인 확장: 예약 발행 — 켜면 [발행] 대신 지금 내용을 저장하고 시각·공개 범위·태그를 맡긴다 */
+    var scheduleField = panel.querySelector('.schedule-field');
+    var scheduleOn = document.getElementById('schedule-on');
+    var scheduleAt = document.getElementById('schedule-at');
+    var scheduleStatus = document.getElementById('schedule-status');
+    var scheduleCancel = document.getElementById('schedule-cancel');
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    function localValue(d) {
+      return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()) + 'T' + two(d.getHours()) + ':' + two(d.getMinutes());
+    }
+    function showSchedule(sch) {
+      if (!scheduleField) { return; }
+      if (sch) {
+        scheduleStatus.textContent = '⏰ ' + new Date(sch.publishAt).toLocaleString('ko-KR') + '에 발행될 예정이에요';
+        scheduleCancel.hidden = false;
+      } else {
+        scheduleStatus.textContent = '';
+        scheduleCancel.hidden = true;
+      }
+    }
+    if (scheduleField) {
+      var schedulePostId = scheduleField.dataset.postId;
+      fetch('/api/posts/' + schedulePostId + '/schedule', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+        .then(function (r) { return r.status === 200 ? r.json() : null; })
+        .then(showSchedule, function () {});
+      scheduleOn.addEventListener('change', function () {
+        scheduleAt.hidden = !scheduleOn.checked;
+        if (scheduleOn.checked && !scheduleAt.value) { scheduleAt.value = localValue(new Date(Date.now() + 60 * 60 * 1000)); }
+        submit.textContent = scheduleOn.checked ? '예약하기' : '발행';
+      });
+      scheduleCancel.addEventListener('click', function () {
+        fetch('/api/posts/' + schedulePostId + '/schedule', { method: 'DELETE', headers: csrfHeaders('x'), credentials: 'same-origin' })
+          .then(function () { showSchedule(null); });
+      });
+    }
+    function scheduleNow() {
+      var when = scheduleAt.value ? new Date(scheduleAt.value) : null;
+      if (!when || isNaN(when.getTime())) { showErrors([{ message: '예약할 날짜와 시각을 골라 주세요' }]); return; }
+      submit.disabled = true;
+      var checked = panel.querySelector('input[name="visibility"]:checked');
+      var body = JSON.stringify({ publishAt: when.toISOString(), visibility: checked ? checked.value : 'PUBLIC', tags: tags });
+      Promise.resolve(editor.saveNow ? editor.saveNow() : null).catch(function () {}).then(function () {
+        return fetch('/api/posts/' + scheduleField.dataset.postId + '/schedule',
+          { method: 'POST', headers: csrfHeaders('x'), credentials: 'same-origin', body: body });
+      }).then(function (r) {
+        return r.json().then(function (data) { return { ok: r.ok, data: data }; });
+      }).then(function (r) {
+        submit.disabled = false;
+        if (!r.ok) { showErrors([{ message: r.data.message || '예약하지 못했어요' }]); return; }
+        showSchedule(r.data);
+        scheduleOn.checked = false;
+        scheduleAt.hidden = true;
+        submit.textContent = '발행';
+      }, function () {
+        submit.disabled = false;
+        showErrors([{ message: '연결되지 않아 예약하지 못했어요' }]);
+      });
+    }
+
     submit.addEventListener('click', function () {
       if (submit.disabled) { return; }
+      if (scheduleOn && scheduleOn.checked) { if (input.value.trim()) { addTag(); } errors.textContent = ''; scheduleNow(); return; }
       if (input.value.trim()) { addTag(); }
       submit.disabled = true;
       submit.textContent = '발행 중…';

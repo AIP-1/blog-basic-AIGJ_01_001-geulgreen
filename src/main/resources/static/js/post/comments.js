@@ -56,12 +56,14 @@
     if (c.state === 'WITHDRAWN_AUTHOR') { box.appendChild(el('p', 'comment-gone', '탈퇴한 사용자 · 탈퇴한 사용자의 댓글이에요')); return box; }
     if (c.state === 'DELETED') { box.appendChild(el('p', 'comment-gone', '삭제된 댓글이에요')); return box; }
     if (c.state === 'HIDDEN' && !c.mine) { box.appendChild(el('p', 'comment-gone', '운영 정책에 따라 숨겨진 댓글이에요')); return box; }
+    if (c.state === 'SECRET') { box.appendChild(el('p', 'comment-gone', '🔒 비밀 댓글이에요')); return box; }
     var head = el('p', 'comment-head');
     var a = el('a', 'comment-author'); a.href = '/@' + c.author.handle;
     a.appendChild(el('span', null, c.author.nickname)); a.appendChild(document.createTextNode(' '));
     a.appendChild(el('span', 'help', '@' + c.author.handle));
     head.appendChild(a);
     if (c.author.isPostAuthor) { head.appendChild(el('span', 'badge', '작성자')); }
+    if (c.secret) { head.appendChild(el('span', 'help', '🔒 비밀')); }
     var t = el('time', 'help', dateLabel(c.createdAt)); t.setAttribute('datetime', c.createdAt); head.appendChild(t);
     if (c.edited) { head.appendChild(el('span', 'help', ' · 수정됨')); }
     box.appendChild(head);
@@ -98,7 +100,8 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         var text = form.querySelector('textarea').value;
-        call('POST', '/api/posts/' + postId + '/comments', { content: text })
+        var secretBox = document.getElementById('comment-secret');
+        call('POST', '/api/posts/' + postId + '/comments', { content: text, secret: !!(secretBox && secretBox.checked) })
           .then(function (c) { reopen(c.id); })
           .catch(function (err) { var x = document.getElementById('comment-form-error'); x.textContent = err.message; x.hidden = false; });
       });

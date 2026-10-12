@@ -25,6 +25,7 @@ public class CommentQuery {
 
     private static final String SELECT = """
             SELECT c.id, c.post_id, c.parent_id, c.author_id, c.content, c.created_at, c.updated_at, c.deleted_at, c.hidden_at,
+                   c.secret, (SELECT pa.author_id FROM comment pa WHERE pa.id = c.parent_id) AS parent_author,
                    m.handle, m.nickname, m.profile_image_url, m.withdrawn_at,
                    rt.handle AS rt_handle, rt.nickname AS rt_nickname, rt.withdrawn_at AS rt_withdrawn
             FROM comment c JOIN member m ON m.id = c.author_id LEFT JOIN member rt ON rt.id = c.reply_to_member_id
@@ -42,7 +43,8 @@ public class CommentQuery {
 
     private record Row(long id, long postId, Long parentId, long authorId, String content, Instant createdAt,
                        Instant updatedAt, boolean deleted, boolean hidden, String handle, String nickname, String image,
-                       boolean authorWithdrawn, String rtHandle, String rtNickname, boolean rtWithdrawn) {
+                       boolean authorWithdrawn, String rtHandle, String rtNickname, boolean rtWithdrawn, boolean secret,
+                       Long parentAuthorId) {
     }
 
     private static Row row(ResultSet rs) throws SQLException {
@@ -50,7 +52,8 @@ public class CommentQuery {
                 rs.getString("content"), rs.getTimestamp("created_at").toInstant(), rs.getTimestamp("updated_at").toInstant(),
                 rs.getTimestamp("deleted_at") != null, rs.getTimestamp("hidden_at") != null, rs.getString("handle"),
                 rs.getString("nickname"), rs.getString("profile_image_url"), rs.getTimestamp("withdrawn_at") != null,
-                rs.getString("rt_handle"), rs.getString("rt_nickname"), rs.getTimestamp("rt_withdrawn") != null);
+                rs.getString("rt_handle"), rs.getString("rt_nickname"), rs.getTimestamp("rt_withdrawn") != null,
+                rs.getBoolean("secret"), (Long) rs.getObject("parent_author"));
     }
 
     /** 글의 댓글 첫 페이지 또는 이어 보기({@code cursor})·이전 보기({@code before})·특정 댓글부터({@code around}). */
@@ -218,6 +221,7 @@ public class CommentQuery {
             var ps = con.prepareStatement("""
                     SELECT * FROM (
                       SELECT c.id, c.post_id, c.parent_id, c.author_id, c.content, c.created_at, c.updated_at, c.deleted_at, c.hidden_at,
+                             c.secret, (SELECT pa.author_id FROM comment pa WHERE pa.id = c.parent_id) AS parent_author,
                              m.handle, m.nickname, m.profile_image_url, m.withdrawn_at,
                              rt.handle AS rt_handle, rt.nickname AS rt_nickname, rt.withdrawn_at AS rt_withdrawn,
                              row_number() OVER (PARTITION BY c.parent_id ORDER BY c.created_at, c.id) AS rn,
@@ -255,7 +259,11 @@ public class CommentQuery {
                              List<CommentView> replies, String repliesNext) {
         long me = viewer.map(CurrentUser::memberId).orElse(-1L);
         boolean mine = r.authorId() == me;
-        String state = r.authorWithdrawn() ? "WITHDRAWN_AUTHOR" : r.deleted() ? "DELETED" : r.hidden() ? "HIDDEN" : "NORMAL";
+        // 043: 비밀 댓글은 쓴 사람·글쓴이·바로 위 댓글 쓴 사람만 본다
+        boolean secretHidden = r.secret() && !mine && me != postAuthorId
+                && (r.parentAuthorId() == null || r.parentAuthorId() != me);
+        String state = r.authorWithdrawn() ? "WITHDRAWN_AUTHOR" : r.deleted() ? "DELETED" : r.hidden() ? "HIDDEN"
+                : secretHidden ? "SECRET" : "NORMAL";
         boolean showContent = "NORMAL".equals(state) || ("HIDDEN".equals(state) && mine);
         CommentView.Author author = showContent
                 ? new CommentView.Author(r.handle(), r.nickname(), r.image(), r.authorId() == postAuthorId) : null;
@@ -269,6 +277,6 @@ public class CommentQuery {
         return new CommentView(r.id(), r.parentId(), state, showContent ? r.content() : null, author, replyTo,
                 r.createdAt(), showContent && r.updatedAt().isAfter(r.createdAt()), mine,
                 normal && loggedIn, normal && mine, mine && (normal || "HIDDEN".equals(state)),
-                normal && loggedIn && !mine, replyCount, replies, repliesNext);
+                normal && loggedIn && !mine, replyCount, replies, repliesNext, r.secret());
     }
 }

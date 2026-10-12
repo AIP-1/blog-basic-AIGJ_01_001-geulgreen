@@ -87,8 +87,16 @@ public class CommentService {
                         rs.getBoolean("withdrawn")), commentId).stream().findFirst();
     }
 
-    /** 작성(FR-003 순서: 로그인 → 인증 → 요청 횟수 → 내용 → 글 → 답글 대상 → 중복). */
     public CommentView create(Optional<CurrentUser> currentUser, long postId, String rawContent, Long replyToCommentId) {
+        return create(currentUser, postId, rawContent, replyToCommentId, false);
+    }
+
+    /**
+     * 작성(FR-003 순서: 로그인 → 인증 → 요청 횟수 → 내용 → 글 → 답글 대상 → 중복).
+     * {@code secret}: 043 비밀 댓글(강성찬 개인 확장). 비밀 댓글에 단 답글도 비밀이다.
+     */
+    public CommentView create(Optional<CurrentUser> currentUser, long postId, String rawContent, Long replyToCommentId,
+                              boolean secret) {
         CurrentUser user = accountGuard.requireWritable(currentUser);
         limit("comment:create:member", user.memberId(), properties.createPerMinute());
         String content = CommentContentRules.clean(rawContent);
@@ -159,6 +167,10 @@ public class CommentService {
             throw e;
         }
         rememberDedupe(dedupeKey, created);
+        if (properties.secretEnabled()) {
+            jdbc.update("UPDATE comment c SET secret = true WHERE c.id = ? AND (? OR EXISTS (SELECT 1 FROM comment pc"
+                    + " WHERE pc.id = c.parent_id AND pc.secret))", created, secret);
+        }
         return query.single(currentUser, created);
     }
 

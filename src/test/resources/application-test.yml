@@ -35,6 +35,9 @@ blog:
   notification:
     async: false
     cleanup-enabled: false
+  # 042: 예약 발행 작업은 끄고 테스트가 직접 부른다
+  schedule:
+    job-enabled: false
 spring:
   # 테스트 컨텍스트가 여러 개(속성이 다른 시험) 떠도 PostgreSQL 연결 한도를 넘지 않게
   datasource:

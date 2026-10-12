@@ -68,10 +68,78 @@
             </div>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
+        <!-- 041 강성찬 개인 확장: 시리즈 -->
+        <section th:if="${postSeries != null}" class="series-box" aria-labelledby="series-heading">
+            <details>
+                <summary><span id="series-heading" th:text="${'📚 ' + postSeries.title()}">시리즈</span>
+                    <span class="help" th:if="${seriesIndex >= 0}" th:text="${'(' + (seriesIndex + 1) + '/' + seriesItems.size() + ')'}">(1/3)</span></summary>
+                <ol class="series-items">
+                    <li th:each="it, st : ${seriesItems}">
+                        <strong th:if="${it.id() == post.id()}" th:text="${it.title()}">지금 글</strong>
+                        <a th:unless="${it.id() == post.id()}" th:href="${it.url()}" th:text="${it.title()}">글</a>
+                    </li>
+                </ol>
+            </details>
+            <p class="series-nav">
+                <a th:if="${seriesPrev != null}" th:href="${seriesPrev.url()}" th:text="${'← 이전편: ' + seriesPrev.title()}">이전편</a>
+                <a th:if="${seriesNext != null}" th:href="${seriesNext.url()}" th:text="${'다음편: ' + seriesNext.title() + ' →'}">다음편</a>
+            </p>
+        </section>
+        <!-- 039 강성찬 개인 확장: 목차(스크립트가 소제목으로 채운다, 2개 미만이면 숨김) -->
+        <nav th:if="${tocEnabled}" id="post-toc" class="post-toc" aria-label="목차" hidden></nav>
         <div class="post-body" th:utext="${post.contentHtml()}"></div>
         <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
             <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
         </ul>
+        <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 여기서 고른다) -->
+        <p th:if="${postCategory != null and myCategories == null}" class="post-category">
+            <a class="tag" th:href="@{'/@' + ${post.author().handle()}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
+        </p>
+        <form th:if="${myCategories != null}" class="post-category-form inline-form" method="post"
+              th:action="@{/posts/{id}/category(id=${post.id()})}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="back" th:value="${post.url()}">
+            <label for="category-select">📁 카테고리</label>
+            <select id="category-select" name="categoryId">
+                <option value="">분류 없음</option>
+                <option th:each="c : ${myCategories}" th:value="${c.id()}" th:text="${c.name()}"
+                        th:selected="${postCategory != null and postCategory.id() == c.id()}">카테고리</option>
+            </select>
+            <button type="submit" class="btn btn-sm">저장</button>
+            <a class="help" href="/settings/categories">카테고리 관리</a>
+        </form>
+        <!-- 041: 글쓴이는 시리즈에 넣거나 뺀다 -->
+        <div th:if="${mySeries != null}" class="series-form">
+            <form class="inline-form" method="post" th:action="@{/posts/{id}/series(id=${post.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="back" th:value="${post.url()}">
+                <label for="series-select">📚 시리즈</label>
+                <select id="series-select" name="seriesId">
+                    <option value="new">새 시리즈 만들기</option>
+                    <option th:each="sr : ${mySeries}" th:value="${sr.id()}" th:text="${sr.title()}"
+                            th:selected="${postSeries != null and postSeries.id() == sr.id()}">시리즈</option>
+                </select>
+                <label for="series-new" class="visually-hidden">새 시리즈 이름</label>
+                <input id="series-new" name="newTitle" type="text" maxlength="60" placeholder="새 시리즈 이름">
+                <button type="submit" class="btn btn-sm">넣기</button>
+            </form>
+            <form th:if="${postSeries != null}" class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${post.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="back" th:value="${post.url()}">
+                <button type="submit" class="btn-text">시리즈에서 빼기</button>
+            </form>
+        </div>
+        <!-- 038 강성찬 개인 확장: 이전 글·다음 글, 관련 글 -->
+        <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
+            <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
+                <span class="help">이전 글</span><span th:text="${prevPost.title()}">이전 글 제목</span></a>
+            <a th:if="${nextPost != null}" class="post-nav-next" th:href="${nextPost.url()}">
+                <span class="help">다음 글</span><span th:text="${nextPost.title()}">다음 글 제목</span></a>
+        </nav>
+        <section th:if="${relatedPosts != null and !relatedPosts.isEmpty()}" class="related-posts" aria-labelledby="related-heading">
+            <h2 id="related-heading">관련 글</h2>
+            <ul><li th:each="r : ${relatedPosts}"><a th:href="${r.url()}" th:text="${r.title()}">관련 글</a></li></ul>
+        </section>
         <!-- 035 강성찬 개인 확장: AI 티저(글쓴이만) — 카드의 요약 자리에 보일 한 줄 -->
         <section th:if="${teaserBox != null}" id="teaser" class="notice teaser-box" aria-labelledby="teaser-heading">
             <h2 id="teaser-heading">카드 한 줄 소개</h2>
@@ -168,6 +236,8 @@
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <label for="comment-content" class="visually-hidden">댓글</label>
                     <textarea id="comment-content" name="content" maxlength="1000" placeholder="댓글을 남겨 보세요" required></textarea>
+                    <!-- 043 강성찬 개인 확장: 비밀 댓글 -->
+                    <label th:if="${secretCommentsEnabled}" class="secret-check"><input type="checkbox" id="comment-secret" name="secret" value="on"> 🔒 비밀 댓글 (글쓴이와 나만 보기)</label>
                     <button type="submit">댓글 쓰기</button>
                     <p class="field-error" id="comment-form-error" role="alert" hidden></p>
                 </form>
@@ -207,6 +277,7 @@
     <script src="/js/code-highlight.js" defer></script></th:block>
     <script src="/js/gif-play.js" defer></script>
     <script src="/js/post/post-detail.js" defer></script>
+    <script th:if="${tocEnabled}" src="/js/post/toc.js" defer></script>
     <script src="/js/post/comments.js" defer></script>
     <script src="/js/post/like.js" defer></script>
     <script src="/js/follow/follow.js" defer></script>
