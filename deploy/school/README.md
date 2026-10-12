@@ -5,7 +5,7 @@
 
 ## 0. 워크플로 파일 넣기
 
-배포 워크플로는 `deploy/school/github-deploy.yml`에 있다. 문서 레포(AIPKANG/docs)에서는 돌지 않게 `.github` 밖에 두었다.
+배포 워크플로는 `.github/workflows/deploy.yml`이다(`deploy/school/github-deploy.yml`은 같은 내용의 사본). 10-12 소스·문서 저장소를 나눈 뒤로 문서 저장소(AIPKANG/docs)에는 소스가 없다.
 **소스코드 레포**에 `.github/workflows/deploy.yml`로 복사해서 올린다. 개인 접근 토큰(PAT)으로 push하면 토큰에 `workflow` 권한이 있어야 한다(없으면 "without `workflow` scope"로 거절). 권한을 늘리기 어렵다면 GitHub 웹에서 Add file → Create new file로 같은 경로에 붙여 넣어도 된다.
 
 ## 1. GitHub Repository secrets (Settings → Secrets and variables → Actions)

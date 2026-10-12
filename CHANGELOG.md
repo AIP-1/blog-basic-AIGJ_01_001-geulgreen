@@ -3,7 +3,7 @@
 이 저장소는 두 단계로 나뉜다.
 
 - **v1.0.0 — 팀 공통 최소 요구사항**: 팀(강성찬·나민서·김민서)이 함께 정한 공통 기능(docs/01 Tier A·B·C)을 명세 001~024로 옮겨 모두 구현한 버전.
-- **v1.0.0 이후 — 강성찬 개인 확장**: 팀은 공통 최소 요구사항만 맞추고, 그 위에 각자 **추가만** 하기로 했다(docs/01 §2-4, 원칙 2: 개인 확장을 켜도 공통 완료 기준은 그대로 지킨다). 명세 025부터는 강성찬 개인 확장이다(1.1.0: 025~036, 1.2.0: 037~044).
+- **v1.0.0 이후 — 강성찬 개인 확장**: 팀은 공통 최소 요구사항만 맞추고, 그 위에 각자 **추가만** 하기로 했다(문서 저장소 docs/01 §2-4, 원칙 2: 개인 확장을 켜도 공통 완료 기준은 그대로 지킨다). 명세 025부터는 강성찬 개인 확장이다(1.1.0: 025~036, 1.2.0: 037~044).
 
 ---
 
@@ -11,7 +11,7 @@
 
 > chan 요청: "서식도구 누르면 바로 적용되는 걸 원해, 지금은 ** 이렇게 마크다운형식으로 보여주는데 바꿔줘"
 
-- [060](specs/060-visual-editor/spec.md) **보이는 대로 쓰기**: 글쓰기 본문이 글 화면과 같은 모양으로 보이고, 서식 창 버튼을 누르면 `**` 없이 바로 굵게·색·밑줄·제목·목록·인용·코드 블록이 된다(되돌리기 됨)
+- [060](https://github.com/AIPKANG/docs/blob/main/specs/060-visual-editor/spec.md) **보이는 대로 쓰기**: 글쓰기 본문이 글 화면과 같은 모양으로 보이고, 서식 창 버튼을 누르면 `**` 없이 바로 굵게·색·밑줄·제목·목록·인용·코드 블록이 된다(되돌리기 됨)
 - 노션식 단축 입력: 줄 처음에 `#`·`-`·`1.`·`>`·`[]`·```` ``` ```` 다음 띄어쓰기. 코드 블록 안 Enter는 줄바꿈, 빈 줄에서 한 번 더 누르면 밖으로
 - 사진은 커서 자리에 한 줄로 들어가고(올리는 중 자리표시), 붙여넣은 글은 위험한 태그를 거른 뒤 서식을 살린다. 할 일 칸은 눌러서 켜고 끈다
 - [Markdown으로 쓰기]로 예전 Markdown 칸과 오갈 수 있다(이 기기에 기억). 저장은 그대로 Markdown이라 자동 저장·발행·사진·비교 창은 그대로
@@ -24,18 +24,18 @@
 
 > chan이 보낸 노션 선택 메뉴 화면대로 1.8.0의 한 줄 도구를 세로 창으로 바꿨다.
 
-- [058](specs/058-format-toolbar/spec.md) **서식 창**: 글을 고르면 넓은 화면은 본문 오른쪽, 좁으면 글 아래에 창이 뜬다
+- [058](https://github.com/AIPKANG/docs/blob/main/specs/058-format-toolbar/spec.md) **서식 창**: 글을 고르면 넓은 화면은 본문 오른쪽, 좁으면 글 아래에 창이 뜬다
   - 맨 위 **서식 종류**(본문·제목·소제목·글머리/번호/할 일 목록·인용·코드 블록, 섞였으면 "여러 종류")를 눌러 바꾸기
   - **글자 색·배경색** 9가지(다크 모드 대응), **밑줄**, **서식 지우기** 새로 — 렌더러가 서식 창이 넣는 `<u>`·`<span class="md-…">`만 살리고 정화기가 다시 거른다(RENDER_VERSION 3, XSS 검사 4개 추가)
   - 링크를 고르면 주소를 바꾸거나 빼기, 단축키에 Ctrl/⌘+U 밑줄
-- [059](specs/059-writing-ai/spec.md) **AI로 글 다듬기**: 서식 창 아래 "✨ AI로 고치기" — 글 다듬기·맞춤법 고치기·더 짧게·더 쉽게·AI에게 부탁하기(Ctrl/⌘+J). 결과는 [바꾸기]·[아래에 넣기]를 눌러야 들어가고 되돌릴 수 있다. 021과 같은 동의·전체 공개 글만·하루 30번. Gemini 키가 있을 때만 보인다
+- [059](https://github.com/AIPKANG/docs/blob/main/specs/059-writing-ai/spec.md) **AI로 글 다듬기**: 서식 창 아래 "✨ AI로 고치기" — 글 다듬기·맞춤법 고치기·더 짧게·더 쉽게·AI에게 부탁하기(Ctrl/⌘+J). 결과는 [바꾸기]·[아래에 넣기]를 눌러야 들어가고 되돌릴 수 있다. 021과 같은 동의·전체 공개 글만·하루 30번. Gemini 키가 있을 때만 보인다
 - 테스트 653개 통과, 서식 규칙 자체 검사 14개
 
 ---
 
 ## [1.8.0] — 2026-10-12 · 강성찬 개인 확장 (글쓰기 서식 도구)
 
-- [058](specs/058-format-toolbar/spec.md) **글쓰기 서식 도구**: 노션처럼 본문에서 글을 드래그하면 바로 위에 도구가 뜬다 — 굵게·기울임·취소선·코드·링크 | 제목·소제목·인용·글머리/번호/할 일 목록·코드 블록
+- [058](https://github.com/AIPKANG/docs/blob/main/specs/058-format-toolbar/spec.md) **글쓰기 서식 도구**: 노션처럼 본문에서 글을 드래그하면 바로 위에 도구가 뜬다 — 굵게·기울임·취소선·코드·링크 | 제목·소제목·인용·글머리/번호/할 일 목록·코드 블록
 - 다시 누르면 서식을 벗기고(버튼이 눌린 모양으로 보임), Ctrl/⌘+Z로 되돌릴 수 있음. 저장은 그대로 Markdown(자동 저장·미리보기 그대로)
 - 단축키 Ctrl/⌘ + B·I·K·E, Shift+X(한글 입력 중에도 같은 자리 키)
 - 목록 여러 줄을 굵게 하면 줄마다 따로, 목록 표시는 밖에. 링크는 주소만 적으면 https:// 붙여 줌
@@ -48,7 +48,7 @@
 
 > 034 "같은 주제로 쓰기·릴레이"를 chan 요청으로 바꿨다. V14(테이블 2개, 알림 종류 하나).
 
-- [057](specs/057-daily-mission/spec.md) **오늘의 미션**: 매일 주제 3개(0시 1분 AI가 만들고, 없으면 내장 주제 120개에서) → [이 주제로 쓰기]로 글쓰기 창(제목에 주제, 위에 안내) → 그날 안에 발행하면 완료
+- [057](https://github.com/AIPKANG/docs/blob/main/specs/057-daily-mission/spec.md) **오늘의 미션**: 매일 주제 3개(0시 1분 AI가 만들고, 없으면 내장 주제 120개에서) → [이 주제로 쓰기]로 글쓰기 창(제목에 주제, 위에 안내) → 그날 안에 발행하면 완료
 - 미션 화면: 내 기록(지금까지 N번·연속·최고 연속, 배지는 아직 없음), 친구들의 오늘 글·모두의 오늘 글(댓글 달기), 지난 7일
 - 친구가 미션 글(전체·친구 공개)을 올리면 알림 "○○님이 오늘의 미션 글을 올렸어요"(새 글 알림과 겹치지 않음)
 - 글 화면에 "🗓 오늘의 미션 · 주제", 글쓴이에게 완료·연속 일수
@@ -60,7 +60,7 @@
 
 ## [1.6.0] — 2026-10-12 · 강성찬 개인 확장 (태그 화면)
 
-- [056](specs/056-tag-icons/spec.md) **태그 화면 리뉴얼**: 고양이 배너, 인기 태그(전체 N개, 글 많은 순·많이 본 순·이름 순), 아이콘 알약
+- [056](https://github.com/AIPKANG/docs/blob/main/specs/056-tag-icons/spec.md) **태그 화면 리뉴얼**: 고양이 배너, 인기 태그(전체 N개, 글 많은 순·많이 본 순·이름 순), 아이콘 알약
 - **태그 아이콘**: 아이콘 41개를 그려 두고 태그마다 내장 규칙으로 바로 정함. Gemini 키가 있으면 AI가 30분마다 다시 골라 다듬음. V13
 - 꼬리말 아래 작은 정원 장식, 홈 오른쪽 인기 태그도 아이콘 알약
 - 테스트 645개 통과
@@ -69,7 +69,7 @@
 
 ## [1.5.0] — 2026-10-12 · 강성찬 개인 확장 (카드 대표 사진)
 
-- [055](specs/055-card-cover/spec.md) **카드 대표 사진**: 글쓰기 발행 설정에서 자동(본문 첫 사진) / 본문 사진 고르기 / 새 사진 올리기. 목록 카드·검색·공유 미리보기에 쓰인다. V12(테이블 1개)
+- [055](https://github.com/AIPKANG/docs/blob/main/specs/055-card-cover/spec.md) **카드 대표 사진**: 글쓰기 발행 설정에서 자동(본문 첫 사진) / 본문 사진 고르기 / 새 사진 올리기. 목록 카드·검색·공유 미리보기에 쓰인다. V12(테이블 1개)
 - 홈 가로 카드: 사진 칸 폭과 아래 줄 정리
 - 테스트 642개 통과
 
@@ -89,10 +89,10 @@
 
 | 명세 | 기능 |
 |---|---|
-| [051](specs/051-blog-visitors/spec.md) | **방문자 수** — 블로그 머리에 오늘·전체 |
-| [052](specs/052-read-progress/spec.md) | **읽기 진행 막대** — 스크롤하면 얼마나 읽었는지 맨 위 막대로 |
-| [053](specs/053-share/spec.md) | **공유하기** — 링크 복사·X·페이스북·다른 앱(카카오톡 등) |
-| [054](specs/054-pin-post/spec.md) | **글 고정** — 블로그 맨 위 📌 고정 글 |
+| [051](https://github.com/AIPKANG/docs/blob/main/specs/051-blog-visitors/spec.md) | **방문자 수** — 블로그 머리에 오늘·전체 |
+| [052](https://github.com/AIPKANG/docs/blob/main/specs/052-read-progress/spec.md) | **읽기 진행 막대** — 스크롤하면 얼마나 읽었는지 맨 위 막대로 |
+| [053](https://github.com/AIPKANG/docs/blob/main/specs/053-share/spec.md) | **공유하기** — 링크 복사·X·페이스북·다른 앱(카카오톡 등) |
+| [054](https://github.com/AIPKANG/docs/blob/main/specs/054-pin-post/spec.md) | **글 고정** — 블로그 맨 위 📌 고정 글 |
 
 ---
 
@@ -102,12 +102,12 @@
 
 | 명세 | 기능 |
 |---|---|
-| [045](specs/045-admin-dashboard/spec.md) | **대시보드** `/admin` — 전체·오늘 숫자, 처리할 신고, 최근 7일 그래프 |
-| [046](specs/046-admin-members/spec.md) | **회원 관리 강화** — 이메일 검색, 이메일·가입일·글 수 |
-| [047](specs/047-admin-content/spec.md) | **글·댓글 관리** — 찾기, 신고 없이 숨기기·해제 |
-| [048](specs/048-admin-guestbook/spec.md) | **방명록 관리** — 전체 방명록 보기·지우기 |
-| [049](specs/049-site-notice/spec.md) | **사이트 공지** — 모든 화면 위 띠 |
-| [050](specs/050-admin-log/spec.md) | **관리 기록·관리자 지정** — 누가 언제 무엇을, `ADMIN_EMAILS`로 첫 관리자 |
+| [045](https://github.com/AIPKANG/docs/blob/main/specs/045-admin-dashboard/spec.md) | **대시보드** `/admin` — 전체·오늘 숫자, 처리할 신고, 최근 7일 그래프 |
+| [046](https://github.com/AIPKANG/docs/blob/main/specs/046-admin-members/spec.md) | **회원 관리 강화** — 이메일 검색, 이메일·가입일·글 수 |
+| [047](https://github.com/AIPKANG/docs/blob/main/specs/047-admin-content/spec.md) | **글·댓글 관리** — 찾기, 신고 없이 숨기기·해제 |
+| [048](https://github.com/AIPKANG/docs/blob/main/specs/048-admin-guestbook/spec.md) | **방명록 관리** — 전체 방명록 보기·지우기 |
+| [049](https://github.com/AIPKANG/docs/blob/main/specs/049-site-notice/spec.md) | **사이트 공지** — 모든 화면 위 띠 |
+| [050](https://github.com/AIPKANG/docs/blob/main/specs/050-admin-log/spec.md) | **관리 기록·관리자 지정** — 누가 언제 무엇을, `ADMIN_EMAILS`로 첫 관리자 |
 
 ---
 
@@ -118,14 +118,14 @@
 
 | 명세 | 기능 | 상태 |
 |---|---|---|
-| [037](specs/037-categories/spec.md) | **카테고리** — 설정에서 만들고·순서·이름 바꾸기, 글마다 하나, 블로그에서 카테고리별 보기 | **구현 완료** |
-| [038](specs/038-post-navigation/spec.md) | **이전 글·다음 글 + 관련 글** — 같은 블로그 앞뒤 글, 태그가 겹치는 글 3개 | **구현 완료** |
-| [039](specs/039-toc/spec.md) | **목차 자동 생성** — 소제목 2개 이상이면 글 위(넓은 화면은 오른쪽)에 목차 | **구현 완료** |
-| [040](specs/040-guestbook/spec.md) | **방명록** — 300자 인사, 비밀글, 쓴 사람·주인이 지우기 | **구현 완료** |
-| [041](specs/041-series/spec.md) | **시리즈** — 글 묶기, (n/전체)·이전편·다음편, 시리즈 목록 | **구현 완료** |
-| [042](specs/042-scheduled-publish/spec.md) | **예약 발행** — 날짜·시각을 정하면 그때 발행, 내 글 관리에 "⏰ 예약" | **구현 완료** |
-| [043](specs/043-secret-comments/spec.md) | **비밀 댓글** — 글쓴이와 쓴 사람(답글은 위 댓글 쓴 사람도)만 보기 | **구현 완료** |
-| [044](specs/044-rss/spec.md) | **RSS 구독** — 전체·블로그별 공개 글 최신 20개 | **구현 완료** |
+| [037](https://github.com/AIPKANG/docs/blob/main/specs/037-categories/spec.md) | **카테고리** — 설정에서 만들고·순서·이름 바꾸기, 글마다 하나, 블로그에서 카테고리별 보기 | **구현 완료** |
+| [038](https://github.com/AIPKANG/docs/blob/main/specs/038-post-navigation/spec.md) | **이전 글·다음 글 + 관련 글** — 같은 블로그 앞뒤 글, 태그가 겹치는 글 3개 | **구현 완료** |
+| [039](https://github.com/AIPKANG/docs/blob/main/specs/039-toc/spec.md) | **목차 자동 생성** — 소제목 2개 이상이면 글 위(넓은 화면은 오른쪽)에 목차 | **구현 완료** |
+| [040](https://github.com/AIPKANG/docs/blob/main/specs/040-guestbook/spec.md) | **방명록** — 300자 인사, 비밀글, 쓴 사람·주인이 지우기 | **구현 완료** |
+| [041](https://github.com/AIPKANG/docs/blob/main/specs/041-series/spec.md) | **시리즈** — 글 묶기, (n/전체)·이전편·다음편, 시리즈 목록 | **구현 완료** |
+| [042](https://github.com/AIPKANG/docs/blob/main/specs/042-scheduled-publish/spec.md) | **예약 발행** — 날짜·시각을 정하면 그때 발행, 내 글 관리에 "⏰ 예약" | **구현 완료** |
+| [043](https://github.com/AIPKANG/docs/blob/main/specs/043-secret-comments/spec.md) | **비밀 댓글** — 글쓴이와 쓴 사람(답글은 위 댓글 쓴 사람도)만 보기 | **구현 완료** |
+| [044](https://github.com/AIPKANG/docs/blob/main/specs/044-rss/spec.md) | **RSS 구독** — 전체·블로그별 공개 글 최신 20개 | **구현 완료** |
 
 ### 그 밖에 (10-10~10-12)
 
@@ -142,22 +142,22 @@
 
 > 여기부터는 **강성찬 개인 확장**이다. 팀 공통 범위가 아니며, 공통 완료 기준(001~024)은 그대로 통과한다. 통합 테스트 628개 통과.
 > 확장마다 끄는 설정이 있다(README "강성찬 개인 확장" 표). DB는 V2~V8 마이그레이션으로 테이블만 더하고 공통 테이블은 CHECK 교체만 했다.
-> 후보 전체와 순서: [`specs/personal-extensions.md`](specs/personal-extensions.md)
+> 후보 전체와 순서: [`specs/personal-extensions.md`](https://github.com/AIPKANG/docs/blob/main/specs/personal-extensions.md)
 
 | 명세 | 기능 | 상태 |
 |---|---|---|
-| [025](specs/025-friends-visibility/spec.md) | **친구 공개** — 친구 요청·수락·거절(상대에게 드러나지 않음), 친구만 보는 글, 친구가 보는 블로그 목록, 끊으면 즉시 404, 탈퇴 정리 | **구현 완료** |
-| [026](specs/026-public-switch/spec.md) | **공개 전환** — 공개 범위를 넓힐 때 확인 창, 처음 공개되면 홈 맨 위, 친구에게 첫 공개 응원 알림 | **구현 완료** |
-| [027](specs/027-view-dedupe-30m/spec.md) | **조회수 30분 5회** — 같은 사람·같은 글을 30분에 5번까지 센다(공통은 24시간 1회) | **구현 완료** |
-| [028](specs/028-reply-depth/spec.md) | **답글 무제한 깊이** — 답글에 답글, 3단계까지 펼치고 더 깊으면 "답글 N개 더보기" | **구현 완료** |
-| [029](specs/029-link-visibility/spec.md) | **링크 공개** — 주소(열쇠)를 아는 사람만 읽기, 목록·검색 노출 없음, 새 링크로 예전 주소 막기 | **구현 완료** |
-| [030](specs/030-group-visibility/spec.md) | **그룹 공개** — 친구를 그룹으로 묶고, 고른 그룹에만 보이는 글 | **구현 완료** |
-| [031](specs/031-activity-streak/spec.md) | **잔디·스트릭** — 블로그에 최근 1년 기록 칸, 연속 기록 일수(공개 활동만) | **구현 완료** |
-| [032](specs/032-author-stats/spec.md) | **작성자 통계** — 합계, 최근 30일 조회 그래프, 많이 읽힌 글 5개(본인만) | **구현 완료** |
-| [033](specs/033-short-notes/spec.md) | **짧은 기록** — 280자 한 줄 기록(전체·친구·나만), 블로그에 최근 3개, 모아 보기 | **구현 완료** |
-| [034](specs/034-missions/spec.md) | **같은 주제로 쓰기·릴레이** — 미션 열기, 내 공개 글로 참여, 참여 순서대로 릴레이 | **구현 완료** |
-| [035](specs/035-ai-teaser/spec.md) | **AI 티저** — AI 제안 또는 직접 쓴 한 줄 소개를 카드 요약 자리에 | **구현 완료** |
-| [036](specs/036-home-newcomers/spec.md) | **홈 "새로 온 작가"** — 최근 2주 첫 글을 올린 사람과 그 첫 글 | **구현 완료** |
+| [025](https://github.com/AIPKANG/docs/blob/main/specs/025-friends-visibility/spec.md) | **친구 공개** — 친구 요청·수락·거절(상대에게 드러나지 않음), 친구만 보는 글, 친구가 보는 블로그 목록, 끊으면 즉시 404, 탈퇴 정리 | **구현 완료** |
+| [026](https://github.com/AIPKANG/docs/blob/main/specs/026-public-switch/spec.md) | **공개 전환** — 공개 범위를 넓힐 때 확인 창, 처음 공개되면 홈 맨 위, 친구에게 첫 공개 응원 알림 | **구현 완료** |
+| [027](https://github.com/AIPKANG/docs/blob/main/specs/027-view-dedupe-30m/spec.md) | **조회수 30분 5회** — 같은 사람·같은 글을 30분에 5번까지 센다(공통은 24시간 1회) | **구현 완료** |
+| [028](https://github.com/AIPKANG/docs/blob/main/specs/028-reply-depth/spec.md) | **답글 무제한 깊이** — 답글에 답글, 3단계까지 펼치고 더 깊으면 "답글 N개 더보기" | **구현 완료** |
+| [029](https://github.com/AIPKANG/docs/blob/main/specs/029-link-visibility/spec.md) | **링크 공개** — 주소(열쇠)를 아는 사람만 읽기, 목록·검색 노출 없음, 새 링크로 예전 주소 막기 | **구현 완료** |
+| [030](https://github.com/AIPKANG/docs/blob/main/specs/030-group-visibility/spec.md) | **그룹 공개** — 친구를 그룹으로 묶고, 고른 그룹에만 보이는 글 | **구현 완료** |
+| [031](https://github.com/AIPKANG/docs/blob/main/specs/031-activity-streak/spec.md) | **잔디·스트릭** — 블로그에 최근 1년 기록 칸, 연속 기록 일수(공개 활동만) | **구현 완료** |
+| [032](https://github.com/AIPKANG/docs/blob/main/specs/032-author-stats/spec.md) | **작성자 통계** — 합계, 최근 30일 조회 그래프, 많이 읽힌 글 5개(본인만) | **구현 완료** |
+| [033](https://github.com/AIPKANG/docs/blob/main/specs/033-short-notes/spec.md) | **짧은 기록** — 280자 한 줄 기록(전체·친구·나만), 블로그에 최근 3개, 모아 보기 | **구현 완료** |
+| [034](https://github.com/AIPKANG/docs/blob/main/specs/034-missions/spec.md) | **같은 주제로 쓰기·릴레이** — 미션 열기, 내 공개 글로 참여, 참여 순서대로 릴레이 | **구현 완료** |
+| [035](https://github.com/AIPKANG/docs/blob/main/specs/035-ai-teaser/spec.md) | **AI 티저** — AI 제안 또는 직접 쓴 한 줄 소개를 카드 요약 자리에 | **구현 완료** |
+| [036](https://github.com/AIPKANG/docs/blob/main/specs/036-home-newcomers/spec.md) | **홈 "새로 온 작가"** — 최근 2주 첫 글을 올린 사람과 그 첫 글 | **구현 완료** |
 
 ### 공통 쪽 고친 것(1.0.0 알려진 문제)
 

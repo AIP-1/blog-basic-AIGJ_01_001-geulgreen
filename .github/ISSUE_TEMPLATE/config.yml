@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 설계 문서·기능 명세(문서 저장소)
+    url: https://github.com/AIPKANG/docs
+    about: 명세를 고치거나 문서끼리 다른 곳은 문서 저장소에 알려 주세요

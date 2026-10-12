@@ -5,7 +5,7 @@
 비밀값은 이미지·저장소에 넣지 않고 `.env`(또는 서버 환경 변수)로만 준다.
 
 ## 1. 준비
-1. `.env.example`을 `.env`로 복사해 값을 채운다. 키 만드는 법은 `specs/001-auth/secrets-setup.md`.
+1. `.env.example`을 `.env`로 복사해 값을 채운다. 키 만드는 법은 문서 저장소의 [specs/001-auth/secrets-setup.md](https://github.com/AIPKANG/docs/blob/main/specs/001-auth/secrets-setup.md).
    - `STORAGE_LOCAL_SECRET`: 사진 업로드 주소 서명 키. `openssl rand -hex 32`로 만든 값. 바꾸면 진행 중인 업로드만 실패한다.
 2. 운영 주소가 정해지면 `APP_BASE_URL=https://도메인`, `SITE_DOMAIN=도메인`으로 바꾸고, Google·GitHub OAuth 앱에 콜백 `https://도메인/login/oauth2/code/google|github`를 추가한다.
 3. Redis는 AOF `everysec`, `maxmemory-policy noeviction`이어야 한다(자동 저장 버퍼). compose의 Redis는 이미 그렇게 뜬다.

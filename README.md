@@ -1,8 +1,10 @@
-# 팀 블로그 플랫폼
+# 팀 블로그 플랫폼 — 소스 저장소
 
-여러 사람이 각자 블로그를 갖고 글을 쓰는 서비스입니다(티스토리·벨로그 같은 형태).
-기능은 [GitHub Spec Kit](https://github.com/github/spec-kit)으로 명세(`specs/`)를 먼저 쓰고 그대로 구현했으며, 명세 001~024(팀 공통 최소 요구사항, v1.0.0)가 모두 구현돼 있습니다.
+여러 사람이 각자 블로그를 갖고 글을 쓰는 서비스입니다(티스토리·벨로그 같은 형태). 운영 사이트: https://geulgreen.java21.net
+기능은 [GitHub Spec Kit](https://github.com/github/spec-kit)으로 명세를 먼저 쓰고 그대로 구현했으며, 명세 001~024(팀 공통 최소 요구사항, v1.0.0)가 모두 구현돼 있습니다.
 **명세 025부터는 강성찬 개인 확장**입니다(팀은 공통만 맞추고 각자 추가만 하기로 함). 변경 내역은 [`CHANGELOG.md`](CHANGELOG.md).
+
+> 이 저장소는 **소스 코드·빌드·배포**만 담습니다. 설계 문서(`docs/`)와 기능 명세(`specs/`)는 문서 저장소 **[AIPKANG/docs](https://github.com/AIPKANG/docs)** 에 있습니다.
 
 ## 할 수 있는 것
 
@@ -18,7 +20,7 @@
 
 ### 강성찬 개인 확장 (명세 025~060)
 
-팀은 공통만 맞추고 각자 **추가만** 하기로 했다(docs/01 §2-4). 아래는 강성찬 개인 확장이며 공통 완료 기준은 그대로 통과한다.
+팀은 공통만 맞추고 각자 **추가만** 하기로 했다(문서 저장소 [docs/01 §2-4](https://github.com/AIPKANG/docs/blob/main/docs/01-common-requirements.md)). 아래는 강성찬 개인 확장이며 공통 완료 기준은 그대로 통과한다.
 
 | 명세 | 기능 | 끄는 설정 |
 |---|---|---|
@@ -88,7 +90,7 @@ docker compose up -d        # PostgreSQL·Redis·Mailpit·사진 저장소(MinIO
 
 - 가입 인증 메일은 Mailpit(http://localhost:8025)에서 봅니다.
 - 기본 포트(5432·6379·1025·8025·9000)가 겹치면 `DB_PORT`·`REDIS_PORT`·`MAIL_PORT`·`MAILPIT_WEB_PORT`·`STORAGE_PORT`로 바꾸고 앱에도 같은 값을 줍니다.
-- 소셜 로그인·Gmail·Gemini 키는 `.env`(git에 올리지 않음)에 넣습니다. 만드는 법은 `specs/001-auth/secrets-setup.md`.
+- 소셜 로그인·Gmail·Gemini 키는 `.env`(git에 올리지 않음)에 넣습니다. 만드는 법은 문서 저장소의 [specs/001-auth/secrets-setup.md](https://github.com/AIPKANG/docs/blob/main/specs/001-auth/secrets-setup.md).
 - 관리자 화면을 보려면 DB에서 `UPDATE member SET role = 'ADMIN' WHERE handle = '내주소';` 후 머리말 [관리].
 
 ## 테스트
@@ -109,16 +111,16 @@ node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(
 
 | 경로 | 내용 |
 |---|---|
-| `docs/` | 팀이 쓴 원본 설계 문서(요구사항·아키텍처·ERD·기능별 설계). 결정 근거의 원문 |
-| `.specify/memory/constitution.md` | 프로젝트 헌법(원칙) |
-| `specs/README.md` | 문서 간 차이와 팀 결정 기록 |
-| `specs/NNN-기능/` | 기능별 `spec.md`(명세) → `plan.md`·`research.md`(설계·결정) → `tasks.md`(작업, 모두 완료) |
+| [AIPKANG/docs](https://github.com/AIPKANG/docs) | 문서 저장소: 팀 원본 설계 문서(`docs/`), 기능별 명세(`specs/NNN-기능/` spec·plan·tasks), 팀 결정 기록(`specs/README.md`), 프로젝트 헌법 |
+| [`CHANGELOG.md`](CHANGELOG.md) | 릴리스별 변경 내역(개인 확장은 "강성찬 개인 확장"으로 표시) |
 | `src/main/resources/db/migration/` | 실제 DB 스키마: V1 공통(테이블 20개), V2~V14 강성찬 개인 확장(테이블 22개 추가, 공통 테이블은 CHECK 교체와 `comment.secret` 칸 추가만) |
 | `db/demo/` | 앱에 바로 넣는 한국어 데모 데이터(PostgreSQL)와 데모 계정 |
 | `db/mysql/` | 같은 스키마의 MySQL 사본과 데모 데이터(ERD 도구용) |
+| `deploy/school/` | 학교 공용 서버 배포(GitHub Actions → SSH), Secrets 목록 |
 | Crowfoot ERD | https://crowfoot.java21.net/workspaces/62/models/672 (테이블 20개·관계 41개, 명세 001~024와 연결) |
 
 ## 작업 방식
 
 기능마다 Spec Kit 순서로 진행합니다: `/speckit-specify` 명세 → `/speckit-clarify`(선택) → `/speckit-plan` 계획 → `/speckit-tasks` 작업 → `/speckit-implement` 구현.
-새 기능도 같은 순서로 `specs/025-…`부터 이어 갑니다.
+명세·계획은 문서 저장소([AIPKANG/docs](https://github.com/AIPKANG/docs))에, 구현은 이 저장소에 올립니다. `main`에 올리면 테스트 후 학교 서버로 자동 배포됩니다(`.github/workflows/deploy.yml`).
+PR·이슈는 `.github`의 템플릿을 따릅니다.
