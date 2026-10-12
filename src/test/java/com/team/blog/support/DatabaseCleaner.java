@@ -24,7 +24,9 @@ public class DatabaseCleaner {
             // 강성찬 개인 확장(051·054)
             "blog_visit_daily", "post_pin",
             // 강성찬 개인 확장(055)
-            "post_cover");
+            "post_cover",
+            // 강성찬 개인 확장(056)
+            "tag_icon");
 
     private final JdbcTemplate jdbc;
     private final StringRedisTemplate redis;

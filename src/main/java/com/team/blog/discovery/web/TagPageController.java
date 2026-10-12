@@ -31,9 +31,14 @@ public class TagPageController {
     private final PostListQuery listQuery;
     private final CurrentUserProvider currentUserProvider;
     private final Clock clock;
+    private final com.team.blog.discovery.application.TagBrowseQuery browseQuery;
+    private final com.team.blog.tag.application.icon.TagIconService tagIcons;
 
     public TagPageController(TagListingQuery tagQuery, PostListQuery listQuery, CurrentUserProvider currentUserProvider,
-                             Clock clock) {
+                             Clock clock, com.team.blog.discovery.application.TagBrowseQuery browseQuery,
+                             com.team.blog.tag.application.icon.TagIconService tagIcons) {
+        this.browseQuery = browseQuery;
+        this.tagIcons = tagIcons;
         this.tagQuery = tagQuery;
         this.listQuery = listQuery;
         this.currentUserProvider = currentUserProvider;
@@ -69,9 +74,19 @@ public class TagPageController {
         return "tag/tag";
     }
 
+    /** 태그 모아 보기. 056 강성찬 개인 확장: 정렬(글 많은 순·많이 본 순·이름 순), 전체 수, 태그 아이콘. */
     @GetMapping("/tags")
-    public String tags(Model model) {
-        model.addAttribute("tags", tagQuery.top(100));
+    public String tags(@RequestParam(value = "sort", required = false) String sort, Model model) {
+        String s = "views".equals(sort) || "name".equals(sort) ? sort : "posts";
+        List<TagListingQuery.TagCount> tags = switch (s) {
+            case "views" -> browseQuery.byViews(100);
+            case "name" -> tagQuery.top(100).stream().sorted(java.util.Comparator.comparing(TagListingQuery.TagCount::name)).toList();
+            default -> tagQuery.top(100);
+        };
+        model.addAttribute("tags", tags);
+        model.addAttribute("sort", s);
+        model.addAttribute("tagTotal", browseQuery.total());
+        model.addAttribute("tagStyles", tagIcons.styles(tags.stream().map(TagListingQuery.TagCount::name).toList()));
         return "tag/tags";
     }
 

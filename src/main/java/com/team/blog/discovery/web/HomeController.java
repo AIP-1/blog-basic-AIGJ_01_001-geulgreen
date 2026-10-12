@@ -29,10 +29,13 @@ public class HomeController {
     private final Clock clock;
     private final com.team.blog.discovery.application.NewcomerQuery newcomerQuery;
     private final com.team.blog.post.application.TagListingQuery tagListingQuery;
+    private final com.team.blog.tag.application.icon.TagIconService tagIcons;
 
     public HomeController(PostListQuery listQuery, TrendingService trendingService, Clock clock,
                           com.team.blog.discovery.application.NewcomerQuery newcomerQuery,
-                          com.team.blog.post.application.TagListingQuery tagListingQuery) {
+                          com.team.blog.post.application.TagListingQuery tagListingQuery,
+                          com.team.blog.tag.application.icon.TagIconService tagIcons) {
+        this.tagIcons = tagIcons;
         this.tagListingQuery = tagListingQuery;
         this.newcomerQuery = newcomerQuery;
         this.listQuery = listQuery;
@@ -62,7 +65,9 @@ public class HomeController {
         model.addAttribute("moreLinkBase", trending ? "?tab=trending&cursor=" : "?cursor=");
         model.addAttribute("heroPhoto", HERO_PHOTO);
         // 홈 리뉴얼(강성찬 개인 확장): 오른쪽 인기 태그와 목록 위 태그 탭
-        model.addAttribute("popularTags", tagListingQuery.top(8));
+        java.util.List<com.team.blog.post.application.TagListingQuery.TagCount> popular = tagListingQuery.top(8);
+        model.addAttribute("popularTags", popular);
+        model.addAttribute("tagStyles", tagIcons.styles(popular.stream().map(com.team.blog.post.application.TagListingQuery.TagCount::name).toList()));
         // 036 강성찬 개인 확장: 새로 온 작가(최신 탭 첫 화면)
         if (newcomerQuery.enabled() && !trending && (cursor == null || cursor.isEmpty())) {
             model.addAttribute("newcomers", newcomerQuery.recent());

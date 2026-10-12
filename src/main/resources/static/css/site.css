@@ -671,3 +671,70 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .cover-choice img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cover-choice.selected { border-color: var(--color-brand); box-shadow: 0 0 0 2px var(--color-brand); }
 .cover-choice:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* 056 태그 화면·태그 알약(강성찬 개인 확장, 10-12 시안) */
+.tone-green { --tone-bg: var(--tone-green-bg); --tone-fg: var(--tone-green-fg); }
+.tone-pink { --tone-bg: var(--tone-pink-bg); --tone-fg: var(--tone-pink-fg); }
+.tone-sand { --tone-bg: var(--tone-sand-bg); --tone-fg: var(--tone-sand-fg); }
+.tone-blue { --tone-bg: var(--tone-blue-bg); --tone-fg: var(--tone-blue-fg); }
+.tone-indigo { --tone-bg: var(--tone-indigo-bg); --tone-fg: var(--tone-indigo-fg); }
+.tone-orange { --tone-bg: var(--tone-orange-bg); --tone-fg: var(--tone-orange-fg); }
+.tone-yellow { --tone-bg: var(--tone-yellow-bg); --tone-fg: var(--tone-yellow-fg); }
+.tone-purple { --tone-bg: var(--tone-purple-bg); --tone-fg: var(--tone-purple-fg); }
+.tone-teal { --tone-bg: var(--tone-teal-bg); --tone-fg: var(--tone-teal-fg); }
+.tone-gray { --tone-bg: var(--tone-gray-bg); --tone-fg: var(--tone-gray-fg); }
+.tag-pills { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px 16px; }
+.tag-pill { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 999px; background: var(--tone-bg);
+    color: var(--color-text); text-decoration: none; border: 1px solid transparent; transition: transform .12s ease, box-shadow .12s ease; }
+.tag-pill:hover { transform: translateY(-1px); box-shadow: 0 6px 16px var(--color-shadow); }
+.tag-pill:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.tag-pill .tag-ic { color: var(--tone-fg); flex: none; }
+.tag-pill-name { font-weight: 600; }
+.tag-pill-count { color: var(--color-text-muted); font-size: .88em; margin-left: 6px; }
+.tag-pill-arrow { color: var(--color-text-muted); }
+.tags-hero { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; overflow: hidden; border-radius: 22px;
+    background: linear-gradient(120deg, var(--color-hero-from), var(--color-hero-to)); margin: 8px 0 28px; min-height: 200px; }
+@media (min-width: 760px) { .tags-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.tags-hero-text { padding: 36px 44px; }
+.tags-hero h1 { margin: 0 0 14px; font-family: Gaegu, "Pretendard Variable", cursive; font-size: 2.6em; display: flex; align-items: center; gap: 10px; }
+.tags-hero h1 .icon-paw { color: var(--color-accent); width: 1em; height: 1em; }
+.tags-hero-paw .icon-paw { width: .55em; height: .55em; }
+.tags-hero p { margin: 0; color: var(--color-text-muted); font-size: 1.05em; line-height: 1.7; }
+.tags-hero-art { display: block; justify-self: end; width: auto; max-width: calc(100% - 40px); height: 220px; object-fit: cover;
+    border-radius: 18px; margin: 18px 24px; }
+@media (max-width: 759px) { .tags-hero-art { height: 150px; justify-self: center; margin: 4px 16px 18px; } .tags-hero-text { padding: 26px 24px 0; } }
+.tags-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 22px; padding: 24px 28px 30px; }
+.tags-box-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+.tags-box-head h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 1.35em; }
+.tags-box-head h2 .icon { color: var(--color-accent); }
+.count-chip { font-size: .62em; font-weight: 500; color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 999px;
+    padding: 3px 12px; }
+.sort-menu { position: relative; }
+.sort-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-control-border); border-radius: 999px; padding: 6px 14px;
+    font-size: .9em; color: var(--color-text-muted); background: var(--color-surface); }
+.sort-menu summary::-webkit-details-marker { display: none; }
+.sort-menu summary::before { content: "⇅ "; }
+.sort-menu summary::after { content: " ⌄"; }
+.sort-menu-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 140px; display: flex; flex-direction: column;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; box-shadow: 0 8px 22px var(--color-shadow); }
+.sort-menu-panel a { padding: 8px 12px; border-radius: 8px; color: var(--color-text); text-decoration: none; font-size: .92em; }
+.sort-menu-panel a:hover, .sort-menu-panel a[aria-current] { background: var(--color-surface-muted); }
+/* 홈 오른쪽 인기 태그는 작게 */
+.side-pills { gap: 8px; }
+.side-pills .tag-pill { padding: 6px 12px; gap: 6px; font-size: .88em; }
+.side-pills .tag-ic { width: 16px; height: 16px; }
+.side-pills .tag-pill-arrow { display: none; }
+/* 꼬리말 정원 장식(강성찬 개인 확장 시안) */
+.footer-garden { position: relative; height: 54px; overflow: hidden; pointer-events: none; }
+.garden-hills { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 34px; }
+.garden-hills path { fill: var(--tone-sand-bg); }
+.garden-plant { position: absolute; bottom: 8px; width: 30px; height: 36px; }
+.garden-plant .stem { fill: none; stroke: var(--tone-green-fg); stroke-width: 2; stroke-linecap: round; }
+.garden-plant .leaf { fill: var(--tone-green-bg); stroke: var(--tone-green-fg); stroke-width: 1.4; }
+.garden-plant .petal-a { fill: var(--tone-yellow-bg); stroke: var(--tone-yellow-fg); stroke-width: 1; }
+.garden-plant .petal-b { fill: var(--tone-pink-bg); stroke: var(--tone-pink-fg); stroke-width: 1; }
+.garden-plant .core { fill: var(--tone-orange-fg); }
+.garden-plant.g1 { left: 3%; height: 40px; }
+.garden-plant.g2 { left: 30%; }
+.garden-plant.g3 { left: 52%; height: 28px; }
+.garden-plant.g4 { left: 78%; }
+.garden-plant.g5 { right: 3%; height: 42px; }

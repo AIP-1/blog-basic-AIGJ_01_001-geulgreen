@@ -87,10 +87,8 @@
     <aside class="home-side" aria-label="둘러보기">
         <section th:if="${!popularTags.isEmpty()}" class="side-box" aria-labelledby="side-tags-heading">
             <h2 id="side-tags-heading"><th:block th:replace="~{fragments/icons :: tag}"></th:block> 인기 태그</h2>
-            <ul class="side-tags">
-                <li th:each="t : ${popularTags}"><a th:href="@{/tags/{name}(name=${t.name()})}"
-                       th:class="${'chip' + (#strings.length(t.name()) % 4)}" th:text="${'#' + t.name()}">#태그</a>
-                    <span class="help" th:text="${t.postCount()}">12</span></li>
+            <ul class="tag-pills side-pills">
+                <li th:each="t : ${popularTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, ${tagStyles.get(t.name())})}"></a></li>
             </ul>
         </section>
         <section class="side-box side-cat" aria-label="글그린 한마디">
