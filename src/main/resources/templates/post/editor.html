@@ -31,7 +31,10 @@
     </div>
     <div class="field">
         <label for="post-content" class="visually-hidden">본문 (Markdown)</label>
-        <textarea id="post-content" placeholder="Markdown으로 써 보세요" th:text="${post.contentMd()}"></textarea>
+        <textarea id="post-content" placeholder="Markdown으로 써 보세요. 글을 드래그하면 서식 도구가 떠요" aria-describedby="format-hint"
+                  th:text="${post.contentMd()}"></textarea>
+        <!-- 058 강성찬 개인 확장: 서식 도구 안내 -->
+        <p id="format-hint" class="help">글을 드래그하면 굵게·제목·목록·링크 같은 서식 도구가 떠요. 단축키 Ctrl/⌘+B 굵게, I 기울임, K 링크, E 코드</p>
     </div>
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
     <section id="preview-panel" class="preview-panel" aria-label="미리보기" hidden>
@@ -156,6 +159,7 @@
     <script src="/js/editor/diff.js" defer></script>
     <script src="/js/editor/autosave.js" defer></script>
     <script src="/js/editor/editor.js" defer></script>
+    <script src="/js/editor/format-toolbar.js" defer></script>
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
     <script src="/js/code-highlight.js" defer></script>
     <script src="/js/editor/preview.js" defer></script>

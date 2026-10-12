@@ -23,6 +23,8 @@ class EditorPageIT extends IntegrationTestBase {
         assertThat(html).doesNotContain("<script>alert(1)</script>").doesNotContain("<b>본문</b>");
         assertThat(html).contains("data-state=").contains("&quot;version&quot;:3").contains("&lt;b&gt;본문&lt;/b&gt;");
         assertThat(html).contains("/js/editor/autosave.js").contains("id=\"save-status\"");
+        // 058 강성찬 개인 확장: 글을 드래그하면 뜨는 서식 도구
+        assertThat(html).contains("/js/editor/format-toolbar.js").contains("id=\"format-hint\"");
         // 임시글에는 [변경 취소]가 없다
         assertThat(html).doesNotContain("discard-working-copy");
     }

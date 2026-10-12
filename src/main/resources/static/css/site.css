@@ -774,3 +774,21 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-past-links a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-size: .9em; }
 .mission-editor-note strong { margin-right: 6px; }
 .mission-done-note a { color: var(--color-brand); }
+
+/* 058 서식 도구(강성찬 개인 확장): 본문에서 글을 드래그하면 뜨는 작은 도구 */
+.format-toolbar { position: absolute; z-index: 40; display: flex; align-items: center; padding: 4px; max-width: calc(100vw - 16px);
+    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 10px;
+    box-shadow: 0 6px 20px var(--color-shadow); }
+.fmt-buttons, .fmt-link-box { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.fmt-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px;
+    border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: .9rem; line-height: 1; cursor: pointer; }
+.fmt-btn:hover { background: var(--color-surface-muted); }
+.fmt-btn[aria-pressed="true"] { background: var(--color-brand-soft); color: var(--color-brand); }
+.fmt-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.fmt-bold { font-weight: 800; }
+.fmt-italic { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
+.fmt-strike { text-decoration: line-through; }
+.fmt-code, .fmt-codeblock { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
+.fmt-sep { width: 1px; height: 20px; margin: 0 4px; background: var(--color-border); }
+.fmt-link-box input { width: min(260px, 60vw); height: 32px; padding: 0 10px; }
+.fmt-link-ok { color: var(--color-brand); font-weight: 700; }
