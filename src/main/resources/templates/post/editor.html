@@ -8,6 +8,12 @@
 <main class="editor" id="editor" th:attr="data-state=${state}">
     <noscript><p class="notice">자동 저장에는 JavaScript가 필요해요.</p></noscript>
 
+    <!-- 057 강성찬 개인 확장: 미션 주제로 연 글 -->
+    <p th:if="${missionTopic != null}" class="notice mission-editor-note">
+        <strong th:text="${'🗓 오늘의 미션: ' + missionTopic.title()}">오늘의 미션</strong>
+        <span th:text="${missionTopic.hint()}">안내</span>
+        <span class="help">발행하면 미션 완료! 제목은 바꿔도 돼요.</span>
+    </p>
     <p class="notice" th:if="${published}">발행한 글을 고치는 중이에요. 저장한 내용은 다시 발행하기 전까지 독자에게 보이지 않아요.</p>
 
     <!-- 충돌 배너(04 §2-7): 편집은 막지 않는다 -->

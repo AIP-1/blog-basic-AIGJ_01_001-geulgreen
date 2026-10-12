@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
-/** 글 화면(034): 참여한 미션 배지(누구나), 공개 글의 글쓴이에게는 진행 중인 미션에 참여하기. */
+/** 글 화면(057): 미션 글이면 "🗓 오늘의 미션 · 주제"(누구나), 글쓴이에게는 완료·연속 일수. */
 @Component
 public class MissionDetailSection implements PostDetailSection {
 
@@ -24,10 +24,11 @@ public class MissionDetailSection implements PostDetailSection {
         if (!missions.enabled()) {
             return;
         }
-        model.addAttribute("postMissions", missions.missionsOfPost(post.id()));
-        boolean author = viewer.map(v -> v.memberId() == post.authorId()).orElse(false);
-        if (author && post.isPublic() && !post.hidden()) {
-            model.addAttribute("joinableMissions", missions.list(true, 20));
-        }
+        missions.ofPost(post.id()).filter(MissionService.PostMission::completed).ifPresent(m -> {
+            model.addAttribute("postMission", m);
+            if (viewer.map(v -> v.memberId() == post.authorId()).orElse(false)) {
+                model.addAttribute("missionStats", missions.stats(post.authorId()));
+            }
+        });
     }
 }

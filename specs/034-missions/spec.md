@@ -1,6 +1,6 @@
 # Feature Specification: 같은 주제로 쓰기·릴레이 (미션)
 
-**Feature Branch**: `034-missions` | **Created**: 2026-10-09 | **Status**: Implemented
+**Feature Branch**: `034-missions` | **Created**: 2026-10-09 | **Status**: Superseded by [057 오늘의 미션](../057-daily-mission/spec.md) (10-12)
 
 **Scope**: **강성찬 개인 확장** (01 §2-4 "같은 주제로 쓰기·릴레이(미션)", 03 ERD `mission`·`mission_participant`).
 

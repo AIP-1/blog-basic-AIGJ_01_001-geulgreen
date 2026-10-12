@@ -26,7 +26,9 @@ public class DatabaseCleaner {
             // 강성찬 개인 확장(055)
             "post_cover",
             // 강성찬 개인 확장(056)
-            "tag_icon");
+            "tag_icon",
+            // 강성찬 개인 확장(057)
+            "daily_topic", "mission_post");
 
     private final JdbcTemplate jdbc;
     private final StringRedisTemplate redis;

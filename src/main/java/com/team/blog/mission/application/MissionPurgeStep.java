@@ -3,7 +3,7 @@ package com.team.blog.mission.application;
 import com.team.blog.account.application.WithdrawalPurgeStep;
 import org.springframework.stereotype.Component;
 
-/** 탈퇴 정리: 미션 참여 기록 삭제(연 미션은 남기고 연 사람은 "탈퇴한 사용자"로 보인다). */
+/** 탈퇴 정리: 미션 글 연결과 034 때의 미션(글 정리 10 다음). */
 @Component
 public class MissionPurgeStep implements WithdrawalPurgeStep {
 

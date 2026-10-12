@@ -9,6 +9,7 @@ import com.team.blog.shared.event.FriendRequested;
 import com.team.blog.shared.event.MemberFollowed;
 import com.team.blog.shared.event.MemberUnfollowed;
 import com.team.blog.shared.event.PostLiked;
+import com.team.blog.shared.event.MissionCompleted;
 import com.team.blog.shared.event.PostPublished;
 import com.team.blog.shared.event.PostUnliked;
 import com.team.blog.shared.event.PostVisibilityChanged;
@@ -68,6 +69,12 @@ public class NotificationListeners {
     public void on(PostUnliked e) {
         dispatcher.submit("unlike " + e.postId(), () -> writer.removeFromGroup(postAuthor(e.postId()),
                 NotificationWriter.likeGroup(e.postId()), e.likerId()));
+    }
+
+    /** 057 강성찬 개인 확장: 오늘의 미션 글 → 친구에게. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(MissionCompleted e) {
+        dispatcher.submit("mission done " + e.postId(), () -> writer.missionDone(e.postId(), e.authorId()));
     }
 
     /** 처음 전체 공개될 때 한 번(FR-006): 공개로 발행했거나, 공개 범위 변경으로 처음 공개됐을 때. */

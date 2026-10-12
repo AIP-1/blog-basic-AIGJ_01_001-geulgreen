@@ -742,3 +742,35 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .gp.p7 { left: 70%; height: 50px; } .gp.p8 { left: 72.3%; height: 38px; }
 .gp.p9 { right: 6.2%; height: 46px; } .gp.p10 { right: 3.6%; height: 60px; } .gp.p11 { right: 1.2%; height: 74px; }
 @media (max-width: 760px) { .gp.p4, .gp.p5, .gp.p7, .gp.p8, .gp.p3, .gp.p9 { display: none; } .footer-garden { height: 76px; } }
+/* 057 오늘의 미션(강성찬 개인 확장) */
+.mission-hero h1 span { font-family: Gaegu, "Pretendard Variable", cursive; }
+.mission-days { display: flex; gap: 14px; margin-top: 12px; font-size: .92em; }
+.mission-days a { color: var(--color-brand); text-decoration: none; font-weight: 600; }
+.mission-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 22px; }
+.mission-stat { margin: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 12px 18px;
+    display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+.mission-stat strong { font-size: 1.4em; }
+.mission-today-state { flex: 1; min-width: 240px; justify-content: center; }
+.topic-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 800px) { .topic-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.topic-card { background: var(--tone-bg); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.topic-no { margin: 0; color: var(--tone-fg); font-weight: 700; font-size: .85em; }
+.topic-title { margin: 0; font-size: 1.2em; line-height: 1.4; }
+.topic-hint { margin: 0; color: var(--color-text-muted); flex: 1; }
+.topic-card form, .topic-card > a.btn { margin-top: 6px; }
+.mission-feed { margin-top: 28px; }
+.mission-feed h2 { font-size: 1.15em; margin: 0 0 12px; }
+.mission-posts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.mission-post { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 14px 18px; }
+.mission-post-title { font-weight: 700; color: var(--color-text); text-decoration: none; }
+.mission-post-title:hover { text-decoration: underline; }
+.mission-post-excerpt { margin: 6px 0 0; color: var(--color-text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mission-post-meta { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .9em; }
+.mission-post-author { color: var(--color-text); font-weight: 600; text-decoration: none; }
+.tag-mini { color: var(--color-brand); font-size: .92em; }
+.mission-past { margin-top: 28px; }
+.mission-past h2 { font-size: 1.05em; }
+.mission-past-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.mission-past-links a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-size: .9em; }
+.mission-editor-note strong { margin-right: 6px; }
+.mission-done-note a { color: var(--color-brand); }

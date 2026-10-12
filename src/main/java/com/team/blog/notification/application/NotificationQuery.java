@@ -171,6 +171,16 @@ public class NotificationQuery {
                     message = UNAVAILABLE;
                 }
             }
+            case MISSION_DONE -> {
+                if (readable) {
+                    post = new NotificationItem.PostRef(title, postUrl, null);
+                    url = postUrl;
+                    message = actorName + "님이 오늘의 미션 글을 올렸어요: 「" + title + "」";
+                } else {
+                    post = new NotificationItem.PostRef(null, null, true);
+                    message = UNAVAILABLE;
+                }
+            }
             case NEW_POST -> {
                 if (readable) {
                     post = new NotificationItem.PostRef(title, postUrl, null);

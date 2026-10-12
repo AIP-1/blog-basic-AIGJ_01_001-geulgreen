@@ -205,7 +205,7 @@ public class NotificationWriter {
                 WHERE f.followee_id = ? AND r.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = f.follower_id AND nm.type = 'NEW_POST')
                   AND NOT EXISTS (SELECT 1 FROM notification n WHERE n.receiver_id = f.follower_id AND n.post_id = ?
-                                  AND n.type = 'FIRST_PUBLIC')
+                                  AND n.type IN ('FIRST_PUBLIC', 'MISSION_DONE'))
                 """, postId, authorId, now, now, authorId, postId);
     }
 
@@ -227,6 +227,29 @@ public class NotificationWriter {
                 WHERE p.id = ? AND p.author_id = ? AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC'
                   AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND r.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = r.id AND nm.type = 'NEW_POST')
+                """, authorId, now, now, authorId, authorId, postId, authorId);
+    }
+
+    /**
+     * 오늘의 미션 글(057, 강성찬 개인 확장): 전체 공개·친구 공개로 처음 발행되면 글쓴이의 친구에게 1건씩. "새 글" 알림을 끈 친구와
+     * 같은 글로 새 글 알림을 이미 받은 친구는 받지 않는다(새 글 알림도 이 알림을 받은 사람은 건너뛴다).
+     */
+    public int missionDone(long postId, long authorId) {
+        if (member(authorId).map(MemberState::withdrawn).orElse(true)) {
+            return 0;
+        }
+        Timestamp now = now();
+        return jdbc.update("""
+                INSERT INTO notification (receiver_id, type, post_id, last_actor_id, actor_count, created_at, updated_at)
+                SELECT r.id, 'MISSION_DONE', p.id, ?, 1, ?, ?
+                FROM post p
+                JOIN friendship fr ON fr.status = 'ACCEPTED' AND ? IN (fr.member_a_id, fr.member_b_id)
+                JOIN member r ON r.id = CASE WHEN fr.member_a_id = ? THEN fr.member_b_id ELSE fr.member_a_id END
+                WHERE p.id = ? AND p.author_id = ? AND p.status = 'PUBLISHED' AND p.visibility IN ('PUBLIC', 'FRIENDS')
+                  AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND r.withdrawn_at IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = r.id AND nm.type = 'NEW_POST')
+                  AND NOT EXISTS (SELECT 1 FROM notification n WHERE n.receiver_id = r.id AND n.post_id = p.id
+                                  AND n.type IN ('NEW_POST', 'MISSION_DONE'))
                 """, authorId, now, now, authorId, authorId, postId, authorId);
     }
 
