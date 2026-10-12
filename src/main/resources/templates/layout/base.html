@@ -43,7 +43,6 @@
                 <a href="/">홈</a>
                 <a href="/tags">태그</a>
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}">미션</a>
-                <a href="/search" class="menu-search"><th:block th:replace="~{fragments/icons :: search}"></th:block>검색</a>
                 <th:block th:if="${currentMemberId != null}">
                     <a href="/feed">피드</a>
                     <a href="/manage/posts">내 글</a>
@@ -68,11 +67,12 @@
                 </th:block>
             </div>
         </div>
-        <!-- 항상 보이는 것: 알림 종, 테마 전환(024, 맨 오른쪽), 좁은 화면의 메뉴 버튼 -->
+        <!-- 항상 보이는 것: 검색, 알림 종, 테마 전환(024, 맨 오른쪽), 좁은 화면의 메뉴 버튼 -->
         <span class="header-quick">
+            <a href="/search" class="icon-btn" aria-label="검색"><th:block th:replace="~{fragments/icons :: search}"></th:block></a>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
-                   aria-haspopup="true" aria-expanded="false">🔔<span id="notif-badge" class="notif-badge" hidden></span></a>
+                   aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
                 <div id="notif-panel" class="notif-panel" hidden></div>
             </span>
             <button type="button" id="theme-toggle" class="theme-toggle" hidden aria-label="테마 바꾸기">🖥</button>

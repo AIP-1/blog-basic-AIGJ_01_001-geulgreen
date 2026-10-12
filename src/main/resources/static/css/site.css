@@ -187,7 +187,7 @@ main.list-page { max-width: 1120px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .notif-bell-wrap { position: relative; }
 .notif-bell { text-decoration: none; position: relative; }
-.notif-badge { background: var(--color-danger-fill); color: var(--color-on-fill); border-radius: 999px; font-size: .75em; padding: 0 6px; margin-left: 2px; }
+.notif-badge { background: var(--color-danger-fill); color: var(--color-on-fill); border-radius: 999px; font-size: .75em; padding: 0 5px; position: absolute; top: 0; right: -2px; line-height: 1.5; }
 .notif-panel { position: absolute; right: 0; top: 100%; z-index: 10; width: min(360px, 90vw); background: var(--color-surface);
     border: 1px solid var(--color-border); border-radius: 6px; padding: 8px; box-shadow: 0 4px 12px var(--color-shadow); }
 .notif-list { list-style: none; padding: 0; margin: 0; }
@@ -252,8 +252,9 @@ a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px;
 .follow-button[aria-pressed="true"] { color: var(--color-brand); border-color: var(--color-brand); }
 .theme-toggle { border-radius: 999px; padding: 4px 10px; line-height: 1.4; font-size: 1em; }
 .theme-toggle, .menu-toggle { background: var(--color-surface); border: 1px solid var(--color-control-border); }
-.notif-bell { display: inline-flex; padding: 4px 6px; border-radius: 999px; }
-.notif-bell:hover { background: var(--color-surface-muted); }
+.notif-bell, .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
+    border-radius: 999px; color: var(--color-text); text-decoration: none; }
+.notif-bell:hover, .icon-btn:hover { background: var(--color-surface-muted); }
 .like-button { padding: 6px 14px; }
 .like-button[aria-pressed="true"], .like-button .like-icon { color: var(--color-like); }
 .list-retry, .handle-suggestion { padding: 4px 12px; font-size: .85em; }
