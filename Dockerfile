@@ -4,8 +4,10 @@ FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src
 COPY gradlew settings.gradle.kts build.gradle.kts ./
 COPY gradle gradle
-COPY src src
-RUN ./gradlew --no-daemon -q bootJar -x test && cp build/libs/*-SNAPSHOT.jar /app.jar
+# 두 모듈: backend(서버) + frontend(화면 jar) → backend의 실행 jar 하나로 묶임
+COPY backend backend
+COPY frontend frontend
+RUN ./gradlew --no-daemon -q :backend:bootJar -x test && cp backend/build/libs/backend-*-SNAPSHOT.jar /app.jar
 
 FROM eclipse-temurin:21-jre
 RUN groupadd --system blog && useradd --system --gid blog --home /app blog
