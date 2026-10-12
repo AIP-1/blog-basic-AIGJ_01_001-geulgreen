@@ -64,6 +64,48 @@
     }).catch(function () { return false; });
   }
 
+  function put(url, headers, blob) {
+    return fetch(url, { method: 'PUT', headers: headers, body: blob, credentials: 'omit' }).then(function (res) {
+      if (!res.ok) { throw new Error('put ' + res.status); }
+    });
+  }
+
+  function failMessage(res, data) {
+    if (res.status === 409) { return data.message || '저장 공간(1GB)을 다 썼어요.'; }
+    if (res.status === 429) { return data.message || '잠시 뒤 다시 올려 주세요.'; }
+    if (res.status === 400) { return data.message || '이 사진은 올릴 수 없어요.'; }
+    return null; // 다시 시도할 수 있는 실패
+  }
+
+  /* 사진 한 장을 원본·썸네일로 만들어 presign → PUT → complete. 성공하면 complete 응답({url, thumbUrl, ...}).
+     실패하면 Error, 다시 시도해도 안 되는 실패는 e.final에 안내 문구. 055 카드 대표 사진(강성찬 개인 확장)도 같이 쓴다. */
+  function uploadFile(file) {
+    return prepare(file).then(function (parts) {
+      var original = parts[0], thumb = parts[1];
+      return fetch('/api/images/presign', { method: 'POST', headers: csrfHeaders(), credentials: 'same-origin',
+        body: JSON.stringify({ purpose: 'POST', contentType: original.type, size: original.blob.size,
+          thumbSize: thumb ? thumb.size : null }) })
+        .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
+        .then(function (r) {
+          if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data); throw e; }
+          var p = r.data;
+          var puts = [put(p.uploadUrl, p.headers, original.blob)];
+          if (thumb && p.thumbUploadUrl) { puts.push(put(p.thumbUploadUrl, p.thumbHeaders, thumb)); }
+          return Promise.all(puts).then(function () {
+            return fetch('/api/images/' + p.imageId + '/complete', { method: 'POST', headers: csrfHeaders(),
+              credentials: 'same-origin' });
+          });
+        })
+        .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
+        .then(function (r) {
+          if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data); throw e; }
+          return r.data;
+        });
+    });
+  }
+
+  window.blogImageUpload = { upload: uploadFile, types: TYPES };
+
   function init() {
     var editor = window.blogEditor;
     var textarea = document.getElementById('post-content');
@@ -108,42 +150,10 @@
       });
     }
 
-    function put(url, headers, blob) {
-      return fetch(url, { method: 'PUT', headers: headers, body: blob, credentials: 'omit' }).then(function (res) {
-        if (!res.ok) { throw new Error('put ' + res.status); }
-      });
-    }
-
-    function failMessage(res, data) {
-      if (res.status === 409) { return data.message || '저장 공간(1GB)을 다 썼어요.'; }
-      if (res.status === 429) { return data.message || '잠시 뒤 다시 올려 주세요.'; }
-      if (res.status === 400) { return data.message || '이 사진은 올릴 수 없어요.'; }
-      return null; // 다시 시도할 수 있는 실패
-    }
-
     function upload(id, file) {
-      return prepare(file).then(function (parts) {
-        var original = parts[0], thumb = parts[1];
-        return fetch('/api/images/presign', { method: 'POST', headers: csrfHeaders(), credentials: 'same-origin',
-          body: JSON.stringify({ purpose: 'POST', contentType: original.type, size: original.blob.size,
-            thumbSize: thumb ? thumb.size : null }) })
-          .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
-          .then(function (r) {
-            if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data); throw e; }
-            var p = r.data;
-            var puts = [put(p.uploadUrl, p.headers, original.blob)];
-            if (thumb && p.thumbUploadUrl) { puts.push(put(p.thumbUploadUrl, p.thumbHeaders, thumb)); }
-            return Promise.all(puts).then(function () {
-              return fetch('/api/images/' + p.imageId + '/complete', { method: 'POST', headers: csrfHeaders(),
-                credentials: 'same-origin' });
-            });
-          })
-          .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
-          .then(function (r) {
-            if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data); throw e; }
-            replaceMarker(id, '![](' + r.data.url + ')');
-            return forget(id).then(checkUsage);
-          });
+      return uploadFile(file).then(function (data) {
+        replaceMarker(id, '![](' + data.url + ')');
+        return forget(id).then(checkUsage);
       }).catch(function (e) {
         if (e && e.final) {
           replaceMarker(id, '');

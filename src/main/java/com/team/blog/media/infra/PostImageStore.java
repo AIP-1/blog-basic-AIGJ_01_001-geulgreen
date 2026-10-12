@@ -42,6 +42,12 @@ public class PostImageStore {
                 """, (rs, n) -> new OwnedImage(rs.getLong(1), rs.getString(2), rs.getString(3)), uploaderId, textArray(keys));
     }
 
+    /** 이 회원이 올린, 올리기를 마친(크기 확인됨) 글 용도 사진의 번호(055 카드 대표 사진, 강성찬 개인 확장). */
+    public java.util.Optional<Long> ownedCompletedImageId(long uploaderId, String key) {
+        return jdbc.queryForList("SELECT id FROM image WHERE uploader_id = ? AND purpose = 'POST' AND storage_key = ? AND width IS NOT NULL",
+                Long.class, uploaderId, key).stream().findFirst();
+    }
+
     /** 저장 키 → 썸네일 키(있으면). 글 용도 사진만. */
     public Map<String, String> thumbnails(List<String> keys) {
         Map<String, String> result = new HashMap<>();

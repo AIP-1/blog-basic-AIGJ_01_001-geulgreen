@@ -1,5 +1,6 @@
 package com.team.blog.discovery.web;
 
+import com.team.blog.cover.application.CoverService;
 import com.team.blog.discovery.application.RssProperties;
 import com.team.blog.guestbook.application.GuestbookProperties;
 import com.team.blog.schedule.application.ScheduleProperties;
@@ -16,9 +17,11 @@ public class BlogExtrasAdvice {
     private final SeriesProperties series;
     private final RssProperties rss;
     private final ScheduleProperties schedule;
+    private final CoverService.Properties cover;
 
     public BlogExtrasAdvice(GuestbookProperties guestbook, SeriesProperties series, RssProperties rss,
-                            ScheduleProperties schedule) {
+                            ScheduleProperties schedule, CoverService.Properties cover) {
+        this.cover = cover;
         this.guestbook = guestbook;
         this.series = series;
         this.rss = rss;
@@ -31,5 +34,6 @@ public class BlogExtrasAdvice {
         model.addAttribute("seriesEnabled", series.enabled());
         model.addAttribute("rssEnabled", rss.enabled());
         model.addAttribute("scheduleEnabled", schedule.enabled());
+        model.addAttribute("coverEnabled", cover.enabled());
     }
 }

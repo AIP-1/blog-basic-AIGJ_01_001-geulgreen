@@ -71,6 +71,12 @@ public class PostImageService {
         return foreign;
     }
 
+    /** 055 카드 대표 사진(강성찬 개인 확장): 이 회원이 올리기를 마친 글 사진 주소면 그 사진 번호. 남의 사진·외부 주소는 빈 값. */
+    @Transactional(readOnly = true)
+    public Optional<Long> ownedCompletedImageId(long authorId, String url) {
+        return keyOf(url).flatMap(key -> store.ownedCompletedImageId(authorId, key));
+    }
+
     /** 카드 썸네일(FR-020): 썸네일이 있으면 썸네일 주소, 없으면 원본 주소. */
     @Transactional(readOnly = true)
     public String cardThumbnailOf(String url) {

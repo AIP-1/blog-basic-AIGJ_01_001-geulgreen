@@ -97,6 +97,14 @@
             <p id="alt-summary" class="help"></p>
             <div id="alt-fields"></div>
         </div>
+        <!-- 055 강성찬 개인 확장: 카드 대표 사진(고르면 바로 저장, 발행과 따로) -->
+        <div class="field cover-field" th:if="${coverEnabled}" th:attr="data-post-id=${post.postId()}">
+            <p class="field-label" id="cover-label">카드 대표 사진</p>
+            <p class="help">목록 카드와 공유 미리보기에 보여요. 자동이면 본문 첫 사진을 써요.</p>
+            <div class="cover-choices" id="cover-choices" role="group" aria-labelledby="cover-label"></div>
+            <input type="file" id="cover-file" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+            <p class="help" id="cover-status" role="status"></p>
+        </div>
         <!-- 042 강성찬 개인 확장: 예약 발행(임시글만) -->
         <div class="field schedule-field" th:if="${scheduleEnabled and !published}" th:attr="data-post-id=${post.postId()}">
             <label><input type="checkbox" id="schedule-on"> ⏰ 예약 발행</label>
@@ -148,6 +156,7 @@
     <script src="/js/editor/publish.js" defer></script>
     <script src="/js/editor/ai-tags.js" defer></script>
     <script src="/js/editor/image-upload.js" defer></script>
+    <script th:if="${coverEnabled}" src="/js/editor/cover.js" defer></script>
     <script src="/js/gif-play.js" defer></script>
 </main>
 </body>

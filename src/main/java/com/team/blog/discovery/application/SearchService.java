@@ -214,8 +214,9 @@ public class SearchService {
     /** 공용 조건 + 숨김 아님 + 블로그 + 커서. {@code window}면 최근창 LIMIT까지. */
     private String base(Long authorId, Instant afterAt, long afterId, List<Object> args, boolean window) {
         StringBuilder sql = new StringBuilder("""
-                SELECT p.id, p.title, p.content_md, p.excerpt, p.thumbnail_url, p.first_public_at, p.comment_count, p.like_count,
-                       m.handle, m.nickname, m.profile_image_url
+                SELECT p.id, p.title, p.content_md, p.excerpt,
+                       COALESCE((SELECT pcv.thumb_url FROM post_cover pcv WHERE pcv.post_id = p.id), p.thumbnail_url) AS thumbnail_url,
+                       p.first_public_at, p.comment_count, p.like_count, m.handle, m.nickname, m.profile_image_url
                 FROM post p JOIN member m ON m.id = p.author_id
                 WHERE """).append(' ').append(accessPolicy.publicListingCondition("p", "m")).append(" AND p.hidden_at IS NULL");
         if (authorId != null) {
