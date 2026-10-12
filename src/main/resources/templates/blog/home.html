@@ -14,6 +14,8 @@
             <!-- 소개는 글자로만(이스케이프), 줄바꿈만 살리고 자동 링크 없음(003 FR-009·FR-010) -->
             <p class="profile-bio" th:if="${owner.bio() != null}" th:text="${owner.bio()}">소개</p>
             <p class="help">
+                <!-- 051 강성찬 개인 확장: 방문자 수 -->
+                <span th:if="${blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span><span th:if="${blogVisits != null}"> · </span>
                 <span th:text="${'공개 글 ' + publicCount}">공개 글 24</span> ·
                 <a th:href="${'/@' + owner.handle() + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a> ·
                 <a th:href="${'/@' + owner.handle() + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a>
@@ -89,6 +91,13 @@
             </form>
         </div>
     </th:block>
+    <!-- 054 강성찬 개인 확장: 고정 글 -->
+    <section th:if="${pinnedCard != null}" class="pinned-post" aria-label="고정 글">
+        <p class="pinned-label">📌 고정 글</p>
+        <div class="card-grid pinned-grid">
+            <article th:replace="~{fragments/post-card :: card(${pinnedCard}, ${pinnedDate}, false)}"></article>
+        </div>
+    </section>
     <div class="card-grid" id="card-grid">
         <th:block th:each="card : ${cards}">
             <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, false)}"></article>

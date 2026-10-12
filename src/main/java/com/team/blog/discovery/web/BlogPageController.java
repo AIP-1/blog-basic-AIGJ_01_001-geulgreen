@@ -33,6 +33,9 @@ public class BlogPageController {
     private final com.team.blog.discovery.application.ActivityQuery activityQuery;
     private final com.team.blog.note.application.NoteService noteService;
     private final com.team.blog.category.application.CategoryService categoryService;
+    private final com.team.blog.discovery.application.BlogVisitService blogVisits;
+    private final com.team.blog.discovery.application.PinService pins;
+    private final com.team.blog.shared.web.ClientIpResolver ipResolver;
 
     public BlogPageController(BlogOwnerResolver blogOwnerResolver, PostListQuery listQuery,
                               CurrentUserProvider currentUserProvider, Clock clock,
@@ -42,7 +45,13 @@ public class BlogPageController {
                               com.team.blog.friend.application.FriendQuery friendQuery,
                               com.team.blog.discovery.application.ActivityQuery activityQuery,
                               com.team.blog.note.application.NoteService noteService,
-                              com.team.blog.category.application.CategoryService categoryService) {
+                              com.team.blog.category.application.CategoryService categoryService,
+                              com.team.blog.discovery.application.BlogVisitService blogVisits,
+                              com.team.blog.discovery.application.PinService pins,
+                              com.team.blog.shared.web.ClientIpResolver ipResolver) {
+        this.blogVisits = blogVisits;
+        this.pins = pins;
+        this.ipResolver = ipResolver;
         this.noteService = noteService;
         this.categoryService = categoryService;
         this.activityQuery = activityQuery;
@@ -113,6 +122,19 @@ public class BlogPageController {
             }
         }
         model.addAttribute("filterCategory", filterCategory);
+        // 051 강성찬 개인 확장: 방문자 수(세고 나서 보여 준다)
+        if (blogVisits.enabled()) {
+            blogVisits.record(owner.memberId(), currentUserProvider.current(),
+                    com.team.blog.shared.web.VisitorCookie.read(request), ipResolver.resolve(request), request.getHeader("User-Agent"));
+            model.addAttribute("blogVisits", blogVisits.counts(owner.memberId()));
+        }
+        // 054 강성찬 개인 확장: 고정 글(첫 화면, 필터 없을 때, 공개 글일 때만)
+        if ((cursor == null || cursor.isEmpty()) && tag == null && filterCategory == null) {
+            pins.pinnedPostId(owner.memberId()).map(id -> listQuery.cardsByIds(java.util.List.of(id)).get(id)).ifPresent(card -> {
+                model.addAttribute("pinnedCard", card);
+                model.addAttribute("pinnedDate", com.team.blog.post.application.CardDates.label(card.firstPublicAt(), clock.instant()));
+            });
+        }
         model.addAttribute("filterTag", tag);
         model.addAttribute("blogTags", tagListingQuery.blogTags(owner.memberId(), 50));
         model.addAttribute("owner", owner);

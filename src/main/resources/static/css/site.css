@@ -592,3 +592,12 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .site-notice { background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); padding: 8px 16px;
     text-align: center; font-size: .92em; }
 .site-notice a { margin-left: 8px; }
+/* 051~054 방문자 수·읽기 진행 막대·공유하기·고정 글(강성찬 개인 확장) */
+.read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 50; background: transparent; pointer-events: none; }
+.read-progress span { display: block; height: 100%; width: 0; background: var(--color-brand); border-radius: 0 4px 4px 0;
+    transition: width .08s linear; }
+.share-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+.share-row a.btn { text-decoration: none; }
+.pin-form { margin: 8px 0; }
+.pinned-post { margin: 0 0 18px; }
+.pinned-label { margin: 0 0 8px; font-weight: 700; }

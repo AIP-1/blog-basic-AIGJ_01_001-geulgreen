@@ -68,6 +68,8 @@
             </div>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
+        <!-- 052 강성찬 개인 확장: 읽기 진행 막대(스크립트가 스크롤에 맞춰 채운다) -->
+        <div th:if="${readProgressEnabled}" id="read-progress" class="read-progress" aria-hidden="true"><span></span></div>
         <!-- 041 강성찬 개인 확장: 시리즈 -->
         <section th:if="${postSeries != null}" class="series-box" aria-labelledby="series-heading">
             <details>
@@ -91,6 +93,24 @@
         <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
             <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
         </ul>
+        <!-- 053 강성찬 개인 확장: 공유하기(공개 글만) -->
+        <div th:if="${shareEnabled and pageMeta != null}" class="share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
+            <span class="help">공유하기</span>
+            <button type="button" class="btn btn-sm share-copy">🔗 링크 복사</button>
+            <a class="btn btn-sm" target="_blank" rel="noopener noreferrer"
+               th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}">X</a>
+            <a class="btn btn-sm" target="_blank" rel="noopener noreferrer"
+               th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}">페이스북</a>
+            <button type="button" class="btn btn-sm share-native" hidden>📤 다른 앱으로</button>
+            <span class="help share-status" role="status"></span>
+        </div>
+        <!-- 054 강성찬 개인 확장: 글 고정(글쓴이만) -->
+        <form th:if="${pinnedHere != null}" class="inline-form pin-form" method="post"
+              th:action="${pinnedHere} ? @{/posts/{id}/unpin(id=${post.id()})} : @{/posts/{id}/pin(id=${post.id()})}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="back" th:value="${post.url()}">
+            <button type="submit" class="btn btn-sm" th:text="${pinnedHere} ? '📌 고정 해제' : '📌 블로그 맨 위에 고정'">고정</button>
+        </form>
         <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 여기서 고른다) -->
         <p th:if="${postCategory != null and myCategories == null}" class="post-category">
             <a class="tag" th:href="@{'/@' + ${post.author().handle()}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
@@ -278,6 +298,7 @@
     <script src="/js/gif-play.js" defer></script>
     <script src="/js/post/post-detail.js" defer></script>
     <script th:if="${tocEnabled}" src="/js/post/toc.js" defer></script>
+    <script th:if="${readProgressEnabled or shareEnabled}" src="/js/post/reading-extras.js" defer></script>
     <script src="/js/post/comments.js" defer></script>
     <script src="/js/post/like.js" defer></script>
     <script src="/js/follow/follow.js" defer></script>
