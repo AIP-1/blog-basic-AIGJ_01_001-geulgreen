@@ -67,7 +67,12 @@
 - **데이터**: PostgreSQL 18(스키마는 `V1__common_schema.sql` 하나, Flyway), Redis(자동 저장 버퍼·요청 제한·조회수·트렌딩·세션)
 - **사진**: 처음에는 서버 디스크에 저장하고, 서버를 늘릴 때 MinIO(S3 호환)로 설정만 바꿔 확장
 - **메일**: 개발 Mailpit, 운영 Gmail SMTP / **AI**: Gemini 무료 등급 → 자체 Ollama
-- **구조**: 하나의 앱 안에서 기능별 모듈로 나눈 모듈러 모놀리스(`src/main/java/com/team/blog/`)
+- **구조**: 저장소를 **백엔드·프론트 두 Gradle 모듈**로 나눴습니다(1.14.0).
+  - `backend/`: Spring Boot 서버. Java 코드·설정·DB 마이그레이션·테스트. 기능별 모듈로 나눈 모듈러 모놀리스(`backend/src/main/java/com/team/blog/`)
+  - `frontend/`: 화면. Thymeleaf 템플릿(`templates/`)·JS·CSS·글꼴(`static/`)·브라우저 라이브러리(webjars)·화면 JS 자체 검사(`src/test/js/`)
+  - `frontend`는 jar 하나로 묶여 `backend`의 실행 jar에 들어갑니다. 배포 단위는 지금처럼 앱 하나라 서버 설정은 그대로이고, 서버는 `classpath:/templates/`·`classpath:/static/`으로 화면을 읽습니다.
+
+백엔드 기능 모듈:
 
 | 모듈 | 담당 |
 |---|---|
@@ -99,8 +104,8 @@ docker compose up -d        # PostgreSQL·Redis·Mailpit·사진 저장소(MinIO
 
 ```bash
 ./gradlew test              # 통합 테스트 656개(Testcontainers로 PostgreSQL·Redis·Mailpit·MinIO를 띄움)
-node src/test/js/diff.test.mjs   # 편집 비교 창 diff 자체 검사(선택)
-node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(선택, 058)
+node frontend/src/test/js/diff.test.mjs   # 편집 비교 창 diff 자체 검사(선택)
+node frontend/src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(선택, 058)
 ```
 
 ## 배포
@@ -115,7 +120,7 @@ node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(
 |---|---|
 | [AIPKANG/docs](https://github.com/AIPKANG/docs) | 문서 저장소: 팀 원본 설계 문서(`docs/`), 기능별 명세(`specs/NNN-기능/` spec·plan·tasks), 팀 결정 기록(`specs/README.md`), 프로젝트 헌법 |
 | [`CHANGELOG.md`](CHANGELOG.md) | 릴리스별 변경 내역(개인 확장은 "강성찬 개인 확장"으로 표시) |
-| `src/main/resources/db/migration/` | 실제 DB 스키마: V1 공통(테이블 20개), V2~V14 강성찬 개인 확장(테이블 22개 추가, 공통 테이블은 CHECK 교체와 `comment.secret` 칸 추가만) |
+| `backend/src/main/resources/db/migration/` | 실제 DB 스키마: V1 공통(테이블 20개), V2~V14 강성찬 개인 확장(테이블 22개 추가, 공통 테이블은 CHECK 교체와 `comment.secret` 칸 추가만) |
 | `db/demo/` | 앱에 바로 넣는 한국어 데모 데이터(PostgreSQL)와 데모 계정 |
 | `db/mysql/` | 같은 스키마의 MySQL 사본과 데모 데이터(ERD 도구용) |
 | `deploy/school/` | 학교 공용 서버 배포(GitHub Actions → SSH), Secrets 목록 |
@@ -124,5 +129,17 @@ node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(
 ## 작업 방식
 
 기능마다 Spec Kit 순서로 진행합니다: `/speckit-specify` 명세 → `/speckit-clarify`(선택) → `/speckit-plan` 계획 → `/speckit-tasks` 작업 → `/speckit-implement` 구현.
-명세·계획은 문서 저장소([AIPKANG/docs](https://github.com/AIPKANG/docs))에, 구현은 이 저장소에 올립니다. `main`에 올리면 테스트 후 학교 서버로 자동 배포됩니다(`.github/workflows/deploy.yml`).
+명세·계획은 문서 저장소([AIPKANG/docs](https://github.com/AIPKANG/docs))에, 구현은 이 저장소에 올립니다.
+
+브랜치는 **깃플로우**를 따릅니다(1.14.0부터).
+
+| 브랜치 | 쓰임 |
+|---|---|
+| `main` | 배포된 코드만. 여기에 머지되면 테스트 후 학교 서버로 자동 배포(`.github/workflows/deploy.yml`), 릴리스마다 `vX.Y.Z` 태그 |
+| `develop` | 다음 릴리스를 모으는 곳 |
+| `feature/<기능>` | `develop`에서 따서 기능 하나를 만들고 PR로 `develop`에 머지 |
+| `release/X.Y.Z` | 배포 직전 CHANGELOG·버전 정리, PR로 `main`에 머지 → 태그 → `develop`에도 머지 |
+| `hotfix/X.Y.Z` | 운영 급한 수정. `main`에서 따서 `main`·`develop` 둘 다에 머지 |
+
+`main`·`develop`으로 가는 PR은 테스트만 돌고, 배포는 `main`에 머지될 때만 일어납니다.
 PR·이슈는 `.github`의 템플릿을 따릅니다.

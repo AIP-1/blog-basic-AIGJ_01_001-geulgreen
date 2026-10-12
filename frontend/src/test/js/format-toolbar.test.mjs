@@ -1,4 +1,4 @@
-// 서식 창 글 바꾸기 자체 검사(058 강성찬 개인 확장). 실행: node src/test/js/format-toolbar.test.mjs (빌드 밖, Node만 필요)
+// 서식 창 글 바꾸기 자체 검사(058 강성찬 개인 확장). 실행: node frontend/src/test/js/format-toolbar.test.mjs (빌드 밖, Node만 필요)
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 

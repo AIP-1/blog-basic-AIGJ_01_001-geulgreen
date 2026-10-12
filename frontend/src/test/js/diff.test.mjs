@@ -1,4 +1,4 @@
-// 비교 창 diff 순수 함수 자체 검사(004 T326). 실행: node src/test/js/diff.test.mjs (빌드 밖, Node만 필요)
+// 비교 창 diff 순수 함수 자체 검사(004 T326). 실행: node frontend/src/test/js/diff.test.mjs (빌드 밖, Node만 필요)
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 

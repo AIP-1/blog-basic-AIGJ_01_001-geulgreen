@@ -46,7 +46,7 @@ class TagIconIT extends IntegrationTestBase {
 
     @Test
     void everyIconHasADrawing() throws Exception {
-        String svg = Files.readString(Path.of("src/main/resources/templates/fragments/tag-icons.html"));
+        String svg = Files.readString(Path.of("../frontend/src/main/resources/templates/fragments/tag-icons.html"));
         TagIconCatalog.ICONS.keySet().stream().filter(k -> !k.equals("hash"))
                 .forEach(k -> assertThat(svg).as(k).contains("th:case=\"'" + k + "'\""));
     }
