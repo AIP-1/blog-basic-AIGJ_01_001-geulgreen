@@ -39,7 +39,7 @@ public class EditorController {
 
     @PostMapping("/write")
     public RedirectView create() {
-        long postId = draftService.create(currentUserProvider.current(), "", "");
+        long postId = draftService.newDraft(currentUserProvider.current()); // 062: 빈 임시글이 있으면 그 글을 다시 연다
         return Redirects.seeOther("/write/" + postId);
     }
 

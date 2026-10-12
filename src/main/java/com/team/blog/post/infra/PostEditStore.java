@@ -186,6 +186,22 @@ public class PostEditStore {
                 """, Long.class, ts(cutoff), ts(cutoff), limit);
     }
 
+    /** 062 강성찬 개인 확장: [새 글]이 다시 열 이 회원의 빈 임시글(제목·본문 공백뿐, 태그 없음) 하나. */
+    public java.util.Optional<Long> latestEmptyDraft(long authorId) {
+        return jdbc.queryForList("""
+                SELECT id FROM post e
+                WHERE author_id = ? AND status = 'DRAFT' AND deleted_at IS NULL
+                  AND btrim(title, E' \\t\\r\\n') = '' AND btrim(content_md, E' \\t\\r\\n') = ''
+                  AND NOT EXISTS (SELECT 1 FROM post_tag t WHERE t.post_id = e.id)
+                ORDER BY id DESC LIMIT 1
+                """, Long.class, authorId).stream().findFirst();
+    }
+
+    /** 062: 빈 임시글을 새 글처럼 다시 열 때 공개 범위를 지금 기본값으로, 수정 시각을 지금으로. */
+    public void reopenEmptyDraft(long postId, String visibility, Instant now) {
+        jdbc.update("UPDATE post SET visibility = ?, updated_at = ? WHERE id = ? AND status = 'DRAFT'", visibility, ts(now), postId);
+    }
+
     /** 같은 조건을 다시 걸어 지운다(그사이 고쳐졌으면 0). */
     public int deleteEmptyDraft(long postId, Instant cutoff) {
         return jdbc.update("""

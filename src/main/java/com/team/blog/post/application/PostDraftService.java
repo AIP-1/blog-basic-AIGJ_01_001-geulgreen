@@ -69,6 +69,51 @@ public class PostDraftService {
         return store.insertDraft(user.memberId(), t, c, visibility, clock.instant());
     }
 
+    /**
+     * [새 글] 버튼 — 062 강성찬 개인 확장: 아무것도 안 쓴 임시글이 이미 있으면(서버 버퍼에도 내용이 없으면) 그 글을 다시 열고,
+     * 없을 때만 새로 만든다. 빈 임시글이 쌓이지 않게.
+     */
+    public long newDraft(Optional<CurrentUser> currentUser) {
+        CurrentUser user = accountGuard.requireWritable(currentUser);
+        Optional<Long> empty = store.latestEmptyDraft(user.memberId());
+        if (empty.isPresent() && bufferBlank(empty.get())) {
+            store.reopenEmptyDraft(empty.get(), accountSettings.defaultVisibility(user.memberId()), clock.instant());
+            return empty.get();
+        }
+        return create(currentUser, "", "");
+    }
+
+    /** 062: 글쓰기 화면을 떠날 때 제목·본문이 비어 있으면(서버 버퍼도) 임시글을 바로 지운다. 지웠으면 true. */
+    public boolean discardIfEmpty(Optional<CurrentUser> currentUser, long postId) {
+        CurrentUser user = accountGuard.requireWritable(currentUser);
+        PostEditRow row = owned(user, postId);
+        if (row.status() != PostStatus.DRAFT || !blank(row.title()) || !blank(row.contentMd()) || !bufferBlank(postId)) {
+            return false;
+        }
+        boolean deleted = store.deleteEmptyDraft(postId, clock.instant().plusSeconds(1)) > 0;
+        if (deleted) {
+            try {
+                buffer.evict(postId);
+            } catch (DataAccessException e) {
+                log.warn("empty draft buffer evict failed for post {}: {}", postId, e.getMessage());
+            }
+        }
+        return deleted;
+    }
+
+    /** 서버 버퍼에 내용이 없거나 공백뿐인가. 버퍼를 확인할 수 없으면 비어 있지 않다고 본다(지우지 않게). */
+    private boolean bufferBlank(long postId) {
+        try {
+            return buffer.read(postId).map(b -> blank(b.title()) && blank(b.contentMd())).orElse(true);
+        } catch (DataAccessException e) {
+            return false;
+        }
+    }
+
+    private static boolean blank(String s) {
+        return s == null || s.strip().isEmpty();
+    }
+
     /** 편집 화면의 현재 내용(research R-2). 작성자만, 휴지통 글은 404. */
     public EditingContent editing(Optional<CurrentUser> currentUser, long postId) {
         CurrentUser user = accountGuard.requireLoggedIn(currentUser);

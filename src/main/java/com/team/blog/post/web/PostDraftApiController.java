@@ -74,6 +74,13 @@ public class PostDraftApiController {
         return draftService.save(currentUserProvider.current(), postId, command(body));
     }
 
+    /** 062 강성찬 개인 확장: 글쓰기 화면을 떠날 때(sendBeacon) 빈 임시글이면 지운다. 비어 있지 않으면 그대로 둔다. */
+    @PostMapping("/{postId}/discard-empty")
+    public ResponseEntity<Void> discardEmpty(@PathVariable long postId) {
+        draftService.discardIfEmpty(currentUserProvider.current(), postId);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/{postId}/working-copy")
     public ResponseEntity<Void> discard(@PathVariable long postId) {
         draftService.discardWorkingCopy(currentUserProvider.current(), postId);

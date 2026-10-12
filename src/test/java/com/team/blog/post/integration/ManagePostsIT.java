@@ -34,7 +34,7 @@ class ManagePostsIT extends IntegrationTestBase {
     void tabsShowOnlyMyPostsWithCountsAndDefaultIsDrafts() throws Exception {
         long me = writer(members, "manageme");
         long other = writer(members, "manageoth");
-        long d1 = posts.draft(me, "", "", 0);
+        long d1 = posts.draft(me, "", "본문만 쓴 글", 0); // 062 강성찬 개인 확장: 제목·본문이 모두 빈 임시글은 목록에서 빠진다
         long d2 = posts.draft(me, "<i>임시</i>", "", 0);
         touch(d1, T);
         touch(d2, T.plusSeconds(60));

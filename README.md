@@ -18,7 +18,7 @@
 | 반응 | 댓글·답글(014), 좋아요(015), 조회수(016), 팔로우·피드(018), 인앱 알림(017) |
 | 운영 | 접근 권한 공통 규칙(012), 신고·관리자 숨김·회원 정지(022), 개인정보 처리방침(`/privacy`), sitemap·robots |
 
-### 강성찬 개인 확장 (명세 025~061)
+### 강성찬 개인 확장 (명세 025~062)
 
 팀은 공통만 맞추고 각자 **추가만** 하기로 했다(문서 저장소 [docs/01 §2-4](https://github.com/AIPKANG/docs/blob/main/docs/01-common-requirements.md)). 아래는 강성찬 개인 확장이며 공통 완료 기준은 그대로 통과한다.
 
@@ -57,6 +57,7 @@
 | 059 | AI로 글 다듬기 — 서식 창에서 고른 글을 다듬기·맞춤법·짧게·쉽게·직접 부탁, [바꾸기]·[아래에 넣기](Gemini 키가 있을 때) | `blog.writing-ai.enabled` |
 | 060 | 보이는 대로 쓰기 — 본문이 글 화면 모양 그대로 보이고 서식이 바로 적용됨, # - 1. > 단축 입력, [Markdown으로 쓰기] 전환(저장은 그대로 Markdown) | — |
 | 061 | 화면 테마를 개인 설정으로 — 머리말 다크 모드 버튼 대신 설정 → 화면 테마(시스템·라이트·다크) | — |
+| 062 | 빈 임시글이 안 생기게 — 안 쓰고 떠나면 바로 지움, [새 글]은 남은 빈 글을 다시 엶, 내 글 관리에서 빈 임시글을 뺌 | — |
 
 그 밖에 디자인 시안(크림·세이지, 사진 배너, 한 줄 4개 카드·한 쪽 12개)도 강성찬 개인 확장으로 적용했다. 변경 내역: [`CHANGELOG.md`](CHANGELOG.md).
 
@@ -97,7 +98,7 @@ docker compose up -d        # PostgreSQL·Redis·Mailpit·사진 저장소(MinIO
 ## 테스트
 
 ```bash
-./gradlew test              # 통합 테스트 654개(Testcontainers로 PostgreSQL·Redis·Mailpit·MinIO를 띄움)
+./gradlew test              # 통합 테스트 656개(Testcontainers로 PostgreSQL·Redis·Mailpit·MinIO를 띄움)
 node src/test/js/diff.test.mjs   # 편집 비교 창 diff 자체 검사(선택)
 node src/test/js/format-toolbar.test.mjs   # 글쓰기 서식 창 자체 검사(선택, 058)
 ```

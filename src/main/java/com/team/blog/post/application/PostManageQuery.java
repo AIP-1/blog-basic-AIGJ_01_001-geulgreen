@@ -22,11 +22,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostManageQuery {
 
+    /** 062 강성찬 개인 확장: 아무것도 안 쓴 임시글은 만든 지(다시 연 지) 2분이 지나면 목록·개수에서 뺀다(자동 저장이 DB에 반영되기 전 글은 보이게). */
+    static final java.time.Duration BLANK_DRAFT_GRACE = java.time.Duration.ofMinutes(2);
+    private static final String BLANK_DRAFT = "p.status = 'DRAFT' AND p.deleted_at IS NULL AND btrim(p.title, E' \\t\\r\\n') = ''"
+            + " AND btrim(p.content_md, E' \\t\\r\\n') = '' AND p.updated_at < ?";
+
     private final AccountGuard accountGuard;
     private final JdbcTemplate jdbc;
     private final PostProperties properties;
+    private final java.time.Clock clock;
 
-    public PostManageQuery(AccountGuard accountGuard, JdbcTemplate jdbc, PostProperties properties) {
+    public PostManageQuery(AccountGuard accountGuard, JdbcTemplate jdbc, PostProperties properties, java.time.Clock clock) {
+        this.clock = clock;
         this.accountGuard = accountGuard;
         this.jdbc = jdbc;
         this.properties = properties;
@@ -46,7 +53,10 @@ public class PostManageQuery {
         List<Object> args = new ArrayList<>();
         args.add(user.memberId());
         switch (tab) {
-            case DRAFTS -> sql.append(" AND p.status = 'DRAFT' AND p.deleted_at IS NULL");
+            case DRAFTS -> {
+                sql.append(" AND p.status = 'DRAFT' AND p.deleted_at IS NULL AND NOT (").append(BLANK_DRAFT).append(")");
+                args.add(Timestamp.from(clock.instant().minus(BLANK_DRAFT_GRACE)));
+            }
             case PUBLISHED -> {
                 sql.append(" AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL");
                 String v = visibility == null ? null : visibility.toUpperCase(java.util.Locale.ROOT);
@@ -80,13 +90,10 @@ public class PostManageQuery {
         counts.put("drafts", 0L);
         counts.put("published", 0L);
         counts.put("trash", 0L);
-        jdbc.query("""
-                SELECT CASE WHEN deleted_at IS NOT NULL THEN 'trash' WHEN status = 'DRAFT' THEN 'drafts' ELSE 'published' END AS tab,
-                       count(*) AS n
-                FROM post WHERE author_id = ? GROUP BY 1
-                """, rs -> {
+        jdbc.query("SELECT CASE WHEN p.deleted_at IS NOT NULL THEN 'trash' WHEN p.status = 'DRAFT' THEN 'drafts' ELSE 'published' END AS tab,"
+                + " count(*) AS n FROM post p WHERE p.author_id = ? AND NOT (" + BLANK_DRAFT + ") GROUP BY 1", rs -> {
                     counts.put(rs.getString("tab"), rs.getLong("n"));
-                }, memberId);
+                }, memberId, Timestamp.from(clock.instant().minus(BLANK_DRAFT_GRACE)));
         return counts;
     }
 
