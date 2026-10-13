@@ -149,8 +149,18 @@ class InstaAccountIT extends IntegrationTestBase {
         clock.advance(Duration.ofDays(15));
         assertThat(changeHandle(other, "oldname").getResponse().getStatus()).isEqualTo(200);
         assertThat(mockMvc.perform(get("/@oldname")).andReturn().getResponse().getStatus()).isEqualTo(200);
-        // 접두어가 다른 주소는 안 됨
+        // 이메일 가입자는 소셜 접두어 주소를 못 고름
         assertThat(changeHandle(me, "go-thirdx").getResponse().getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void socialMemberDropsThePrefixAndCanGoBack() throws Exception {
+        long g = members.active("go-ksc", "구글사람");
+        members.addSocialIdentity(g, "GOOGLE", "g-ksc", "ksc@example.com", Instant.now());
+        assertThat(changeHandle(g, "ksc").getResponse().getContentAsString()).contains("\"handle\":\"ksc\"");
+        assertThat(mockMvc.perform(get("/@go-ksc")).andReturn().getResponse().getRedirectedUrl()).isEqualTo("/@ksc");
+        assertThat(changeHandle(g, "gi-ksc").getResponse().getStatus()).isEqualTo(400);
+        assertThat(changeHandle(g, "go-ksc").getResponse().getContentAsString()).contains("\"handle\":\"go-ksc\"");
     }
 
     @Test

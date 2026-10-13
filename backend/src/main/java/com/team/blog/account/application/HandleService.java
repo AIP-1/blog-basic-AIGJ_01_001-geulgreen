@@ -75,16 +75,20 @@ public class HandleService {
      */
     @Transactional(readOnly = true)
     public Handle validateForSignup(String rawHandle, Provider provider) {
-        return validate(rawHandle, HandlePrefix.of(provider), null);
+        return validate(rawHandle, HandlePrefix.of(provider), HandlePrefix.of(provider), null);
     }
 
-    /** 074: 주소 변경 검사. 접두어는 지금 주소와 같아야 하고, 자기가 잡아 둔 옛 주소는 되돌릴 수 있다. */
+    /**
+     * 074: 주소 변경 검사. 접두어 없이 아무 주소나 고를 수 있다(인스타처럼). 접두어를 붙이면 가입 수단의 것만
+     * (예전 {@code go-} 주소로 되돌리기용). 자기가 잡아 둔 옛 주소는 되돌릴 수 있다.
+     */
     @Transactional(readOnly = true)
-    public Handle validateForChange(String rawHandle, HandlePrefix expected, long memberId) {
-        return validate(rawHandle, expected, memberId);
+    public Handle validateForChange(String rawHandle, Provider provider, long memberId) {
+        return validate(rawHandle, HandlePrefix.of(provider), HandlePrefix.NONE, memberId);
     }
 
-    private Handle validate(String rawHandle, HandlePrefix expected, Long memberId) {
+    /** @param bare 접두어 없이 쓴 값의 접두어(가입은 가입 수단의 것, 변경은 없음) */
+    private Handle validate(String rawHandle, HandlePrefix expected, HandlePrefix bare, Long memberId) {
         String value = HandleRules.normalizeInput(rawHandle);
         HandlePrefix prefix;
         String body;
@@ -99,7 +103,7 @@ public class HandleService {
             }
             body = value.substring(dash + 1);
         } else {
-            prefix = expected;
+            prefix = bare;
             body = value;
         }
         Violation violation = evaluate(prefix, body, memberId);
