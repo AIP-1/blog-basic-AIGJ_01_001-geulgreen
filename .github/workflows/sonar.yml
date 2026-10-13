@@ -24,11 +24,11 @@ jobs:
       - name: 토큰 없으면 건너뛰기
         if: ${{ env.SONAR_TOKEN == '' }}
         run: echo "SONAQUBETOKEN secret이 없어 분석을 건너뜁니다." >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: ${{ env.SONAR_TOKEN != '' }}
         with:
           fetch-depth: 0  # 줄별 작성자(blame) 정보
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         if: ${{ env.SONAR_TOKEN != '' }}
         with:
           distribution: temurin
@@ -64,3 +64,21 @@ jobs:
             echo
             echo "대시보드: $SONAR_HOST_URL/dashboard?id=$key"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: 핫스팟·이슈 원본 저장
+        if: ${{ env.SONAR_TOKEN != '' }}
+        continue-on-error: true
+        run: |
+          key=$(grep '^projectKey=' build/sonar/report-task.txt | cut -d= -f2-)
+          mkdir -p sonar-report
+          api() { curl -sf -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/$1"; }
+          api "hotspots/search?projectKey=$key&status=TO_REVIEW&ps=500" > sonar-report/hotspots.json
+          for p in 1 2 3 4; do
+            api "issues/search?componentKeys=$key&issueStatuses=OPEN,CONFIRMED&ps=500&p=$p" > sonar-report/issues-$p.json
+          done
+          api "qualitygates/project_status?projectKey=$key" > sonar-report/gate.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ env.SONAR_TOKEN != '' }}
+        with:
+          name: sonar-report
+          path: sonar-report/
+          retention-days: 14
