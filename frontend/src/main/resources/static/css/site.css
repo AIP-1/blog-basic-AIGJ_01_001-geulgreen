@@ -750,7 +750,7 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .home-side { display: flex; flex-direction: column; gap: 18px; }
 /* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
 @media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
-    overscroll-behavior: contain; scrollbar-width: thin; } }
+    scrollbar-width: thin; } } /* 휠이 칸 끝에서 페이지로 넘어가게 overscroll-behavior는 두지 않음 */
 .side-post-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .side-post-list li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .side-post-list a { color: var(--color-text); text-decoration: none; font-weight: 600; font-size: .92em; line-height: 1.4;
