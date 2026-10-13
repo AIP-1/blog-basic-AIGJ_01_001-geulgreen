@@ -91,7 +91,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         tag(hidden, "spring", 0);
         String html = page("/@navme/posts/" + second);
         assertThat(html).contains("이전 글").contains("첫 번째 글").contains("다음 글").contains("세 번째 글")
-                .contains("관련 글").doesNotContain("나만 보는 글").contains("id=\"post-toc\"").contains("/js/post/toc.js");
+                .contains("관련 글").doesNotContain("나만 보는 글").contains("id=\"post-toc\"").contains("/js/post/toc-");
         assertThat(page("/@navme/posts/" + first)).doesNotContain("이전 글</span>");
     }
 

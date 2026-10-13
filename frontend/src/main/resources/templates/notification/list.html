@@ -37,7 +37,7 @@
            th:attr="data-cursor=${page.nextCursor()}">더 보기</a>
     </p>
     <p id="notif-status" aria-live="polite"></p>
-    <script src="/js/notification/list.js" defer></script>
+    <script th:src="@{/js/notification/list.js}" defer></script>
 </main>
 </body>
 </html>

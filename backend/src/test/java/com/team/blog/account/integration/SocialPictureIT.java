@@ -66,7 +66,7 @@ class SocialPictureIT extends IntegrationTestBase {
 
         String page = browser.perform(get("/settings/social-picture")).getResponse().getContentAsString();
         assertThat(page).contains("data-picture-url=\"https://lh3.googleusercontent.com/a/ACg8ocKabc=s256-c\"")
-                .contains("/js/profile/social-picture.js")
+                .contains("/js/profile/social-picture-")
                 .contains("소셜 사진을 가져오지 못했어요. 설정에서 직접 올릴 수 있어요");
         // 한 번만 넘긴다
         MockHttpServletResponse again = browser.perform(get("/settings/social-picture")).getResponse();

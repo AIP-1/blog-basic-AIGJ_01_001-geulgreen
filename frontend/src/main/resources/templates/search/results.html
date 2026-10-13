@@ -52,7 +52,7 @@
             </article>
         </div>
         <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!results.isEmpty()}, ${moreLinkBase}, null)}"></div>
-        <script src="/js/post/list-more.js" defer></script>
+        <script th:src="@{/js/post/list-more.js}" defer></script>
     </th:block>
     <th:block th:if="${!emptyQuery and tab == 'people'}">
         <p th:if="${people.isEmpty()}" class="empty-state" th:text="${'''' + q + '''에 대한 사람이 없어요'}">없음</p>
