@@ -13,7 +13,15 @@
             <h1 th:replace="~{fragments/author :: byline(${author})}">닉네임 @주소</h1>
             <!-- 소개는 글자로만(이스케이프), 줄바꿈만 살리고 자동 링크 없음(003 FR-009·FR-010) -->
             <p class="profile-bio" th:if="${owner.bio() != null}" th:text="${owner.bio()}">소개</p>
-            <p class="help">
+            <!-- 074 강성찬 개인 확장: 인스타식 숫자 줄(게시물·팔로워·팔로잉)과 내 블로그면 프로필 편집 -->
+            <ul class="insta-stats" th:if="${instaAccount}">
+                <li th:text="${'게시물 ' + publicCount}">게시물 24</li>
+                <li><a th:href="${'/@' + owner.handle() + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a></li>
+                <li><a th:href="${'/@' + owner.handle() + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a></li>
+            </ul>
+            <p th:if="${instaAccount and isOwner}"><a class="btn btn-sm" href="/settings#settings-profile">프로필 편집</a></p>
+            <p class="help" th:if="${instaAccount and blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</p>
+            <p class="help" th:unless="${instaAccount}">
                 <!-- 051 강성찬 개인 확장: 방문자 수 -->
                 <span th:if="${blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span><span th:if="${blogVisits != null}"> · </span>
                 <span th:text="${'공개 글 ' + publicCount}">공개 글 24</span> ·

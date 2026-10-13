@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /** 003 T257: 설정 화면 표시(11 §2, FR-003, FR-024 화면, FR-029). */
+// 공통 규칙(닉네임 30일에 한 번)을 본다. 074 인스타식 계정을 켜면 14일에 두 번(InstaAccountIT)
+@org.springframework.test.context.TestPropertySource(properties = "blog.insta-account.enabled=false")
 class SettingsPageIT extends IntegrationTestBase {
 
     @Autowired

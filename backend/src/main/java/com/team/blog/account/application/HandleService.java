@@ -24,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 블로그 주소 공개 Service (contracts/account-identity-service.md §1).
  *
- * <p><b>기존 회원의 주소를 바꾸는 연산은 없다</b>(FR-011). 주소는 가입 때 {@code Member} 생성자에서만 정해진다.
+ * <p>공통 규칙(FR-011)에서는 주소를 바꾸지 않는다. 074 강성찬 개인 확장의 {@link HandleChangeService}만 바꾸며, 그때 쓰는
+ * 검사({@link #validateForChange})도 여기 있다. 다른 사람이 잡아 둔 옛 주소({@code handle_history.hold_until})는 쓸 수 없다.
  */
 @Service
 public class HandleService {
@@ -34,9 +35,14 @@ public class HandleService {
     private final AccountIdentityProperties.HandleSettings settings;
     private final Set<String> reserved;
     private final RandomGenerator random = new SecureRandom();
+    private final org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate jdbc;
+    private final java.time.Clock clock;
 
     public HandleService(MemberRepository memberRepository, BannedWordFilter bannedWordFilter,
-                         AccountIdentityProperties properties) {
+                         AccountIdentityProperties properties,
+                         org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate jdbc, java.time.Clock clock) {
+        this.jdbc = jdbc;
+        this.clock = clock;
         this.memberRepository = memberRepository;
         this.bannedWordFilter = bannedWordFilter;
         this.settings = properties.handle();
@@ -69,8 +75,17 @@ public class HandleService {
      */
     @Transactional(readOnly = true)
     public Handle validateForSignup(String rawHandle, Provider provider) {
+        return validate(rawHandle, HandlePrefix.of(provider), null);
+    }
+
+    /** 074: 주소 변경 검사. 접두어는 지금 주소와 같아야 하고, 자기가 잡아 둔 옛 주소는 되돌릴 수 있다. */
+    @Transactional(readOnly = true)
+    public Handle validateForChange(String rawHandle, HandlePrefix expected, long memberId) {
+        return validate(rawHandle, expected, memberId);
+    }
+
+    private Handle validate(String rawHandle, HandlePrefix expected, Long memberId) {
         String value = HandleRules.normalizeInput(rawHandle);
-        HandlePrefix expected = HandlePrefix.of(provider);
         HandlePrefix prefix;
         String body;
         int dash = value.indexOf('-');
@@ -87,7 +102,7 @@ public class HandleService {
             prefix = expected;
             body = value;
         }
-        Violation violation = evaluate(prefix, body);
+        Violation violation = evaluate(prefix, body, memberId);
         if (violation != null) {
             throw new HandleViolationException(violation.code(), violation.suggestion());
         }
@@ -108,7 +123,7 @@ public class HandleService {
             }
             body = value.substring(dash + 1);
         }
-        Violation violation = evaluate(prefix, body);
+        Violation violation = evaluate(prefix, body, null);
         return violation == null ? HandleCheckResult.ok() : unavailable(violation.code(), violation.suggestion());
     }
 
@@ -136,7 +151,7 @@ public class HandleService {
     private record Violation(HandleViolation code, String suggestion) {
     }
 
-    private Violation evaluate(HandlePrefix prefix, String body) {
+    private Violation evaluate(HandlePrefix prefix, String body, Long memberId) {
         if (!HandleRules.isValidFormat(prefix.value() + body)) {
             return new Violation(HandleViolation.HANDLE_INVALID_FORMAT, null);
         }
@@ -147,10 +162,19 @@ public class HandleService {
         if (bannedWordFilter.containsBannedInHandleBody(body)) {
             return new Violation(HandleViolation.HANDLE_BANNED_WORD, null);
         }
-        if (memberRepository.existsByHandle(handle.toString())) {
+        if (memberRepository.existsByHandle(handle.toString()) || !heldByOthers(List.of(handle.toString()), memberId).isEmpty()) {
             return new Violation(HandleViolation.HANDLE_DUPLICATE, firstAvailable(handle, false));
         }
         return null;
+    }
+
+    /** 074: 아직 잡아 둔 기간인 옛 주소(그 주인 {@code memberId}의 것은 빼고). */
+    private List<String> heldByOthers(List<String> handles, Long memberId) {
+        return jdbc.queryForList("SELECT old_handle FROM handle_history WHERE old_handle IN (:h) AND hold_until > :now"
+                        + " AND (CAST(:me AS bigint) IS NULL OR member_id <> :me)",
+                new org.springframework.jdbc.core.namedparam.MapSqlParameterSource("h", handles)
+                        .addValue("now", java.sql.Timestamp.from(clock.instant()))
+                        .addValue("me", memberId, java.sql.Types.BIGINT), String.class);
     }
 
     private boolean isReserved(String body) {
@@ -176,6 +200,7 @@ public class HandleService {
                 candidates.add(base.prefix().value() + HandleRules.withNumber(base.body(), next));
             }
             Set<String> taken = new HashSet<>(memberRepository.findHandlesIn(new LinkedHashSet<>(candidates)));
+            taken.addAll(heldByOthers(candidates, null));
             for (String candidate : candidates) {
                 if (!taken.contains(candidate)) {
                     return candidate;
