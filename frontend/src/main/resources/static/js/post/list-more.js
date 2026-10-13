@@ -3,7 +3,8 @@
  * 불러오는 중 "불러오는 중…" 비활성, 실패 "불러오지 못했어요 [다시 시도]"(같은 커서), 끝 "모든 글을 다 봤어요".
  * 글을 보러 떠날 때 붙인 카드·다음 커서·스크롤을 sessionStorage에 30분 보관하고, 같은 주소로 돌아오면 복원한다.
  * 글자는 모두 textContent로 넣는다.
- * 067 강성찬 개인 확장: 목록 끝이 화면에 가까워지면 저절로 다음 묶음을 불러온다(무한 스크롤). 버튼은 그대로 둔다(실패·스크립트 없는 경우).
+ * 067 강성찬 개인 확장: 목록 끝이 화면에 가까워지면 저절로 다음 묶음을 불러온다(무한 스크롤).
+ * 067 후속: 무한 스크롤이 되면 [더 보기] 버튼은 화면에서 숨기고(.infinite, 스크립트 없을 때만 보임) 실패할 때만 [다시 시도].
  */
 (function () {
   'use strict';
@@ -130,6 +131,7 @@
       if (loading || !next) { return; }
       loading = true;
       var button = box.querySelector('.more-button');
+      box.classList.add('loading');
       if (button) { button.textContent = '불러오는 중…'; button.setAttribute('aria-disabled', 'true'); button.style.pointerEvents = 'none'; }
       errorBox.hidden = true;
       fetch(api + (api.indexOf('?') >= 0 ? '&' : '?') + 'cursor=' + encodeURIComponent(next), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
@@ -139,9 +141,9 @@
           if (!res.ok) { throw new Error(String(res.status)); }
           return res.json();
         })
-        .then(function (page) { loading = false; append(page.items || []); next = page.nextCursor; render(); })
+        .then(function (page) { loading = false; box.classList.remove('loading'); append(page.items || []); next = page.nextCursor; render(); })
         .catch(function () {
-          loading = false;
+          loading = false; box.classList.remove('loading');
           if (button) { button.textContent = '더 보기'; button.removeAttribute('aria-disabled'); button.style.pointerEvents = ''; }
           errorBox.hidden = false;
         });
@@ -152,6 +154,7 @@
     if (first) { first.addEventListener('click', load); }
 
     if ('IntersectionObserver' in window) {
+      box.classList.add('infinite');
       io = new IntersectionObserver(function (entries) {
         if (entries[0].isIntersecting && errorBox.hidden) { load(); }
       }, { rootMargin: '400px 0px' });
