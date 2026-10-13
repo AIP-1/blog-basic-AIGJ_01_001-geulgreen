@@ -59,7 +59,7 @@
     if (c.state === 'SECRET') { box.appendChild(el('p', 'comment-gone', '🔒 비밀 댓글이에요')); return box; }
     var head = el('p', 'comment-head');
     var a = el('a', 'comment-author'); a.href = '/@' + c.author.handle;
-    a.appendChild(el('span', null, c.author.nickname));
+    a.appendChild(el('span', null, c.author.handle));
     head.appendChild(a);
     if (c.author.isPostAuthor) { head.appendChild(el('span', 'badge', '작성자')); }
     if (c.secret) { head.appendChild(el('span', 'help secret-mark', '🔒 비밀')); }
@@ -67,7 +67,7 @@
     if (c.edited) { head.appendChild(el('span', 'help', ' · 수정됨')); }
     box.appendChild(head);
     if (c.state === 'HIDDEN') { box.appendChild(el('p', 'warning', '운영 정책에 따라 숨겨졌어요 (나만 보여요)')); }
-    if (c.replyTo) { box.appendChild(el('p', 'reply-to', '@' + c.replyTo.nickname + '에게')); }
+    if (c.replyTo) { box.appendChild(el('p', 'reply-to', '@' + (c.replyTo.handle || c.replyTo.nickname) + '에게')); }
     box.appendChild(el('p', 'comment-content', c.content));
     var actions = el('p', 'comment-actions');
     if (c.canReply) { actions.appendChild(el('button', 'comment-reply', '답글')); }

@@ -278,10 +278,11 @@ class NotificationIT extends IntegrationTestBase {
         assertThat(json).contains("볼 수 없는 글이에요").contains("\"unavailable\":true").doesNotContain("새글")
                 .doesNotContain("\"url\"");
         jdbc.update("UPDATE post SET visibility = 'PUBLIC' WHERE id = ?", p);
-        jdbc.update("UPDATE member SET nickname = '바뀐이름' WHERE id = ?", a);
-        assertThat(list(f1)).contains("바뀐이름님이 새 글을 올렸어요");
+        // 082: 알림의 이름은 아이디(지금 아이디로)
+        jdbc.update("UPDATE member SET handle = 'renamedid' WHERE id = ?", a);
+        assertThat(list(f1)).contains("renamedid님이 새 글을 올렸어요");
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = ? WHERE id = ?", Timestamp.from(T), a);
-        assertThat(list(f1)).contains("볼 수 없는 글이에요").doesNotContain("바뀐이름");
+        assertThat(list(f1)).contains("볼 수 없는 글이에요").doesNotContain("renamedid님");
     }
 
     @Test

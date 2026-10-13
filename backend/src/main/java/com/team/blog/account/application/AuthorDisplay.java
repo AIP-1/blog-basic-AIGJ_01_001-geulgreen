@@ -35,9 +35,9 @@ public record AuthorDisplay(String handle, String nickname, boolean withdrawn, S
         return withdrawn ? WITHDRAWN_LABEL : nickname + " @" + handle;
     }
 
-    /** 정상: {@code 김민서} / 탈퇴: {@code 탈퇴한 사용자}. */
+    /** 082 강성찬 개인 확장: 인스타그램처럼 아이디가 주 이름. 정상: {@code kim755030} / 탈퇴: {@code 탈퇴한 사용자}. */
     public String shortLabel() {
-        return withdrawn ? WITHDRAWN_LABEL : nickname;
+        return withdrawn ? WITHDRAWN_LABEL : handle;
     }
 
     /** 정상: {@code /@kim755030} / 탈퇴: null(링크 없음). */
