@@ -18,3 +18,8 @@ dependencies {
     runtimeOnly("org.webjars.npm:turndown:7.2.0") { isTransitive = false } // Node용 DOM(domino)은 필요 없음
     runtimeOnly("org.webjars.npm:turndown-plugin-gfm:1.0.2")
 }
+
+// 071 릴리스 노트(강성찬 개인 확장): 저장소 맨 위 CHANGELOG.md를 jar의 releases/에 넣어 /releases가 읽는다
+tasks.processResources {
+    from(rootProject.file("CHANGELOG.md")) { into("releases") }
+}

@@ -7,6 +7,8 @@ COPY gradle gradle
 # 두 모듈: backend(서버) + frontend(화면 jar) → backend의 실행 jar 하나로 묶임
 COPY backend backend
 COPY frontend frontend
+# /releases 화면이 읽는 릴리스 노트(071)
+COPY CHANGELOG.md ./
 RUN ./gradlew --no-daemon -q :backend:bootJar -x test && cp backend/build/libs/backend-*-SNAPSHOT.jar /app.jar
 
 FROM eclipse-temurin:21-jre
