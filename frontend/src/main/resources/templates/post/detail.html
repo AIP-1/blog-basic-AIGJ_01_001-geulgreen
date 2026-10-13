@@ -52,6 +52,9 @@
                 <span> · <time th:attr="datetime=${post.displayDate()}" th:text="${displayDate}">2026.10.02</time></span>
                 <span th:if="${editedDate != null}" class="post-edited"> · 수정됨 <time th:attr="datetime=${post.editedAt()}" th:text="${editedDate}">10월 3일</time></span>
             </p>
+            <!-- 080 강성찬 개인 확장: velog처럼 작성자 줄 오른쪽에 팔로우(내 글이면 ⋯ 메뉴) -->
+            <th:block th:unless="${viewerIsAuthor}"><th:block
+                      th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
             <!-- 075 강성찬 개인 확장: 작성자 도구는 작성자 줄 오른쪽 ⋯ 메뉴 하나로(FR-016). 서버는 각 기능에서 다시 검사한다 -->
             <details th:if="${viewerIsAuthor}" class="sort-menu post-owner-menu">
                 <summary aria-label="글 관리">⋯</summary>
@@ -78,6 +81,10 @@
                 </div>
             </details>
             </div>
+            <!-- 080: 태그 칩은 작성자 줄 바로 아래 -->
+            <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
+                <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
+            </ul>
             <span th:if="${viewerIsAuthor}" id="author-action-status" class="help" role="status"></span>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
@@ -103,9 +110,6 @@
         <!-- 039 강성찬 개인 확장: 목차(스크립트가 소제목으로 채운다, 2개 미만이면 숨김) -->
         <nav th:if="${tocEnabled}" id="post-toc" class="post-toc" aria-label="목차" hidden></nav>
         <div class="post-body" th:utext="${post.contentHtml()}"></div>
-        <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
-            <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
-        </ul>
         <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 글 설정 창에서 고른다) -->
         <p th:if="${postCategory != null}" class="post-category">
             <a class="tag" th:href="@{${paths.blog(post.author().handle())}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
@@ -120,17 +124,13 @@
             <span th:text="${'연속 ' + missionStats.streak() + '일 · 지금까지 ' + missionStats.total() + '번'}">연속 1일</span>
             · <a href="/missions">다른 친구들 글 보러 가기</a>
         </p>
-        <!-- 038 강성찬 개인 확장: 이전 글·다음 글, 관련 글 -->
+        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 080 아래 "관심 있을 만한 글"로 합쳤다) -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
                 <span class="help">이전 글</span><span th:text="${prevPost.title()}">이전 글 제목</span></a>
             <a th:if="${nextPost != null}" class="post-nav-next" th:href="${nextPost.url()}">
                 <span class="help">다음 글</span><span th:text="${nextPost.title()}">다음 글 제목</span></a>
         </nav>
-        <section th:if="${relatedPosts != null and !relatedPosts.isEmpty()}" class="related-posts" aria-labelledby="related-heading">
-            <h2 id="related-heading">관련 글</h2>
-            <ul><li th:each="r : ${relatedPosts}"><a th:href="${r.url()}" th:text="${r.title()}">관련 글</a></li></ul>
-        </section>
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
         <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
@@ -220,6 +220,15 @@
             </th:block>
         </section>
     </article>
+    <!-- 080 강성찬 개인 확장: 댓글 다음 "관심 있을 만한 글". 글 화면은 쿼리를 늘리지 않고, list-more.js가 끝에 닿으면 첫 묶음부터(커서 0) 무한 스크롤로 불러온다 -->
+    <section class="more-posts" aria-labelledby="more-heading">
+        <h2 id="more-heading">관심 있을 만한 글</h2>
+        <div class="card-grid" id="card-grid"></div>
+        <div class="list-more" th:attr="data-list-api=${'/api/posts/' + post.id() + '/more'}" data-show-author="true">
+            <a class="more-button" href="/" data-cursor="0">더 많은 글 보기</a>
+            <p class="list-error" role="alert" hidden>불러오지 못했어요 <button type="button" class="list-retry">다시 시도</button></p>
+        </div>
+    </section>
     <!-- 075 강성찬 개인 확장: 글 설정 창(카테고리·시리즈·카드 한 줄 소개). ⋯ 메뉴의 [글 설정]으로 연다 -->
     <dialog th:if="${viewerIsAuthor}" id="post-settings" class="post-settings" aria-labelledby="post-settings-heading">
         <div class="post-settings-head">
@@ -313,6 +322,7 @@
     <script th:src="@{/js/post/comments.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
     <script th:src="@{/js/follow/follow.js}" defer></script>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:if="${recordView}" th:src="@{/js/post/post-view.js}" defer></script>
 </main>
 </body>

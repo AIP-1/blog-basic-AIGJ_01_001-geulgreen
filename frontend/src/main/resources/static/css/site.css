@@ -621,8 +621,6 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
     border-radius: 12px; color: var(--color-text); text-decoration: none; background: var(--color-surface); }
 .post-nav a:hover { background: var(--color-surface-muted); }
 .post-nav .post-nav-next { text-align: right; }
-.related-posts h2 { font-size: 1.05em; margin: 16px 0 8px; }
-.related-posts ul { margin: 0; padding-left: 1.2em; }
 /* 075 글 상세 작성자 ⋯ 메뉴·글 설정 창(강성찬 개인 확장): 읽는 흐름엔 글만, 작성자 도구는 작성자 줄 오른쪽에 */
 .post-meta-row { display: flex; gap: 8px; align-items: center; }
 .post-meta-row .post-meta { flex: 1; min-width: 0; margin: 0; }
@@ -643,9 +641,13 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
 a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
 a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
-.related-posts { margin: 24px 0; }
 .post-category, .post-missions { margin: 8px 0; font-size: .9em; }
 .mission-done-note { margin: 8px 0; padding: 8px 12px; font-size: .88em; }
+/* 080 강성찬 개인 확장: velog처럼 작성자 줄 오른쪽 팔로우, 태그는 그 아래, 댓글 다음 관심 있을 만한 글 */
+.post-meta-row .follow-form, .post-meta-row > .follow-button { flex: none; }
+.post-head .post-tags { margin: 14px 0 0; }
+.more-posts { margin: 48px 0 24px; padding-top: 28px; border-top: 1px solid var(--color-border); }
+.more-posts h2 { font-size: 1.2em; margin: 0 0 16px; }
 /* 037 카테고리·041 시리즈·040 방명록·043 비밀 댓글(강성찬 개인 확장) */
 .blog-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .blog-links a { text-decoration: none; }
