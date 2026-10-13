@@ -6,52 +6,27 @@
 </head>
 <body>
 <main class="list-page mission-page">
-    <!-- 057 강성찬 개인 확장: 오늘의 미션 -->
-    <section class="tags-hero mission-hero" aria-labelledby="mission-title">
-        <div class="tags-hero-text">
+    <!-- 057 강성찬 개인 확장: 오늘의 미션. 075 후속: 오늘의 주제가 맨 위 주인공, 바로 아래 글, 기록·배지·지난 미션은 맨 아래 접는 "미션 정보" 칸 -->
+    <section class="mission-topics" aria-labelledby="mission-title">
+        <div class="mission-head">
             <h1 id="mission-title"><th:block th:replace="~{fragments/icons :: paw}"></th:block>
-                <span th:text="${isToday ? '오늘의 미션' : '지난 미션'}">오늘의 미션</span></h1>
-            <p><strong th:text="${dayLabel}">10월 12일 (일)</strong><br>
-                <span th:if="${isToday}">주제 하나를 골라 글을 쓰면 오늘의 미션 완료! 친구들의 글에도 댓글로 응원해 주세요.</span>
-                <span th:unless="${isToday}">그날의 주제와 글이에요. 미션은 그날 안에 쓴 글만 완료로 세요.</span></p>
+                <span th:text="${isToday ? '오늘의 미션' : '지난 미션'}">오늘의 미션</span>
+                <strong class="mission-day" th:text="${dayLabel}">10월 12일 (일)</strong>
+                <span class="count-chip" th:text="${anyAi ? 'AI 추천' : '글그린 추천'}">AI 추천</span></h1>
             <nav class="mission-days" aria-label="날짜 옮기기">
                 <a th:href="@{/missions(date=${prevDay})}">← 전날</a>
                 <a th:if="${!isToday}" href="/missions">오늘</a>
                 <a th:if="${nextDay != null}" th:href="@{/missions(date=${nextDay})}">다음날 →</a>
             </nav>
         </div>
-        <img class="tags-hero-art" th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641">
-    </section>
-
-    <!-- 내 기록(완료 횟수·연속 일수) -->
-    <section th:if="${myStats != null}" class="mission-stats" aria-label="내 미션 기록">
-        <p class="mission-stat"><span class="help">지금까지</span><strong th:text="${myStats.total() + '번'}">0번</strong></p>
-        <p class="mission-stat"><span class="help">연속</span><strong th:text="${'🔥 ' + myStats.streak() + '일'}">0일</strong></p>
-        <p class="mission-stat"><span class="help">최고 연속</span><strong th:text="${myStats.best() + '일'}">0일</strong></p>
-        <p class="mission-stat mission-today-state" th:if="${isToday}">
+        <p class="help">
+            <span th:if="${isToday}">주제 하나를 골라 글을 쓰면 오늘의 미션 완료! 친구들의 글에도 댓글로 응원해 주세요.</span>
+            <span th:unless="${isToday}">그날의 주제와 글이에요. 미션은 그날 안에 쓴 글만 완료로 세요.</span></p>
+        <p class="mission-today-state" th:if="${isToday and myStats != null}">
             <th:block th:if="${myStats.doneToday()}">🎉 오늘 미션 완료!
                 <a th:if="${myTodayPost != null}" th:href="${myTodayPost.url()}" th:text="${'「' + myTodayPost.title() + '」'}">내 글</a></th:block>
-            <th:block th:unless="${myStats.doneToday()}">아직 오늘 미션을 안 했어요. 아래에서 주제를 골라 보세요</th:block>
+            <th:block th:unless="${myStats.doneToday()}">아직 오늘 미션을 안 했어요. 아래 주제 중 하나를 골라 보세요</th:block>
         </p>
-    </section>
-
-    <!-- 066 강성찬 개인 확장: 미션 배지(완료한 날 수·최고 연속으로 정함, 나만 봄) -->
-    <section th:if="${myBadges != null}" class="mission-badges" aria-labelledby="badges-heading">
-        <h2 id="badges-heading">🏅 내 배지 <span class="count-chip" th:text="${myBadgeCount + ' / ' + myBadges.size()}">1 / 7</span></h2>
-        <ul class="badge-list">
-            <li th:each="b : ${myBadges}" th:class="${b.earned() ? 'badge-item is-earned' : 'badge-item'}">
-                <span class="badge-emoji" aria-hidden="true" th:text="${b.emoji()}">🌱</span>
-                <strong th:text="${b.name()}">첫 미션</strong>
-                <span class="help" th:text="${b.earned() ? '받았어요' : b.rule()}">받았어요</span>
-            </li>
-        </ul>
-    </section>
-
-    <section class="tags-box" aria-labelledby="topics-heading">
-        <div class="tags-box-head">
-            <h2 id="topics-heading"><span th:text="${isToday ? '🗓 오늘의 주제' : '🗓 그날의 주제'}">🗓 오늘의 주제</span>
-                <span class="count-chip" th:text="${anyAi ? 'AI 추천' : '글그린 추천'}">AI 추천</span></h2>
-        </div>
         <p th:if="${topics.isEmpty()}" class="empty-state">이날은 주제가 없었어요</p>
         <ol class="topic-cards">
             <li th:each="t, st : ${topics}" th:class="${'topic-card tone-' + (st.index == 0 ? 'green' : st.index == 1 ? 'blue' : 'orange')}">
@@ -62,9 +37,9 @@
                 <th:block th:if="${isToday}">
                     <form th:if="${currentMemberId != null}" method="post" th:action="@{/missions/topics/{id}/write(id=${t.id()})}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button type="submit" class="btn btn-primary btn-sm">✍ 이 주제로 쓰기</button>
+                        <button type="submit" class="btn btn-primary">✍ 이 주제로 쓰기</button>
                     </form>
-                    <a th:unless="${currentMemberId != null}" class="btn btn-sm" href="/login?redirect=/missions">로그인하고 쓰기</a>
+                    <a th:unless="${currentMemberId != null}" class="btn" href="/login?redirect=/missions">로그인하고 쓰기</a>
                 </th:block>
             </li>
         </ol>
@@ -84,10 +59,33 @@
         </ul>
     </section>
 
-    <section th:if="${!pastDays.isEmpty()}" class="mission-past" aria-labelledby="past-heading">
-        <h2 id="past-heading">지난 미션</h2>
-        <p class="mission-past-links"><a th:each="d : ${pastDays}" th:href="@{/missions(date=${d.date()})}" th:text="${d.label()}">10월 11일</a></p>
-    </section>
+    <details th:if="${myStats != null or !pastDays.isEmpty()}" class="mission-info">
+        <summary>미션 정보 <span class="help" th:if="${myStats != null}" th:text="${'🔥 연속 ' + myStats.streak() + '일 · 기록·배지·지난 미션'}">🔥 연속 0일</span>
+            <span class="help" th:if="${myStats == null}">지난 미션</span></summary>
+            <!-- 내 기록(완료 횟수·연속 일수) -->
+            <section th:if="${myStats != null}" class="mission-stats" aria-label="내 미션 기록">
+                <p class="mission-stat"><span class="help">지금까지</span><strong th:text="${myStats.total() + '번'}">0번</strong></p>
+                <p class="mission-stat"><span class="help">연속</span><strong th:text="${'🔥 ' + myStats.streak() + '일'}">0일</strong></p>
+                <p class="mission-stat"><span class="help">최고 연속</span><strong th:text="${myStats.best() + '일'}">0일</strong></p>
+            </section>
+
+            <!-- 066 강성찬 개인 확장: 미션 배지(완료한 날 수·최고 연속으로 정함, 나만 봄) -->
+            <section th:if="${myBadges != null}" class="mission-badges" aria-labelledby="badges-heading">
+                <h2 id="badges-heading">🏅 내 배지 <span class="count-chip" th:text="${myBadgeCount + ' / ' + myBadges.size()}">1 / 7</span></h2>
+                <ul class="badge-list">
+                    <li th:each="b : ${myBadges}" th:class="${b.earned() ? 'badge-item is-earned' : 'badge-item'}">
+                        <span class="badge-emoji" aria-hidden="true" th:text="${b.emoji()}">🌱</span>
+                        <strong th:text="${b.name()}">첫 미션</strong>
+                        <span class="help" th:text="${b.earned() ? '받았어요' : b.rule()}">받았어요</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section th:if="${!pastDays.isEmpty()}" class="mission-past" aria-labelledby="past-heading">
+                <h2 id="past-heading">지난 미션</h2>
+                <p class="mission-past-links"><a th:each="d : ${pastDays}" th:href="@{/missions(date=${d.date()})}" th:text="${d.label()}">10월 11일</a></p>
+            </section>
+    </details>
 </main>
 <!-- 미션 글 한 줄: 제목·요약·주제·글쓴이, 댓글 달러 가기(파라미터 이름은 부르는 쪽 반복 변수와 다르게) -->
 <li th:fragment="missionPost(mp)" class="mission-post">
