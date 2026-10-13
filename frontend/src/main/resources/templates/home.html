@@ -7,9 +7,9 @@
 <body>
 <main class="list-page">
     <!-- 067 첫 배너 사진은 css를 읽기 전에 미리 받기 시작(강성찬 개인 확장) -->
-    <link th:if="${heroPhoto and !continued}" rel="preload" as="image" th:href="@{/images/hero.jpg}" fetchpriority="high">
+    <link th:if="${heroPhoto and !continued}" rel="preload" as="image" th:href="@{/images/hero.webp}" fetchpriority="high">
     <p th:if="${welcomeBack != null}" class="notice" role="status">다시 오신 걸 환영해요</p>
-    <!-- 시안(10-08) 소개 영역: 첫 화면에만, 화면 폭 전체. 사진(static/images/hero.jpg)이 있으면 배경, 없으면 고양이 그림 -->
+    <!-- 시안(10-08) 소개 영역: 첫 화면에만, 화면 폭 전체. 사진(static/images/hero.webp)이 있으면 배경, 없으면 고양이 그림 -->
     <section class="hero" th:unless="${continued}" th:classappend="${heroPhoto} ? 'hero-photo'" aria-label="소개">
         <div class="hero-inner">
             <div class="hero-text">
@@ -27,14 +27,11 @@
     <div class="home-layout">
     <div class="home-main">
     <h1 class="visually-hidden" th:text="${tab == 'trending' ? '트렌딩' : '전체 글'}">전체 글</h1>
-    <!-- 019 [최신] [트렌딩] 탭(기본 최신) + 인기 태그 바로가기 -->
+    <!-- 019 [최신] [트렌딩] 탭(기본 최신). 인기 태그는 오른쪽 상자 하나로(067 강성찬 개인 확장) -->
     <div class="home-tabs-row">
         <nav class="manage-tabs home-tabs" aria-label="목록 탭">
             <a href="/" th:attr="aria-current=${tab == 'latest' ? 'page' : null}">최신 글</a>
             <a href="/?tab=trending" th:attr="aria-current=${tab == 'trending' ? 'page' : null}">트렌딩</a>
-            <th:block th:each="t, st : ${popularTags}" th:if="${st.index < 3}">
-                <a th:href="@{/tags/{name}(name=${t.name()})}" th:text="${t.name()}">태그</a>
-            </th:block>
         </nav>
         <!-- 시안(10-08) 오른쪽 "더보기": 다음 쪽으로 -->
         <a th:if="${nextCursor != null}" class="home-more" th:href="${moreLinkBase + nextCursor}">더 보기 <span aria-hidden="true">→</span></a>
