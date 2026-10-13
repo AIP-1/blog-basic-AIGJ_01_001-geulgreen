@@ -110,10 +110,12 @@ class TrendingIT extends IntegrationTestBase {
         trending.refresh();
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", ids.get(13));
         String second = mockMvc.perform(get("/api/posts/trending?cursor=" + cursor)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(2)).andExpect(jsonPath("$.nextCursor").doesNotExist())
+                .andExpect(jsonPath("$.items.length()").value(2)).andExpect(jsonPath("$.nextCursor").value("latest:")) // 067 후속: 순위 끝 → 최신 글로
                 .andReturn().getResponse().getContentAsString();
         collect(second, seen);
         assertThat(seen).hasSize(14).doesNotContain(ids.get(13));
+        mockMvc.perform(get("/api/posts/trending?cursor=latest:")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(12)).andExpect(jsonPath("$.nextCursor").value(org.hamcrest.Matchers.startsWith("latest:")));
         // 새 순위는 뒤집힌 글이 맨 앞
         mockMvc.perform(get("/api/posts/trending")).andExpect(jsonPath("$.items[0].id").value(ids.get(14)));
         // 사라진 순위는 410, 모양이 틀린 커서는 400

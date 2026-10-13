@@ -62,6 +62,7 @@
 
     function setStatus(kind, detail) {
       statusLine.textContent = '';
+      statusLine.dataset.kind = kind; // 068 후속: 좁은 화면은 저장됨·기기 저장 표시만 숨김(css)
       if (kind === 'saved') {
         statusLine.textContent = '✓ 저장됨 ' + hhmm((detail && detail.savedAt) || new Date().toISOString());
       } else if (kind === 'local') {

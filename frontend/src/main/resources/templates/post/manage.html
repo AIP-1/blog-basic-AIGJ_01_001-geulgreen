@@ -5,7 +5,7 @@
     <title>내 글</title>
 </head>
 <body>
-<main id="manage" th:attr="data-tab=${tab},data-visibility=${visibility}">
+<main id="manage" class="list-page" th:attr="data-tab=${tab},data-visibility=${visibility}">
     <div class="manage-head">
         <h1>내 글</h1>
         <form method="post" action="/write">
@@ -35,62 +35,10 @@
     <p th:if="${continued}"><a th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
     <p th:if="${rows.isEmpty()}" class="help">아직 글이 없어요.</p>
 
-    <ul class="post-rows" id="post-rows">
+    <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드 조각, 관리 정보는 배지, 관리 버튼은 ⋯ 메뉴 -->
+    <ul class="post-rows card-grid home-cards" id="post-rows">
         <li th:each="row : ${rows}" class="post-row" th:attr="data-post-id=${row.id()}">
-            <div class="row-main">
-                <!-- 임시글 -->
-                <th:block th:if="${tab == 'drafts'}">
-                    <a th:href="@{/write/{id}(id=${row.id()})}" th:classappend="${#strings.isEmpty(#strings.trim(row.title())) ? 'untitled' : ''}"
-                       th:text="${#strings.isEmpty(#strings.trim(row.title())) ? '(제목 없음)' : row.title()}">제목</a>
-                    <span class="help" th:text="${'마지막 저장 ' + savedLabels.get(row.id())}">마지막 저장</span>
-                    <span class="badge" th:if="${scheduleLabels != null and scheduleLabels.containsKey(row.id())}"
-                          th:text="${'⏰ 예약 · ' + scheduleLabels.get(row.id())}">예약</span>
-                </th:block>
-                <!-- 발행 글 -->
-                <th:block th:if="${tab == 'published'}">
-                    <span class="visibility-icon" data-visibility-badge th:attr="data-visibility=${row.visibility()}">
-                        <span aria-hidden="true" th:text="${row.visibility() == 'PRIVATE' ? '🔒' : (row.visibility() == 'FRIENDS' ? '👥' : (row.visibility() == 'LINK' ? '🔗' : (row.visibility() == 'GROUP' ? '🧑‍🤝‍🧑' : '🌐')))}">🌐</span><span class="visually-hidden" th:text="${row.visibility() == 'PRIVATE' ? '비공개' : (row.visibility() == 'FRIENDS' ? '친구 공개' : (row.visibility() == 'LINK' ? '링크 공개' : (row.visibility() == 'GROUP' ? '그룹 공개' : '공개')))}">공개</span></span>
-                    <a th:href="${row.url()}" th:text="${row.title()}">제목</a>
-                    <span class="badge badge-editing" th:if="${row.editing()}">수정 중</span>
-                    <span class="badge" th:if="${row.hidden()}" title="운영 정책에 따라 숨겨졌어요">숨김</span>
-                    <span class="help"><span th:text="${dates.get(row.id())}">발행일</span><span th:if="${row.editedAt() != null}"
-                          th:text="${' · 수정됨 ' + @koreanDateFormatter.format(row.editedAt())}"></span>
-                        · <span th:text="${'조회 ' + views.get(row.id())}">조회</span> · <span th:text="${'♥ ' + row.likeCount()}">♥</span>
-                        · <span th:text="${'💬 ' + row.commentCount()}">💬</span></span>
-                </th:block>
-                <!-- 휴지통 -->
-                <th:block th:if="${tab == 'trash'}">
-                    <span th:text="${#strings.isEmpty(#strings.trim(row.title())) ? '(제목 없음)' : row.title()}">제목</span>
-                    <span class="help" th:text="${row.status().name() == 'DRAFT' ? '(임시글이었음)' : '(발행 글이었음)'}">(발행 글이었음)</span>
-                    <span class="help" th:text="${'삭제 ' + dates.get(row.id()) + ' · ' + daysLeft.get(row.id()) + '일 뒤 완전 삭제'}">삭제일</span>
-                </th:block>
-            </div>
-            <div class="row-actions">
-                <th:block th:if="${tab == 'drafts'}">
-                    <a th:href="@{/write/{id}(id=${row.id()})}">이어 쓰기</a>
-                </th:block>
-                <th:block th:if="${tab == 'published'}">
-                    <a th:href="${row.url()}">보기</a>
-                    <a th:href="@{/write/{id}(id=${row.id()})}" th:text="${row.editing() ? '이어서 수정' : '수정'}">수정</a>
-                    <button type="button" th:if="${row.editing()}" class="discard-editing" th:attr="data-post-id=${row.id()}">변경 취소</button>
-                    <button type="button" class="visibility-toggle" th:attr="data-post-id=${row.id()},data-visibility=${row.visibility()}"
-                            th:text="${row.visibility() != 'PUBLIC' ? '전체 공개로' : '나만 보기로'}">나만 보기로</button>
-                </th:block>
-                <form th:if="${tab != 'trash'}" method="post" th:action="@{/manage/posts/{id}/trash(id=${row.id()},tab=${tab})}" data-row-action="trash">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit">삭제</button>
-                </form>
-                <th:block th:if="${tab == 'trash'}">
-                    <form method="post" th:action="@{/manage/posts/{id}/restore(id=${row.id()},tab=${tab})}" data-row-action="restore">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button type="submit">복구</button>
-                    </form>
-                    <form method="post" th:action="@{/manage/posts/{id}/purge(id=${row.id()},tab=${tab})}" data-row-action="purge">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button type="submit">영구 삭제</button>
-                    </form>
-                </th:block>
-            </div>
+            <article th:replace="~{fragments/post-card :: cardWith(${cards.get(row.id())}, ${cardLabels.get(row.id())}, false, ~{post/manage :: manageExtra})}"></article>
             <p class="row-error field-error" role="alert" hidden></p>
         </li>
     </ul>
@@ -99,5 +47,53 @@
     <p id="manage-notice" class="notice" role="status" hidden></p>
     <script th:src="@{/js/post/manage.js}" defer></script>
 </main>
+
+<!-- 카드에 덧붙는 관리 부분(row·tab은 부르는 쪽 값) -->
+<th:block th:fragment="manageExtra">
+    <p class="manage-badges">
+        <th:block th:if="${tab == 'drafts'}">
+            <span class="badge">임시글</span>
+            <span class="badge" th:if="${scheduleLabels != null and scheduleLabels.containsKey(row.id())}"
+                  th:text="${'⏰ 예약 · ' + scheduleLabels.get(row.id())}">예약</span>
+        </th:block>
+        <th:block th:if="${tab == 'published'}">
+            <span class="visibility-icon" data-visibility-badge th:attr="data-visibility=${row.visibility()}">
+                <span aria-hidden="true" th:text="${row.visibility() == 'PRIVATE' ? '🔒' : (row.visibility() == 'FRIENDS' ? '👥' : (row.visibility() == 'LINK' ? '🔗' : (row.visibility() == 'GROUP' ? '🧑‍🤝‍🧑' : '🌐')))}">🌐</span><span class="visually-hidden" th:text="${row.visibility() == 'PRIVATE' ? '비공개' : (row.visibility() == 'FRIENDS' ? '친구 공개' : (row.visibility() == 'LINK' ? '링크 공개' : (row.visibility() == 'GROUP' ? '그룹 공개' : '공개')))}">공개</span></span>
+            <span class="badge badge-editing" th:if="${row.editing()}">수정 중</span>
+            <span class="badge" th:if="${row.hidden()}" title="운영 정책에 따라 숨겨졌어요">숨김</span>
+            <span class="badge" th:text="${'조회 ' + views.get(row.id())}">조회</span>
+        </th:block>
+        <th:block th:if="${tab == 'trash'}">
+            <span class="badge" th:text="${row.status().name() == 'DRAFT' ? '(임시글이었음)' : '(발행 글이었음)'}">(발행 글이었음)</span>
+            <span class="badge" th:text="${daysLeft.get(row.id()) + '일 뒤 완전 삭제'}">30일 뒤 완전 삭제</span>
+        </th:block>
+    </p>
+    <details class="sort-menu manage-menu">
+        <summary aria-label="글 관리">⋯</summary>
+        <div class="sort-menu-panel">
+            <a th:if="${tab == 'drafts'}" th:href="@{/write/{id}(id=${row.id()})}">이어 쓰기</a>
+            <th:block th:if="${tab == 'published'}">
+                <a th:href="@{/write/{id}(id=${row.id()})}" th:text="${row.editing() ? '이어서 수정' : '수정'}">수정</a>
+                <button type="button" th:if="${row.editing()}" class="discard-editing" th:attr="data-post-id=${row.id()}">변경 취소</button>
+                <button type="button" class="visibility-toggle" th:attr="data-post-id=${row.id()},data-visibility=${row.visibility()}"
+                        th:text="${row.visibility() != 'PUBLIC' ? '전체 공개로' : '나만 보기로'}">나만 보기로</button>
+            </th:block>
+            <form th:if="${tab != 'trash'}" method="post" th:action="@{/manage/posts/{id}/trash(id=${row.id()},tab=${tab})}" data-row-action="trash">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="menu-danger">삭제</button>
+            </form>
+            <th:block th:if="${tab == 'trash'}">
+                <form method="post" th:action="@{/manage/posts/{id}/restore(id=${row.id()},tab=${tab})}" data-row-action="restore">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit">복구</button>
+                </form>
+                <form method="post" th:action="@{/manage/posts/{id}/purge(id=${row.id()},tab=${tab})}" data-row-action="purge">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="menu-danger">영구 삭제</button>
+                </form>
+            </th:block>
+        </div>
+    </details>
+</th:block>
 </body>
 </html>
