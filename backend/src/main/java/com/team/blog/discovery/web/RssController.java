@@ -49,7 +49,7 @@ public class RssController {
     @GetMapping("/@{handle}/rss")
     public ResponseEntity<String> blog(@PathVariable("handle") String handle) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
-        return feed(owner.nickname() + "의 블로그", com.team.blog.shared.web.BlogPaths.of(owner.handle()), owner.memberId());
+        return feed(owner.handle() + "의 블로그", com.team.blog.shared.web.BlogPaths.of(owner.handle()), owner.memberId());
     }
 
     private ResponseEntity<String> feed(String title, String link, Long authorId) {
@@ -71,7 +71,7 @@ public class RssController {
                     xml.append("<item><title>").append(esc(rs.getString("title"))).append("</title>")
                             .append("<link>").append(esc(url)).append("</link>")
                             .append("<guid isPermaLink=\"true\">").append(esc(url)).append("</guid>")
-                            .append("<author>").append(esc(rs.getString("nickname"))).append("</author>")
+                            .append("<author>").append(esc(rs.getString("handle"))).append("</author>")
                             .append("<pubDate>").append(DateTimeFormatter.RFC_1123_DATE_TIME.format(
                                     rs.getTimestamp("first_public_at").toInstant().atOffset(ZoneOffset.UTC))).append("</pubDate>")
                             .append("<description>").append(esc(rs.getString("excerpt"))).append("</description></item>\n");

@@ -51,7 +51,7 @@
       var top = el('p', 'card-top');
       if (showAuthor) {
         var a = el('a', 'card-author'); a.href = '/@' + item.author.handle;
-        a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.nickname || ''));
+        a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.handle || ''));
         top.appendChild(a);
       }
       if (item.firstTag) {
@@ -117,11 +117,22 @@
       if (io) { io.unobserve(box); if (next) { io.observe(box); } }
     }
 
-    function append(items) {
+    // 081 피드: reasons(추천 글 → 이유)면 "추천" 표시, dividerBefore 글 앞에 "팔로우한 글을 모두 봤어요"
+    function append(items, reasons, dividerBefore) {
       var ids = seen();
       items.forEach(function (item) {
         if (ids[item.id]) { return; }
-        grid.appendChild(card(item, showAuthor));
+        // 돌아와 복원할 때도 보이게 카드 자료에 함께 적어 둔다
+        item.recReason = (reasons && reasons[item.id]) || item.recReason;
+        item.feedDivider = item.id === dividerBefore || item.feedDivider;
+        if (item.feedDivider) { grid.appendChild(el('p', 'help feed-divider', '팔로우한 글을 모두 봤어요')); }
+        var node = card(item, showAuthor);
+        if (item.recReason) {
+          var badge = el('p', 'feed-rec-badge'); badge.appendChild(el('span', 'feed-rec-label', '추천'));
+          badge.appendChild(document.createTextNode(' ')); badge.appendChild(el('span', null, item.recReason));
+          var body = node.querySelector('.card-body'); body.insertBefore(badge, body.firstChild);
+        }
+        grid.appendChild(node);
         appended.push(item);
       });
     }
@@ -141,7 +152,7 @@
           if (!res.ok) { throw new Error(String(res.status)); }
           return res.json();
         })
-        .then(function (page) { loading = false; box.classList.remove('loading'); append(page.items || []); next = page.nextCursor; render(); })
+        .then(function (page) { loading = false; box.classList.remove('loading'); append(page.items || [], page.reasons, page.dividerBefore); next = page.nextCursor; render(); })
         .catch(function () {
           loading = false; box.classList.remove('loading');
           if (button) { button.textContent = '더 보기'; button.removeAttribute('aria-disabled'); button.style.pointerEvents = ''; }

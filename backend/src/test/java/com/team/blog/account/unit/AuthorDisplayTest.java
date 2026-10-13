@@ -12,7 +12,7 @@ class AuthorDisplayTest {
     void activeMember() {
         AuthorDisplay author = AuthorDisplay.of("kim755030", "김민서", null);
         assertThat(author.fullLabel()).isEqualTo("김민서 @kim755030");
-        assertThat(author.shortLabel()).isEqualTo("김민서");
+        assertThat(author.shortLabel()).isEqualTo("kim755030");
         assertThat(author.blogPath()).isEqualTo("/kim755030");
         assertThat(author.withdrawn()).isFalse();
     }

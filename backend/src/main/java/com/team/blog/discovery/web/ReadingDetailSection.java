@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
-/** 글 화면(강성찬 개인 확장): 039 목차·052 읽기 진행 막대 켜기, 054 고정 버튼, 038 공개 글이면 이전·다음 글과 관련 글. */
+/** 글 화면(강성찬 개인 확장): 039 목차·052 읽기 진행 막대 켜기, 054 고정 버튼, 038 공개 글이면 이전·다음 글. 080 관심 있을 만한 글은 화면이 /api/posts/{id}/more로 불러온다. */
 @Component
 public class ReadingDetailSection implements PostDetailSection {
 
@@ -39,6 +39,5 @@ public class ReadingDetailSection implements PostDetailSection {
         }
         model.addAttribute("prevPost", navigation.neighbor(post.authorId(), post.id(), post.firstPublicAt(), true).orElse(null));
         model.addAttribute("nextPost", navigation.neighbor(post.authorId(), post.id(), post.firstPublicAt(), false).orElse(null));
-        model.addAttribute("relatedPosts", navigation.related(post.id(), properties.relatedCount()));
     }
 }
