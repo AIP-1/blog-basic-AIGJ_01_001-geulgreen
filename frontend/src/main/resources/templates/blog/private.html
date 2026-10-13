@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${owner.nickname()}">블로그</title>
+</head>
+<body>
+<!-- 073 강성찬 개인 확장: 비공개 계정을 수락받지 않은 사람에게는 프로필 윗부분만 -->
+<main class="list-page">
+    <div class="blog-cover" aria-hidden="true"></div>
+    <header class="blog-header profile-header">
+        <th:block th:replace="~{fragments/avatar :: avatar(${owner.avatar()}, 96)}"></th:block>
+        <div class="profile-text">
+            <h1 th:replace="~{fragments/author :: byline(${author})}">닉네임 @주소</h1>
+            <p class="profile-bio" th:if="${owner.bio() != null}" th:text="${owner.bio()}">소개</p>
+            <p class="help">
+                <span th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</span> ·
+                <span th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</span>
+            </p>
+            <p>
+                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${'/@' + owner.handle()})}"></th:block>
+            </p>
+            <p class="follow-message help" role="status" hidden></p>
+        </div>
+    </header>
+    <section class="private-account" aria-labelledby="private-heading">
+        <h2 id="private-heading">🔒 비공개 계정이에요</h2>
+        <p class="help" th:text="${followRequested ? '팔로우 요청을 보냈어요. 수락되면 글을 볼 수 있어요' : '팔로우 요청이 수락되면 글을 볼 수 있어요'}">팔로우 요청이 수락되면 글을 볼 수 있어요</p>
+    </section>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
+</main>
+</body>
+</html>

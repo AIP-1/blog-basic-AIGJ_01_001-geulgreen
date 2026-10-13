@@ -33,7 +33,7 @@ public class PostNavigationQuery {
         String dir = older ? "DESC" : "ASC";
         // 별칭을 np·nm으로: 글 상세의 본 조회(010, 글 한 번만 읽기 검사)와 구분된다
         return jdbc.query("SELECT np.id, np.title, nm.handle FROM post np JOIN member nm ON nm.id = np.author_id WHERE "
-                        + accessPolicy.publicListingCondition("np", "nm") + " AND np.author_id = ? AND (np.first_public_at, np.id) "
+                        + accessPolicy.blogListingCondition("np", "nm") + " AND np.author_id = ? AND (np.first_public_at, np.id) "
                         + cmp + " (?, ?) ORDER BY np.first_public_at " + dir + ", np.id " + dir + " LIMIT 1",
                 (rs, i) -> new Link(rs.getLong("id"), rs.getString("title"), rs.getString("handle")),
                 authorId, Timestamp.from(firstPublicAt), postId).stream().findFirst();
