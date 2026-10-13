@@ -51,7 +51,7 @@
       var top = el('p', 'card-top');
       if (showAuthor) {
         var a = el('a', 'card-author'); a.href = '/@' + item.author.handle;
-        a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.nickname || ''));
+        a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.handle || ''));
         top.appendChild(a);
       }
       if (item.firstTag) {

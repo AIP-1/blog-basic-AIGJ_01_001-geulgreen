@@ -17,13 +17,13 @@
         <p class="comment-head">
             <a th:href="${paths.blog(c.author().handle())}" class="comment-author">
                 <th:block th:replace="~{fragments/avatar :: avatar(${c.author().avatar()}, 24)}"></th:block>
-                <span th:text="${c.author().nickname()}">닉네임</span></a>
+                <span th:text="${c.author().handle()}">아이디</span></a>
             <span class="badge" th:if="${c.author().isPostAuthor()}">작성자</span>
             <span class="help secret-mark" th:if="${c.secret()}">🔒 비밀</span>
             <time class="help" th:attr="datetime=${c.createdAt()}" th:text="${date}">3시간 전</time><span class="help" th:if="${c.edited()}"> · 수정됨</span>
         </p>
         <p th:if="${c.state() == 'HIDDEN'}" class="warning">운영 정책에 따라 숨겨졌어요 (나만 보여요)</p>
-        <p th:if="${c.replyTo() != null}" class="reply-to" th:text="${'@' + c.replyTo().nickname() + '에게'}">@닉네임에게</p>
+        <p th:if="${c.replyTo() != null}" class="reply-to" th:text="${'@' + (c.replyTo().handle() != null ? c.replyTo().handle() : c.replyTo().nickname()) + '에게'}">@아이디에게</p>
         <p class="comment-content" th:text="${c.content()}">내용</p>
         <p class="comment-actions">
             <button type="button" th:if="${c.canReply()}" class="comment-reply">답글</button>

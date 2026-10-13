@@ -6,7 +6,7 @@
 </head>
 <body>
 <main class="list-page search-page">
-    <h1 th:text="${owner != null ? owner.nickname() + '님의 블로그에서 검색' : '검색'}">검색</h1>
+    <h1 th:text="${owner != null ? owner.handle() + '님의 블로그에서 검색' : '검색'}">검색</h1>
     <form method="get" th:action="${searchBase}" role="search" class="search-form">
         <label for="search-q" class="visually-hidden">검색어</label>
         <input id="search-q" type="search" name="q" maxlength="50" th:value="${q}" placeholder="검색어를 입력하세요">
@@ -35,7 +35,7 @@
                     <p class="card-top">
                         <a class="card-author" th:href="${paths.blog(card.author().handle())}">
                             <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
-                            <span th:text="${card.author().nickname()}">닉네임</span></a>
+                            <span th:text="${card.author().handle()}">아이디</span></a>
                     </p>
                     <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${card.title()}">제목</a></h2>
                     <!-- 미리보기: 서버가 전체를 이스케이프한 뒤 검색어에만 <mark>를 붙인 값(FR-015) -->

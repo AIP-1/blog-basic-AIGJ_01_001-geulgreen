@@ -2,11 +2,11 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${owner.nickname() + (followers ? '님의 팔로워' : '님의 팔로잉')}">팔로워</title>
+    <title th:text="${owner.handle() + (followers ? '님의 팔로워' : '님의 팔로잉')}">팔로워</title>
 </head>
 <body>
 <main class="list-page">
-    <h1 th:text="${owner.nickname() + (followers ? '님의 팔로워 ' : '님이 팔로우하는 사람 ') + count}">팔로워 0</h1>
+    <h1 th:text="${owner.handle() + (followers ? '님의 팔로워 ' : '님이 팔로우하는 사람 ') + count}">팔로워 0</h1>
     <p><a th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <p th:if="${continued}"><a th:href="${base}">처음부터 보기</a></p>
     <p th:if="${page.items().isEmpty() and !continued}" class="empty-state"

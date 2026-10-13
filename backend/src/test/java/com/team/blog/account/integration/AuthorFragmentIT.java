@@ -30,9 +30,9 @@ class AuthorFragmentIT extends IntegrationTestBase {
     @Test
     void rendersBylineAndNameForActiveMember() {
         String html = render(AuthorDisplay.of("kim755030", "김민서", null));
-        assertThat(html).contains("<a class=\"author-byline author-nickname\" href=\"/kim755030\">김민서</a>")
+        assertThat(html).contains("<a class=\"author-byline author-nickname\" href=\"/kim755030\">kim755030</a>")
                 .contains("<a class=\"profile-handle\" href=\"/kim755030\">kim755030</a><span class=\"person-nickname\">김민서</span>")
-                .contains("<span class=\"author-name\">김민서</span>");
+                .contains("<span class=\"author-name\">kim755030</span>");
     }
 
     @Test
@@ -58,7 +58,7 @@ class AuthorFragmentIT extends IntegrationTestBase {
         Map<Long, AuthorDisplay> result = memberSummaryQuery.findByIds(List.of(a, b, c, d));
         assertThat(statistics.getPrepareStatementCount()).isEqualTo(1);
         assertThat(result.get(a).fullLabel()).isEqualTo("김민서 @kim755030");
-        assertThat(result.get(b).shortLabel()).isEqualTo("이영희");
+        assertThat(result.get(b).shortLabel()).isEqualTo("lee755030");
         assertThat(result.get(c).fullLabel()).isEqualTo("탈퇴한 사용자");
         assertThat(result.get(d).fullLabel()).isEqualTo("탈퇴한 사용자");
     }
