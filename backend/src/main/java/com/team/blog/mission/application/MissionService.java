@@ -239,12 +239,17 @@ public class MissionService {
 
     /** 완료한 날: 주제가 나온 날 안에 발행했고 지금도 발행·삭제 안 됨. */
     public Stats stats(long memberId) {
+        return stats(doneDays(memberId), today());
+    }
+
+    /** 미션을 완료한 날 모음(미션 화면 달력도 쓴다). */
+    public TreeSet<LocalDate> doneDays(long memberId) {
         List<LocalDate> days = jdbc.queryForList("""
                 SELECT DISTINCT dt.day FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id JOIN post p ON p.id = mp.post_id
                 WHERE mp.member_id = ? AND mp.completed_at IS NOT NULL AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL
                   AND (mp.completed_at AT TIME ZONE 'Asia/Seoul')::date = dt.day
                 """, Date.class, memberId).stream().map(Date::toLocalDate).toList();
-        return stats(new TreeSet<>(days), today());
+        return new TreeSet<>(days);
     }
 
     /** 날짜 모음으로 기록 계산(테스트도 쓴다). */
