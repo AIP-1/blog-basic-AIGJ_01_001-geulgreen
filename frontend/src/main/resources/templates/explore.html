@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>탐색 - 글그린</title>
+</head>
+<body>
+<!-- 079 강성찬 개인 확장: 탐색. 홈 오른쪽 칸과 같은 내용을 휴대폰에서도 볼 수 있게 한 화면에 -->
+<main class="list-page explore-page">
+    <h1>탐색</h1>
+    <section th:if="${!popularTags.isEmpty()}" class="side-box" aria-labelledby="explore-tags-heading">
+        <h2 id="explore-tags-heading"><th:block th:replace="~{fragments/icons :: tag}"></th:block> 인기 태그</h2>
+        <ul class="tag-pills side-pills">
+            <li th:each="t : ${popularTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, ${tagStyles.get(t.name())})}"></a></li>
+        </ul>
+    </section>
+    <section th:if="${!newcomers.isEmpty()}" class="newcomers" aria-labelledby="newcomers-heading">
+        <h2 id="newcomers-heading">새로 온 작가 <span class="help">첫 글을 반겨 주세요</span></h2>
+        <ul class="newcomer-list">
+            <li th:each="n : ${newcomers}" class="newcomer">
+                <a th:href="${paths.blog(n.handle())}" class="newcomer-who">
+                    <th:block th:replace="~{fragments/avatar :: avatar(${n.avatar()}, 36)}"></th:block>
+                    <span th:text="${n.nickname()}">닉네임</span></a>
+                <a th:href="${n.url()}" class="newcomer-post" th:text="${'첫 글 · ' + n.title()}">첫 글</a>
+            </li>
+        </ul>
+    </section>
+    <div class="explore-grid">
+        <section th:if="${!recommendedPosts.isEmpty()}" class="side-box" aria-labelledby="explore-posts-heading">
+            <h2 id="explore-posts-heading">추천 글</h2>
+            <ol class="side-post-list">
+                <li th:each="p : ${recommendedPosts}">
+                    <a th:href="${p.url()}" th:text="${p.title()}">제목</a>
+                    <span class="help" th:text="${p.author().nickname()}">작가</span>
+                </li>
+            </ol>
+        </section>
+        <section th:if="${!recommended.isEmpty()}" class="side-box" aria-labelledby="explore-rec-heading">
+            <h2 id="explore-rec-heading">추천 블로그</h2>
+            <ul class="side-rec-list">
+                <li th:each="b : ${recommended}">
+                    <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
+                        <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 28)}"></th:block>
+                        <span th:text="${b.nickname()}">닉네임</span></a>
+                    <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, ${currentMemberId != null}, '/login', '/explore')}"></th:block>
+                </li>
+            </ul>
+            <p class="follow-message help" role="status" hidden></p>
+        </section>
+    </div>
+    <p th:if="${popularTags.isEmpty() and newcomers.isEmpty() and recommendedPosts.isEmpty() and recommended.isEmpty()}"
+       class="empty-state">아직 둘러볼 글이 없어요 <a href="/">홈으로</a></p>
+    <script th:src="@{/js/post/drag-scroll.js}" defer></script>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
+</main>
+</body>
+</html>
