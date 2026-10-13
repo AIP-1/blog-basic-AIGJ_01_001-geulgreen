@@ -71,7 +71,7 @@
                 <p class="field-error" data-error-for="bio" role="alert"></p>
             </div>
 
-            <div class="field">
+            <div class="field" th:unless="${handleChangeEnabled}">
                 <span>블로그 주소</span>
                 <span class="readonly" th:text="'@' + ${profile.handle()}">@주소</span>
                 <span class="help">(변경할 수 없어요)</span>
@@ -79,6 +79,27 @@
 
             <button type="submit">저장</button>
             <p class="form-status" id="profile-status" aria-live="polite"></p>
+        </form>
+
+        <!-- 074 강성찬 개인 확장: 블로그 주소(아이디) 바꾸기. 14일에 두 번, 예전 주소는 14일 동안 나만 되돌릴 수 있고 옛 주소로 오면 새 주소로 넘김 -->
+        <form id="handle-form" novalidate th:if="${handleChangeEnabled}">
+            <div class="field">
+                <label for="new-handle">블로그 주소(아이디)</label>
+                <div class="handle-input">
+                    <span aria-hidden="true">/@</span>
+                    <input id="new-handle" name="handle" type="text" maxlength="39" autocapitalize="off" autocomplete="off"
+                           spellcheck="false" lang="en" th:value="${profile.handle()}" th:disabled="${handleNextAllowed != null}"
+                           data-availability="handle" data-availability-target="#new-handle-status"
+                           aria-describedby="new-handle-help new-handle-status">
+                </div>
+                <p id="new-handle-help" class="help" th:text="${handleNextAllowed != null}
+                   ? '다음 변경 가능일: ' + ${handleNextAllowed}
+                   : '14일에 두 번까지 바꿀 수 있어요. 예전 주소는 14일 동안 나만 되돌릴 수 있고, 옛 주소로 들어오면 새 주소로 넘겨 드려요.'">도움말</p>
+                <p id="new-handle-status" class="availability" aria-live="polite"></p>
+                <p class="field-error" data-error-for="handle" role="alert"></p>
+            </div>
+            <button type="submit" th:disabled="${handleNextAllowed != null}">주소 바꾸기</button>
+            <p class="form-status" id="handle-status" aria-live="polite"></p>
         </form>
     </section>
 
@@ -222,6 +243,8 @@
     <script th:src="@{/js/account/ai-consent.js}" defer></script>
     <script th:src="@{/js/theme-toggle.js}" defer></script>
     <script th:src="@{/js/profile/settings-sections.js}" defer></script>
+    <script th:if="${handleChangeEnabled}" th:src="@{/js/account/availability.js}" defer></script>
+    <script th:if="${handleChangeEnabled}" th:src="@{/js/account/handle-change.js}" defer></script>
 </main>
 </body>
 </html>

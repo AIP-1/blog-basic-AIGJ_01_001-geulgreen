@@ -12,6 +12,7 @@ import com.team.blog.account.infra.AuthIdentityRepository;
 import com.team.blog.account.infra.MemberRepository;
 import com.team.blog.account.infra.RedisTokenStore;
 import com.team.blog.account.infra.TokenKind;
+import com.team.blog.shared.event.EmailVerified;
 import com.team.blog.shared.event.MemberSignedUp;
 import com.team.blog.shared.event.VerificationMailRequested;
 import java.time.Clock;
@@ -74,10 +75,15 @@ public class EmailSignupService {
      *         DuplicateEmailException, WithdrawnAccountExistsException, 002 주소·닉네임 예외
      */
     public long signUp(EmailSignupCommand command) {
+        return signUp(command, false);
+    }
+
+    /** 074 강성찬 개인 확장: {@code emailVerified}면 메일 코드로 이미 확인한 이메일이라 인증된 채로 만들고 링크 메일을 보내지 않는다. */
+    public long signUp(EmailSignupCommand command, boolean emailVerified) {
         Objects.requireNonNull(command);
         Handle[] submittedHandle = new Handle[1];
         try {
-            return Objects.requireNonNull(transactionTemplate.execute(status -> doSignUp(command, submittedHandle)));
+            return Objects.requireNonNull(transactionTemplate.execute(status -> doSignUp(command, submittedHandle, emailVerified)));
         } catch (DataIntegrityViolationException e) {
             String constraint = MemberUniqueViolationTranslator.constraintName(e);
             if (MemberUniqueViolationTranslator.UQ_AUTH_IDENTITY.equals(constraint)) {
@@ -88,7 +94,7 @@ public class EmailSignupService {
         }
     }
 
-    private long doSignUp(EmailSignupCommand command, Handle[] submittedHandle) {
+    private long doSignUp(EmailSignupCommand command, Handle[] submittedHandle, boolean emailVerified) {
         agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
         String email = EmailRules.normalizeAndValidate(command.email());
         List<PasswordPolicyViolation> violations = passwordPolicy.validate(command.password(), email);
@@ -111,9 +117,17 @@ public class EmailSignupService {
         Instant now = clock.instant();
         Member member = memberRepository.saveAndFlush(new Member(handle, nickname, now));
         long memberId = member.getId();
-        authIdentityRepository.saveAndFlush(
-                AuthIdentity.local(memberId, email, passwordEncoder.encode(command.password()), now));
+        AuthIdentity identity = AuthIdentity.local(memberId, email, passwordEncoder.encode(command.password()), now);
+        if (emailVerified) {
+            identity.markVerified(now);
+        }
+        authIdentityRepository.saveAndFlush(identity);
         agreementRecorder.recordSignupAgreements(memberId, now);
+        if (emailVerified) {
+            events.publishEvent(new MemberSignedUp(memberId, Provider.LOCAL.name()));
+            events.publishEvent(new EmailVerified(memberId));
+            return memberId;
+        }
         String rawToken = tokenStore.issue(TokenKind.VERIFY, memberId);
         events.publishEvent(new MemberSignedUp(memberId, Provider.LOCAL.name()));
         events.publishEvent(new VerificationMailRequested(memberId, email, rawToken));

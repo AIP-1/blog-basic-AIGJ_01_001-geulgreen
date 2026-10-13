@@ -17,8 +17,11 @@
     <form method="post" th:action="@{/login}" class="auth-form">
         <input type="hidden" name="redirect" th:if="${redirect != null}" th:value="${redirect}">
         <div class="field">
-            <label for="email">이메일</label>
-            <input id="email" name="email" type="email" autocomplete="username" required maxlength="254" placeholder="이메일을 입력하세요">
+            <!-- 074 강성찬 개인 확장: 이메일 또는 블로그 주소(아이디)로 로그인 -->
+            <label for="email" th:text="${instaLogin} ? '이메일 또는 아이디' : '이메일'">이메일</label>
+            <input id="email" name="email" th:type="${instaLogin} ? 'text' : 'email'" autocomplete="username" required maxlength="254"
+                   autocapitalize="off" spellcheck="false"
+                   th:placeholder="${instaLogin} ? '이메일 또는 아이디(블로그 주소)' : '이메일을 입력하세요'">
         </div>
         <div class="field">
             <label for="password">비밀번호</label>

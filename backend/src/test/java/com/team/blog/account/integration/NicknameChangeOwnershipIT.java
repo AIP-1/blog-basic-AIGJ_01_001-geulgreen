@@ -26,6 +26,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /** 본인만 변경·동시성(헌법 III·VI). */
+// 공통 규칙(닉네임 30일에 한 번)을 본다. 074 인스타식 계정을 켜면 14일에 두 번(InstaAccountIT)
+@org.springframework.test.context.TestPropertySource(properties = "blog.insta-account.enabled=false")
 class NicknameChangeOwnershipIT extends IntegrationTestBase {
 
     @Autowired

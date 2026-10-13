@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 코드</title>
+</head>
+<body>
+<p th:text="${purpose}">가입 화면에 아래 코드를 넣어 주세요.</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:6px" th:text="${code}">123456</p>
+<p>코드는 <span th:text="${minutes}">10</span>분 동안 쓸 수 있어요.</p>
+<p>직접 요청하지 않았다면 이 메일은 무시해 주세요.</p>
+</body>
+</html>
