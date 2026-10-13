@@ -67,7 +67,7 @@ public class PostListQuery {
     /** 블로그 머리말의 공개 글 수(보는 사람 기준 — 지금은 공개 글만 있으므로 누구에게나 같다). */
     public long publicCount(long authorId) {
         Long count = jdbc.queryForObject("SELECT count(*) FROM post p JOIN member m ON m.id = p.author_id WHERE "
-                + accessPolicy.publicListingCondition("p", "m") + " AND p.author_id = ?", Long.class, authorId);
+                + accessPolicy.blogListingCondition("p", "m") + " AND p.author_id = ?", Long.class, authorId);
         return count == null ? 0 : count;
     }
 
@@ -88,7 +88,10 @@ public class PostListQuery {
                 FROM post p JOIN member m ON m.id = p.author_id LEFT JOIN post_teaser tz ON tz.post_id = p.id
                      LEFT JOIN post_cover pcv ON pcv.post_id = p.id
                 WHERE """).append(' ').append(groupViewerId != null ? accessPolicy.friendAndGroupBlogCondition("p", "m")
-                : withFriends ? accessPolicy.friendBlogCondition("p", "m") : accessPolicy.publicListingCondition("p", "m"));
+                : withFriends ? accessPolicy.friendBlogCondition("p", "m")
+                // 073: 한 블로그(보는 쪽이 먼저 막음)·팔로잉 피드(팔로우한 사람만)는 비공개 계정 글도
+                : authorId != null || followerId != null ? accessPolicy.blogListingCondition("p", "m")
+                : accessPolicy.publicListingCondition("p", "m"));
         List<Object> args = new ArrayList<>();
         if (groupViewerId != null) {
             args.add(groupViewerId);
@@ -124,6 +127,11 @@ public class PostListQuery {
      * 019 트렌딩: 주어진 글 중 지금 공용 목록 조건(+관리자 숨김 아님)을 만족하는 카드만, SQL 1번. 순서는 호출자가 정한다.
      */
     public java.util.Map<Long, PostCard> cardsByIds(java.util.Collection<Long> ids) {
+        return cardsByIds(ids, false);
+    }
+
+    /** {@code oneBlog}: 한 블로그 안의 글(카테고리·고정 글)이라 비공개 계정(073)도 넣는다 — 보는 쪽이 먼저 막는다. */
+    public java.util.Map<Long, PostCard> cardsByIds(java.util.Collection<Long> ids, boolean oneBlog) {
         if (ids.isEmpty()) {
             return java.util.Map.of();
         }
@@ -134,7 +142,8 @@ public class PostListQuery {
                         WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag
                 FROM post p JOIN member m ON m.id = p.author_id LEFT JOIN post_teaser tz ON tz.post_id = p.id
                      LEFT JOIN post_cover pcv ON pcv.post_id = p.id
-                WHERE """ + " " + accessPolicy.publicListingCondition("p", "m") + " AND p.hidden_at IS NULL AND p.id = ANY (?)",
+                WHERE """ + " " + (oneBlog ? accessPolicy.blogListingCondition("p", "m") : accessPolicy.publicListingCondition("p", "m"))
+                + " AND p.hidden_at IS NULL AND p.id = ANY (?)",
                 PostListQuery::card, (Object) ids.toArray(new Long[0]));
         java.util.Map<Long, PostCard> result = new java.util.HashMap<>();
         rows.forEach(c -> result.put(c.id(), c));

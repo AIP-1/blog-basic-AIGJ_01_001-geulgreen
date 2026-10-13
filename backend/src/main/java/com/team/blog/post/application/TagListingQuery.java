@@ -95,7 +95,7 @@ public class TagListingQuery {
     /** 블로그 태그 줄(FR-025): 블로그 목록과 같은 조건의 글에 쓰인 태그, 글 수 많은 순. */
     public List<TagCount> blogTags(long authorId, int limit) {
         return jdbc.query("SELECT t.name, count(*) AS n FROM tag t JOIN post_tag pt ON pt.tag_id = t.id "
-                + "JOIN post p ON p.id = pt.post_id JOIN member m ON m.id = p.author_id WHERE " + visible()
+                + "JOIN post p ON p.id = pt.post_id JOIN member m ON m.id = p.author_id WHERE " + accessPolicy.blogListingCondition("p", "m")
                 + " AND p.author_id = ? GROUP BY t.name ORDER BY n DESC, t.name LIMIT ?",
                 (rs, i) -> new TagCount(rs.getString(1), rs.getLong(2)), authorId, limit);
     }

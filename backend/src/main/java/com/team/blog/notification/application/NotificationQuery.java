@@ -109,7 +109,7 @@ public class NotificationQuery {
             actorName = d.shortLabel();
         }
         int count = rs.getInt("actor_count");
-        Integer others = (type == NotificationType.LIKE || type == NotificationType.FOLLOW || type == NotificationType.FRIEND_REQUEST) ? Math.max(0, count - 1) : null;
+        Integer others = (type == NotificationType.LIKE || type == NotificationType.FOLLOW || type == NotificationType.FRIEND_REQUEST || type == NotificationType.FOLLOW_REQUEST) ? Math.max(0, count - 1) : null;
         String title = null;
         String postUrl = null;
         boolean readable = false;
@@ -198,6 +198,10 @@ public class NotificationQuery {
             case FRIEND_REQUEST -> {
                 url = "/settings/friends";
                 message = who(actorName, others) + " 친구 요청을 보냈어요";
+            }
+            case FOLLOW_REQUEST -> {
+                url = "/settings/privacy";
+                message = who(actorName, others) + " 팔로우를 요청했어요";
             }
             case REPORT_RESOLVED -> message = "ACTION_TAKEN".equals(rs.getString("result"))
                     ? "신고하신 내용을 검토해 조치했어요. 알려 주셔서 고마워요"

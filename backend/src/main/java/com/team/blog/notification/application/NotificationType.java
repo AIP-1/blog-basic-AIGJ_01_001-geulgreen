@@ -10,7 +10,9 @@ public enum NotificationType {
     /** 친구 공개였던 글이 처음 전체 공개됨(026, 강성찬 개인 확장): 친구에게 응원 알림. "새 글" 설정을 따른다. */
     FIRST_PUBLIC,
     /** 친구가 오늘의 미션 글을 올림(057, 강성찬 개인 확장). "새 글" 설정을 따른다. */
-    MISSION_DONE;
+    MISSION_DONE,
+    /** 비공개 계정에 팔로우 요청(073, 강성찬 개인 확장): 처리해야 하는 요청이라 끌 수 없다. */
+    FOLLOW_REQUEST;
 
     public static final List<NotificationType> MUTABLE = List.of(COMMENT, REPLY, LIKE, FOLLOW, NEW_POST);
 
