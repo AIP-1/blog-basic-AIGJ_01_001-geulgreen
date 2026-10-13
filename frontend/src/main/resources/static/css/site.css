@@ -432,7 +432,6 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
 .publish-panel, .preview-panel { border-radius: 18px; background: var(--color-surface); padding: 16px 20px; }
 /* 068 발행 설정 팝업(강성찬 개인 확장) */
 dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; color: var(--color-text); }
-dialog.publish-panel::backdrop { background: rgba(0, 0, 0, .45); }
 
 /* 검색 */
 .search-form { gap: 10px; margin: 8px 0 16px; }
