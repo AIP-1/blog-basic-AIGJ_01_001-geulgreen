@@ -36,7 +36,7 @@ public record PostDetail(long id, long authorId, PostStatus status, String visib
     }
 
     public String url() {
-        return "/@" + author.handle() + "/posts/" + id;
+        return "/" + author.handle() + "/posts/" + id;
     }
 
     /** 표시 날짜: 공개 글은 처음 공개된 시각(목록과 같음), 작성자가 보는 비공개 글은 발행 시각(010 FR-008). */

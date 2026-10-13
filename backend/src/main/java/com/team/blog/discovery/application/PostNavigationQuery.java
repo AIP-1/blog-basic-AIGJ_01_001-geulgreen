@@ -15,7 +15,7 @@ public class PostNavigationQuery {
     public record Link(long id, String title, String handle) {
 
         public String url() {
-            return "/@" + handle + "/posts/" + id;
+            return "/" + handle + "/posts/" + id;
         }
     }
 

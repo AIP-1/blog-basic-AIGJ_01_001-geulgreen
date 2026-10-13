@@ -66,7 +66,7 @@ class TeaserIT extends IntegrationTestBase {
         long me = members.localMember("teaserme", "teaserme", "teaserme@example.com", "Blog#2026ok", true);
         long other = members.localMember("teaserother", "teaserothe", "teaserother@example.com", "Blog#2026ok", true);
         long postId = posts.published(me, "트랜잭션 이야기", "본문 ".repeat(50), 1, Instant.parse("2026-10-09T00:00:00Z"));
-        String url = "/@teaserme/posts/" + postId;
+        String url = "/teaserme/posts/" + postId;
         // 동의 전: 화면에 동의 안내, 만들기 요청은 오류 안내
         assertThat(mockMvc.perform(get(url).with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
                 .contains("카드 한 줄 소개").contains("먼저 동의해 주세요").doesNotContain("AI로 만들기</button>");

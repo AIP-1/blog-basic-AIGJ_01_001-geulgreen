@@ -22,7 +22,7 @@ public class NewcomerQuery {
         }
 
         public String url() {
-            return "/@" + handle + "/posts/" + postId;
+            return "/" + handle + "/posts/" + postId;
         }
     }
 

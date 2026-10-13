@@ -139,24 +139,24 @@ class FollowIT extends IntegrationTestBase {
                 .andExpect(jsonPath("$.items[0].handle").value("fwfan21")).andExpect(jsonPath("$.items[0].followedByMe").value(false));
         mockMvc.perform(get("/api/members/fwlist/following").with(TestAuth.member(a)))
                 .andExpect(jsonPath("$.items[0].followedByMe").value(true));
-        String blog = mockMvc.perform(get("/@fwlist")).andReturn().getResponse().getContentAsString();
-        assertThat(blog).contains("팔로워 21").contains("팔로잉 1").contains("/login?redirect=/@fwlist");
-        String page = mockMvc.perform(get("/@fwlist/followers")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String blog = mockMvc.perform(get("/fwlist")).andReturn().getResponse().getContentAsString();
+        assertThat(blog).contains("팔로워 21").contains("팔로잉 1").contains("/login?redirect=/fwlist");
+        String page = mockMvc.perform(get("/fwlist/followers")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("님의 팔로워 21").contains("@fwfan21").doesNotContain("@fwfan0<").contains("더 보기");
         // 복구하면 다시 포함
         jdbc.update("UPDATE member SET status = 'ACTIVE', withdrawn_at = NULL WHERE id = ?", fans.get(0));
-        assertThat(mockMvc.perform(get("/@fwlist")).andReturn().getResponse().getContentAsString()).contains("팔로워 22");
-        String empty = mockMvc.perform(get("/@fwfan3/followers")).andReturn().getResponse().getContentAsString();
+        assertThat(mockMvc.perform(get("/fwlist")).andReturn().getResponse().getContentAsString()).contains("팔로워 22");
+        String empty = mockMvc.perform(get("/fwfan3/followers")).andReturn().getResponse().getContentAsString();
         assertThat(empty).contains("아직 팔로워가 없어요");
         // 화면 폼(스크립트 없음): 처리 뒤 돌아감, 바깥 주소로는 안 감
-        mockMvc.perform(post("/@fwfan3/follow").with(csrf()).with(TestAuth.member(a)).param("following", "true")
-                .param("back", "//evil.example")).andExpect(status().isSeeOther()).andExpect(header().string("Location", "/@fwfan3"));
-        String mine = mockMvc.perform(get("/@fwfan3").with(TestAuth.member(a))).andReturn().getResponse().getContentAsString();
+        mockMvc.perform(post("/fwfan3/follow").with(csrf()).with(TestAuth.member(a)).param("following", "true")
+                .param("back", "//evil.example")).andExpect(status().isSeeOther()).andExpect(header().string("Location", "/fwfan3"));
+        String mine = mockMvc.perform(get("/fwfan3").with(TestAuth.member(a))).andReturn().getResponse().getContentAsString();
         assertThat(mine).contains("팔로잉 ✓").contains("data-following=\"true\"");
-        assertThat(mockMvc.perform(get("/@fwlist").with(TestAuth.member(a))).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/fwlist").with(TestAuth.member(a))).andReturn().getResponse().getContentAsString())
                 .doesNotContain("class=\"follow-button\"");
         // 알림의 내 팔로워 목록
-        mockMvc.perform(get("/me/followers").with(TestAuth.member(a))).andExpect(header().string("Location", "/@fwlist/followers"));
+        mockMvc.perform(get("/me/followers").with(TestAuth.member(a))).andExpect(header().string("Location", "/fwlist/followers"));
         assertThat(followService.purgeWithdrawn(a)).isEqualTo(24);
     }
 
@@ -198,8 +198,8 @@ class FollowIT extends IntegrationTestBase {
         jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
         page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("class=\"feed-following-heading\""));
-        assertThat(recommended).contains("href=\"/@fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
-                .doesNotContain("/@fdwriter1\"").doesNotContain("/@fdwriter2\"").doesNotContain("/@fdreader\"");
+        assertThat(recommended).contains("href=\"/fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
+                .doesNotContain("/fdwriter1\"").doesNotContain("/fdwriter2\"").doesNotContain("/fdreader\"");
         assertThat(mockMvc.perform(get("/feed?cursor=" + cursor).with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
                 .doesNotContain("class=\"feed-recommended\"");
         // 언팔로우 직후 다음 요청부터 빠짐, 작성자 탈퇴 유예도 빠짐
@@ -212,7 +212,7 @@ class FollowIT extends IntegrationTestBase {
     }
 
     private static void collect(String body, Set<Long> seen) {
-        Matcher m = Pattern.compile("\"url\":\"/@[a-z0-9_]+/posts/(\\d+)\"").matcher(body);
+        Matcher m = Pattern.compile("\"url\":\"/[a-z0-9_]+/posts/(\\d+)\"").matcher(body);
         while (m.find()) {
             assertThat(seen.add(Long.parseLong(m.group(1)))).isTrue();
         }

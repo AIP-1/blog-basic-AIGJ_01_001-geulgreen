@@ -129,11 +129,11 @@ class ProfileImageAttachIT extends IntegrationTestBase {
     void newImageShowsImmediatelyOnBlogHeaderAndAuthorDisplays() throws Exception {
         long id = verified("kim755030", "김민서");
         long imageId = new ImageFlow(mockMvc).uploadProfile(id);
-        String html = mockMvc.perform(get("/@kim755030")).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/kim755030")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("avatar-default").doesNotContain(url(imageId));
 
         mockMvc.perform(patchProfile(id, "{\"profileImageId\":" + imageId + "}")).andExpect(status().isOk());
-        html = mockMvc.perform(get("/@kim755030")).andReturn().getResponse().getContentAsString();
+        html = mockMvc.perform(get("/kim755030")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("src=\"" + url(imageId) + "\"").contains("alt=\"\"");
         assertThat(memberSummaryQuery.findByIds(List.of(id)).get(id).profileImageUrl()).isEqualTo(url(imageId));
     }

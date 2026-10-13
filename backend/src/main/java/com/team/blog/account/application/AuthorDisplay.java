@@ -42,6 +42,6 @@ public record AuthorDisplay(String handle, String nickname, boolean withdrawn, S
 
     /** 정상: {@code /@kim755030} / 탈퇴: null(링크 없음). */
     public String blogPath() {
-        return withdrawn ? null : "/@" + handle;
+        return withdrawn ? null : "/" + handle;
     }
 }

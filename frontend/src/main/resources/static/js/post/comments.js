@@ -58,7 +58,7 @@
     if (c.state === 'HIDDEN' && !c.mine) { box.appendChild(el('p', 'comment-gone', '운영 정책에 따라 숨겨진 댓글이에요')); return box; }
     if (c.state === 'SECRET') { box.appendChild(el('p', 'comment-gone', '🔒 비밀 댓글이에요')); return box; }
     var head = el('p', 'comment-head');
-    var a = el('a', 'comment-author'); a.href = '/@' + c.author.handle;
+    var a = el('a', 'comment-author'); a.href = '/' + c.author.handle;
     a.appendChild(el('span', null, c.author.nickname)); a.appendChild(document.createTextNode(' '));
     a.appendChild(el('span', 'help', '@' + c.author.handle));
     head.appendChild(a);

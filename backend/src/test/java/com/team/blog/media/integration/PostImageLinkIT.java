@@ -154,6 +154,6 @@ class PostImageLinkIT extends IntegrationTestBase {
                 .andExpect(status().isNoContent());
         assertThat(linked(postId)).containsExactly(published.imageId());
         assertThat(image(editing.imageId()).get("detached_at")).isNotNull();
-        mockMvc.perform(get("/@wcimg/posts/{id}", postId)).andExpect(status().isOk());
+        mockMvc.perform(get("/wcimg/posts/{id}", postId)).andExpect(status().isOk());
     }
 }

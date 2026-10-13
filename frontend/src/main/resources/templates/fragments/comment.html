@@ -15,7 +15,7 @@
     </th:block>
     <th:block th:if="${c.author() != null}">
         <p class="comment-head">
-            <a th:href="${'/@' + c.author().handle()}" class="comment-author">
+            <a th:href="${'/' + c.author().handle()}" class="comment-author">
                 <th:block th:replace="~{fragments/avatar :: avatar(${c.author().avatar()}, 24)}"></th:block>
                 <span th:text="${c.author().nickname()}">닉네임</span> <span class="help" th:text="${'@' + c.author().handle()}">@주소</span></a>
             <span class="badge" th:if="${c.author().isPostAuthor()}">작성자</span>

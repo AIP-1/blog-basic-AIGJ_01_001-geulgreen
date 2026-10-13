@@ -181,6 +181,11 @@ public class HandleService {
                         .addValue("me", memberId, java.sql.Types.BIGINT), String.class);
     }
 
+    /** 076: 맨 앞 경로 칸이 사이트 경로·예약어인지(블로그 주소 {@code /{handle}}로 보지 않음). */
+    public boolean isRouteOrReserved(String segment) {
+        return isReserved(segment);
+    }
+
     private boolean isReserved(String body) {
         return reserved.contains(body);
     }

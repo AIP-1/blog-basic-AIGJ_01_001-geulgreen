@@ -50,7 +50,7 @@ class CoverIT extends IntegrationTestBase {
         // 카드(목록 API)에 대표 사진의 썸네일, 공유 미리보기에 원본
         String list = mockMvc.perform(get("/api/posts")).andReturn().getResponse().getContentAsString();
         assertThat(list).contains(mine.thumbUrl());
-        String detail = mockMvc.perform(get("/@coverme/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
+        String detail = mockMvc.perform(get("/coverme/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
         assertThat(detail).contains("property=\"og:image\" content=\"" + mine.url() + "\"");
         // 정리 작업은 대표 사진을 지우지 않는다
         assertThat(covers.referencedIds(List.of(mine.imageId(), theirs.imageId()))).containsExactly(mine.imageId());

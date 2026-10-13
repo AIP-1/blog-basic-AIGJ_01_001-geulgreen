@@ -8,7 +8,7 @@
 -->
 <th:block th:fragment="button(handle, following, loggedIn, loginRedirect, back)">
     <a th:unless="${loggedIn}" class="follow-button" th:href="${loginRedirect}">팔로우</a>
-    <form th:if="${loggedIn}" method="post" th:action="${'/@' + handle + '/follow'}" class="follow-form"
+    <form th:if="${loggedIn}" method="post" th:action="${'/' + handle + '/follow'}" class="follow-form"
           th:with="requested=${followRequested == true and !following}">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" name="following" th:value="${!(following or requested)}">

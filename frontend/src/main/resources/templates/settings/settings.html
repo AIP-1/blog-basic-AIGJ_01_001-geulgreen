@@ -86,7 +86,7 @@
             <div class="field">
                 <label for="new-handle">블로그 주소(아이디)</label>
                 <div class="handle-input">
-                    <span aria-hidden="true">/@</span>
+                    <span aria-hidden="true">/</span>
                     <input id="new-handle" name="handle" type="text" maxlength="39" autocapitalize="off" autocomplete="off"
                            spellcheck="false" lang="en" th:value="${profile.handle()}" th:disabled="${handleNextAllowed != null}"
                            data-availability="handle" data-availability-target="#new-handle-status"

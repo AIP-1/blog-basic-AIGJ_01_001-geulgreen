@@ -99,10 +99,10 @@ class ThemeIT extends IntegrationTestBase {
         long author = members.localMember("hlauthor", "hlauthor", "hlauthor@example.com", "Blog#2026ok", true);
         long post = posts.published(author, "코드 글", "본문", 1, java.time.Instant.parse("2026-10-01T00:00:00Z"));
         // 코드 블록이 없는 글은 불러오지 않는다(40 §2)
-        String plain = mockMvc.perform(get("/@hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
+        String plain = mockMvc.perform(get("/hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
         assertThat(plain).doesNotContain("/js/code-highlight-");
         jdbc.update("UPDATE post SET content_html = '<pre><code class=\"language-java\">int a;</code></pre>' WHERE id = ?", post);
-        String html = mockMvc.perform(get("/@hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js").contains("/js/code-highlight-");
     }
 

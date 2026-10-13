@@ -6,7 +6,7 @@
   내가 팔로우하는 사람만 친구로 넣을 수 있고, 상대 수락도 알림도 없다. 스크립트 없이 폼으로 동작한다.
 -->
 <th:block th:fragment="button(handle, status, back)">
-    <form th:if="${status == 'FOLLOWING' or status == 'FRIENDS'}" method="post" th:action="${'/@' + handle + '/friend'}" class="friend-form">
+    <form th:if="${status == 'FOLLOWING' or status == 'FRIENDS'}" method="post" th:action="${'/' + handle + '/friend'}" class="friend-form">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" name="back" th:value="${back}">
         <button th:if="${status == 'FOLLOWING'}" type="submit" name="action" value="add" class="btn btn-sm">친구로 넣기</button>

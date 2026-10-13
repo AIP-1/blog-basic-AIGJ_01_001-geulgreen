@@ -20,7 +20,7 @@
       .then(function (res) {
         if (res.ok) {
           input.value = res.body.handle;
-          status.textContent = res.body.message + ' 새 주소: /@' + res.body.handle;
+          status.textContent = res.body.message + ' 새 주소: /' + res.body.handle;
           var avatar = document.getElementById('profile-avatar');
           if (avatar) { avatar.dataset.handle = res.body.handle; }
         } else {

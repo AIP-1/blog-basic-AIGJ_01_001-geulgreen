@@ -25,7 +25,7 @@ public class SeriesService {
     public record Item(long id, String title, String handle) {
 
         public String url() {
-            return "/@" + handle + "/posts/" + id;
+            return "/" + handle + "/posts/" + id;
         }
     }
 
@@ -79,7 +79,7 @@ public class SeriesService {
                 FROM series_post sp JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id
                      LEFT JOIN post_teaser tz ON tz.post_id = p.id LEFT JOIN post_cover pcv ON pcv.post_id = p.id
                 WHERE sp.series_id = ?""" + " AND " + accessPolicy.blogListingCondition("p", "m") + " ORDER BY sp.position, p.id",
-                (rs, i) -> new PostCard(rs.getLong("id"), "/@" + rs.getString("handle") + "/posts/" + rs.getLong("id"),
+                (rs, i) -> new PostCard(rs.getLong("id"), "/" + rs.getString("handle") + "/posts/" + rs.getLong("id"),
                         rs.getString("title"), rs.getString("excerpt") == null ? "" : rs.getString("excerpt"),
                         rs.getString("thumbnail_url"), rs.getTimestamp("first_public_at") == null ? null
                         : rs.getTimestamp("first_public_at").toInstant(), rs.getInt("comment_count"), rs.getInt("like_count"),

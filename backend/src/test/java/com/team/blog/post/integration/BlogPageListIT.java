@@ -33,7 +33,7 @@ class BlogPageListIT extends IntegrationTestBase {
         posts.published(other, "남의 글", "본문", 1, T0);
 
         for (var viewer : new org.springframework.test.web.servlet.request.RequestPostProcessor[] {null, TestAuth.member(me)}) {
-            var request = get("/@blogowner");
+            var request = get("/blogowner");
             if (viewer != null) {
                 request = request.with(viewer);
             }
@@ -48,18 +48,18 @@ class BlogPageListIT extends IntegrationTestBase {
     @Test
     void pagingAndEmptyStatesAndMissingBlog() throws Exception {
         long me = writer(members, "blogpager");
-        assertThat(mockMvc.perform(get("/@blogpager")).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/blogpager")).andReturn().getResponse().getContentAsString())
                 .contains("아직 공개한 글이 없어요");
-        assertThat(mockMvc.perform(get("/@blogpager").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/blogpager").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
                 .contains("첫 글을 써 보세요");
         for (int i = 0; i < 14; i++) {
             posts.published(me, "블로그 글 " + i, "본문", 1, T0.plus(Duration.ofHours(i)));
         }
-        String html = mockMvc.perform(get("/@blogpager")).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/blogpager")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("게시물 14").contains("블로그 글 13").contains("더 보기").doesNotContain("블로그 글 1<");
-        mockMvc.perform(get("/@nobodyhere")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/nobodyhere")).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/members/nobodyhere/posts")).andExpect(status().isNotFound());
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = now() WHERE id = ?", me);
-        mockMvc.perform(get("/@blogpager")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/blogpager")).andExpect(status().isNotFound());
     }
 }

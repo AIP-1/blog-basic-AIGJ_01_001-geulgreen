@@ -23,7 +23,7 @@ class PostAccessMatrixIT extends IntegrationTestBase {
     JdbcTemplate jdbc;
 
     private MockHttpServletResponse open(String handle, long postId, RequestPostProcessor viewer) throws Exception {
-        MockHttpServletRequestBuilder request = get("/@" + handle + "/posts/" + postId);
+        MockHttpServletRequestBuilder request = get("/" + handle + "/posts/" + postId);
         if (viewer != null) {
             request = request.with(viewer);
         }

@@ -44,7 +44,7 @@
                th:text="${'운영 정책에 따라 숨겨진 글이에요 (사유: ' + hiddenReasonLabel + '). 다른 사람에게는 보이지 않아요'}">숨겨진 글</p>
             <h1 th:text="${post.title()}">제목</h1>
             <p class="post-meta">
-                <a class="author-link" th:href="${'/@' + post.author().handle()}">
+                <a class="author-link" th:href="${'/' + post.author().handle()}">
                     <th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, 28)}"></th:block>
                 </a>
                 <th:block th:replace="~{fragments/author :: byline(${author})}"></th:block>
@@ -102,7 +102,7 @@
         </form>
         <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 여기서 고른다) -->
         <p th:if="${postCategory != null and myCategories == null}" class="post-category">
-            <a class="tag" th:href="@{'/@' + ${post.author().handle()}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
+            <a class="tag" th:href="@{'/' + ${post.author().handle()}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
         </p>
         <form th:if="${myCategories != null}" class="post-category-form inline-form" method="post"
               th:action="@{/posts/{id}/category(id=${post.id()})}">
@@ -217,7 +217,7 @@
                 <p><th:block th:replace="~{fragments/author :: byline(${author})}"></th:block></p>
                 <p class="profile-bio" th:if="${post.author().bio() != null}" th:text="${post.author().bio()}">소개</p>
                 <p>
-                    <a th:href="${'/@' + post.author().handle()}">블로그 가기</a>
+                    <a th:href="${'/' + post.author().handle()}">블로그 가기</a>
                     <th:block th:unless="${viewerIsAuthor}"><th:block
                               th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
                 </p>

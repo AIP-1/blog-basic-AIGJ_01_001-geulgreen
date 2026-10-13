@@ -102,7 +102,7 @@ class SocialPictureIT extends IntegrationTestBase {
         MockHttpServletResponse done = browser.perform(complete(false, null)).getResponse();
         assertThat(done.getHeader("Location")).isEqualTo("/");
         assertThat(browser.perform(get("/settings/social-picture")).getResponse().getHeader("Location")).isEqualTo("/");
-        String blog = mockMvc.perform(get("/@go-kimminseo")).andReturn().getResponse().getContentAsString();
+        String blog = mockMvc.perform(get("/go-kimminseo")).andReturn().getResponse().getContentAsString();
         assertThat(blog).contains("avatar-default");
     }
 

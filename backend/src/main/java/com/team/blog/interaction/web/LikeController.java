@@ -40,7 +40,7 @@ public class LikeController {
     public RedirectView form(@PathVariable("handle") String handle, @PathVariable("postId") long postId,
                              @RequestParam(value = "liked", defaultValue = "true") boolean liked) {
         likeService.set(currentUserProvider.current(), postId, liked);
-        RedirectView view = new RedirectView("/@" + handle + "/posts/" + postId);
+        RedirectView view = new RedirectView("/" + handle + "/posts/" + postId);
         view.setStatusCode(HttpStatus.SEE_OTHER);
         return view;
     }

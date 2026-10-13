@@ -128,10 +128,10 @@ class InstaAccountIT extends IntegrationTestBase {
         assertThat(changeHandle(me, "newname").getResponse().getContentAsString()).contains("\"handle\":\"newname\"");
         assertThat(jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, me)).isEqualTo("newname");
         // 옛 주소는 새 주소로 넘김(하위 경로·쿼리 유지)
-        MvcResult redirect = mockMvc.perform(get("/@oldname/guestbook?x=1")).andReturn();
+        MvcResult redirect = mockMvc.perform(get("/oldname/guestbook?x=1")).andReturn();
         assertThat(redirect.getResponse().getStatus()).isEqualTo(302);
-        assertThat(redirect.getResponse().getRedirectedUrl()).isEqualTo("/@newname/guestbook?x=1");
-        assertThat(mockMvc.perform(get("/@newname")).andReturn().getResponse().getContentAsString())
+        assertThat(redirect.getResponse().getRedirectedUrl()).isEqualTo("/newname/guestbook?x=1");
+        assertThat(mockMvc.perform(get("/newname")).andReturn().getResponse().getContentAsString())
                 .contains("게시물", "팔로워", "팔로잉");
         // 잡아 둔 동안 남은 못 가져감
         assertThat(changeHandle(other, "oldname").getResponse().getStatus()).isEqualTo(400);
@@ -145,10 +145,10 @@ class InstaAccountIT extends IntegrationTestBase {
         // 기간이 지나면 다시 바꿀 수 있고, 잡아 둔 기간이 끝난 옛 주소는 남이 가져가며 넘김도 끝남
         clock.advance(Duration.ofDays(15));
         assertThat(changeHandle(me, "thirdname").getResponse().getStatus()).isEqualTo(200);
-        assertThat(mockMvc.perform(get("/@oldname")).andReturn().getResponse().getStatus()).isEqualTo(302);
+        assertThat(mockMvc.perform(get("/oldname")).andReturn().getResponse().getStatus()).isEqualTo(302);
         clock.advance(Duration.ofDays(15));
         assertThat(changeHandle(other, "oldname").getResponse().getStatus()).isEqualTo(200);
-        assertThat(mockMvc.perform(get("/@oldname")).andReturn().getResponse().getStatus()).isEqualTo(200);
+        assertThat(mockMvc.perform(get("/oldname")).andReturn().getResponse().getStatus()).isEqualTo(200);
         // 이메일 가입자는 소셜 접두어 주소를 못 고름
         assertThat(changeHandle(me, "go-thirdx").getResponse().getStatus()).isEqualTo(400);
     }
@@ -158,7 +158,7 @@ class InstaAccountIT extends IntegrationTestBase {
         long g = members.active("go-ksc", "구글사람");
         members.addSocialIdentity(g, "GOOGLE", "g-ksc", "ksc@example.com", Instant.now());
         assertThat(changeHandle(g, "ksc").getResponse().getContentAsString()).contains("\"handle\":\"ksc\"");
-        assertThat(mockMvc.perform(get("/@go-ksc")).andReturn().getResponse().getRedirectedUrl()).isEqualTo("/@ksc");
+        assertThat(mockMvc.perform(get("/go-ksc")).andReturn().getResponse().getRedirectedUrl()).isEqualTo("/ksc");
         assertThat(changeHandle(g, "gi-ksc").getResponse().getStatus()).isEqualTo(400);
         assertThat(changeHandle(g, "go-ksc").getResponse().getContentAsString()).contains("\"handle\":\"go-ksc\"");
     }
