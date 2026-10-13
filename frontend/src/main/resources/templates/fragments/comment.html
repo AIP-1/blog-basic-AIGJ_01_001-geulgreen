@@ -19,7 +19,7 @@
                 <th:block th:replace="~{fragments/avatar :: avatar(${c.author().avatar()}, 24)}"></th:block>
                 <span th:text="${c.author().nickname()}">닉네임</span> <span class="help" th:text="${'@' + c.author().handle()}">@주소</span></a>
             <span class="badge" th:if="${c.author().isPostAuthor()}">작성자</span>
-            <span class="help" th:if="${c.secret()}">🔒 비밀</span>
+            <span class="help secret-mark" th:if="${c.secret()}">🔒 비밀</span>
             <time class="help" th:attr="datetime=${c.createdAt()}" th:text="${date}">3시간 전</time><span class="help" th:if="${c.edited()}"> · 수정됨</span>
         </p>
         <p th:if="${c.state() == 'HIDDEN'}" class="warning">운영 정책에 따라 숨겨졌어요 (나만 보여요)</p>

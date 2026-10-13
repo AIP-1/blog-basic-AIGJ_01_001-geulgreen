@@ -23,8 +23,8 @@
   if (!row) { return; }
   var url = row.dataset.shareUrl;
   var title = row.dataset.shareTitle;
-  var status = row.querySelector('.share-status');
-  var say = function (text) { status.textContent = text; setTimeout(function () { status.textContent = ''; }, 2500); };
+  var status = document.querySelector('.share-status');
+  var say = function (text) { row.open = false; status.textContent = text; setTimeout(function () { status.textContent = ''; }, 2500); };
   row.querySelector('.share-copy').addEventListener('click', function () {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(function () { say('링크를 복사했어요'); }, function () { window.prompt('링크를 복사하세요', url); });

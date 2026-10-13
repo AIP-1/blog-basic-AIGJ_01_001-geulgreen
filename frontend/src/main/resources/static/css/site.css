@@ -632,8 +632,10 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 50; background: transparent; pointer-events: none; }
 .read-progress span { display: block; height: 100%; width: 0; background: var(--color-brand); border-radius: 0 4px 4px 0;
     transition: width .08s linear; }
-.share-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
-.share-row a.btn { text-decoration: none; }
+.share-menu summary::before, .share-menu summary::after { content: none; }
+.share-menu .sort-menu-panel { left: 0; right: auto; }
+.share-menu .sort-menu-panel button { all: unset; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+.share-menu .sort-menu-panel button:hover, .share-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
 .pin-form { margin: 8px 0; }
 .pinned-post { margin: 0 0 18px; }
 .pinned-label { margin: 0 0 8px; font-weight: 700; }
