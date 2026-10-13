@@ -157,25 +157,25 @@
         </div>
     </dialog>
 
-    <script src="/js/editor/draft-store.js" defer></script>
-    <script src="/js/editor/diff.js" defer></script>
-    <script src="/js/editor/autosave.js" defer></script>
-    <script src="/js/editor/editor.js" defer></script>
+    <script th:src="@{/js/editor/draft-store.js}" defer></script>
+    <script th:src="@{/js/editor/diff.js}" defer></script>
+    <script th:src="@{/js/editor/autosave.js}" defer></script>
+    <script th:src="@{/js/editor/editor.js}" defer></script>
     <!-- 060 강성찬 개인 확장: 보이는 대로 쓰기(Markdown ↔ 화면 변환) -->
     <script src="/webjars/marked/15.0.12/marked.min.js" defer></script>
     <script src="/webjars/turndown/7.2.0/dist/turndown.js" defer></script>
     <script src="/webjars/turndown-plugin-gfm/1.0.2/dist/turndown-plugin-gfm.js" defer></script>
-    <script src="/js/editor/visual-editor.js" defer></script>
-    <script src="/js/editor/format-toolbar.js" defer></script>
-    <script src="/js/editor/empty-draft.js" defer></script>
+    <script th:src="@{/js/editor/visual-editor.js}" defer></script>
+    <script th:src="@{/js/editor/format-toolbar.js}" defer></script>
+    <script th:src="@{/js/editor/empty-draft.js}" defer></script>
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
-    <script src="/js/code-highlight.js" defer></script>
-    <script src="/js/editor/preview.js" defer></script>
-    <script src="/js/editor/publish.js" defer></script>
-    <script src="/js/editor/ai-tags.js" defer></script>
-    <script src="/js/editor/image-upload.js" defer></script>
-    <script th:if="${coverEnabled}" src="/js/editor/cover.js" defer></script>
-    <script src="/js/gif-play.js" defer></script>
+    <script th:src="@{/js/code-highlight.js}" defer></script>
+    <script th:src="@{/js/editor/preview.js}" defer></script>
+    <script th:src="@{/js/editor/publish.js}" defer></script>
+    <script th:src="@{/js/editor/ai-tags.js}" defer></script>
+    <script th:src="@{/js/editor/image-upload.js}" defer></script>
+    <script th:if="${coverEnabled}" th:src="@{/js/editor/cover.js}" defer></script>
+    <script th:src="@{/js/gif-play.js}" defer></script>
 </main>
 </body>
 </html>

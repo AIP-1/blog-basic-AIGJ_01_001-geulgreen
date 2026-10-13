@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <!-- 024: 그리기 전에 테마를 정한다(외부 파일, defer 없음) -->
-    <script src="/js/theme-init.js"></script>
+    <script th:src="@{/js/theme-init.js}"></script>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
     <meta name="_csrf_parameter" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
@@ -29,8 +29,8 @@
     </th:block>
     <link rel="stylesheet" href="/fonts/pretendard/pretendard.css">
     <link rel="stylesheet" href="/fonts/gaegu/gaegu.css">
-    <link rel="stylesheet" href="/css/theme.css">
-    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/site.css}">
 </head>
 <body>
 <header class="site-header">
@@ -144,8 +144,8 @@
     <svg class="gp leafy p11" focusable="false"><use href="#gd-leafy"/></svg>
   </div>
 </footer>
-<script src="/js/auth/auth-logout.js" defer></script>
-<script src="/js/menu.js" defer></script>
-<script th:if="${currentMemberId != null}" src="/js/notification/bell.js" defer></script>
+<script th:src="@{/js/auth/auth-logout.js}" defer></script>
+<script th:src="@{/js/menu.js}" defer></script>
+<script th:if="${currentMemberId != null}" th:src="@{/js/notification/bell.js}" defer></script>
 </body>
 </html>

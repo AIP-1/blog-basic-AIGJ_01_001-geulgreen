@@ -1,4 +1,9 @@
 spring:
+  # 템플릿의 @{/css/…}·@{/js/…} 주소에 내용 지문을 붙이는 필터를 켠다(StaticCacheConfig).
+  web:
+    resources:
+      chain:
+        enabled: true
   application:
     name: blog
   profiles:
