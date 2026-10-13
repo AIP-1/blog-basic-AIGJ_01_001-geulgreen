@@ -43,6 +43,7 @@
             <p th:if="${post.hidden()}" class="warning" role="status"
                th:text="${'운영 정책에 따라 숨겨진 글이에요 (사유: ' + hiddenReasonLabel + '). 다른 사람에게는 보이지 않아요'}">숨겨진 글</p>
             <h1 th:text="${post.title()}">제목</h1>
+            <div class="post-meta-row">
             <p class="post-meta">
                 <a class="author-link" th:href="${'/@' + post.author().handle()}">
                     <th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, 28)}"></th:block>
@@ -51,21 +52,33 @@
                 <span> · <time th:attr="datetime=${post.displayDate()}" th:text="${displayDate}">2026.10.02</time></span>
                 <span th:if="${editedDate != null}" class="post-edited"> · 수정됨 <time th:attr="datetime=${post.editedAt()}" th:text="${editedDate}">10월 3일</time></span>
             </p>
-            <!-- 작성자 버튼(FR-016). 서버는 각 기능에서 다시 검사한다 -->
-            <div th:if="${viewerIsAuthor}" class="author-actions">
-                <a th:href="@{/write/{id}(id=${post.id()})}" class="button-link">수정</a>
-                <label>공개 범위
-                    <select id="visibility-select">
-                        <option value="PUBLIC" th:selected="${post.visibility() == 'PUBLIC'}">🌐 전체 공개</option>
-                        <option value="FRIENDS" th:selected="${post.visibility() == 'FRIENDS'}">👥 친구 공개</option>
-                        <option value="LINK" th:selected="${post.visibility() == 'LINK'}">🔗 링크 공개</option>
-                        <option value="GROUP" th:selected="${post.visibility() == 'GROUP'}">🧑‍🤝‍🧑 그룹 공개</option>
-                        <option value="PRIVATE" th:selected="${post.visibility() == 'PRIVATE'}">🔒 나만 보기</option>
-                    </select>
-                </label>
-                <button type="button" id="trash-post" data-trash-post>삭제</button>
-                <span id="author-action-status" class="help" role="status"></span>
+            <!-- 075 강성찬 개인 확장: 작성자 도구는 작성자 줄 오른쪽 ⋯ 메뉴 하나로(FR-016). 서버는 각 기능에서 다시 검사한다 -->
+            <details th:if="${viewerIsAuthor}" class="sort-menu post-owner-menu">
+                <summary aria-label="글 관리">⋯</summary>
+                <div class="sort-menu-panel">
+                    <a th:href="@{/write/{id}(id=${post.id()})}">수정</a>
+                    <label class="menu-field">공개 범위
+                        <select id="visibility-select">
+                            <option value="PUBLIC" th:selected="${post.visibility() == 'PUBLIC'}">🌐 전체 공개</option>
+                            <option value="FRIENDS" th:selected="${post.visibility() == 'FRIENDS'}">👥 친구 공개</option>
+                            <option value="LINK" th:selected="${post.visibility() == 'LINK'}">🔗 링크 공개</option>
+                            <option value="GROUP" th:selected="${post.visibility() == 'GROUP'}">🧑‍🤝‍🧑 그룹 공개</option>
+                            <option value="PRIVATE" th:selected="${post.visibility() == 'PRIVATE'}">🔒 나만 보기</option>
+                        </select>
+                    </label>
+                    <!-- 054 강성찬 개인 확장: 글 고정(글쓴이만) -->
+                    <form th:if="${pinnedHere != null}" class="pin-form" method="post"
+                          th:action="${pinnedHere} ? @{/posts/{id}/unpin(id=${post.id()})} : @{/posts/{id}/pin(id=${post.id()})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="back" th:value="${post.url()}">
+                        <button type="submit" th:text="${pinnedHere} ? '📌 고정 해제' : '📌 블로그 맨 위에 고정'">고정</button>
+                    </form>
+                    <button type="button" data-open-post-settings>⚙️ 글 설정</button>
+                    <button type="button" id="trash-post" class="menu-danger" data-trash-post>삭제</button>
+                </div>
+            </details>
             </div>
+            <span th:if="${viewerIsAuthor}" id="author-action-status" class="help" role="status"></span>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
         <!-- 052 강성찬 개인 확장: 읽기 진행 막대(스크립트가 스크롤에 맞춰 채운다) -->
@@ -93,51 +106,20 @@
         <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
             <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
         </ul>
-        <!-- 054 강성찬 개인 확장: 글 고정(글쓴이만) -->
-        <form th:if="${pinnedHere != null}" class="inline-form pin-form" method="post"
-              th:action="${pinnedHere} ? @{/posts/{id}/unpin(id=${post.id()})} : @{/posts/{id}/pin(id=${post.id()})}">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" name="back" th:value="${post.url()}">
-            <button type="submit" class="btn btn-sm" th:text="${pinnedHere} ? '📌 고정 해제' : '📌 블로그 맨 위에 고정'">고정</button>
-        </form>
-        <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 여기서 고른다) -->
-        <p th:if="${postCategory != null and myCategories == null}" class="post-category">
+        <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 글 설정 창에서 고른다) -->
+        <p th:if="${postCategory != null}" class="post-category">
             <a class="tag" th:href="@{'/@' + ${post.author().handle()}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
         </p>
-        <form th:if="${myCategories != null}" class="post-category-form inline-form" method="post"
-              th:action="@{/posts/{id}/category(id=${post.id()})}">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" name="back" th:value="${post.url()}">
-            <label for="category-select">📁 카테고리</label>
-            <select id="category-select" name="categoryId">
-                <option value="">분류 없음</option>
-                <option th:each="c : ${myCategories}" th:value="${c.id()}" th:text="${c.name()}"
-                        th:selected="${postCategory != null and postCategory.id() == c.id()}">카테고리</option>
-            </select>
-            <button type="submit" class="btn btn-sm">저장</button>
-            <a class="help" href="/settings/categories">카테고리 관리</a>
-        </form>
-        <!-- 041: 글쓴이는 시리즈에 넣거나 뺀다 -->
-        <div th:if="${mySeries != null}" class="series-form">
-            <form class="inline-form" method="post" th:action="@{/posts/{id}/series(id=${post.id()})}">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <input type="hidden" name="back" th:value="${post.url()}">
-                <label for="series-select">📚 시리즈</label>
-                <select id="series-select" name="seriesId">
-                    <option value="new">새 시리즈 만들기</option>
-                    <option th:each="sr : ${mySeries}" th:value="${sr.id()}" th:text="${sr.title()}"
-                            th:selected="${postSeries != null and postSeries.id() == sr.id()}">시리즈</option>
-                </select>
-                <label for="series-new" class="visually-hidden">새 시리즈 이름</label>
-                <input id="series-new" name="newTitle" type="text" maxlength="60" placeholder="새 시리즈 이름">
-                <button type="submit" class="btn btn-sm">넣기</button>
-            </form>
-            <form th:if="${postSeries != null}" class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${post.id()})}">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <input type="hidden" name="back" th:value="${post.url()}">
-                <button type="submit" class="btn-text">시리즈에서 빼기</button>
-            </form>
-        </div>
+        <!-- 057 강성찬 개인 확장: 오늘의 미션 글 -->
+        <p th:if="${postMission != null}" class="post-missions">
+            <a class="tag" th:href="@{/missions(date=${postMission.day()})}" th:text="${'🗓 오늘의 미션 · ' + postMission.title()}">🗓 오늘의 미션</a>
+        </p>
+        <p th:if="${missionStats != null}" class="notice mission-done-note" role="status">
+            <th:block th:if="${postMission.countedOnDay()}">🎉 미션 완료!</th:block>
+            <th:block th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</th:block>
+            <span th:text="${'연속 ' + missionStats.streak() + '일 · 지금까지 ' + missionStats.total() + '번'}">연속 1일</span>
+            · <a href="/missions">다른 친구들 글 보러 가기</a>
+        </p>
         <!-- 038 강성찬 개인 확장: 이전 글·다음 글, 관련 글 -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
@@ -149,36 +131,6 @@
             <h2 id="related-heading">관련 글</h2>
             <ul><li th:each="r : ${relatedPosts}"><a th:href="${r.url()}" th:text="${r.title()}">관련 글</a></li></ul>
         </section>
-        <!-- 035 강성찬 개인 확장: AI 티저(글쓴이만) — 카드의 요약 자리에 보일 한 줄 -->
-        <section th:if="${teaserBox != null}" id="teaser" class="notice teaser-box" aria-labelledby="teaser-heading">
-            <h2 id="teaser-heading">카드 한 줄 소개</h2>
-            <p class="help">글 목록 카드에 요약 대신 보여요. 비워 두면 본문 앞부분이 보여요.</p>
-            <p th:if="${teaserError != null}" class="form-error" role="alert" th:text="${teaserError}">오류</p>
-            <form method="post" th:action="@{/posts/{id}/teaser(id=${post.id()})}" class="teaser-form">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <label for="teaser-text" class="visually-hidden">한 줄 소개</label>
-                <input id="teaser-text" name="teaser" type="text" maxlength="80"
-                       th:value="${teaserDraft != null ? teaserDraft : currentTeaser}" placeholder="이 글을 한 줄로 소개해 보세요">
-                <button type="submit" class="btn btn-primary btn-sm">저장</button>
-            </form>
-            <p th:if="${teaserDraft != null}" class="help">✨ AI 제안이에요. 고쳐서 저장하거나 그대로 저장하세요.</p>
-            <form th:if="${teaserConsent}" method="post" th:action="@{/posts/{id}/teaser/generate(id=${post.id()})}">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="btn btn-sm">✨ AI로 만들기</button>
-                <span class="help">제목과 본문 앞부분이 AI 서비스로 전송돼요(AI 태그 추천과 같은 동의)</span>
-            </form>
-            <p th:unless="${teaserConsent}" class="help">AI로 만들려면 글쓰기의 [AI 태그 추천]에서 먼저 동의해 주세요.</p>
-        </section>
-        <!-- 057 강성찬 개인 확장: 오늘의 미션 글 -->
-        <p th:if="${postMission != null}" class="post-missions">
-            <a class="tag" th:href="@{/missions(date=${postMission.day()})}" th:text="${'🗓 오늘의 미션 · ' + postMission.title()}">🗓 오늘의 미션</a>
-        </p>
-        <p th:if="${missionStats != null}" class="notice mission-done-note" role="status">
-            <th:block th:if="${postMission.countedOnDay()}">🎉 미션 완료!</th:block>
-            <th:block th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</th:block>
-            <span th:text="${'연속 ' + missionStats.streak() + '일 · 지금까지 ' + missionStats.total() + '번'}">연속 1일</span>
-            · <a href="/missions">다른 친구들 글 보러 가기</a>
-        </p>
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
         <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
@@ -268,6 +220,67 @@
             </th:block>
         </section>
     </article>
+    <!-- 075 강성찬 개인 확장: 글 설정 창(카테고리·시리즈·카드 한 줄 소개). ⋯ 메뉴의 [글 설정]으로 연다 -->
+    <dialog th:if="${viewerIsAuthor}" id="post-settings" class="post-settings" aria-labelledby="post-settings-heading">
+        <div class="post-settings-head">
+            <h2 id="post-settings-heading">글 설정</h2>
+            <form method="dialog"><button type="submit" class="btn-text" aria-label="닫기">✕</button></form>
+        </div>
+            <form th:if="${myCategories != null}" class="post-category-form inline-form" method="post"
+                  th:action="@{/posts/{id}/category(id=${post.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="back" th:value="${post.url()}">
+                <label for="category-select">📁 카테고리</label>
+                <select id="category-select" name="categoryId">
+                    <option value="">분류 없음</option>
+                    <option th:each="c : ${myCategories}" th:value="${c.id()}" th:text="${c.name()}"
+                            th:selected="${postCategory != null and postCategory.id() == c.id()}">카테고리</option>
+                </select>
+                <button type="submit" class="btn btn-sm">저장</button>
+                <a class="help" href="/settings/categories">카테고리 관리</a>
+            </form>
+            <!-- 041: 글쓴이는 시리즈에 넣거나 뺀다 -->
+            <div th:if="${mySeries != null}" class="series-form">
+                <form class="inline-form" method="post" th:action="@{/posts/{id}/series(id=${post.id()})}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="back" th:value="${post.url()}">
+                    <label for="series-select">📚 시리즈</label>
+                    <select id="series-select" name="seriesId">
+                        <option value="new">새 시리즈 만들기</option>
+                        <option th:each="sr : ${mySeries}" th:value="${sr.id()}" th:text="${sr.title()}"
+                                th:selected="${postSeries != null and postSeries.id() == sr.id()}">시리즈</option>
+                    </select>
+                    <label for="series-new" class="visually-hidden">새 시리즈 이름</label>
+                    <input id="series-new" name="newTitle" type="text" maxlength="60" placeholder="새 시리즈 이름">
+                    <button type="submit" class="btn btn-sm">넣기</button>
+                </form>
+                <form th:if="${postSeries != null}" class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${post.id()})}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="back" th:value="${post.url()}">
+                    <button type="submit" class="btn-text">시리즈에서 빼기</button>
+                </form>
+            </div>
+            <!-- 035 강성찬 개인 확장: AI 티저(글쓴이만) — 카드의 요약 자리에 보일 한 줄 -->
+            <section th:if="${teaserBox != null}" id="teaser" class="notice teaser-box" aria-labelledby="teaser-heading">
+                <h2 id="teaser-heading">카드 한 줄 소개</h2>
+                <p class="help">글 목록 카드에 요약 대신 보여요. 비워 두면 본문 앞부분이 보여요.</p>
+                <p th:if="${teaserError != null}" class="form-error" role="alert" th:text="${teaserError}">오류</p>
+                <form method="post" th:action="@{/posts/{id}/teaser(id=${post.id()})}" class="teaser-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <label for="teaser-text" class="visually-hidden">한 줄 소개</label>
+                    <input id="teaser-text" name="teaser" type="text" maxlength="80"
+                           th:value="${teaserDraft != null ? teaserDraft : currentTeaser}" placeholder="이 글을 한 줄로 소개해 보세요">
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                </form>
+                <p th:if="${teaserDraft != null}" class="help">✨ AI 제안이에요. 고쳐서 저장하거나 그대로 저장하세요.</p>
+                <form th:if="${teaserConsent}" method="post" th:action="@{/posts/{id}/teaser/generate(id=${post.id()})}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-sm">✨ AI로 만들기</button>
+                    <span class="help">제목과 본문 앞부분이 AI 서비스로 전송돼요(AI 태그 추천과 같은 동의)</span>
+                </form>
+                <p th:unless="${teaserConsent}" class="help">AI로 만들려면 글쓰기의 [AI 태그 추천]에서 먼저 동의해 주세요.</p>
+            </section>
+    </dialog>
     <!-- 022 신고 창: 사유 하나, 기타는 설명 필수(200자) -->
     <dialog id="report-dialog" aria-labelledby="report-heading" th:if="${canReact}">
         <form method="dialog" id="report-form">
