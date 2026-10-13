@@ -188,7 +188,7 @@ class ModerationIT extends IntegrationTestBase {
         mockMvc.perform(get(url).with(TestAuth.member(r1))).andExpect(status().isNotFound());
         mockMvc.perform(get(url).with(TestAuth.admin(ad))).andExpect(status().isNotFound());
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감");
-        assertThat(mockMvc.perform(get("/@hdauthor")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감").contains("공개 글 0");
+        assertThat(mockMvc.perform(get("/@hdauthor")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감").contains("게시물 0");
         assertThat(mockMvc.perform(get("/api/search/posts?q=숨길글감")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감");
         String own = mockMvc.perform(get(url).with(TestAuth.member(author))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(own).contains("운영 정책에 따라 숨겨진 글이에요 (사유: 욕설·혐오). 다른 사람에게는 보이지 않아요");

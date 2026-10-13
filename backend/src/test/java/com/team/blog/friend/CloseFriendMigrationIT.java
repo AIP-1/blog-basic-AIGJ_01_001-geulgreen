@@ -27,10 +27,14 @@ class CloseFriendMigrationIT extends IntegrationTestBase {
                 .schemas("v15_check").target("14").load().migrate();
         JdbcTemplate jdbc = new JdbcTemplate(new SingleConnectionDataSource(
                 POSTGRES.getJdbcUrl() + "&currentSchema=v15_check,public", POSTGRES.getUsername(), POSTGRES.getPassword(), true));
+        // 뒤 버전에서 member에 붙은 칸(074 nickname_prev_changed_at 등)은 빼고 그 시점 칸만 옮긴다
+        String columns = jdbc.queryForObject("SELECT string_agg(column_name, ', ' ORDER BY ordinal_position)"
+                + " FROM information_schema.columns WHERE table_schema = 'v15_check' AND table_name = 'member'", String.class);
         long[] ids = new long[3];
         for (int i = 0; i < 3; i++) {
             ids[i] = members.localMember("mig" + i, "mig" + i, "mig" + i + "@example.com", "Blog#2026ok", true);
-            jdbc.update("INSERT INTO member OVERRIDING SYSTEM VALUE SELECT * FROM public.member WHERE id = ?", ids[i]);
+            jdbc.update("INSERT INTO member (" + columns + ") OVERRIDING SYSTEM VALUE SELECT " + columns
+                    + " FROM public.member WHERE id = ?", ids[i]);
         }
         jdbc.update("INSERT INTO friendship (member_a_id, member_b_id, requested_by, status, created_at, accepted_at) "
                 + "VALUES (?, ?, ?, 'ACCEPTED', now(), now())", ids[0], ids[1], ids[0]);

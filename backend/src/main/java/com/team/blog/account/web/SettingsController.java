@@ -1,5 +1,6 @@
 package com.team.blog.account.web;
 
+import com.team.blog.account.application.HandleChangeService;
 import com.team.blog.account.application.ProfileService;
 import com.team.blog.account.application.ProfileView;
 import com.team.blog.shared.security.AccountGuard;
@@ -22,9 +23,11 @@ public class SettingsController {
     private final ProfileService profileService;
     private final CurrentUserProvider currentUserProvider;
     private final AccountGuard accountGuard;
+    private final HandleChangeService handleChangeService;
 
     public SettingsController(ProfileService profileService, CurrentUserProvider currentUserProvider,
-                              AccountGuard accountGuard) {
+                              AccountGuard accountGuard, HandleChangeService handleChangeService) {
+        this.handleChangeService = handleChangeService;
         this.profileService = profileService;
         this.currentUserProvider = currentUserProvider;
         this.accountGuard = accountGuard;
@@ -37,6 +40,12 @@ public class SettingsController {
         model.addAttribute("avatar", profile.avatar());
         model.addAttribute("nicknameNextAllowed", profile.nicknameNextAllowedAt() == null ? null
                 : KoreanDateFormatter.monthDay(profile.nicknameNextAllowedAt()));
+        // 074 강성찬 개인 확장: 주소 바꾸기
+        model.addAttribute("handleChangeEnabled", handleChangeService.enabled());
+        if (handleChangeService.enabled()) {
+            model.addAttribute("handleNextAllowed", handleChangeService.nextAllowedAt(currentUserProvider.current().orElseThrow().memberId())
+                    .map(KoreanDateFormatter::monthDay).orElse(null));
+        }
         return "settings/settings";
     }
 

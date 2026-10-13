@@ -43,11 +43,16 @@ public class PasswordResetService {
     private final ApplicationEventPublisher events;
     private final AuthProperties properties;
     private final Clock clock;
+    private final EmailCodeService codes;
+    private final InstaAccountProperties insta;
 
     public PasswordResetService(AuthIdentityRepository authIdentityRepository, MemberRepository memberRepository,
                                 RedisTokenStore tokenStore, RedisRateLimiter rateLimiter, PasswordPolicy passwordPolicy,
                                 PasswordEncoder passwordEncoder, ApplicationEventPublisher events,
-                                AuthProperties properties, Clock clock) {
+                                AuthProperties properties, Clock clock, EmailCodeService codes,
+                                InstaAccountProperties insta) {
+        this.codes = codes;
+        this.insta = insta;
         this.authIdentityRepository = authIdentityRepository;
         this.memberRepository = memberRepository;
         this.tokenStore = tokenStore;
@@ -90,11 +95,13 @@ public class PasswordResetService {
                 .filter(a -> memberRepository.findById(a.getMemberId()).map(m -> m.getDeletedAt() == null).orElse(false));
         if (local.isPresent()) {
             String rawToken = tokenStore.issue(TokenKind.RESET, local.get().getMemberId());
+            String code = insta.enabled()
+                    ? codes.issue(EmailCodeService.Purpose.RESET, email, String.valueOf(local.get().getMemberId())) : null;
             events.publishEvent(new PasswordResetMailRequested(email, PasswordResetMailRequested.Kind.LOCAL_LINK,
-                    rawToken, socialProviders));
+                    rawToken, socialProviders, code));
         } else if (!socialProviders.isEmpty()) {
             events.publishEvent(new PasswordResetMailRequested(email, PasswordResetMailRequested.Kind.SOCIAL_ONLY,
-                    null, socialProviders));
+                    null, socialProviders, null));
         }
     }
 
@@ -132,6 +139,33 @@ public class PasswordResetService {
         }
         identity.get().changePasswordHash(passwordEncoder.encode(newPassword));
         events.publishEvent(new PasswordResetCompleted(memberId.get()));
+        return ResetResult.RESET;
+    }
+
+    /**
+     * 074 강성찬 개인 확장: 메일 6자리 코드로 재설정. 정책 위반이면 코드를 쓰지 않는다. 코드가 틀리면 틀린 횟수가 오르고
+     * 한도를 넘으면 코드가 지워진다(다시 요청해야 함).
+     */
+    @Transactional
+    public ResetResult resetWithCode(String rawEmail, String code, String newPassword, String confirm) {
+        String email = EmailRules.normalize(rawEmail);
+        Optional<AuthIdentity> identity = insta.enabled() ? authIdentityRepository.findLocalByEmail(email) : Optional.empty();
+        if (identity.isEmpty()) {
+            return ResetResult.EXPIRED_OR_USED;
+        }
+        List<PasswordPolicyViolation> violations = passwordPolicy.validate(newPassword, email);
+        if (!violations.isEmpty()) {
+            throw new InvalidPasswordException(violations);
+        }
+        if (!Objects.equals(newPassword, confirm)) {
+            throw new PasswordMismatchException();
+        }
+        long memberId = identity.get().getMemberId();
+        if (codes.consume(EmailCodeService.Purpose.RESET, email, code).filter(String.valueOf(memberId)::equals).isEmpty()) {
+            return ResetResult.EXPIRED_OR_USED;
+        }
+        identity.get().changePasswordHash(passwordEncoder.encode(newPassword));
+        events.publishEvent(new PasswordResetCompleted(memberId));
         return ResetResult.RESET;
     }
 }
