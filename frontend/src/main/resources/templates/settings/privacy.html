@@ -26,7 +26,7 @@
             <li th:each="m : ${requests}" class="follow-row">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
                 <div class="follow-text"><p><span th:text="${m.nickname()}">닉네임</span>
-                    <a th:href="${'/@' + m.handle()}" th:text="${'@' + m.handle()}">@주소</a></p></div>
+                    <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a></p></div>
                 <form method="post" th:action="${'/settings/privacy/requests/' + m.handle()}" class="friend-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button type="submit" name="action" value="accept" class="btn btn-primary btn-sm">수락</button>

@@ -153,7 +153,7 @@ public class PostListQuery {
     private static PostCard card(ResultSet rs, int rowNum) throws SQLException {
         String handle = rs.getString("handle");
         long id = rs.getLong("id");
-        return new PostCard(id, "/@" + handle + "/posts/" + id, rs.getString("title"),
+        return new PostCard(id, com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id, rs.getString("title"),
                 rs.getString("excerpt") == null ? "" : rs.getString("excerpt"), rs.getString("thumbnail_url"),
                 rs.getTimestamp("first_public_at").toInstant(), rs.getInt("comment_count"), rs.getInt("like_count"),
                 new PostCard.Author(handle, rs.getString("nickname"), rs.getString("profile_image_url")), rs.getString("first_tag"));

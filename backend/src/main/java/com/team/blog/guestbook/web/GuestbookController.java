@@ -55,7 +55,7 @@ public class GuestbookController {
         model.addAttribute("entries", items);
         model.addAttribute("entryDates", dates);
         model.addAttribute("nextBefore", page.size() > size ? items.get(items.size() - 1).id() : null);
-        model.addAttribute("loginRedirect", "/login?redirect=/@" + owner.handle() + "/guestbook");
+        model.addAttribute("loginRedirect", "/login?redirect=" + com.team.blog.shared.web.BlogPaths.of(owner.handle()) + "/guestbook");
         return "guestbook/list";
     }
 
@@ -64,13 +64,13 @@ public class GuestbookController {
                               @RequestParam(value = "secret", required = false) String secret) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
         guestbook.write(currentUserProvider.current(), owner.memberId(), content, secret != null);
-        return seeOther("/@" + owner.handle() + "/guestbook");
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(owner.handle()) + "/guestbook");
     }
 
     @PostMapping("/@{handle}/guestbook/{id}/delete")
     public RedirectView delete(@PathVariable("handle") String handle, @PathVariable("id") long id) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
         guestbook.delete(currentUserProvider.current(), id);
-        return seeOther("/@" + owner.handle() + "/guestbook");
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(owner.handle()) + "/guestbook");
     }
 }

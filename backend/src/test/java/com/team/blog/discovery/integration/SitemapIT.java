@@ -28,7 +28,7 @@ class SitemapIT extends IntegrationTestBase {
         long trashed = posts.published(a, "휴지통", "본문", 1, t);
         posts.trash(trashed);
         String xml = mockMvc.perform(get("/sitemap.xml")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(xml).contains("/@smauthor/posts/" + open + "</loc>").contains("/@smauthor</loc>")
+        assertThat(xml).contains("/smauthor/posts/" + open + "</loc>").contains("/smauthor</loc>")
                 .doesNotContain("/posts/" + priv + "<").doesNotContain("/posts/" + friends + "<").doesNotContain("/posts/" + trashed + "<");
         assertThat(mockMvc.perform(get("/robots.txt")).andReturn().getResponse().getContentAsString())
                 .contains("Sitemap: ").contains("/sitemap.xml").contains("Disallow: /api/");

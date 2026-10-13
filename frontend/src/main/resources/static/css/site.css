@@ -169,7 +169,6 @@ main.list-page { max-width: 1120px; }
 .inline-form { display: inline; }
 /* 010 글 상세 */
 .post-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.author-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .reaction-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; color: var(--color-text-muted); }
 .author-card { display: flex; gap: 12px; align-items: flex-start; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 12px 0; margin: 16px 0; }
 .author-card-text { flex: 1; min-width: 0; }
@@ -435,7 +434,6 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
 .post-tags { margin: 28px 0 8px; }
 .reaction-row { padding: 16px 0; border-bottom: 1px solid var(--color-border); gap: 16px; }
 .author-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 20px; margin: 28px 0; }
-.author-actions { margin-top: 8px; }
 
 /* 댓글 */
 .comment { padding: 14px 0; }
@@ -623,6 +621,29 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .post-nav .post-nav-next { text-align: right; }
 .related-posts h2 { font-size: 1.05em; margin: 16px 0 8px; }
 .related-posts ul { margin: 0; padding-left: 1.2em; }
+/* 075 글 상세 작성자 ⋯ 메뉴·글 설정 창(강성찬 개인 확장): 읽는 흐름엔 글만, 작성자 도구는 작성자 줄 오른쪽에 */
+.post-meta-row { display: flex; gap: 8px; align-items: center; }
+.post-meta-row .post-meta { flex: 1; min-width: 0; margin: 0; }
+.post-owner-menu summary { padding: 2px 10px; font-weight: 700; letter-spacing: .1em; }
+.post-owner-menu summary::before, .post-owner-menu summary::after { content: none; }
+.post-owner-menu .sort-menu-panel { min-width: 210px; gap: 2px; }
+.post-owner-menu .sort-menu-panel form { margin: 0; display: flex; }
+.post-owner-menu .sort-menu-panel button, .post-owner-menu .sort-menu-panel #trash-post { all: unset; flex: 1; padding: 8px 12px; border-radius: 8px;
+    color: var(--color-text); font-size: .92em; cursor: pointer; }
+.post-owner-menu .sort-menu-panel button:hover, .post-owner-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
+.post-owner-menu .menu-field { display: flex; flex-direction: column; gap: 4px; padding: 6px 12px; font-size: .85em; color: var(--color-text-muted); }
+.post-owner-menu .sort-menu-panel #trash-post { color: var(--color-danger); border-top: 1px solid var(--color-border); border-radius: 0 0 8px 8px; margin-top: 4px; }
+dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; color: var(--color-text);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
+.post-settings-head { display: flex; align-items: center; justify-content: space-between; }
+.post-settings-head h2 { margin: 0; font-size: 1.1em; }
+.post-settings .teaser-box { margin: 12px 0 0; }
+a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
+a.author-byline.author-nickname:hover { text-decoration: underline; }
+/* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
+.related-posts { margin: 24px 0; }
+.post-category, .post-missions { margin: 8px 0; font-size: .9em; }
+.mission-done-note { margin: 8px 0; padding: 8px 12px; font-size: .88em; }
 /* 037 카테고리·041 시리즈·040 방명록·043 비밀 댓글(강성찬 개인 확장) */
 .blog-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .blog-links a { text-decoration: none; }
@@ -689,6 +710,23 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .profile-menu-panel a, .profile-menu-panel button { display: block; width: 100%; text-align: left; padding: 8px 12px; border-radius: 8px;
     color: var(--color-text); text-decoration: none; }
 .profile-menu-panel a:hover, .profile-menu-panel button:hover { background: var(--color-surface-muted); }
+/* 078: 머리말 검색 패널(입력창+추천 태그). 좁은 화면은 머리말 폭 전체 */
+.search-menu { position: relative; }
+.search-menu summary { list-style: none; cursor: pointer; }
+.search-menu summary::-webkit-details-marker { display: none; }
+.search-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; width: min(420px, calc(100vw - 32px)); display: flex;
+    flex-direction: column; gap: 10px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px;
+    padding: 14px; box-shadow: 0 8px 22px var(--color-shadow); }
+.search-menu-panel .search-form { display: flex; gap: 8px; margin: 0; }
+.search-menu-panel .search-form input { flex: 1; min-width: 0; }
+.search-menu-title { margin: 0; font-size: .85em; font-weight: 700; color: var(--color-text-muted); }
+.search-menu-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.search-menu-tags .tag-pill { padding: 6px 12px; gap: 6px; font-size: .88em; }
+.search-menu-all { align-self: flex-end; font-size: .85em; color: var(--color-text-muted); }
+@media (max-width: 640px) {
+    .search-menu { position: static; }
+    .search-menu-panel { position: absolute; left: 0; right: 0; top: 100%; width: auto; border-radius: 0; border-width: 0 0 1px; }
+}
 /* 본문 2단 */
 .home-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 @media (min-width: 1000px) { .home-layout { grid-template-columns: minmax(0, 1fr) 280px; } }
@@ -713,6 +751,12 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 /* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
 @media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
     overscroll-behavior: contain; scrollbar-width: thin; } }
+.side-post-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.side-post-list li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.side-post-list a { color: var(--color-text); text-decoration: none; font-weight: 600; font-size: .92em; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.side-post-list a:hover { text-decoration: underline; }
+.side-post-list .help { font-size: .8em; }
 .side-rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .side-rec-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
 .side-rec-list .newcomer-who { min-width: 0; font-weight: 600; font-size: .92em; }
@@ -722,6 +766,11 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
 .side-links a { color: var(--color-text-muted); text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
+/* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
+.side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
+@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; }
+    /* 프로필 메뉴 안 같은 링크도 이때는 숨김(오른쪽 칸 없는 화면·휴대폰은 그대로) */
+    body:has(.home-side .side-links) .profile-menu-links { display: none; } }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
@@ -735,10 +784,6 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-tags { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
 .side-tags li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .side-tags a { padding: 4px 10px; border-radius: 999px; text-decoration: none; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.side-cat { background: var(--color-cat-art-bg); text-align: center; padding: 20px 14px 0; overflow: hidden; }
-.side-cat-text { font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.35em; line-height: 1.4; margin: 0 0 8px; color: var(--color-cat-art-text); }
-.side-cat-text .icon-paw { width: .8em; height: .8em; }
-.side-cat img { display: block; width: 100%; height: auto; margin-top: 4px; }
 /* 꼬리말 */
 .footer-inner { justify-content: space-between; }
 .footer-slogan { color: var(--color-text-muted); margin: 0; }

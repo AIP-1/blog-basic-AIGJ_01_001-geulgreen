@@ -183,12 +183,12 @@ class ModerationIT extends IntegrationTestBase {
         String authorNotes = mockMvc.perform(get("/api/notifications").with(TestAuth.member(author))).andReturn().getResponse().getContentAsString();
         assertThat(authorNotes).contains("회원님의 글「숨길 글감」이(가) 운영 정책에 따라 숨겨졌어요").doesNotContain("hdr1").doesNotContain("hdadmin");
         // 작성자 외에는 어디에도 없음
-        String url = "/@hdauthor/posts/" + p;
+        String url = "/hdauthor/posts/" + p;
         mockMvc.perform(get(url)).andExpect(status().isNotFound());
         mockMvc.perform(get(url).with(TestAuth.member(r1))).andExpect(status().isNotFound());
         mockMvc.perform(get(url).with(TestAuth.admin(ad))).andExpect(status().isNotFound());
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감");
-        assertThat(mockMvc.perform(get("/@hdauthor")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감").contains("게시물 0");
+        assertThat(mockMvc.perform(get("/hdauthor")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감").contains("게시물 0");
         assertThat(mockMvc.perform(get("/api/search/posts?q=숨길글감")).andReturn().getResponse().getContentAsString()).doesNotContain("숨길 글감");
         String own = mockMvc.perform(get(url).with(TestAuth.member(author))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(own).contains("운영 정책에 따라 숨겨진 글이에요 (사유: 욕설·혐오). 다른 사람에게는 보이지 않아요");
@@ -231,9 +231,9 @@ class ModerationIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE type = 'COMMENT' AND comment_id = ?", Integer.class, cm)).isZero();
         assertThat(jdbc.queryForMap("SELECT * FROM notification WHERE type = 'CONTENT_HIDDEN'")).containsEntry("receiver_id", writer)
                 .containsEntry("comment_id", cm);
-        String page = mockMvc.perform(get("/@hcauthor/posts/" + p).with(TestAuth.member(author))).andReturn().getResponse().getContentAsString();
+        String page = mockMvc.perform(get("/hcauthor/posts/" + p).with(TestAuth.member(author))).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("운영 정책에 따라 숨겨진 댓글이에요").doesNotContain("나쁜 댓글").contains("답글");
-        String mine = mockMvc.perform(get("/@hcauthor/posts/" + p).with(TestAuth.member(writer))).andReturn().getResponse().getContentAsString();
+        String mine = mockMvc.perform(get("/hcauthor/posts/" + p).with(TestAuth.member(writer))).andReturn().getResponse().getContentAsString();
         assertThat(mine).contains("나쁜 댓글").contains("숨겨졌어요 (나만 보여요)");
         mockMvc.perform(post("/api/admin/reports/{id}/unhide", caseOf("comment_id", cm)).with(csrf()).with(TestAuth.admin(ad)))
                 .andExpect(status().isNoContent());

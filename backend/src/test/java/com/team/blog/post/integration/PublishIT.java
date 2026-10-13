@@ -41,7 +41,7 @@ class PublishIT extends IntegrationTestBase {
                 "[\"Spring Boot\", \"#JPA\", \"spring boot\"]", "PUBLIC", 3);
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), body).with(TestAuth.member(me)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.url").value("/@publisher/posts/" + postId))
+                .andExpect(jsonPath("$.url").value("/publisher/posts/" + postId))
                 .andExpect(jsonPath("$.version").value(4))
                 .andExpect(jsonPath("$.publishedAt").value("2026-10-07T05:00:00Z"))
                 .andExpect(jsonPath("$.firstPublicAt").value("2026-10-07T05:00:00Z"))
@@ -55,7 +55,7 @@ class PublishIT extends IntegrationTestBase {
         assertThat(row.get("edited_at")).isNull();
         assertThat(tagsOf(postId)).containsExactly("spring-boot", "jpa");
 
-        String html = mockMvc.perform(get("/@publisher/posts/{id}", postId)).andExpect(status().isOk())
+        String html = mockMvc.perform(get("/publisher/posts/{id}", postId)).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).contains("JPA N+1 정리").contains("#spring-boot").doesNotContain("수정됨")
                 .doesNotContain(">수정</a>");
@@ -119,7 +119,7 @@ class PublishIT extends IntegrationTestBase {
         String body = publishBody("<script>alert(1)</script>", "<img src=x onerror=alert(1)> [x](javascript:alert(1))\n\n<svg onload=alert(1)>",
                 "[]", "PUBLIC", 0);
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), body).with(TestAuth.member(me))).andExpect(status().isOk());
-        String html = mockMvc.perform(get("/@xsspub/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/xsspub/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
         String article = html.substring(html.indexOf("<article"), html.indexOf("</article>"));
         assertThat(article).doesNotContain("<script").doesNotContain("<svg").doesNotContain("<img")
                 .doesNotContain("href=\"javascript").contains("&lt;script&gt;alert(1)&lt;/script&gt;");
@@ -133,7 +133,7 @@ class PublishIT extends IntegrationTestBase {
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), publishBody("비공개", "본문", "[]", "PRIVATE", 0))
                         .with(TestAuth.member(me)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.firstPublicAt").doesNotExist());
-        mockMvc.perform(get("/@privpub/posts/{id}", postId)).andExpect(status().isNotFound());
-        mockMvc.perform(get("/@privpub/posts/{id}", postId).with(TestAuth.member(me))).andExpect(status().isOk());
+        mockMvc.perform(get("/privpub/posts/{id}", postId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/privpub/posts/{id}", postId).with(TestAuth.member(me))).andExpect(status().isOk());
     }
 }

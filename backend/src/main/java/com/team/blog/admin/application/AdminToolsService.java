@@ -43,7 +43,7 @@ public class AdminToolsService {
                           boolean hidden, String hiddenReason, long views, int comments) {
 
         public String url() {
-            return "/@" + handle + "/posts/" + id;
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id;
         }
     }
 
@@ -51,7 +51,7 @@ public class AdminToolsService {
                              String nickname, Instant createdAt, boolean hidden) {
 
         public String url() {
-            return "/@" + postHandle + "/posts/" + postId + "?comment=" + id + "#comment-" + id;
+            return com.team.blog.shared.web.BlogPaths.of(postHandle) + "/posts/" + postId + "?comment=" + id + "#comment-" + id;
         }
     }
 

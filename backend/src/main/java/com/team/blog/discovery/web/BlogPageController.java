@@ -84,7 +84,7 @@ public class BlogPageController {
             model.addAttribute("followCounts", followQuery.counts(owner.memberId()));
             model.addAttribute("followRequested", currentUserProvider.current()
                     .map(v -> privacy.requested(v.memberId(), owner.memberId())).orElse(false));
-            model.addAttribute("loginRedirect", "/login?redirect=/@" + owner.handle());
+            model.addAttribute("loginRedirect", "/login?redirect=" + com.team.blog.shared.web.BlogPaths.of(owner.handle()));
             return "blog/private";
         }
         // 020 FR-017: 블로그 안 검색
@@ -97,7 +97,7 @@ public class BlogPageController {
             java.util.Optional<String> normalized = com.team.blog.tag.domain.TagNormalizer.lookupName(tagRaw);
             if (normalized.isPresent() && !normalized.get().equals(tagRaw)) {
                 org.springframework.web.servlet.view.RedirectView redirect = new org.springframework.web.servlet.view.RedirectView(
-                        "/@" + owner.handle() + "?tag=" + org.springframework.web.util.UriUtils.encodeQueryParam(
+                        com.team.blog.shared.web.BlogPaths.of(owner.handle()) + "?tag=" + org.springframework.web.util.UriUtils.encodeQueryParam(
                                 normalized.get(), java.nio.charset.StandardCharsets.UTF_8));
                 redirect.setStatusCode(org.springframework.http.HttpStatus.MOVED_PERMANENTLY);
                 return redirect;
@@ -173,7 +173,7 @@ public class BlogPageController {
             model.addAttribute("recentNotes", recent);
             model.addAttribute("noteDates", noteDates);
         }
-        model.addAttribute("loginRedirect", "/login?redirect=/@" + owner.handle());
+        model.addAttribute("loginRedirect", "/login?redirect=" + com.team.blog.shared.web.BlogPaths.of(owner.handle()));
         model.addAttribute("continued", cursor != null && !cursor.isEmpty());
         model.addAttribute("listApi", "/api/members/" + owner.handle() + "/posts"
                 + (tag == null ? "" : "?tag=" + org.springframework.web.util.UriUtils.encodeQueryParam(tag, java.nio.charset.StandardCharsets.UTF_8)));

@@ -71,7 +71,7 @@ class ProfileValidationIT extends IntegrationTestBase {
         long id = members.active("kim755030", "김민서");
         mockMvc.perform(patchProfile(id, "{\"bio\":" + q("<script>alert(1)</script> https://evil.example") + "}"))
                 .andExpect(status().isOk());
-        String html = mockMvc.perform(get("/@kim755030")).andExpect(status().isOk())
+        String html = mockMvc.perform(get("/kim755030")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).doesNotContain("<script>alert(1)</script>")
                 .contains("&lt;script&gt;alert(1)&lt;/script&gt;")

@@ -69,7 +69,7 @@ public class FollowPageController {
             cursor = null;
         }
         FollowQuery.Counts counts = followQuery.counts(owner.memberId());
-        String base = "/@" + owner.handle() + (followers ? "/followers" : "/following");
+        String base = com.team.blog.shared.web.BlogPaths.of(owner.handle()) + (followers ? "/followers" : "/following");
         model.addAttribute("owner", owner);
         model.addAttribute("followers", followers);
         model.addAttribute("count", followers ? counts.followers() : counts.following());
@@ -87,7 +87,7 @@ public class FollowPageController {
                              @RequestParam(value = "back", required = false) String back, HttpServletRequest request) {
         followService.set(currentUserProvider.current(), handle, following, clientIpResolver.resolve(request));
         String target = back != null && back.startsWith("/") && !back.startsWith("//") && !back.contains("\\")
-                ? back : "/@" + handle;
+                ? back : com.team.blog.shared.web.BlogPaths.of(handle);
         return seeOther(target);
     }
 
@@ -96,7 +96,7 @@ public class FollowPageController {
     public RedirectView myFollowers() {
         CurrentUser user = accountGuard.requireLoggedIn(currentUserProvider.current());
         String handle = memberSummaryQuery.findByIds(Set.of(user.memberId())).get(user.memberId()).handle();
-        return seeOther("/@" + handle + "/followers");
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(handle) + "/followers");
     }
 
     private static RedirectView seeOther(String url) {

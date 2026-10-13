@@ -45,13 +45,13 @@ class RepublishIT extends IntegrationTestBase {
         clock.advance(Duration.ofDays(2));
         mockMvc.perform(autosave(postId, "고친 제목", "고친 본문", 1).with(TestAuth.member(me))).andExpect(status().isOk());
         flusher.flushBatch(500);
-        assertThat(mockMvc.perform(get("/@republisher/posts/{id}", postId)).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/republisher/posts/{id}", postId)).andReturn().getResponse().getContentAsString())
                 .contains("첫 본문").doesNotContain("고친 본문");
 
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), publishBody("고친 제목", "고친 본문", "[]", "PUBLIC", 2))
                         .with(TestAuth.member(me)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.url").value("/@republisher/posts/" + postId))
+                .andExpect(jsonPath("$.url").value("/republisher/posts/" + postId))
                 .andExpect(jsonPath("$.editedAt").value("2026-10-03T00:00:00Z"))
                 .andExpect(jsonPath("$.version").value(3));
         Map<String, Object> after = posts.post(postId);
@@ -62,7 +62,7 @@ class RepublishIT extends IntegrationTestBase {
         assertThat(((Timestamp) after.get("edited_at")).toInstant()).isEqualTo(T0.plus(Duration.ofDays(2)));
         assertThat(posts.workingCopyRow(postId)).isNull();
         assertThat(posts.buffer(postId)).isEmpty();
-        String html = mockMvc.perform(get("/@republisher/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/republisher/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("고친 본문").contains("수정됨").contains("10월 3일");
     }
 
@@ -84,11 +84,11 @@ class RepublishIT extends IntegrationTestBase {
         clock.advance(Duration.ofDays(1));
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), publishBody("다시 비공개", "본문", "[]", "PRIVATE", 2))
                 .with(TestAuth.member(me))).andExpect(status().isOk());
-        mockMvc.perform(get("/@latepublic/posts/{id}", postId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/latepublic/posts/{id}", postId)).andExpect(status().isNotFound());
         clock.advance(Duration.ofDays(1));
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), publishBody("다시 공개", "본문", "[]", "PUBLIC", 3))
                 .with(TestAuth.member(me))).andExpect(status().isOk());
         assertThat(((Timestamp) posts.post(postId).get("first_public_at")).toInstant()).isEqualTo(firstPublic);
-        mockMvc.perform(get("/@latepublic/posts/{id}", postId)).andExpect(status().isOk());
+        mockMvc.perform(get("/latepublic/posts/{id}", postId)).andExpect(status().isOk());
     }
 }

@@ -51,6 +51,7 @@ public class HandleService {
             words.add(word.strip().toLowerCase(Locale.ROOT));
         }
         this.reserved = Set.copyOf(words);
+        com.team.blog.shared.web.BlogPaths.reserve(this.reserved);
     }
 
     /** 08 §3 1~10단계로 미리 채울 주소. 결과는 그 순간 비어 있는 주소일 뿐 확정이 아니다. 이메일이 없으면 {@code user_}부터. */
@@ -179,6 +180,11 @@ public class HandleService {
                 new org.springframework.jdbc.core.namedparam.MapSqlParameterSource("h", handles)
                         .addValue("now", java.sql.Timestamp.from(clock.instant()))
                         .addValue("me", memberId, java.sql.Types.BIGINT), String.class);
+    }
+
+    /** 076: 맨 앞 경로 칸이 사이트 경로·예약어인지(블로그 주소 {@code /{handle}}로 보지 않음). */
+    public boolean isRouteOrReserved(String segment) {
+        return isReserved(segment);
     }
 
     private boolean isReserved(String body) {

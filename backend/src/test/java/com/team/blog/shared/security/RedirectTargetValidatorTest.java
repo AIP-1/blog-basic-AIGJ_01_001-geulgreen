@@ -10,7 +10,7 @@ class RedirectTargetValidatorTest {
     @Test
     void relativePathsAreKept() {
         assertThat(RedirectTargetValidator.sanitize("/manage/posts")).isEqualTo("/manage/posts");
-        assertThat(RedirectTargetValidator.sanitize("/@kim?tab=posts")).isEqualTo("/@kim?tab=posts");
+        assertThat(RedirectTargetValidator.sanitize("/kim?tab=posts")).isEqualTo("/kim?tab=posts");
         assertThat(RedirectTargetValidator.sanitize("/")).isEqualTo("/");
     }
 

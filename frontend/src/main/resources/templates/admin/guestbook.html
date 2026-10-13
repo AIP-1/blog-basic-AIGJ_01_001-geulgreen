@@ -14,7 +14,7 @@
         <li th:each="e : ${entries}" class="post-row">
             <div class="row-main">
                 <p class="comment-content" th:text="${e.content()}">내용</p>
-                <span class="help" th:text="${e.nickname() + ' @' + e.handle() + ' → '}">쓴 사람</span><a th:href="${'/@' + e.ownerHandle() + '/guestbook'}" th:text="${'@' + e.ownerHandle()}">블로그</a>
+                <span class="help" th:text="${e.nickname() + ' @' + e.handle() + ' → '}">쓴 사람</span><a th:href="${paths.blog(e.ownerHandle()) + '/guestbook'}" th:text="${'@' + e.ownerHandle()}">블로그</a>
                 <span class="badge" th:if="${e.secret()}">비밀글</span>
             </div>
             <form method="post" th:action="@{/admin/guestbook/{id}/delete(id=${e.id()})}" class="row-actions">

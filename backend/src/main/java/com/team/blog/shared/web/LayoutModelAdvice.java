@@ -49,6 +49,14 @@ public class LayoutModelAdvice {
         return request.getRequestURI();
     }
 
+    /** 076: 블로그 주소 링크({@code ${paths.blog(handle)}}). */
+    @ModelAttribute("paths")
+    public BlogPaths paths() {
+        return PATHS;
+    }
+
+    private static final BlogPaths PATHS = new BlogPaths();
+
     @ModelAttribute("currentMemberId")
     public Long currentMemberId() {
         return currentUserProvider.current().map(CurrentUser::memberId).orElse(null);

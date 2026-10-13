@@ -112,7 +112,7 @@ public class PostManageQuery {
                 instant(rs.getTimestamp("published_at")), instant(rs.getTimestamp("edited_at")), deletedAt,
                 deletedAt == null ? null : deletedAt.plus(properties.trash().retention()),
                 rs.getLong("view_count"), rs.getInt("like_count"), rs.getInt("comment_count"),
-                "/@" + rs.getString("handle") + "/posts/" + id,
+                com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + id,
                 rs.getString("excerpt"), rs.getString("thumbnail_url"), rs.getString("first_tag"));
     }
 

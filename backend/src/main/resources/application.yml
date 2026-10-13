@@ -124,6 +124,25 @@ blog:
         - undefined
         - devlog
         - teamblog
+        # 076 강성찬 개인 확장: 블로그 주소가 /{주소}라 사이트 맨 앞 경로도 예약(RootPathReservedIT가 빠진 것을 잡음)
+        - account
+        - actuator
+        - auth
+        - error
+        - feed
+        - missions
+        - notes
+        - oauth2
+        - password
+        - posts
+        - releases
+        - rss
+        - test
+        - withdrawn
+        - css
+        - fonts
+        - webjars
+        - media
     nickname:
       change-cooldown: 30d
       # FR-017 (09 §5) 15개

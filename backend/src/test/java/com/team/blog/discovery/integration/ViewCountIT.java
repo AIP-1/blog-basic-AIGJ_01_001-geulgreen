@@ -158,13 +158,13 @@ class ViewCountIT extends IntegrationTestBase {
     void detailIssuesVisitorCookieAndShowsNotice() throws Exception {
         long author = member("viewpage");
         long post = posts.published(author, "글", "본문", 1, NOW);
-        var guest = mockMvc.perform(get("/@viewpage/posts/{id}", post)).andReturn().getResponse();
+        var guest = mockMvc.perform(get("/viewpage/posts/{id}", post)).andReturn().getResponse();
         assertThat(guest.getHeaders("Set-Cookie")).anyMatch(c -> c.startsWith("vid=") && c.contains("HttpOnly")
                 && c.contains("SameSite=Lax") && c.contains("Max-Age=31536000"));
         assertThat(guest.getContentAsString()).contains("같은 사람은 30분에 5번까지 세요").contains("/js/post/post-view-");
-        assertThat(mockMvc.perform(get("/@viewpage/posts/{id}", post).with(TestAuth.member(author)))
+        assertThat(mockMvc.perform(get("/viewpage/posts/{id}", post).with(TestAuth.member(author)))
                 .andReturn().getResponse().getContentAsString()).doesNotContain("/js/post/post-view-");
-        mockMvc.perform(get("/@viewpage/posts/{id}", post)).andExpect(status().isOk());
+        mockMvc.perform(get("/viewpage/posts/{id}", post)).andExpect(status().isOk());
         assertThat(posts.post(post).get("view_count")).isEqualTo(0L);
     }
 
