@@ -54,7 +54,7 @@ class ProfileUpdateIT extends IntegrationTestBase {
                 .andExpect(jsonPath("$.provider").value("LOCAL"))
                 .andExpect(jsonPath("$.defaultVisibility").value("PUBLIC"));
 
-        String blog = mockMvc.perform(get("/@kim755030")).andExpect(status().isOk())
+        String blog = mockMvc.perform(get("/kim755030")).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(blog).contains("민서").contains("백엔드 개발을\n공부하고 있어요.").contains("profile-bio");
     }

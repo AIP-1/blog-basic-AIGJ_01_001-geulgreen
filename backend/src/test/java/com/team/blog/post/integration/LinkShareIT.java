@@ -38,7 +38,7 @@ class LinkShareIT extends IntegrationTestBase {
         long postId = posts.draft(me, "", "", 0);
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(),
                 publishBody("링크로만 보는 글", "비밀 본문", "[]", "LINK", 0)).with(TestAuth.member(me))).andExpect(status().isOk());
-        String url = "/@linkwriter/posts/" + postId;
+        String url = "/linkwriter/posts/" + postId;
         String mine = mockMvc.perform(get(url).with(TestAuth.member(me))).andExpect(status().isOk()).andReturn().getResponse()
                 .getContentAsString();
         assertThat(mine).contains("이 주소를 아는 사람만 볼 수 있어요");
@@ -55,7 +55,7 @@ class LinkShareIT extends IntegrationTestBase {
         mockMvc.perform(put("/api/posts/{id}/like", postId).with(csrf()).with(TestAuth.member(reader)))
                 .andExpect(status().isNotFound());
         // 목록·검색·sitemap에는 없다
-        for (String path : new String[] {"/", "/@linkwriter", "/api/posts", "/sitemap.xml", "/search?q=" + "링크로만"}) {
+        for (String path : new String[] {"/", "/linkwriter", "/api/posts", "/sitemap.xml", "/search?q=" + "링크로만"}) {
             assertThat(mockMvc.perform(get(path)).andReturn().getResponse().getContentAsString()).as(path)
                     .doesNotContain("링크로만 보는 글");
         }

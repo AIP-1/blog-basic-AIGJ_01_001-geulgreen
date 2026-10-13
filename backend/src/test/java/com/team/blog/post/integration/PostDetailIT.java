@@ -32,13 +32,13 @@ class PostDetailIT extends IntegrationTestBase {
         long trashed = posts.published(me, "휴지통 글", "본문", 1, T);
         posts.trash(trashed);
 
-        mockMvc.perform(get("/@detailown/posts/{id}", pub)).andExpect(status().isOk());
-        mockMvc.perform(get("/@detailown/posts/{id}", pub).with(TestAuth.member(other))).andExpect(status().isOk());
+        mockMvc.perform(get("/detailown/posts/{id}", pub)).andExpect(status().isOk());
+        mockMvc.perform(get("/detailown/posts/{id}", pub).with(TestAuth.member(other))).andExpect(status().isOk());
         String notFound = null;
         for (long hidden : new long[] {draft, priv, trashed, 999999}) {
             for (MockHttpServletRequestBuilder request : new MockHttpServletRequestBuilder[] {
-                    get("/@detailown/posts/{id}", hidden), get("/@detailown/posts/{id}", hidden).with(TestAuth.member(other)),
-                    get("/@detailown/posts/{id}", hidden).with(TestAuth.admin(other))}) {
+                    get("/detailown/posts/{id}", hidden), get("/detailown/posts/{id}", hidden).with(TestAuth.member(other)),
+                    get("/detailown/posts/{id}", hidden).with(TestAuth.admin(other))}) {
                 String body = mockMvc.perform(request).andExpect(status().isNotFound())
                         .andReturn().getResponse().getContentAsString();
                 if (notFound == null) {
@@ -47,15 +47,15 @@ class PostDetailIT extends IntegrationTestBase {
             }
         }
         // 010: 작성자 본인의 임시글은 에디터로
-        mockMvc.perform(get("/@detailown/posts/{id}", draft).with(TestAuth.member(me)))
+        mockMvc.perform(get("/detailown/posts/{id}", draft).with(TestAuth.member(me)))
                 .andExpect(status().isFound())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/write/" + draft));
-        assertThat(mockMvc.perform(get("/@detailown/posts/{id}", priv).with(TestAuth.member(me)))
+        assertThat(mockMvc.perform(get("/detailown/posts/{id}", priv).with(TestAuth.member(me)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).contains("나만 볼 수 있는 글이에요");
-        mockMvc.perform(get("/@detailown/posts/{id}", trashed).with(TestAuth.member(me))).andExpect(status().isNotFound());
+        mockMvc.perform(get("/detailown/posts/{id}", trashed).with(TestAuth.member(me))).andExpect(status().isNotFound());
         // 010: 다른 블로그 주소로 열면 작성자 주소로 301
-        mockMvc.perform(get("/@detailoth/posts/{id}", pub)).andExpect(status().isMovedPermanently())
-                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/@detailown/posts/" + pub));
+        mockMvc.perform(get("/detailoth/posts/{id}", pub)).andExpect(status().isMovedPermanently())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/detailown/posts/" + pub));
     }
 
     @Test
@@ -64,11 +64,11 @@ class PostDetailIT extends IntegrationTestBase {
         long other = writer(members, "editbtnx");
         long pub = posts.published(me, "글", "본문", 1, T);
         posts.workingCopy(pub, "고치는 중", "", 2);
-        String mine = mockMvc.perform(get("/@editbtn/posts/{id}", pub).with(TestAuth.member(me)))
+        String mine = mockMvc.perform(get("/editbtn/posts/{id}", pub).with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(mine).contains("href=\"/write/" + pub + "\"").contains("수정 중인 내용이 있어요");
         for (MockHttpServletRequestBuilder request : new MockHttpServletRequestBuilder[] {
-                get("/@editbtn/posts/{id}", pub), get("/@editbtn/posts/{id}", pub).with(TestAuth.member(other))}) {
+                get("/editbtn/posts/{id}", pub), get("/editbtn/posts/{id}", pub).with(TestAuth.member(other))}) {
             String html = mockMvc.perform(request).andReturn().getResponse().getContentAsString();
             assertThat(html).doesNotContain("/write/" + pub).doesNotContain("수정 중인 내용").contains("<p>발행본</p>");
         }

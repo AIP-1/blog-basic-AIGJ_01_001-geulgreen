@@ -80,7 +80,7 @@ class AccountStatusOnLoginIT extends IntegrationTestBase {
         assertThat(restore.getResponse().getStatus()).isEqualTo(200);
         assertThat(restore.getResponse().getContentAsString()).contains("복구하기").contains("로그아웃");
 
-        for (String path : new String[] {"/", "/signup", "/@goingaway", "/api/handles/availability?handle=abc"}) {
+        for (String path : new String[] {"/", "/signup", "/goingaway", "/api/handles/availability?handle=abc"}) {
             MvcResult other = browser.perform(get(path));
             assertThat(other.getResponse().getStatus()).as(path).isEqualTo(303);
             assertThat(other.getResponse().getHeader("Location")).as(path).isEqualTo("/account/restore");

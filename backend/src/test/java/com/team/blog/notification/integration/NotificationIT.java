@@ -105,7 +105,7 @@ class NotificationIT extends IntegrationTestBase {
         String json = list(a);
         assertThat(json).contains("ntb님이 회원님의 댓글에 답글을 남겼어요: 작성자에게 답글")
                 .contains("ntb님이 「제목글」에 댓글을 남겼어요: B의 댓글입니다")
-                .contains("/@ntauthor/posts/" + p + "?comment=" + bc + "#comment-" + bc);
+                .contains("/ntauthor/posts/" + p + "?comment=" + bc + "#comment-" + bc);
         // 댓글 삭제(답글 있어 자리만 남음)도 알림 삭제
         mockMvc.perform(delete("/api/comments/{id}", bc).with(csrf()).with(TestAuth.member(b))).andExpect(status().isNoContent());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE comment_id = ?", Integer.class, bc)).isZero();
@@ -154,7 +154,7 @@ class NotificationIT extends IntegrationTestBase {
         // 화면: 폼으로 읽음 후 이동
         mockMvc.perform(post("/notifications/{id}/open", ids.get(2)).with(csrf()).with(TestAuth.member(a)))
                 .andExpect(status().isSeeOther())
-                .andExpect(header().string("Location", "/@ntread/posts/" + p + "?comment="
+                .andExpect(header().string("Location", "/ntread/posts/" + p + "?comment="
                         + rows(a).get(1).get("comment_id") + "#comment-" + rows(a).get(1).get("comment_id")));
         String page = mockMvc.perform(get("/notifications").with(TestAuth.member(a))).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

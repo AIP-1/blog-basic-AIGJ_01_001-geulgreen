@@ -66,11 +66,11 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         // 남의 글에는 못 단다
         mockMvc.perform(post("/posts/{id}/category", a).param("categoryId", String.valueOf(dev))
                 .with(csrf()).with(TestAuth.member(other))).andExpect(status().isNotFound());
-        String blog = page("/@catme");
+        String blog = page("/catme");
         assertThat(blog).contains("개발 1").contains("자바 공부").contains("산책 일기");
-        String filtered = page("/@catme?category=" + dev);
+        String filtered = page("/catme?category=" + dev);
         assertThat(filtered.substring(filtered.indexOf("id=\"card-grid\""))).contains("자바 공부").doesNotContain("산책 일기");
-        assertThat(page("/@catme/posts/" + a)).contains("📁 개발");
+        assertThat(page("/catme/posts/" + a)).contains("📁 개발");
         // 지우면 글은 분류 없음
         mockMvc.perform(post("/settings/categories/{id}/delete", dev).with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
@@ -89,10 +89,10 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         tag(second, "spring", 0);
         tag(third, "spring", 0);
         tag(hidden, "spring", 0);
-        String html = page("/@navme/posts/" + second);
+        String html = page("/navme/posts/" + second);
         assertThat(html).contains("이전 글").contains("첫 번째 글").contains("다음 글").contains("세 번째 글")
                 .contains("관련 글").doesNotContain("나만 보는 글").contains("id=\"post-toc\"").contains("/js/post/toc-");
-        assertThat(page("/@navme/posts/" + first)).doesNotContain("이전 글</span>");
+        assertThat(page("/navme/posts/" + first)).doesNotContain("이전 글</span>");
     }
 
     @Test
@@ -100,21 +100,21 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         long owner = member("gbowner");
         long guest = member("gbguest");
         long stranger = member("gbstranger");
-        mockMvc.perform(post("/@gbowner/guestbook").param("content", "안녕하세요 <b>반가워요</b>").with(csrf())
+        mockMvc.perform(post("/gbowner/guestbook").param("content", "안녕하세요 <b>반가워요</b>").with(csrf())
                 .with(TestAuth.member(guest))).andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/@gbowner/guestbook").param("content", "비밀 이야기").param("secret", "on").with(csrf())
+        mockMvc.perform(post("/gbowner/guestbook").param("content", "비밀 이야기").param("secret", "on").with(csrf())
                 .with(TestAuth.member(guest))).andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/@gbowner/guestbook").param("content", "가".repeat(301)).with(csrf())
+        mockMvc.perform(post("/gbowner/guestbook").param("content", "가".repeat(301)).with(csrf())
                 .with(TestAuth.member(guest))).andExpect(status().isBadRequest());
-        assertThat(page("/@gbowner/guestbook")).contains("안녕하세요 &lt;b&gt;반가워요&lt;/b&gt;").doesNotContain("비밀 이야기")
+        assertThat(page("/gbowner/guestbook")).contains("안녕하세요 &lt;b&gt;반가워요&lt;/b&gt;").doesNotContain("비밀 이야기")
                 .contains("비밀글이에요");
-        assertThat(page("/@gbowner/guestbook", stranger)).doesNotContain("비밀 이야기");
-        assertThat(page("/@gbowner/guestbook", owner)).contains("비밀 이야기");
-        assertThat(page("/@gbowner/guestbook", guest)).contains("비밀 이야기");
+        assertThat(page("/gbowner/guestbook", stranger)).doesNotContain("비밀 이야기");
+        assertThat(page("/gbowner/guestbook", owner)).contains("비밀 이야기");
+        assertThat(page("/gbowner/guestbook", guest)).contains("비밀 이야기");
         long id = jdbc.queryForObject("SELECT min(id) FROM guestbook_entry", Long.class);
-        mockMvc.perform(post("/@gbowner/guestbook/{id}/delete", id).with(csrf()).with(TestAuth.member(stranger)))
+        mockMvc.perform(post("/gbowner/guestbook/{id}/delete", id).with(csrf()).with(TestAuth.member(stranger)))
                 .andExpect(status().isNotFound());
-        mockMvc.perform(post("/@gbowner/guestbook/{id}/delete", id).with(csrf()).with(TestAuth.member(owner)))
+        mockMvc.perform(post("/gbowner/guestbook/{id}/delete", id).with(csrf()).with(TestAuth.member(owner)))
                 .andExpect(status().is3xxRedirection());
         guestbookPurge.purge(guest);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM guestbook_entry", Integer.class)).isZero();
@@ -133,9 +133,9 @@ class TistoryFeaturesIT extends IntegrationTestBase {
             mockMvc.perform(post("/posts/{id}/series", p).param("seriesId", String.valueOf(series))
                     .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
         }
-        String html = page("/@serme/posts/" + p2);
+        String html = page("/serme/posts/" + p2);
         assertThat(html).contains("📚 스프링 입문").contains("(2/3)").contains("이전편: 입문 1편").contains("다음편: 입문 3편");
-        String list = page("/@serme/series/" + series);
+        String list = page("/serme/series/" + series);
         assertThat(list.indexOf("입문 1편")).isLessThan(list.indexOf("입문 2편"));
         assertThat(list.indexOf("입문 2편")).isLessThan(list.indexOf("입문 3편"));
         // 다 빼면 시리즈도 사라진다
@@ -161,12 +161,12 @@ class TistoryFeaturesIT extends IntegrationTestBase {
                 .andExpect(status().isOk());
         assertThat(page("/manage/posts?tab=drafts", me)).contains("⏰ 예약");
         assertThat(schedules.runDue()).isZero();
-        assertThat(page("/@schme")).doesNotContain("예약한 글");
+        assertThat(page("/schme")).doesNotContain("예약한 글");
         clock.set(T.plus(61, ChronoUnit.MINUTES));
         assertThat(schedules.runDue()).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT status FROM post WHERE id = ?", String.class, draft)).isEqualTo("PUBLISHED");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post_schedule", Integer.class)).isZero();
-        assertThat(page("/@schme")).contains("예약한 글");
+        assertThat(page("/schme")).contains("예약한 글");
         // 취소는 본인만
         long other = posts.draft(me, "다른 글", "본문", 1);
         mockMvc.perform(post("/api/posts/{id}/schedule", other).with(csrf()).with(TestAuth.member(me))
@@ -191,11 +191,11 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         mockMvc.perform(post("/api/posts/{id}/comments", postId).with(csrf()).with(TestAuth.member(writer))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\"모두 보는 댓글\"}"))
                 .andExpect(status().isCreated());
-        assertThat(page("/@scauthor/posts/" + postId, stranger)).contains("🔒 비밀 댓글이에요").doesNotContain("글쓴이만 보세요")
+        assertThat(page("/scauthor/posts/" + postId, stranger)).contains("🔒 비밀 댓글이에요").doesNotContain("글쓴이만 보세요")
                 .contains("모두 보는 댓글");
-        assertThat(page("/@scauthor/posts/" + postId)).doesNotContain("글쓴이만 보세요");
-        assertThat(page("/@scauthor/posts/" + postId, author)).contains("글쓴이만 보세요");
-        assertThat(page("/@scauthor/posts/" + postId, writer)).contains("글쓴이만 보세요");
+        assertThat(page("/scauthor/posts/" + postId)).doesNotContain("글쓴이만 보세요");
+        assertThat(page("/scauthor/posts/" + postId, author)).contains("글쓴이만 보세요");
+        assertThat(page("/scauthor/posts/" + postId, writer)).contains("글쓴이만 보세요");
         String api = mockMvc.perform(get("/api/posts/{id}/comments", postId).with(TestAuth.member(stranger))).andReturn()
                 .getResponse().getContentAsString();
         assertThat(api).doesNotContain("글쓴이만 보세요").contains("SECRET");
@@ -205,7 +205,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\":\"답글이에요\",\"replyToCommentId\":" + secretId + "}")).andExpect(status().isCreated());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM comment WHERE secret", Integer.class)).isEqualTo(2);
-        assertThat(page("/@scauthor/posts/" + postId, stranger)).doesNotContain("답글이에요");
+        assertThat(page("/scauthor/posts/" + postId, stranger)).doesNotContain("답글이에요");
         assertThat(jdbc.queryForObject("SELECT comment_count FROM post WHERE id = ?", Integer.class, postId)).isEqualTo(3);
         // 043: 보통 댓글에도 비밀 답글을 달 수 있다(글쓴이·원댓글 쓴 사람·답글 쓴 사람만 본다)
         long openId = jdbc.queryForObject("SELECT id FROM comment WHERE content = '모두 보는 댓글'", Long.class);
@@ -214,10 +214,10 @@ class TistoryFeaturesIT extends IntegrationTestBase {
                 .content("{\"content\":\"몰래 단 답글\",\"replyToCommentId\":" + openId + ",\"secret\":true}"))
                 .andExpect(status().isCreated());
         long outsider = member("scoutsider");
-        assertThat(page("/@scauthor/posts/" + postId, outsider)).doesNotContain("몰래 단 답글").contains("모두 보는 댓글");
-        assertThat(page("/@scauthor/posts/" + postId, writer)).contains("몰래 단 답글");
-        assertThat(page("/@scauthor/posts/" + postId, author)).contains("몰래 단 답글");
-        assertThat(page("/@scauthor/posts/" + postId, stranger)).contains("몰래 단 답글");
+        assertThat(page("/scauthor/posts/" + postId, outsider)).doesNotContain("몰래 단 답글").contains("모두 보는 댓글");
+        assertThat(page("/scauthor/posts/" + postId, writer)).contains("몰래 단 답글");
+        assertThat(page("/scauthor/posts/" + postId, author)).contains("몰래 단 답글");
+        assertThat(page("/scauthor/posts/" + postId, stranger)).contains("몰래 단 답글");
     }
 
     @Test
@@ -226,13 +226,13 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         posts.published(me, "공개 글 <제목>", "본문", 1, T.minusSeconds(100));
         long priv = posts.published(me, "비공개 글", "본문", 1, T.minusSeconds(50));
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", priv);
-        var res = mockMvc.perform(get("/@rssme/rss")).andExpect(status().isOk()).andReturn().getResponse();
+        var res = mockMvc.perform(get("/rssme/rss")).andExpect(status().isOk()).andReturn().getResponse();
         assertThat(res.getContentType()).startsWith("application/rss+xml");
         String xml = res.getContentAsString();
         assertThat(xml).contains("<rss version=\"2.0\">").contains("공개 글 &lt;제목&gt;").doesNotContain("비공개 글")
-                .contains("/@rssme/posts/");
+                .contains("/rssme/posts/");
         assertThat(mockMvc.perform(get("/rss")).andReturn().getResponse().getContentAsString()).contains("공개 글 &lt;제목&gt;");
-        mockMvc.perform(get("/@nobodyhere/rss")).andExpect(status().isNotFound());
-        assertThat(page("/@rssme")).contains("/@rssme/rss").contains("/@rssme/guestbook").contains("/@rssme/series");
+        mockMvc.perform(get("/nobodyhere/rss")).andExpect(status().isNotFound());
+        assertThat(page("/rssme")).contains("/rssme/rss").contains("/rssme/guestbook").contains("/rssme/series");
     }
 }

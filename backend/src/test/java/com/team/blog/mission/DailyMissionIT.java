@@ -95,7 +95,7 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 미션").contains("받았어요")
                 .contains("3일 연속 완료하면");
         assertThat(page("/missions", null)).doesNotContain("내 배지");
-        assertThat(page("/@mswriter/posts/" + postId, writer)).contains("🗓 오늘의 미션 · ").contains("미션 완료");
+        assertThat(page("/mswriter/posts/" + postId, writer)).contains("🗓 오늘의 미션 · ").contains("미션 완료");
         assertThat(missions.stats(writer).total()).isEqualTo(1);
         // 다음 날: 어제 주제로는 새로 시작할 수 없고, 어제 화면에서 글을 볼 수 있다
         clock.set(T.plusSeconds(24 * 3600));

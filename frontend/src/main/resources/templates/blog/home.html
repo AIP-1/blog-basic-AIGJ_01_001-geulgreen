@@ -16,8 +16,8 @@
             <!-- 074 강성찬 개인 확장: 인스타식 숫자 줄(게시물·팔로워·팔로잉)과 내 블로그면 프로필 편집 -->
             <ul class="insta-stats" th:if="${instaAccount}">
                 <li th:text="${'게시물 ' + publicCount}">게시물 24</li>
-                <li><a th:href="${'/@' + owner.handle() + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a></li>
-                <li><a th:href="${'/@' + owner.handle() + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a></li>
+                <li><a th:href="${paths.blog(owner.handle()) + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a></li>
+                <li><a th:href="${paths.blog(owner.handle()) + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a></li>
             </ul>
             <p th:if="${instaAccount and isOwner}"><a class="btn btn-sm" href="/settings#settings-profile">프로필 편집</a></p>
             <p class="help" th:if="${instaAccount and blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</p>
@@ -25,20 +25,20 @@
                 <!-- 051 강성찬 개인 확장: 방문자 수 -->
                 <span th:if="${blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span><span th:if="${blogVisits != null}"> · </span>
                 <span th:text="${'공개 글 ' + publicCount}">공개 글 24</span> ·
-                <a th:href="${'/@' + owner.handle() + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a> ·
-                <a th:href="${'/@' + owner.handle() + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a>
+                <a th:href="${paths.blog(owner.handle()) + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a> ·
+                <a th:href="${paths.blog(owner.handle()) + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a>
             </p>
             <!-- 040·041·044 강성찬 개인 확장: 방명록·시리즈·RSS -->
             <p class="help blog-links">
-                <a th:if="${guestbookEnabled}" th:href="${'/@' + owner.handle() + '/guestbook'}">📖 방명록</a>
-                <a th:if="${seriesEnabled}" th:href="${'/@' + owner.handle() + '/series'}">📚 시리즈</a>
-                <a th:if="${rssEnabled}" th:href="${'/@' + owner.handle() + '/rss'}">RSS</a>
+                <a th:if="${guestbookEnabled}" th:href="${paths.blog(owner.handle()) + '/guestbook'}">📖 방명록</a>
+                <a th:if="${seriesEnabled}" th:href="${paths.blog(owner.handle()) + '/series'}">📚 시리즈</a>
+                <a th:if="${rssEnabled}" th:href="${paths.blog(owner.handle()) + '/rss'}">RSS</a>
             </p>
             <!-- 018 팔로우 버튼(내 블로그에서는 없음) -->
             <p th:unless="${isOwner}">
-                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, ${followingOwner}, ${currentMemberId != null}, ${loginRedirect}, ${'/@' + owner.handle()})}"></th:block>
+                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, ${followingOwner}, ${currentMemberId != null}, ${loginRedirect}, ${paths.blog(owner.handle())})}"></th:block>
                 <!-- 025·069 강성찬 개인 확장: 친한 친구 버튼(내가 주인을 팔로우할 때만) -->
-                <th:block th:replace="~{fragments/friend :: button(${owner.handle()}, ${friendStatus}, ${'/@' + owner.handle()})}"></th:block>
+                <th:block th:replace="~{fragments/friend :: button(${owner.handle()}, ${friendStatus}, ${paths.blog(owner.handle())})}"></th:block>
             </p>
             <p class="follow-message help" role="status" hidden></p>
         </div>
@@ -56,40 +56,40 @@
     </section>
     <!-- 033 강성찬 개인 확장: 짧은 기록 -->
     <section th:if="${recentNotes != null and (!recentNotes.isEmpty() or isOwner)}" class="notes-box" aria-labelledby="notes-heading">
-        <h2 id="notes-heading" class="grass-title">짧은 기록 <a class="help" th:href="${'/@' + owner.handle() + '/notes'}">모두 보기</a></h2>
-        <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${'/@' + owner.handle()})}"></form></th:block>
+        <h2 id="notes-heading" class="grass-title">짧은 기록 <a class="help" th:href="${paths.blog(owner.handle()) + '/notes'}">모두 보기</a></h2>
+        <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${paths.blog(owner.handle())})}"></form></th:block>
         <ul class="note-list">
-            <th:block th:each="n : ${recentNotes}"><li th:replace="~{fragments/note :: item(${n}, ${noteDates.get(n.id())}, ${'/@' + owner.handle()})}"></li></th:block>
+            <th:block th:each="n : ${recentNotes}"><li th:replace="~{fragments/note :: item(${n}, ${noteDates.get(n.id())}, ${paths.blog(owner.handle())})}"></li></th:block>
         </ul>
     </section>
     <!-- 037 강성찬 개인 확장: 카테고리 -->
     <nav th:if="${blogCategories != null and !blogCategories.isEmpty()}" class="blog-categories" aria-label="카테고리">
-        <a th:href="${'/@' + owner.handle()}" th:class="${filterCategory == null ? 'category-link active' : 'category-link'}">전체</a>
-        <a th:each="c : ${blogCategories}" th:href="@{'/@' + ${owner.handle()}(category=${c.id()})}"
+        <a th:href="${paths.blog(owner.handle())}" th:class="${filterCategory == null ? 'category-link active' : 'category-link'}">전체</a>
+        <a th:each="c : ${blogCategories}" th:href="@{${paths.blog(owner.handle())}(category=${c.id()})}"
            th:class="${filterCategory != null and filterCategory.id() == c.id() ? 'category-link active' : 'category-link'}"
            th:text="${c.name() + ' ' + c.postCount()}">카테고리 3</a>
     </nav>
     <!-- 013 블로그 태그 줄(처음 10개 + 태그 더 보기)과 필터 -->
     <nav class="blog-tags" th:unless="${blogTags.isEmpty()}" aria-label="이 블로그의 태그">
         <th:block th:each="t, st : ${blogTags}" th:if="${st.index < 10}">
-            <a class="tag" th:href="@{'/@' + ${owner.handle()}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
+            <a class="tag" th:href="@{${paths.blog(owner.handle())}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
         </th:block>
         <details th:if="${blogTags.size() > 10}">
             <summary>태그 더 보기</summary>
             <th:block th:each="t, st : ${blogTags}" th:if="${st.index >= 10}">
-                <a class="tag" th:href="@{'/@' + ${owner.handle()}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
+                <a class="tag" th:href="@{${paths.blog(owner.handle())}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
             </th:block>
         </details>
     </nav>
     <p th:if="${filterCategory != null}" class="tag-filter">
         <span th:text="${'📁 ' + filterCategory.name() + ' 글'}">카테고리 글</span>
-        <a th:href="${'/@' + owner.handle()}">필터 해제</a>
+        <a th:href="${paths.blog(owner.handle())}">필터 해제</a>
     </p>
     <p th:if="${filterTag != null}" class="tag-filter">
         <span th:text="${'#' + filterTag + ' 글'}">#태그 글</span>
-        <a th:href="${'/@' + owner.handle()}">필터 해제</a>
+        <a th:href="${paths.blog(owner.handle())}">필터 해제</a>
     </p>
-    <p th:if="${continued}"><a th:href="${'/@' + owner.handle()}">처음부터 보기</a></p>
+    <p th:if="${continued}"><a th:href="${paths.blog(owner.handle())}">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued and filterTag == null and filterCategory == null}">
         <p class="empty-state" th:unless="${isOwner}">아직 공개한 글이 없어요</p>
         <div class="empty-state" th:if="${isOwner}">첫 글을 써 보세요

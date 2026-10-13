@@ -55,10 +55,10 @@ class AdminToolsIT extends IntegrationTestBase {
         mockMvc.perform(post("/admin/posts/{id}/hide", postId).param("reason", "SPAM").with(csrf()).with(TestAuth.admin(admin)))
                 .andExpect(status().is3xxRedirection());
         assertThat(jdbc.queryForObject("SELECT hidden_reason FROM post WHERE id = ?", String.class, postId)).isEqualTo("SPAM");
-        mockMvc.perform(get("/@writer1/posts/{id}", postId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/writer1/posts/{id}", postId)).andExpect(status().isNotFound());
         mockMvc.perform(post("/admin/posts/{id}/unhide", postId).with(csrf()).with(TestAuth.admin(admin)))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(get("/@writer1/posts/{id}", postId)).andExpect(status().isOk());
+        mockMvc.perform(get("/writer1/posts/{id}", postId)).andExpect(status().isOk());
         mockMvc.perform(post("/api/posts/{id}/comments", postId).with(csrf()).with(TestAuth.member(user))
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON).content("{\"content\":\"광고 댓글\"}"))
                 .andExpect(status().isCreated());
@@ -82,14 +82,14 @@ class AdminToolsIT extends IntegrationTestBase {
         long owner = member("owner3");
         mockMvc.perform(post("/admin/notices").param("message", "오늘 밤 점검해요").param("linkUrl", "javascript:alert(1)")
                 .with(csrf()).with(TestAuth.admin(admin))).andExpect(status().isBadRequest());
-        mockMvc.perform(post("/admin/notices").param("message", "오늘 밤 점검해요").param("linkUrl", "/@boss3")
+        mockMvc.perform(post("/admin/notices").param("message", "오늘 밤 점검해요").param("linkUrl", "/boss3")
                 .with(csrf()).with(TestAuth.admin(admin))).andExpect(status().is3xxRedirection());
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("📢 오늘 밤 점검해요");
         long noticeId = jdbc.queryForObject("SELECT id FROM site_notice WHERE active", Long.class);
         mockMvc.perform(post("/admin/notices/{id}/off", noticeId).with(csrf()).with(TestAuth.admin(admin)))
                 .andExpect(status().is3xxRedirection());
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("오늘 밤 점검해요");
-        mockMvc.perform(post("/@owner3/guestbook").param("content", "도배 방명록").with(csrf()).with(TestAuth.member(guest)))
+        mockMvc.perform(post("/owner3/guestbook").param("content", "도배 방명록").with(csrf()).with(TestAuth.member(guest)))
                 .andExpect(status().is3xxRedirection());
         assertThat(page("/admin/guestbook", TestAuth.admin(admin))).contains("도배 방명록");
         long entry = jdbc.queryForObject("SELECT id FROM guestbook_entry", Long.class);

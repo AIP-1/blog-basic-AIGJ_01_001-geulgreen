@@ -63,7 +63,7 @@ class PostListIT extends IntegrationTestBase {
         assertThat(ids(third)).containsExactly(ids.get(1), ids.get(0));
         assertThat(third.nextCursor()).isNull();
         PostCard card = first.items().get(0);
-        assertThat(card.url()).isEqualTo("/@listauthor/posts/" + ids.get(25));
+        assertThat(card.url()).isEqualTo("/listauthor/posts/" + ids.get(25));
         assertThat(card.excerpt()).isEqualTo("요약 25");
         assertThat(card.commentCount()).isEqualTo(25);
         assertThat(card.likeCount()).isEqualTo(50);

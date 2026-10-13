@@ -97,7 +97,7 @@ public class SearchController {
         model.addAttribute("owner", owner);
         model.addAttribute("emptyQuery", terms.empty());
         model.addAttribute("twoCharNotice", terms.hasTwoCharWord());
-        String base = owner == null ? "/search" : "/@" + owner.handle();
+        String base = owner == null ? "/search" : com.team.blog.shared.web.BlogPaths.of(owner.handle());
         model.addAttribute("searchBase", base);
         String enc = UriUtils.encodeQueryParam(terms.text(), StandardCharsets.UTF_8);
         model.addAttribute("encodedQ", enc);

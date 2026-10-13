@@ -41,7 +41,7 @@ class ActivityIT extends IntegrationTestBase {
         assertThat(grass.bestStreak()).isEqualTo(3);
         assertThat(grass.activeDays()).isEqualTo(4);
         assertThat(grass.weeks()).hasSizeBetween(52, 54);
-        String html = mockMvc.perform(get("/@grassme")).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/grassme")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("🔥 3일 연속").contains("최근 1년 4일").contains("2026.10.09 · 글 1 · 댓글 0");
     }
 }

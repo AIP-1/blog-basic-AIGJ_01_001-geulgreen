@@ -37,13 +37,13 @@ public class SitemapController {
         jdbc.query("""
                 SELECT DISTINCT m.handle FROM post p JOIN member m ON m.id = p.author_id WHERE """ + " "
                 + accessPolicy.publicListingCondition("p", "m") + " ORDER BY m.handle LIMIT 10000",
-                rs -> { url(xml, "/@" + rs.getString("handle"), null); });
+                rs -> { url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")), null); });
         jdbc.query("""
                 SELECT p.id, m.handle, COALESCE(p.edited_at, p.first_public_at) AS changed
                 FROM post p JOIN member m ON m.id = p.author_id WHERE """ + " " + accessPolicy.publicListingCondition("p", "m")
                 + " ORDER BY p.first_public_at DESC, p.id DESC LIMIT " + MAX_URLS / 2,
                 rs -> {
-                    url(xml, "/@" + rs.getString("handle") + "/posts/" + rs.getLong("id"),
+                    url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + rs.getLong("id"),
                             DateTimeFormatter.ISO_INSTANT.format(rs.getTimestamp("changed").toInstant()));
                 });
         xml.append("</urlset>\n");

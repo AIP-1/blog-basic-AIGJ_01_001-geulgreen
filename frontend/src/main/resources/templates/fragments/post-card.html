@@ -12,7 +12,7 @@
     <div class="card-body">
         <th:block th:replace="${extra}"></th:block>
         <p class="card-top" th:if="${showAuthor or card.firstTag() != null}">
-            <a th:if="${showAuthor}" class="card-author" th:href="${'/@' + card.author().handle()}">
+            <a th:if="${showAuthor}" class="card-author" th:href="${paths.blog(card.author().handle())}">
                 <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
                 <span th:text="${card.author().nickname()}">닉네임</span></a>
             <!-- 시안(10-08): 첫 태그를 카드 머리에(색은 태그 길이로 4가지 중 하나) -->

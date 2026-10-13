@@ -75,7 +75,7 @@ class NestedRepliesIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE type = 'REPLY' AND comment_id = ? AND receiver_id = ?",
                 Integer.class, l4, a)).isEqualTo(1);
         // 화면: 3단계까지 펼침, 4단계부터 접힘. @대상 표시 없음
-        String html = mockMvc.perform(get("/@nrauthor/posts/" + postId)).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/nrauthor/posts/" + postId)).andReturn().getResponse().getContentAsString();
         int fold = html.indexOf("replies-fold");
         assertThat(fold).isPositive();
         assertThat(html.indexOf("셋째-단계")).isLessThan(fold);
@@ -85,10 +85,10 @@ class NestedRepliesIT extends IntegrationTestBase {
         for (int i = 0; i < 5; i++) {
             write(b, postId, "같은단계" + i, l1);
         }
-        html = mockMvc.perform(get("/@nrauthor/posts/" + postId)).andReturn().getResponse().getContentAsString();
+        html = mockMvc.perform(get("/nrauthor/posts/" + postId)).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("답글 3개 더보기"); // l1 아래 6개(l2 + 5) 중 3개 접힘
         // 특정 답글로 들어오면 그 대화의 최상위 페이지
-        assertThat(mockMvc.perform(get("/@nrauthor/posts/" + postId).param("comment", String.valueOf(l5))).andReturn()
+        assertThat(mockMvc.perform(get("/nrauthor/posts/" + postId).param("comment", String.valueOf(l5))).andReturn()
                 .getResponse().getContentAsString()).contains("다섯째-단계");
     }
 
@@ -104,7 +104,7 @@ class NestedRepliesIT extends IntegrationTestBase {
         mockMvc.perform(delete("/api/comments/{id}", l2).with(csrf()).with(TestAuth.member(a))).andExpect(status().is2xxSuccessful());
         assertThat(jdbc.queryForObject("SELECT deleted_at IS NOT NULL FROM comment WHERE id = ?", Boolean.class, l2)).isTrue();
         assertThat(commentCount(postId)).isEqualTo(2);
-        String html = mockMvc.perform(get("/@nrdel/posts/" + postId)).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/nrdel/posts/" + postId)).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("삭제된 댓글이에요").contains("셋");
         // 마지막 답글을 지우면 위의 빈 자리도 정리된다(l1은 내용이 있으므로 남음)
         mockMvc.perform(delete("/api/comments/{id}", l3).with(csrf()).with(TestAuth.member(a))).andExpect(status().is2xxSuccessful());

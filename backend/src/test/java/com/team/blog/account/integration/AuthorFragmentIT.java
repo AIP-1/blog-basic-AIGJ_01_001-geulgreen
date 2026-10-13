@@ -30,9 +30,9 @@ class AuthorFragmentIT extends IntegrationTestBase {
     @Test
     void rendersBylineAndNameForActiveMember() {
         String html = render(AuthorDisplay.of("kim755030", "김민서", null));
-        assertThat(html).contains("<a class=\"author-byline author-nickname\" href=\"/@kim755030\">김민서</a>")
+        assertThat(html).contains("<a class=\"author-byline author-nickname\" href=\"/kim755030\">김민서</a>")
                 .contains("<span class=\"author-nickname\">김민서</span>")
-                .contains("<a class=\"author-handle\" href=\"/@kim755030\">@kim755030</a>")
+                .contains("<a class=\"author-handle\" href=\"/kim755030\">@kim755030</a>")
                 .contains("<span class=\"author-name\">김민서</span>");
     }
 

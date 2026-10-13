@@ -49,7 +49,7 @@ public class RssController {
     @GetMapping("/@{handle}/rss")
     public ResponseEntity<String> blog(@PathVariable("handle") String handle) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
-        return feed(owner.nickname() + "의 블로그", "/@" + owner.handle(), owner.memberId());
+        return feed(owner.nickname() + "의 블로그", com.team.blog.shared.web.BlogPaths.of(owner.handle()), owner.memberId());
     }
 
     private ResponseEntity<String> feed(String title, String link, Long authorId) {
@@ -67,7 +67,7 @@ public class RssController {
                         + " ON m.id = p.author_id WHERE " + accessPolicy.publicListingCondition("p", "m") + byAuthor
                         + " ORDER BY p.first_public_at DESC, p.id DESC LIMIT " + properties.size(),
                 rs -> {
-                    String url = origin + "/@" + rs.getString("handle") + "/posts/" + rs.getLong("id");
+                    String url = origin + com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + rs.getLong("id");
                     xml.append("<item><title>").append(esc(rs.getString("title"))).append("</title>")
                             .append("<link>").append(esc(url)).append("</link>")
                             .append("<guid isPermaLink=\"true\">").append(esc(url)).append("</guid>")

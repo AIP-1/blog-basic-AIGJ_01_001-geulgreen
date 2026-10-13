@@ -52,7 +52,7 @@ public class TeaserController {
     }
 
     private String url(long id) {
-        return jdbc.queryForObject("SELECT '/@' || m.handle || '/posts/' || p.id FROM post p JOIN member m ON m.id = p.author_id WHERE p.id = ?",
-                String.class, id);
+        return com.team.blog.shared.web.BlogPaths.of(jdbc.queryForObject(
+                "SELECT m.handle FROM post p JOIN member m ON m.id = p.author_id WHERE p.id = ?", String.class, id)) + "/posts/" + id;
     }
 }

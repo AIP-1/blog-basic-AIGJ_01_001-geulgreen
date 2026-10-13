@@ -18,7 +18,7 @@
                 <span th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</span>
             </p>
             <p>
-                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${'/@' + owner.handle()})}"></th:block>
+                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${paths.blog(owner.handle())})}"></th:block>
             </p>
             <p class="follow-message help" role="status" hidden></p>
         </div>
