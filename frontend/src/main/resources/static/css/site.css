@@ -763,11 +763,13 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-rec-list .newcomer-who span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .side-rec-list .follow-form { margin: 0; flex: none; }
 .side-rec-list .follow-button { padding: 4px 12px; font-size: .82em; }
-.side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
-.side-links a { color: var(--color-text-muted); text-decoration: none; }
+/* 067 후속: 링크 넷은 한 줄(작은 회색 글씨, 사이에 ·), 슬로건만 다음 줄 */
+.side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
+.side-links a { color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
+.side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
 /* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
-.side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
+.side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; font-size: 1.1em; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
 @media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; }
     /* 프로필 메뉴 안 같은 링크도 이때는 숨김(오른쪽 칸 없는 화면·휴대폰은 그대로) */
     body:has(.home-side .side-links) .profile-menu-links { display: none; } }
