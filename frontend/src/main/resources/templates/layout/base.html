@@ -41,6 +41,8 @@
         <div id="site-menu" class="site-menu">
             <div class="menu-main">
                 <a href="/" th:attr="aria-current=${currentPath == '/' ? 'page' : null}">홈</a>
+                <!-- 079 강성찬 개인 확장: 탐색(추천 글·블로그·인기 태그, 휴대폰에서도 닿게) -->
+                <a href="/explore" th:attr="aria-current=${currentPath == '/explore' ? 'page' : null}">탐색</a>
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
                    th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
                 <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리) -->
