@@ -117,6 +117,21 @@ class TagPagesIT extends IntegrationTestBase {
                 .contains("#java 3").doesNotContain("hidden-tag");
     }
 
+    /** 078 강성찬 개인 확장: 머리말에 태그 메뉴 대신 🔍 패널(검색창 + 인기 태그 칩 + 태그 전체 보기). 비회원도 같다. */
+    @Test
+    void headerSearchPanelShowsPopularTagsInsteadOfTagMenu() throws Exception {
+        long a = writer("taghead");
+        tagged(a, "1", T, "java", "spring");
+        tagged(a, "2", T, "java");
+        String html = mockMvc.perform(get("/search")).andReturn().getResponse().getContentAsString();
+        String header = html.substring(html.indexOf("<header"), html.indexOf("</header>"));
+        assertThat(header).doesNotContain(">태그</a>")
+                .contains("class=\"search-menu\"").contains("action=\"/search\"").contains("name=\"q\"")
+                .contains("href=\"/tags/java\"").contains("#java").contains("#spring")
+                .contains("href=\"/tags\" class=\"search-menu-all\"");
+        assertThat(header.indexOf("#java")).isLessThan(header.indexOf("#spring"));
+    }
+
     @Test
     void suggestShowsMineAndPublicOnly() throws Exception {
         long me = writer("tagme");

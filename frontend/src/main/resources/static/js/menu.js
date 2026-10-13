@@ -31,3 +31,19 @@
   if (mq.addEventListener) { mq.addEventListener('change', sync); }
   sync();
 })();
+
+/* 078: 머리말 검색 패널. 열면 입력창에 커서, Esc·바깥 누르기로 닫힌다(스크립트 없어도 details로 열고 닫힘). */
+(function () {
+  'use strict';
+  var menu = document.querySelector('.search-menu');
+  if (!menu) { return; }
+  menu.addEventListener('toggle', function () {
+    if (menu.open) { var q = menu.querySelector('input[name="q"]'); if (q) { q.focus(); } }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu.open) { menu.open = false; menu.querySelector('summary').focus(); }
+  });
+  document.addEventListener('click', function (e) {
+    if (menu.open && !menu.contains(e.target)) { menu.open = false; }
+  });
+})();
