@@ -18,10 +18,11 @@ public final class AiInputCleaner {
     private static final Pattern LINK = Pattern.compile("\\[([^\\]]*)]\\([^)]*\\)");
     private static final Pattern AUTOLINK = Pattern.compile("<(https?://[^>\\s]+)>");
     private static final Pattern HEADING = Pattern.compile("^\\s{0,3}#{1,6}\\s*", Pattern.MULTILINE);
-    private static final Pattern QUOTE = Pattern.compile("^\\s*(>\\s*)+", Pattern.MULTILINE);
+    private static final Pattern QUOTE = Pattern.compile("^\\s*+(?:>\\s*+)++", Pattern.MULTILINE);
     private static final Pattern LIST = Pattern.compile("^\\s*(?:[-*+]|\\d+[.)])\\s+(?:\\[[ xX]]\\s+)?", Pattern.MULTILINE);
     private static final Pattern EMPHASIS = Pattern.compile("(\\*{1,3}|_{2,3}|~~)(?=\\S)(.+?)(?<=\\S)\\1");
-    private static final Pattern RULE = Pattern.compile("^\\s*([-*_])(\\s*\\1){2,}\\s*$", Pattern.MULTILINE);
+    // 구분선 기호 사이 공백은 한 줄 안에서만 본다(줄을 넘는 반복은 되돌아가기가 깊어진다)
+    private static final Pattern RULE = Pattern.compile("^\\s*([-*_])(?:[^\\S\\r\\n]*+\\1){2,}+\\s*$", Pattern.MULTILINE);
     private static final Pattern SPACES = Pattern.compile("\\s+");
 
     private AiInputCleaner() {

@@ -73,8 +73,9 @@ public class ViewRecorder {
         if (visit.prefetch() || isBot(visit.userAgent())) {
             return false;
         }
-        if (visit.viewer().isPresent()) {
-            CurrentUser user = visit.viewer().get();
+        Optional<CurrentUser> viewer = visit.viewer();
+        if (viewer.isPresent()) {
+            CurrentUser user = viewer.get();
             if (user.memberId() == post.authorId() || "ADMIN".equals(user.role())) {
                 return false;
             }

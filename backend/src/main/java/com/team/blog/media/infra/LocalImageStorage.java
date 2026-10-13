@@ -82,7 +82,7 @@ public class LocalImageStorage implements ImageStorage {
     public void write(String key, String contentType, InputStream body, long maxBytes) throws IOException {
         Path file = resolve(key);
         Files.createDirectories(file.getParent());
-        byte[] bytes = body.readNBytes((int) Math.min(Integer.MAX_VALUE - 8, maxBytes + 1));
+        byte[] bytes = body.readNBytes((int) Math.min(Integer.MAX_VALUE - 8L, maxBytes + 1));
         if (bytes.length > maxBytes) {
             throw new IOException("too large");
         }
@@ -113,7 +113,7 @@ public class LocalImageStorage implements ImageStorage {
             return Optional.empty();
         }
         try (InputStream in = Files.newInputStream(file)) {
-            return Optional.of(in.readNBytes((int) Math.min(Integer.MAX_VALUE - 8, maxBytes)));
+            return Optional.of(in.readNBytes((int) Math.min(Integer.MAX_VALUE - 8L, maxBytes)));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

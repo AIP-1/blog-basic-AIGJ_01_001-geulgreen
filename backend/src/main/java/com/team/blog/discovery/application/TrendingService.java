@@ -145,7 +145,7 @@ public class TrendingService {
         int pos = position;
         while (items.size() < pageSize && pos < size) {
             int need = pageSize - items.size();
-            List<String> raw = redis.opsForList().range(key, pos, pos + need - 1);
+            List<String> raw = redis.opsForList().range(key, pos, (long) pos + need - 1);
             if (raw == null || raw.isEmpty()) {
                 break;
             }

@@ -61,7 +61,7 @@ public class AutosaveBodyLimitFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-        byte[] body = request.getInputStream().readNBytes((int) Math.min(Integer.MAX_VALUE - 8, max + 1));
+        byte[] body = request.getInputStream().readNBytes((int) Math.min(Integer.MAX_VALUE - 8L, max + 1));
         if (body.length > max) {
             reject(response);
             return;
