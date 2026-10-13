@@ -9,7 +9,7 @@
     <p class="help"><a th:href="${'/@' + owner.handle() + '/series'}" th:text="${owner.nickname() + '님의 시리즈'}">시리즈</a></p>
     <h1 th:text="${'📚 ' + series.title()}">시리즈</h1>
     <p th:if="${items.isEmpty()}" class="empty-state">아직 공개한 글이 없어요</p>
-    <ol class="series-items">
+    <ol class="series-cards">
         <li th:each="it : ${items}"><a th:href="${it.url()}" th:text="${it.title()}">글</a></li>
     </ol>
 </main>
