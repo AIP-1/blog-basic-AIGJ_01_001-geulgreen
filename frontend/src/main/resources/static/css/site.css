@@ -895,6 +895,23 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-past { margin-top: 28px; }
 .mission-past h2 { font-size: 1.05em; }
 .mission-past-links { display: flex; flex-wrap: wrap; gap: 10px; }
+/* 075 후속(강성찬 개인 확장): 미션 화면은 오늘의 주제가 맨 위 주인공, 바로 아래 글, 기록·배지·지난 미션은 맨 아래 접는 칸 */
+.mission-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mission-head h1 { margin: 0; font-size: 1.2em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mission-head h1 .icon-paw { color: var(--color-accent); width: 1em; height: 1em; }
+.mission-head .mission-day { font-weight: 600; color: var(--color-text-muted); }
+.mission-head .mission-days { margin: 0; }
+.mission-topics > p { margin: 6px 0 0; }
+.mission-today-state { font-weight: 600; }
+.mission-topics .topic-cards { margin-top: 16px; }
+.mission-topics .topic-card { padding: 24px 24px 22px; gap: 8px; }
+.mission-topics .topic-title { font-size: 1.6em; line-height: 1.35; }
+.mission-topics .topic-card .btn { align-self: flex-start; }
+.mission-info { margin-top: 32px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 12px 18px; }
+.mission-info summary { cursor: pointer; font-weight: 600; font-size: .92em; }
+.mission-info[open] summary { margin-bottom: 12px; }
+.mission-info .mission-stats, .mission-info .mission-badges { margin: 0 0 14px; }
+.mission-info .mission-past { margin-top: 0; }
 .mission-past-links a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-size: .9em; }
 .mission-editor-note strong { margin-right: 6px; }
 .mission-done-note a { color: var(--color-brand); }
@@ -987,3 +1004,9 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .signup-code [data-code-entry][hidden] { display: none; }
 .signup-code [data-code-entry] label { flex-basis: 100%; }
 .signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }
+/* 079 강성찬 개인 확장: 탐색 화면(홈 오른쪽 칸 상자를 그대로, 넓으면 추천 글·블로그 두 칸) */
+.explore-page { display: flex; flex-direction: column; gap: 18px; }
+.explore-page h1 { margin: 0; }
+.explore-page .newcomers { margin: 0; }
+.explore-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (min-width: 760px) { .explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
