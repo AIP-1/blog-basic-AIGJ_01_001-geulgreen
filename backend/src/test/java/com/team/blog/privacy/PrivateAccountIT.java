@@ -80,7 +80,7 @@ class PrivateAccountIT extends IntegrationTestBase {
         assertThat(count("SELECT count(*) FROM follow WHERE follower_id = ?", fan)).isZero();
         assertThat(count("SELECT count(*) FROM notification WHERE receiver_id = ? AND type = 'FOLLOW_REQUEST'", owner)).isEqualTo(1);
         assertThat(page("/pvowner", fan)).contains("요청됨").contains("팔로우 요청을 보냈어요");
-        assertThat(page("/settings/privacy", owner)).contains("받은 팔로우 요청 1").contains("@pvfan");
+        assertThat(page("/settings/privacy", owner)).contains("받은 팔로우 요청 1").contains(">pvfan<");
 
         // 수락: 팔로우가 되고 글이 열린다, 요청 알림은 빠진다
         mockMvc.perform(post("/settings/privacy/requests/pvfan").param("action", "accept").with(csrf()).with(TestAuth.member(owner)))

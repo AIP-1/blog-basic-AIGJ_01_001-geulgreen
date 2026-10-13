@@ -4,17 +4,20 @@
 <!--
   작성자 표시 조각 (research R-16). author = account.application.AuthorDisplay
   - byline(author): 닉네임만(블로그 링크) — 글 상세 작성자 영역
-  - profile(author): "닉네임 @주소" (주소는 블로그 링크) — 블로그 상단 프로필 줄만
+  - profile(author): 아이디(블로그 링크) 위, 닉네임 아래 작게 — 블로그 상단 프로필 줄만
+  - person(handle, nickname): 같은 모양의 사람 목록 한 줄 — 팔로우 목록·사람 검색·친구·그룹·팔로우 요청
   - name(author):   닉네임만 — 글 카드
   탈퇴(유예·익명 처리)는 "탈퇴한 사용자"만, 링크 없음. 출력은 th:text(이스케이프)만 쓴다.
 -->
 <th:block th:fragment="byline(author)"><span class="author-byline" th:if="${author.withdrawn()}" th:text="${author.shortLabel()}">탈퇴한 사용자</span><a class="author-byline author-nickname" th:unless="${author.withdrawn()}" th:href="${author.blogPath()}" th:text="${author.shortLabel()}">닉네임</a></th:block>
-<!-- 075 강성찬 개인 확장: 아이디(@주소)는 그 사람 블로그 첫 화면 프로필 줄에만 -->
-<th:block th:fragment="profile(author)"><span class="author-byline" th:if="${author.withdrawn()}" th:text="${author.shortLabel()}">탈퇴한 사용자</span><span class="author-byline" th:unless="${author.withdrawn()}"><span class="author-nickname" th:text="${author.shortLabel()}">닉네임</span> <a class="author-handle" th:href="${author.blogPath()}" th:text="${'@' + author.handle()}">@주소</a></span></th:block>
+<!-- 075·077 강성찬 개인 확장: 아이디는 그 사람 블로그 첫 화면 프로필 줄에만, 아이디 크게(@ 없이) 그 아래 닉네임 작게 -->
+<th:block th:fragment="profile(author)"><span class="author-byline" th:if="${author.withdrawn()}" th:text="${author.shortLabel()}">탈퇴한 사용자</span><span class="author-byline profile-name" th:unless="${author.withdrawn()}"><a class="profile-handle" th:href="${author.blogPath()}" th:text="${author.handle()}">아이디</a><span class="person-nickname" th:text="${author.shortLabel()}">닉네임</span></span></th:block>
 
 <!-- 003: 작성자 프로필 아이콘(이미지 또는 기본 아이콘). 탈퇴면 회색 ? 아이콘 -->
 <th:block th:fragment="avatar(author, size)"><th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, ${size})}"></th:block></th:block>
 
 <th:block th:fragment="name(author)"><span class="author-name" th:text="${author.shortLabel()}">닉네임</span></th:block>
+<!-- 077 강성찬 개인 확장: 사람 목록 한 줄(인스타그램처럼 아이디 굵게, 그 아래 닉네임 작게) -->
+<th:block th:fragment="person(handle, nickname)"><a class="person-handle" th:href="${paths.blog(handle)}" th:text="${handle}">아이디</a><span class="person-nickname" th:text="${nickname}">닉네임</span></th:block>
 </body>
 </html>
