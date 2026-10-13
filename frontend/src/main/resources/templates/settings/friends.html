@@ -8,6 +8,7 @@
 <main class="friends-page">
     <h1>친구</h1>
     <p class="help">내가 팔로우하는 사람 중에서 친구를 골라 넣어요. 친구 공개 글은 나와 내가 넣은 친구만 볼 수 있어요.
+        상대가 나를 팔로우하지 않아도 되고, 팔로우를 끊으면 친구에서도 빠져요.
         넣고 빼도 상대에게 알리지 않고, 목록은 나만 볼 수 있어요.
         <a href="/settings/groups">친구 그룹</a> · <a href="/settings">설정으로</a></p>
 
@@ -26,7 +27,12 @@
 
     <section aria-labelledby="candidates-heading">
         <h2 id="candidates-heading" th:text="${'내가 팔로우하는 사람 ' + candidates.size()}">내가 팔로우하는 사람 0</h2>
-        <p th:if="${candidates.isEmpty()}" class="help">친구로 넣을 수 있는 사람이 없어요</p>
+        <form method="get" action="/settings/friends" class="friend-search" role="search">
+            <label for="friend-q" class="visually-hidden">팔로우하는 사람 찾기</label>
+            <input id="friend-q" type="search" name="q" th:value="${q}" placeholder="주소나 별명으로 찾기">
+            <button type="submit" class="btn btn-sm">찾기</button>
+        </form>
+        <p th:if="${candidates.isEmpty()}" class="help" th:text="${q.isEmpty() ? '친구로 넣을 수 있는 사람이 없어요. 먼저 팔로우해 보세요' : '찾는 사람이 없어요'}">친구로 넣을 수 있는 사람이 없어요</p>
         <ul class="follow-list">
             <li th:each="m : ${candidates}" class="follow-row">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>

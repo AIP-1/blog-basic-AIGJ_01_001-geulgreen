@@ -1,6 +1,7 @@
 package com.team.blog.friend.application;
 
 import com.team.blog.account.application.ProfileAvatar;
+import com.team.blog.discovery.application.SearchTerms;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -51,19 +52,22 @@ public class FriendQuery {
                 """, me);
     }
 
-    /** 내가 팔로우하지만 아직 친구로 넣지 않은 사람(최근에 팔로우한 순). */
-    public List<Person> candidates(long me) {
+    /** 내가 팔로우하지만 아직 친구로 넣지 않은 사람(최근에 팔로우한 순). {@code q}가 있으면 주소·별명 부분 일치로 찾는다. */
+    public List<Person> candidates(long me, String q) {
+        String term = q == null ? "" : q.strip();
         return people("""
                 FROM follow f JOIN member m ON m.id = f.followee_id
                 WHERE f.follower_id = ? AND m.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM close_friend cf WHERE cf.owner_id = f.follower_id AND cf.friend_id = f.followee_id)
+                  AND (? = '' OR m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\')
                 ORDER BY f.created_at DESC, m.id DESC
-                """, me);
+                """, me, term, SearchTerms.likePattern(term), SearchTerms.likePattern(term));
     }
 
-    private List<Person> people(String from, long me) {
+    // ponytail: 한 화면에 1000명까지만 그린다(친구 수 제한은 없음). 넘는 사람이 생기면 쪽 나누기.
+    private List<Person> people(String from, Object... args) {
         return jdbc.query("SELECT m.id, m.handle, m.nickname, m.profile_image_url " + from + " LIMIT 1000",
                 (rs, n) -> new Person(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"),
-                        rs.getString("profile_image_url")), me);
+                        rs.getString("profile_image_url")), args);
     }
 }

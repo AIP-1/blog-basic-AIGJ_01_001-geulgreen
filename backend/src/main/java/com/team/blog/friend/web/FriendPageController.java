@@ -50,10 +50,11 @@ public class FriendPageController {
     }
 
     @GetMapping("/settings/friends")
-    public String friends(Model model) {
+    public String friends(@RequestParam(value = "q", required = false) String q, Model model) {
         CurrentUser me = accountGuard.requireLoggedIn(currentUserProvider.current());
         model.addAttribute("friends", friendQuery.friends(me.memberId()));
-        model.addAttribute("candidates", friendQuery.candidates(me.memberId()));
+        model.addAttribute("candidates", friendQuery.candidates(me.memberId(), q));
+        model.addAttribute("q", q == null ? "" : q.strip());
         return "settings/friends";
     }
 }

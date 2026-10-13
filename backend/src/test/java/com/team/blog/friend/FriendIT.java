@@ -2,6 +2,7 @@ package com.team.blog.friend;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -151,6 +152,38 @@ class FriendIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/@frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).doesNotContain("친구로 넣기").doesNotContain("친구 요청");
         assertThat(mockMvc.perform(get("/@frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
+    }
+
+    @Test
+    void unfollowingDropsTheFriendAndTheirPlaceInMyGroups() throws Exception {
+        long me = member("frunme");
+        long pal = member("frunpal");
+        members.addFriend(me, pal);
+        mockMvc.perform(post("/settings/groups").param("name", "가까운 사람").with(csrf()).with(TestAuth.member(me)));
+        long group = jdbc.queryForObject("SELECT id FROM friend_group WHERE owner_id = ?", Long.class, me);
+        mockMvc.perform(post("/settings/groups/{g}/members", group).param("memberId", String.valueOf(pal)).with(csrf())
+                .with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        mockMvc.perform(delete("/api/members/frunpal/follow").with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
+        assertThat(friendQuery.hasFriend(me, pal)).isFalse();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM group_member WHERE group_id = ?", Integer.class, group)).isZero();
+    }
+
+    @Test
+    void friendPageSearchesPeopleIFollowByHandleOrNickname() throws Exception {
+        long me = member("frsrchme");
+        follow(me, members.localMember("frsrch_kim", "김하늘", "kim@example.com", "Blog#2026ok", true));
+        follow(me, members.localMember("frsrchlee", "이바다", "lee@example.com", "Blog#2026ok", true));
+        member("frsrchnot");
+        String page = mockMvc.perform(get("/settings/friends").param("q", "하늘").with(TestAuth.member(me)))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(page).contains("@frsrch_kim").doesNotContain("@frsrchlee");
+        assertThat(mockMvc.perform(get("/settings/friends").param("q", "frsrch").with(TestAuth.member(me))).andReturn()
+                .getResponse().getContentAsString()).contains("@frsrch_kim").contains("@frsrchlee").doesNotContain("@frsrchnot");
+        assertThat(mockMvc.perform(get("/settings/friends").param("q", "없는사람").with(TestAuth.member(me))).andReturn()
+                .getResponse().getContentAsString()).contains("찾는 사람이 없어요");
+        // _는 글자 그대로
+        assertThat(mockMvc.perform(get("/settings/friends").param("q", "h_k").with(TestAuth.member(me))).andReturn()
+                .getResponse().getContentAsString()).contains("@frsrch_kim").doesNotContain("@frsrchlee");
     }
 
     @Test

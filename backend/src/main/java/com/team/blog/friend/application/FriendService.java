@@ -3,15 +3,18 @@ package com.team.blog.friend.application;
 import com.team.blog.account.application.BlogOwnerResolver;
 import com.team.blog.friend.application.FriendQuery.Status;
 import com.team.blog.shared.error.NotFoundException;
+import com.team.blog.shared.event.MemberUnfollowed;
 import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUser;
 import java.util.Optional;
+import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * 친한 친구 넣기·빼기(069, 인스타 "친한 친구"처럼). 내가 팔로우하는 사람만 넣을 수 있고, 상대 수락도 알림도 없다.
+ * 친한 친구 넣기·빼기(069, 인스타 "친한 친구"처럼). 내가 팔로우하는 사람만 넣을 수 있고(상대가 나를 팔로우하지 않아도 됨, 인원 제한 없음), 상대 수락도 알림도 없다.
+ * 팔로우를 끊으면 친구에서도 빠진다.
  * 판정 순서: 로그인(401) → 대상(없거나 탈퇴 유예 404). 내가 팔로우하지 않는 사람·나 자신은 아무것도 바꾸지 않는다.
  */
 @Service
@@ -55,6 +58,13 @@ public class FriendService {
             groups.removeFromOwnGroups(me, target);
         });
         return query.status(me, target);
+    }
+
+    /** 팔로우를 끊으면 친구에서도, 내 그룹에서도 빠진다(친구는 내가 팔로우하는 사람만). 팔로우 끊기와 같은 트랜잭션. */
+    @EventListener
+    public void on(MemberUnfollowed e) {
+        jdbc.update("DELETE FROM close_friend WHERE owner_id = ? AND friend_id = ?", e.followerId(), e.followeeId());
+        groups.removeFromOwnGroups(e.followerId(), e.followeeId());
     }
 
     /** 익명 처리 단계(13 §3-3): 그 회원이 고른 친구와, 남이 그 회원을 고른 관계를 모두 지운다. */
