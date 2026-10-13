@@ -713,6 +713,12 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 /* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
 @media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
     overscroll-behavior: contain; scrollbar-width: thin; } }
+.side-post-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.side-post-list li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.side-post-list a { color: var(--color-text); text-decoration: none; font-weight: 600; font-size: .92em; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.side-post-list a:hover { text-decoration: underline; }
+.side-post-list .help { font-size: .8em; }
 .side-rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .side-rec-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
 .side-rec-list .newcomer-who { min-width: 0; font-weight: 600; font-size: .92em; }
@@ -722,6 +728,9 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
 .side-links a { color: var(--color-text-muted); text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
+/* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
+.side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
+@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; } }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
@@ -735,10 +744,6 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-tags { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
 .side-tags li { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .side-tags a { padding: 4px 10px; border-radius: 999px; text-decoration: none; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.side-cat { background: var(--color-cat-art-bg); text-align: center; padding: 20px 14px 0; overflow: hidden; }
-.side-cat-text { font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.35em; line-height: 1.4; margin: 0 0 8px; color: var(--color-cat-art-text); }
-.side-cat-text .icon-paw { width: .8em; height: .8em; }
-.side-cat img { display: block; width: 100%; height: auto; margin-top: 4px; }
 /* 꼬리말 */
 .footer-inner { justify-content: space-between; }
 .footer-slogan { color: var(--color-text-muted); margin: 0; }
