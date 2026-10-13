@@ -17,7 +17,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * 친한 친구(025·069, 강성찬 개인 확장): 블로그 머리·설정 화면의 폼(스크립트 없이 동작)과 설정의 친구 화면.
- * 친구 목록과 나를 팔로우하는 사람 목록은 본인만 본다.
+ * 친구 목록과 내가 팔로우하는 사람 목록은 본인만 본다.
  */
 @Controller
 public class FriendPageController {
@@ -35,7 +35,7 @@ public class FriendPageController {
         this.currentUserProvider = currentUserProvider;
     }
 
-    /** {@code action}: add(나를 팔로우하는 사람을 친구로 넣기) / remove(친구에서 빼기). */
+    /** {@code action}: add(내가 팔로우하는 사람을 친구로 넣기) / remove(친구에서 빼기). */
     @PostMapping("/@{handle}/friend")
     public RedirectView form(@PathVariable("handle") String handle, @RequestParam("action") String action,
                              @RequestParam(value = "back", required = false) String back) {

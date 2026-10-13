@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class FriendQuery {
 
-    /** 보는 사람 기준 상대: 고를 수 없음 / 나를 팔로우해서 고를 수 있음 / 이미 내 친구. */
-    public enum Status { NONE, FOLLOWER, FRIENDS }
+    /** 보는 사람 기준 상대: 고를 수 없음 / 내가 팔로우해서 고를 수 있음 / 이미 내 친구. */
+    public enum Status { NONE, FOLLOWING, FRIENDS }
 
     public record Person(long memberId, String handle, String nickname, String profileImageUrl) {
 
@@ -39,8 +39,8 @@ public class FriendQuery {
             return Status.FRIENDS;
         }
         return Boolean.TRUE.equals(jdbc.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM follow WHERE follower_id = ? AND followee_id = ?)", Boolean.class, other, viewer))
-                ? Status.FOLLOWER : Status.NONE;
+                "SELECT EXISTS (SELECT 1 FROM follow WHERE follower_id = ? AND followee_id = ?)", Boolean.class, viewer, other))
+                ? Status.FOLLOWING : Status.NONE;
     }
 
     /** 내가 고른 친구(최근에 넣은 순). 탈퇴 유예·익명 회원은 뺀다. */
@@ -51,12 +51,12 @@ public class FriendQuery {
                 """, me);
     }
 
-    /** 나를 팔로우하지만 아직 친구로 넣지 않은 사람(최근에 팔로우한 순). */
+    /** 내가 팔로우하지만 아직 친구로 넣지 않은 사람(최근에 팔로우한 순). */
     public List<Person> candidates(long me) {
         return people("""
-                FROM follow f JOIN member m ON m.id = f.follower_id
-                WHERE f.followee_id = ? AND m.withdrawn_at IS NULL
-                  AND NOT EXISTS (SELECT 1 FROM close_friend cf WHERE cf.owner_id = f.followee_id AND cf.friend_id = f.follower_id)
+                FROM follow f JOIN member m ON m.id = f.followee_id
+                WHERE f.follower_id = ? AND m.withdrawn_at IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM close_friend cf WHERE cf.owner_id = f.follower_id AND cf.friend_id = f.followee_id)
                 ORDER BY f.created_at DESC, m.id DESC
                 """, me);
     }
