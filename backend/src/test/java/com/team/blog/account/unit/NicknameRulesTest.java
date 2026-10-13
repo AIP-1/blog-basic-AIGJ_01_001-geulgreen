@@ -30,8 +30,13 @@ class NicknameRulesTest {
         return NicknameRules.firstViolation(NicknameRules.normalize(raw), RESERVED, FILTER);
     }
 
+    @Test
+    void thirtyLetterEnglishNicknameIsAllowed() {
+        assertThat(check("ChristopherColumbusTheExplorer")).isEmpty(); // 30자
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {"ㅋㅋ", "김 민서", "kim!", "😀kim", "김", "가나다라마바사아자차카", "", "kim​min", "kim‮min"})
+    @ValueSource(strings = {"ㅋㅋ", "김 민서", "kim!", "😀kim", "김", "abcdefghijklmnopqrstuvwxyzabcde", "", "kim​min", "kim‮min"})
     void invalidFormat(String raw) {
         assertThat(check(raw)).contains(NicknameViolation.NICKNAME_INVALID_FORMAT);
     }
@@ -80,7 +85,7 @@ class NicknameRulesTest {
     @CsvSource(value = {
             "Kim Min-seo|KimMinseo",
             "김민서 (Minseo)|김민서Minseo",
-            "Christopher Columbus|Christophe",
+            "Christopher Columbus|ChristopherColumbus",
             "A|A",
     }, delimiter = '|')
     void cleansSocialNames(String displayName, String expected) {
@@ -96,7 +101,7 @@ class NicknameRulesTest {
 
     @Test
     void dbPatternsAreTheSameStrings() {
-        assertThat(NicknameRules.FORMAT).isEqualTo("^[가-힣a-zA-Z0-9]{2,10}$");
+        assertThat(NicknameRules.FORMAT).isEqualTo("^[가-힣a-zA-Z0-9]{2,30}$");
         assertThat(NicknameRules.LETTER).isEqualTo("[가-힣a-zA-Z]");
     }
 }

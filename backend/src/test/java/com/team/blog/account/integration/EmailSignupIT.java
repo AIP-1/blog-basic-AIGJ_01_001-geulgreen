@@ -128,7 +128,7 @@ class EmailSignupIT extends IntegrationTestBase {
 
         MvcResult nickname = mockMvc.perform(signup("h3@x.com", "goodhandle", "a")).andReturn();
         assertThat(nickname.getResponse().getStatus()).isEqualTo(400);
-        assertThat(nickname.getResponse().getContentAsString()).contains("한글·영문·숫자로 2~10자까지 쓸 수 있어요");
+        assertThat(nickname.getResponse().getContentAsString()).contains("한글·영문·숫자로 2~30자까지 쓸 수 있어요");
 
         MvcResult email = mockMvc.perform(signup("not-an-email", "goodhandle", "닉셋")).andReturn();
         assertThat(email.getResponse().getStatus()).isEqualTo(400);

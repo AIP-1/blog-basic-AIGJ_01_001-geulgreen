@@ -50,7 +50,7 @@
 
         <div class="field">
             <label for="nickname">닉네임</label>
-            <input id="nickname" name="nickname" type="text" maxlength="10" required
+            <input id="nickname" name="nickname" type="text" maxlength="30" required
                    data-availability="nickname" data-availability-target="#nickname-status"
                    th:value="${form.nickname}" aria-describedby="nickname-status">
             <p class="help" th:if="${nicknameHint != null}" th:text="${nicknameHint}">닉네임을 입력해 주세요</p>

@@ -15,12 +15,12 @@ import java.util.regex.Pattern;
 public final class NicknameRules {
 
     /** DB {@code ck_member_nickname} 첫 조건과 같은 문자열. */
-    public static final String FORMAT = "^[가-힣a-zA-Z0-9]{2,10}$";
+    public static final String FORMAT = "^[가-힣a-zA-Z0-9]{2,30}$";
 
     /** DB {@code ck_member_nickname} 둘째 조건과 같은 문자열(한글·영문 1자 이상). */
     public static final String LETTER = "[가-힣a-zA-Z]";
 
-    public static final int MAX_LENGTH = 10;
+    public static final int MAX_LENGTH = 30;
 
     private static final Pattern FORMAT_PATTERN = Pattern.compile(FORMAT);
     private static final Pattern LETTER_PATTERN = Pattern.compile(LETTER);
