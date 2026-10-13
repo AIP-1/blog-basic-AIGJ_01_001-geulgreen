@@ -676,6 +676,15 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .home-cards .card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 /* 오른쪽 */
 .home-side { display: flex; flex-direction: column; gap: 18px; }
+/* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
+@media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
+    overscroll-behavior: contain; scrollbar-width: thin; } }
+.side-rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.side-rec-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.side-rec-list .newcomer-who { min-width: 0; font-weight: 600; font-size: .92em; }
+.side-rec-list .newcomer-who span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-rec-list .follow-form { margin: 0; flex: none; }
+.side-rec-list .follow-button { padding: 4px 12px; font-size: .82em; }
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
 .side-links a { color: var(--color-text-muted); text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }

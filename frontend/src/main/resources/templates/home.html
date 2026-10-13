@@ -71,16 +71,29 @@
     <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()}, ${moreLinkBase}, ${tab == 'trending' ? '/?tab=trending&expired=1' : null})}"></div>
     </div>
     <!-- 오른쪽: 인기 태그, 고양이 카드 -->
+    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 고양이 카드, 추천 블로그, 인기 태그, 사이트 링크 -->
     <aside class="home-side" aria-label="둘러보기">
+        <section class="side-box side-cat" aria-label="글그린 한마디">
+            <p class="side-cat-text">좋은 글은<br>언제나<br>마음에 남아요 <th:block th:replace="~{fragments/icons :: paw}"></th:block></p>
+            <img th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641" loading="lazy">
+        </section>
+        <section th:if="${!recommended.isEmpty()}" class="side-box side-recommended" aria-labelledby="side-rec-heading">
+            <h2 id="side-rec-heading">추천 블로그</h2>
+            <ul class="side-rec-list">
+                <li th:each="b : ${recommended}">
+                    <a th:href="${'/@' + b.handle()}" class="newcomer-who">
+                        <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 28)}"></th:block>
+                        <span th:text="${b.nickname()}">닉네임</span></a>
+                    <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, ${currentMemberId != null}, '/login', '/')}"></th:block>
+                </li>
+            </ul>
+            <p class="follow-message help" role="status" hidden></p>
+        </section>
         <section th:if="${!popularTags.isEmpty()}" class="side-box" aria-labelledby="side-tags-heading">
             <h2 id="side-tags-heading"><th:block th:replace="~{fragments/icons :: tag}"></th:block> 인기 태그</h2>
             <ul class="tag-pills side-pills">
                 <li th:each="t : ${popularTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, ${tagStyles.get(t.name())})}"></a></li>
             </ul>
-        </section>
-        <section class="side-box side-cat" aria-label="글그린 한마디">
-            <p class="side-cat-text">좋은 글은<br>언제나<br>마음에 남아요 <th:block th:replace="~{fragments/icons :: paw}"></th:block></p>
-            <img th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641" loading="lazy">
         </section>
         <!-- 067 후속(강성찬 개인 확장): 목록이 끝없이 이어지므로 꼬리말 링크를 여기에도 -->
         <nav class="side-links" aria-label="사이트 정보">
@@ -91,6 +104,7 @@
     </div>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/home-tabs.js}" defer></script>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>
 </html>
