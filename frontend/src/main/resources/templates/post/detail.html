@@ -93,17 +93,6 @@
         <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
             <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
         </ul>
-        <!-- 053 강성찬 개인 확장: 공유하기(공개 글만) -->
-        <div th:if="${shareEnabled and pageMeta != null}" class="share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
-            <span class="help">공유하기</span>
-            <button type="button" class="btn btn-sm share-copy">🔗 링크 복사</button>
-            <a class="btn btn-sm" target="_blank" rel="noopener noreferrer"
-               th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}">X</a>
-            <a class="btn btn-sm" target="_blank" rel="noopener noreferrer"
-               th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}">페이스북</a>
-            <button type="button" class="btn btn-sm share-native" hidden>📤 다른 앱으로</button>
-            <span class="help share-status" role="status"></span>
-        </div>
         <!-- 054 강성찬 개인 확장: 글 고정(글쓴이만) -->
         <form th:if="${pinnedHere != null}" class="inline-form pin-form" method="post"
               th:action="${pinnedHere} ? @{/posts/{id}/unpin(id=${post.id()})} : @{/posts/{id}/pin(id=${post.id()})}">
@@ -191,7 +180,7 @@
             · <a href="/missions">다른 친구들 글 보러 가기</a>
         </p>
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
-        <p class="reaction-row">
+        <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
             <span th:if="${viewerIsAuthor}" class="like-count" th:text="${'♥ ' + likeLabel}">♥ 12</span>
             <form th:unless="${viewerIsAuthor}" method="post" th:action="@{${post.url() + '/like'}}" class="like-form"
@@ -203,11 +192,24 @@
                     <span class="like-number" th:text="${likeLabel}">12</span>
                 </button>
             </form>
+            <!-- 053 강성찬 개인 확장: 공유하기(공개 글만). 좋아요 옆 메뉴 하나로 접었다 -->
+            <details th:if="${shareEnabled and pageMeta != null}" class="sort-menu share-menu share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
+                <summary>📤 공유하기</summary>
+                <div class="sort-menu-panel">
+                    <button type="button" class="share-copy">🔗 링크 복사</button>
+                    <a target="_blank" rel="noopener noreferrer"
+                       th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}">X</a>
+                    <a target="_blank" rel="noopener noreferrer"
+                       th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}">페이스북</a>
+                    <button type="button" class="share-native" hidden>📤 다른 앱으로</button>
+                </div>
+            </details>
+            <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status"></span>
             <span class="view-count" th:text="${'조회 ' + viewCount}" th:attr="title=${viewNotice}">조회 1,234</span>
             <span class="help view-notice" th:if="${viewNotice != null}" th:text="${viewNotice}">같은 사람은 30분에 5번까지 세요</span>
             <button type="button" th:if="${canReact}" class="report-button" th:attr="data-report-post-id=${post.id()}">신고</button>
             <span class="like-message help" role="status" hidden></span>
-        </p>
+        </div>
         <!-- 작성자 카드(FR-013): 팔로우 버튼은 018 -->
         <aside class="author-card">
             <th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, 56)}"></th:block>

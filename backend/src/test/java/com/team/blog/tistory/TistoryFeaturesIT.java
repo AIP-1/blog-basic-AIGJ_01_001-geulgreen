@@ -207,6 +207,17 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM comment WHERE secret", Integer.class)).isEqualTo(2);
         assertThat(page("/@scauthor/posts/" + postId, stranger)).doesNotContain("답글이에요");
         assertThat(jdbc.queryForObject("SELECT comment_count FROM post WHERE id = ?", Integer.class, postId)).isEqualTo(3);
+        // 043: 보통 댓글에도 비밀 답글을 달 수 있다(글쓴이·원댓글 쓴 사람·답글 쓴 사람만 본다)
+        long openId = jdbc.queryForObject("SELECT id FROM comment WHERE content = '모두 보는 댓글'", Long.class);
+        mockMvc.perform(post("/api/posts/{id}/comments", postId).with(csrf()).with(TestAuth.member(stranger))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"content\":\"몰래 단 답글\",\"replyToCommentId\":" + openId + ",\"secret\":true}"))
+                .andExpect(status().isCreated());
+        long outsider = member("scoutsider");
+        assertThat(page("/@scauthor/posts/" + postId, outsider)).doesNotContain("몰래 단 답글").contains("모두 보는 댓글");
+        assertThat(page("/@scauthor/posts/" + postId, writer)).contains("몰래 단 답글");
+        assertThat(page("/@scauthor/posts/" + postId, author)).contains("몰래 단 답글");
+        assertThat(page("/@scauthor/posts/" + postId, stranger)).contains("몰래 단 답글");
     }
 
     @Test
