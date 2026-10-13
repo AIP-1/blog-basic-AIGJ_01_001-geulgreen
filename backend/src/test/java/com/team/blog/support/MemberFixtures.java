@@ -96,9 +96,9 @@ public class MemberFixtures {
         return id;
     }
 
-    /** 069 친한 친구: {@code friend}가 {@code owner}를 팔로우하고, owner가 friend를 친구로 넣는다(friend가 owner의 친구 공개 글을 읽는다). */
+    /** 069 친한 친구: {@code owner}가 {@code friend}를 팔로우하고, owner가 friend를 친구로 넣는다(friend가 owner의 친구 공개 글을 읽는다). */
     public void addFriend(long owner, long friend) {
-        jdbc.update("INSERT INTO follow (follower_id, followee_id) VALUES (?, ?) ON CONFLICT DO NOTHING", friend, owner);
+        jdbc.update("INSERT INTO follow (follower_id, followee_id) VALUES (?, ?) ON CONFLICT DO NOTHING", owner, friend);
         jdbc.update("INSERT INTO close_friend (owner_id, friend_id) VALUES (?, ?) ON CONFLICT DO NOTHING", owner, friend);
     }
 
