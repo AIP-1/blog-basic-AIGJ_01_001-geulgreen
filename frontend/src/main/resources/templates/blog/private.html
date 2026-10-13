@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${owner.nickname()}">블로그</title>
+    <title th:text="${owner.handle()}">블로그</title>
 </head>
 <body>
 <!-- 073 강성찬 개인 확장: 비공개 계정을 수락받지 않은 사람에게는 프로필 윗부분만 -->
