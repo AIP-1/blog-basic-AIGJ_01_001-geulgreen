@@ -44,10 +44,9 @@
                 <a href="/tags" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/tags') ? 'page' : null}">태그</a>
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
                    th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
+                <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리) -->
                 <th:block th:if="${currentMemberId != null}">
                     <a href="/feed" th:attr="aria-current=${currentPath == '/feed' ? 'page' : null}">피드</a>
-                    <a href="/manage/posts" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/manage') ? 'page' : null}">내 글</a>
-                    <a href="/settings" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/settings') ? 'page' : null}">설정</a>
                     <a href="/admin" th:if="${currentIsAdmin}" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/admin') ? 'page' : null}">관리</a>
                 </th:block>
             </div>
