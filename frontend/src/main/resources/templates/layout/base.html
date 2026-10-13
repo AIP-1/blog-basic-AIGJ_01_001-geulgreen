@@ -41,7 +41,6 @@
         <div id="site-menu" class="site-menu">
             <div class="menu-main">
                 <a href="/" th:attr="aria-current=${currentPath == '/' ? 'page' : null}">홈</a>
-                <a href="/tags" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/tags') ? 'page' : null}">태그</a>
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
                    th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
                 <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리) -->
@@ -70,7 +69,24 @@
         </div>
         <!-- 항상 보이는 것: 검색, 알림 종, 좁은 화면의 메뉴 버튼(테마 전환은 061부터 설정 화면에) -->
         <span class="header-quick">
-            <a href="/search" class="icon-btn" aria-label="검색"><th:block th:replace="~{fragments/icons :: search}"></th:block></a>
+            <!-- 078 강성찬 개인 확장: 검색은 이 자리에서 입력창+추천 태그로 열린다(스크립트 없이 details, 태그 메뉴 대신) -->
+            <details class="search-menu">
+                <summary class="icon-btn" aria-label="검색"><th:block th:replace="~{fragments/icons :: search}"></th:block></summary>
+                <div class="search-menu-panel">
+                    <form method="get" action="/search" role="search" class="search-form">
+                        <label for="header-search-q" class="visually-hidden">검색어</label>
+                        <input id="header-search-q" type="search" name="q" maxlength="50" placeholder="검색어를 입력하세요">
+                        <button type="submit" class="btn btn-primary btn-sm">검색</button>
+                    </form>
+                    <th:block th:if="${headerTags != null and !headerTags.isEmpty()}">
+                        <p class="search-menu-title">추천 태그</p>
+                        <ul class="search-menu-tags">
+                            <li th:each="t : ${headerTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, null)}"></a></li>
+                        </ul>
+                    </th:block>
+                    <a href="/tags" class="search-menu-all">태그 전체 보기</a>
+                </div>
+            </details>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>

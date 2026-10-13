@@ -119,7 +119,8 @@ class PostDetailPageIT extends IntegrationTestBase {
         jdbc.update("INSERT INTO post_tag (post_id, tag_id, position) SELECT ?, id, CASE name WHEN 'spring-boot' THEN 0 ELSE 1 END FROM tag", id);
         String html = mockMvc.perform(get("/detailtags/posts/{id}", id)).andReturn().getResponse().getContentAsString();
         assertThat(html).doesNotContain("수정됨");
-        assertThat(html.indexOf("#spring-boot")).isLessThan(html.indexOf("#c#"));
+        String body = html.substring(html.indexOf("</header>")); // 078: 머리말 검색 패널에도 인기 태그가 있어 본문만 본다
+        assertThat(body.indexOf("#spring-boot")).isLessThan(body.indexOf("#c#"));
         assertThat(html).contains("href=\"/tags/c%23\"").contains("href=\"/tags/spring-boot\"");
     }
 

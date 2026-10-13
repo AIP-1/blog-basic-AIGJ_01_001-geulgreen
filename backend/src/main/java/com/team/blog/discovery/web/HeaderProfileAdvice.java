@@ -16,9 +16,12 @@ public class HeaderProfileAdvice {
     private final CurrentUserProvider currentUserProvider;
     private final JdbcTemplate jdbc;
     private final String contactEmail;
+    private final com.team.blog.post.application.TagListingQuery tagListingQuery;
 
-    public HeaderProfileAdvice(CurrentUserProvider currentUserProvider, JdbcTemplate jdbc, AdminProperties admin) {
+    public HeaderProfileAdvice(CurrentUserProvider currentUserProvider, JdbcTemplate jdbc, AdminProperties admin,
+                               com.team.blog.post.application.TagListingQuery tagListingQuery) {
         this.currentUserProvider = currentUserProvider;
+        this.tagListingQuery = tagListingQuery;
         this.jdbc = jdbc;
         this.contactEmail = admin.emails().stream().map(String::strip).filter(e -> !e.isEmpty()).findFirst().orElse(null);
     }
@@ -34,5 +37,11 @@ public class HeaderProfileAdvice {
     @ModelAttribute("contactEmail")
     public String contactEmail() {
         return contactEmail;
+    }
+
+    /** 078 강성찬 개인 확장: 머리말 검색창 아래 추천 태그(홈 인기 태그와 같은 10분 캐시 순위). */
+    @ModelAttribute("headerTags")
+    public java.util.List<com.team.blog.post.application.TagListingQuery.TagCount> headerTags() {
+        return tagListingQuery.top(10);
     }
 }
