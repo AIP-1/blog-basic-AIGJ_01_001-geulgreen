@@ -20,7 +20,7 @@
                 <a th:if="${nextDay != null}" th:href="@{/missions(date=${nextDay})}">다음날 →</a>
             </nav>
         </div>
-        <img class="tags-hero-art" src="/images/sleeping-cat.jpg" alt="" width="880" height="641">
+        <img class="tags-hero-art" th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641">
     </section>
 
     <!-- 내 기록(완료 횟수·연속 일수) -->
