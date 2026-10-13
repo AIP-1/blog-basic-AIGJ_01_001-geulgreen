@@ -8,8 +8,10 @@ import java.util.List;
  * @param kind           {@code LOCAL_LINK}(재설정 링크) / {@code SOCIAL_ONLY}(링크 없는 안내)
  * @param rawToken       {@code LOCAL_LINK}일 때만
  * @param otherProviders 같은 이메일의 소셜 수단 이름({@code GOOGLE}/{@code GITHUB})
+ * @param code           074 메일 6자리 코드({@code LOCAL_LINK}이고 인스타식 계정이 켜져 있을 때만)
  */
-public record PasswordResetMailRequested(String email, Kind kind, String rawToken, List<String> otherProviders)
+public record PasswordResetMailRequested(String email, Kind kind, String rawToken, List<String> otherProviders,
+                                         String code)
         implements DomainEvent {
 
     public enum Kind { LOCAL_LINK, SOCIAL_ONLY }
@@ -17,6 +19,6 @@ public record PasswordResetMailRequested(String email, Kind kind, String rawToke
     @Override
     public String toString() {
         return "PasswordResetMailRequested[email=" + DomainEvent.maskEmail(email) + ", kind=" + kind
-                + ", rawToken=" + DomainEvent.mask(rawToken) + ", otherProviders=" + otherProviders + "]";
+                + ", rawToken=" + DomainEvent.mask(rawToken) + ", otherProviders=" + otherProviders + ", code=" + DomainEvent.mask(code) + "]";
     }
 }

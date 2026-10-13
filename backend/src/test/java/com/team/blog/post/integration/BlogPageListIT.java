@@ -38,7 +38,7 @@ class BlogPageListIT extends IntegrationTestBase {
                 request = request.with(viewer);
             }
             String html = mockMvc.perform(request).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-            assertThat(html).contains("내 공개 글").contains("공개 글 1").doesNotContain("내 비공개 글")
+            assertThat(html).contains("내 공개 글").contains("게시물 1").doesNotContain("내 비공개 글")
                     .doesNotContain("내 임시글").doesNotContain("남의 글").doesNotContain("class=\"card-author\"");
         }
         mockMvc.perform(get("/api/members/blogowner/posts"))
@@ -56,7 +56,7 @@ class BlogPageListIT extends IntegrationTestBase {
             posts.published(me, "블로그 글 " + i, "본문", 1, T0.plus(Duration.ofHours(i)));
         }
         String html = mockMvc.perform(get("/@blogpager")).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("공개 글 14").contains("블로그 글 13").contains("더 보기").doesNotContain("블로그 글 1<");
+        assertThat(html).contains("게시물 14").contains("블로그 글 13").contains("더 보기").doesNotContain("블로그 글 1<");
         mockMvc.perform(get("/@nobodyhere")).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/members/nobodyhere/posts")).andExpect(status().isNotFound());
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = now() WHERE id = ?", me);

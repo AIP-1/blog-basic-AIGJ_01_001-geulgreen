@@ -20,8 +20,11 @@ public class PasswordResetListeners {
     private final MailSender mailSender;
     private final SessionRevoker sessionRevoker;
     private final AuthProperties properties;
+    private final InstaAccountProperties insta;
 
-    public PasswordResetListeners(MailSender mailSender, SessionRevoker sessionRevoker, AuthProperties properties) {
+    public PasswordResetListeners(MailSender mailSender, SessionRevoker sessionRevoker, AuthProperties properties,
+                                  InstaAccountProperties insta) {
+        this.insta = insta;
         this.mailSender = mailSender;
         this.sessionRevoker = sessionRevoker;
         this.properties = properties;
@@ -35,6 +38,8 @@ public class PasswordResetListeners {
             if (event.kind() == PasswordResetMailRequested.Kind.LOCAL_LINK) {
                 variables.put("link", properties.mail().linkBaseUrl() + "/password/reset?token=" + event.rawToken());
                 variables.put("minutes", properties.resetTokenTtl().toMinutes());
+                variables.put("code", event.code());
+                variables.put("codeMinutes", insta.codeTtl().toMinutes());
                 mailSender.send(event.email(), "[블로그] 비밀번호 재설정 안내", "mail/reset", variables);
             } else {
                 mailSender.send(event.email(), "[블로그] 비밀번호 찾기 안내", "mail/social-only", variables);

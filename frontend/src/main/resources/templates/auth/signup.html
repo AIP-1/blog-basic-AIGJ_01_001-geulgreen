@@ -25,6 +25,29 @@
             </p>
         </div>
 
+        <!-- 074 강성찬 개인 확장: 인스타처럼 이메일 → 6자리 코드 확인 → 나머지 칸 -->
+        <div class="field signup-code" th:if="${instaSignup}" data-signup-code
+             th:attr="data-verified=${codeVerifiedEmail != null}">
+            <button type="button" class="btn btn-sm" data-code-send>인증 코드 받기</button>
+            <div data-code-entry hidden>
+                <label for="email-code">메일로 받은 6자리 코드</label>
+                <input id="email-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}">
+                <button type="button" class="btn btn-sm" data-code-verify>확인</button>
+            </div>
+            <p class="availability" data-code-status aria-live="polite"
+               th:text="${codeVerifiedEmail != null} ? '이메일을 확인했어요' : ''"></p>
+        </div>
+
+        <div data-signup-rest>
+        <div class="field">
+            <label for="nickname">닉네임</label>
+            <input id="nickname" name="nickname" type="text" maxlength="10" required autocomplete="nickname"
+                   data-availability="nickname" data-availability-target="#nickname-status"
+                   th:value="${form.nickname}" aria-describedby="nickname-status">
+            <p id="nickname-status" class="availability" aria-live="polite"></p>
+            <p class="field-error" th:if="${errors['nickname'] != null}" th:text="${errors['nickname']}" role="alert"></p>
+        </div>
+
         <div class="field">
             <label for="handle">블로그 주소</label>
             <div class="handle-input">
@@ -35,7 +58,7 @@
                        inputmode="latin" autocapitalize="off" autocomplete="off" spellcheck="false" lang="en"
                        th:value="${form.handle}" aria-describedby="handle-help handle-status">
             </div>
-            <p id="handle-help" class="help">이메일 앞부분으로 채웠어요. ⚠ 가입 후에는 바꿀 수 없어요.</p>
+            <p id="handle-help" class="help" th:text="${instaSignup} ? '이메일 앞부분으로 채웠어요. 가입 후 설정에서 14일에 두 번까지 바꿀 수 있어요.' : '이메일 앞부분으로 채웠어요. ⚠ 가입 후에는 바꿀 수 없어요.'">이메일 앞부분으로 채웠어요.</p>
             <p id="handle-status" class="availability" aria-live="polite"></p>
             <p class="field-error" th:if="${errors['handle'] != null}" role="alert">
                 <span th:text="${errors['handle']}">오류</span>
@@ -69,15 +92,6 @@
             <p class="field-error" th:if="${errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
         </div>
 
-        <div class="field">
-            <label for="nickname">닉네임</label>
-            <input id="nickname" name="nickname" type="text" maxlength="10" required autocomplete="nickname"
-                   data-availability="nickname" data-availability-target="#nickname-status"
-                   th:value="${form.nickname}" aria-describedby="nickname-status">
-            <p id="nickname-status" class="availability" aria-live="polite"></p>
-            <p class="field-error" th:if="${errors['nickname'] != null}" th:text="${errors['nickname']}" role="alert"></p>
-        </div>
-
         <fieldset class="field signup-agree">
             <legend>약관 동의 (필수)</legend>
             <label class="agree-all"><input type="checkbox" data-agree-all> 모두 동의해요</label>
@@ -86,7 +100,16 @@
         </fieldset>
 
         <button type="submit" class="btn btn-primary btn-block">가입하기</button>
+        </div>
     </form>
+    <!-- 074: 소셜 가입도 같은 카드에서 -->
+    <th:block th:if="${instaSignup}">
+    <p class="auth-divider"><span>또는</span></p>
+    <div class="social-login">
+        <a class="btn btn-social" href="/oauth2/authorization/google"><th:block th:replace="~{fragments/icons :: google}"></th:block>Google로 계속하기</a>
+        <a class="btn btn-social" href="/oauth2/authorization/github"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub로 계속하기</a>
+    </div>
+    </th:block>
     <p class="auth-links">이미 계정이 있나요? <a href="/login">로그인</a></p>
     </div>
   </div>
@@ -95,6 +118,7 @@
     <script th:src="@{/js/account/handle-field.js}" defer></script>
     <script th:src="@{/js/auth/password-rules.js}" defer></script>
     <script th:src="@{/js/auth/signup-form.js}" defer></script>
+    <script th:if="${instaSignup}" th:src="@{/js/auth/signup-code.js}" defer></script>
 </main>
 </body>
 </html>

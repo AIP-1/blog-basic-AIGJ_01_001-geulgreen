@@ -36,6 +36,10 @@ public class Member {
     @Column(name = "nickname_changed_at")
     private Instant nicknameChangedAt;
 
+    /** 074: 그 전 변경 시각("14일에 두 번" 판정용). */
+    @Column(name = "nickname_prev_changed_at")
+    private Instant nicknamePrevChangedAt;
+
     @Column(name = "bio", length = 200)
     private String bio;
 
@@ -89,6 +93,7 @@ public class Member {
      */
     public void changeNickname(Nickname newNickname, Instant now) {
         this.nickname = Objects.requireNonNull(newNickname).value();
+        this.nicknamePrevChangedAt = this.nicknameChangedAt;
         this.nicknameChangedAt = Objects.requireNonNull(now);
         this.updatedAt = now;
     }
@@ -148,6 +153,10 @@ public class Member {
 
     public Instant getNicknameChangedAt() {
         return nicknameChangedAt;
+    }
+
+    public Instant getNicknamePrevChangedAt() {
+        return nicknamePrevChangedAt;
     }
 
     public String getBio() {

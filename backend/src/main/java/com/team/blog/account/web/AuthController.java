@@ -3,7 +3,9 @@ package com.team.blog.account.web;
 import com.team.blog.account.application.AgreementRequiredException;
 import com.team.blog.account.application.DuplicateEmailException;
 import com.team.blog.account.application.EmailSignupService;
+import com.team.blog.account.application.EmailRules;
 import com.team.blog.account.application.EmailVerificationService;
+import com.team.blog.account.application.InstaAccountProperties;
 import com.team.blog.account.application.InvalidEmailException;
 import com.team.blog.account.application.InvalidPasswordException;
 import com.team.blog.account.application.PasswordMismatchException;
@@ -45,10 +47,12 @@ public class AuthController {
     private final LoginSessionEstablisher loginSessionEstablisher;
     private final CurrentUserProvider currentUserProvider;
     private final MessageSource messageSource;
+    private final InstaAccountProperties insta;
 
     public AuthController(EmailSignupService emailSignupService, EmailVerificationService emailVerificationService,
                           LoginSessionEstablisher loginSessionEstablisher, CurrentUserProvider currentUserProvider,
-                          MessageSource messageSource) {
+                          MessageSource messageSource, InstaAccountProperties insta) {
+        this.insta = insta;
         this.emailSignupService = emailSignupService;
         this.emailVerificationService = emailVerificationService;
         this.loginSessionEstablisher = loginSessionEstablisher;
@@ -59,8 +63,9 @@ public class AuthController {
     // ----- 가입 -----
 
     @GetMapping("/signup")
-    public ModelAndView signupForm() {
+    public ModelAndView signupForm(HttpServletRequest request) {
         ModelAndView view = new ModelAndView("auth/signup");
+        addCodeState(view, request, null);
         view.addObject("form", SignupForm.empty());
         view.addObject("errors", Map.of());
         view.addObject("passwordErrors", List.of());
@@ -75,8 +80,19 @@ public class AuthController {
         String handleSuggestion = null;
         boolean emailDuplicate = false;
         try {
-            long memberId = emailSignupService.signUp(form.toCommand());
+            // 074 강성찬 개인 확장: 메일 코드로 확인한 이메일이면 인증된 채로 가입하고 바로 시작
+            HttpSession session = request.getSession(false);
+            boolean codeVerified = session != null
+                    && EmailRules.normalize(form.email()).equals(session.getAttribute(SignupCodeApiController.VERIFIED_EMAIL));
+            long memberId = emailSignupService.signUp(form.toCommand(), codeVerified);
             loginSessionEstablisher.establish(memberId, "USER", request, response);
+            if (codeVerified) {
+                HttpSession current = request.getSession(false);
+                if (current != null) {
+                    current.removeAttribute(SignupCodeApiController.VERIFIED_EMAIL);
+                }
+                return Redirects.seeOther("/");
+            }
             return Redirects.seeOther("/signup/verify-sent");
         } catch (AgreementRequiredException e) {
             errors.put("agreements", message(AgreementRequiredException.CODE));
@@ -109,6 +125,7 @@ public class AuthController {
             }
         }
         ModelAndView view = new ModelAndView("auth/signup");
+        addCodeState(view, request, form.email());
         view.setStatus(status);
         view.addObject("form", form.withoutPasswords());
         view.addObject("errors", errors);
@@ -150,6 +167,7 @@ public class AuthController {
             message = "다시 소셜 로그인해 주세요";
         }
         view.addObject("message", message);
+        view.addObject("instaLogin", insta.enabled());
         view.addObject("notice", hasFlag(request, "reset") ? "비밀번호를 바꿨어요. 다시 로그인해 주세요" : null);
         return view;
     }
@@ -197,6 +215,15 @@ public class AuthController {
     }
 
     // ----- 도우미 -----
+
+    /** 074: 가입 화면이 코드 단계를 보일지, 이 이메일을 이미 코드로 확인했는지. */
+    private void addCodeState(ModelAndView view, HttpServletRequest request, String email) {
+        view.addObject("instaSignup", insta.enabled());
+        HttpSession session = request.getSession(false);
+        Object verified = session == null ? null : session.getAttribute(SignupCodeApiController.VERIFIED_EMAIL);
+        view.addObject("codeVerifiedEmail", verified != null && (email == null || verified.equals(EmailRules.normalize(email)))
+                ? verified : null);
+    }
 
     private CurrentUser requireUser() {
         return currentUserProvider.current().orElseThrow(LoginRequiredException::new);
