@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>릴리스 노트</title>
+</head>
+<body>
+<main class="settings">
+    <h1>릴리스 노트</h1>
+    <div class="post-body release-notes" th:utext="${releaseHtml}"></div>
+</main>
+</body>
+</html>

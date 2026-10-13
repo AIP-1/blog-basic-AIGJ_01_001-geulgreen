@@ -94,13 +94,13 @@ public class BlogPageController {
         java.util.Optional<Long> tagId = tag == null ? java.util.Optional.empty() : tagListingQuery.tagId(tag);
         CardPage page;
         String requestedCursor = cursor;
-        // 025 강성찬 개인 확장: 보는 사람 기준 친구 상태, 친구면 친구 공개 글도 목록에
+        // 025·069 강성찬 개인 확장: 친구 버튼은 보는 사람이 이 주인을 친구로 넣을 수 있는지, 목록은 주인이 보는 사람을 골랐으면 친구 공개 글도
         com.team.blog.friend.application.FriendQuery.Status friendStatus = currentUserProvider.current()
                 .map(v -> friendQuery.status(v.memberId(), owner.memberId()))
                 .orElse(com.team.blog.friend.application.FriendQuery.Status.NONE);
-        boolean withFriends = friendStatus == com.team.blog.friend.application.FriendQuery.Status.FRIENDS;
-        // 030: 친구면 그 사람이 든 그룹의 그룹 공개 글도
-        Long friendViewer = withFriends ? currentUserProvider.current().map(CurrentUser::memberId).orElse(null) : null;
+        // 030: 그러면 그 사람이 든 그룹의 그룹 공개 글도
+        Long friendViewer = currentUserProvider.current().map(CurrentUser::memberId)
+                .filter(v -> friendQuery.hasFriend(owner.memberId(), v)).orElse(null);
         try {
             page = blogPage(owner.memberId(), friendViewer, tag, tagId, requestedCursor);
         } catch (PostContentException e) {

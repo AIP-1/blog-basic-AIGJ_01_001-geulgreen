@@ -10,7 +10,7 @@
         <header class="post-head">
             <!-- 상태 배지·안내: 작성자에게만(010 FR-018~FR-020) -->
             <p th:if="${viewerIsAuthor and post.isPrivate()}"><span class="badge">🔒 비공개</span> 나만 볼 수 있는 글이에요.</p>
-            <p th:if="${viewerIsAuthor and post.visibility() == 'FRIENDS'}"><span class="badge">👥 친구 공개</span> 나와 친구만 볼 수 있는 글이에요.</p>
+            <p th:if="${viewerIsAuthor and post.visibility() == 'FRIENDS'}"><span class="badge">👥 친구 공개</span> 나와 내가 친구로 넣은 사람만 볼 수 있는 글이에요.</p>
             <!-- 030 강성찬 개인 확장: 그룹 공개 대상 고르기(글쓴이만) -->
             <form th:if="${myGroups != null}" id="post-groups" method="post" th:action="@{/posts/{id}/groups(id=${post.id()})}" class="notice">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

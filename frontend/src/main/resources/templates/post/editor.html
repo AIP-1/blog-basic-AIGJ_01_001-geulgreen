@@ -58,8 +58,8 @@
         </div>
     </div>
 
-    <!-- 005 발행 설정(05 §4, 22 §3) -->
-    <section id="publish-panel" class="publish-panel" aria-labelledby="publish-heading" hidden>
+    <!-- 005 발행 설정(05 §4, 22 §3). 068 강성찬 개인 확장: [발행]을 누르면 아래로 펼치는 대신 팝업(모달 창)으로 연다 -->
+    <dialog id="publish-panel" class="publish-panel" aria-labelledby="publish-heading">
         <h2 id="publish-heading">발행 설정</h2>
         <fieldset>
             <legend>공개 범위</legend>
@@ -129,7 +129,7 @@
         <ul id="publish-errors" class="field-error" role="alert"></ul>
         <button type="button" id="publish-cancel">취소</button>
         <button type="button" id="publish-submit">발행</button>
-    </section>
+    </dialog>
 
     <!-- 비교 창(04 §2-7, FR-020·FR-021) -->
     <dialog id="compare-dialog" aria-labelledby="compare-heading">

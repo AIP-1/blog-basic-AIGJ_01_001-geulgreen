@@ -31,8 +31,7 @@ class GroupIT extends IntegrationTestBase {
     }
 
     private void befriend(long a, String aHandle, long b, String bHandle) throws Exception {
-        mockMvc.perform(post("/@" + bHandle + "/friend").param("action", "request").with(csrf()).with(TestAuth.member(a)));
-        mockMvc.perform(post("/@" + aHandle + "/friend").param("action", "accept").with(csrf()).with(TestAuth.member(b)));
+        members.befriend(a, b);
     }
 
     @Test
@@ -78,8 +77,11 @@ class GroupIT extends IntegrationTestBase {
         // 남의 글·남의 그룹은 못 바꾼다
         mockMvc.perform(post("/posts/{id}/groups", postId).param("groupId", String.valueOf(group)).with(csrf())
                 .with(TestAuth.member(inGroup))).andExpect(status().isNotFound());
-        // 친구를 끊으면 그룹에서도 빠지고 바로 못 본다
+        // 069: 상대가 나를 빼도 내 그룹은 그대로
         mockMvc.perform(post("/@growner/friend").param("action", "remove").with(csrf()).with(TestAuth.member(inGroup)));
+        mockMvc.perform(get(url).with(TestAuth.member(inGroup))).andExpect(status().isOk());
+        // 내가 친구에서 빼면 내 그룹에서도 빠지고 바로 못 본다
+        mockMvc.perform(post("/@grin/friend").param("action", "remove").with(csrf()).with(TestAuth.member(owner)));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM group_member WHERE group_id = ?", Integer.class, group)).isZero();
         mockMvc.perform(get(url).with(TestAuth.member(inGroup))).andExpect(status().isNotFound());
         // 탈퇴하면 그룹도 정리

@@ -5,9 +5,12 @@
     <title>이메일로 가입하기</title>
 </head>
 <body>
-<main class="auth-page auth-page-single">
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-art"><th:block th:replace="~{fragments/icons :: cat}"></th:block></div>
+    <div class="auth-panel">
     <h1>이메일로 가입하기</h1>
-    <p><a href="/login">이미 계정이 있어요 — 로그인</a></p>
+    <p class="auth-lead">글그린에서 나만의 블로그를 시작해 보세요.</p>
 
     <form method="post" th:action="@{/signup}" novalidate class="auth-form">
         <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
@@ -32,8 +35,7 @@
                        inputmode="latin" autocapitalize="off" autocomplete="off" spellcheck="false" lang="en"
                        th:value="${form.handle}" aria-describedby="handle-help handle-status">
             </div>
-            <p id="handle-help" class="help">이메일 앞부분으로 미리 채웠어요. 이메일을 드러내고 싶지 않으면 바꿔 주세요.</p>
-            <p class="warning">⚠ 블로그 주소는 가입 후 바꿀 수 없어요.</p>
+            <p id="handle-help" class="help">이메일 앞부분으로 채웠어요. ⚠ 가입 후에는 바꿀 수 없어요.</p>
             <p id="handle-status" class="availability" aria-live="polite"></p>
             <p class="field-error" th:if="${errors['handle'] != null}" role="alert">
                 <span th:text="${errors['handle']}">오류</span>
@@ -43,9 +45,10 @@
             </p>
         </div>
 
-        <div class="field">
-            <label for="password">비밀번호 <span class="help">(8~16자, 최대 16자)</span></label>
+        <div class="field signup-password">
+            <label for="password">비밀번호</label>
             <input id="password" name="password" type="password" autocomplete="new-password" required
+                   placeholder="8~16자, 영문·숫자·특수문자"
                    data-password-rules="#password-rules" data-email-source="#email">
             <ul id="password-rules" class="password-rules" aria-live="polite">
                 <li data-rule="length">8~16자 (최대 16자)</li>
@@ -75,14 +78,18 @@
             <p class="field-error" th:if="${errors['nickname'] != null}" th:text="${errors['nickname']}" role="alert"></p>
         </div>
 
-        <fieldset class="field">
+        <fieldset class="field signup-agree">
             <legend>약관 동의 (필수)</legend>
-            <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수)</label><br>
-            <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label> <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
+            <label class="agree-all"><input type="checkbox" data-agree-all> 모두 동의해요</label>
+            <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수) <a href="/terms" target="_blank" rel="noopener">약관 보기</a></label>
+            <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수) <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></label>
         </fieldset>
 
         <button type="submit" class="btn btn-primary btn-block">가입하기</button>
     </form>
+    <p class="auth-links">이미 계정이 있나요? <a href="/login">로그인</a></p>
+    </div>
+  </div>
 
     <script th:src="@{/js/account/availability.js}" defer></script>
     <script th:src="@{/js/account/handle-field.js}" defer></script>
