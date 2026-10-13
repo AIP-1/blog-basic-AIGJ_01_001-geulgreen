@@ -3,6 +3,7 @@
  * 불러오는 중 "불러오는 중…" 비활성, 실패 "불러오지 못했어요 [다시 시도]"(같은 커서), 끝 "모든 글을 다 봤어요".
  * 글을 보러 떠날 때 붙인 카드·다음 커서·스크롤을 sessionStorage에 30분 보관하고, 같은 주소로 돌아오면 복원한다.
  * 글자는 모두 textContent로 넣는다.
+ * 067 강성찬 개인 확장: 목록 끝이 화면에 가까워지면 저절로 다음 묶음을 불러온다(무한 스크롤). 버튼은 그대로 둔다(실패·스크립트 없는 경우).
  */
 (function () {
   'use strict';
@@ -95,6 +96,7 @@
     var appended = [];
     var next = (box.querySelector('.more-button') || {}).dataset ? (box.querySelector('.more-button') || {}).dataset.cursor : null;
     var errorBox = box.querySelector('.list-error');
+    var loading = false, io = null;
 
     function seen() {
       var ids = {};
@@ -110,6 +112,8 @@
       } else if (grid.children.length) {
         box.insertBefore(el('p', 'help list-end', '모든 글을 다 봤어요'), errorBox);
       }
+      // 붙인 뒤에도 끝이 아직 화면 안이면 다시 알려 주도록 관찰을 새로 건다
+      if (io) { io.unobserve(box); if (next) { io.observe(box); } }
     }
 
     function append(items) {
@@ -123,6 +127,8 @@
 
     function load(e) {
       if (e) { e.preventDefault(); }
+      if (loading || !next) { return; }
+      loading = true;
       var button = box.querySelector('.more-button');
       if (button) { button.textContent = '불러오는 중…'; button.setAttribute('aria-disabled', 'true'); button.style.pointerEvents = 'none'; }
       errorBox.hidden = true;
@@ -133,8 +139,9 @@
           if (!res.ok) { throw new Error(String(res.status)); }
           return res.json();
         })
-        .then(function (page) { append(page.items || []); next = page.nextCursor; render(); })
+        .then(function (page) { loading = false; append(page.items || []); next = page.nextCursor; render(); })
         .catch(function () {
+          loading = false;
           if (button) { button.textContent = '더 보기'; button.removeAttribute('aria-disabled'); button.style.pointerEvents = ''; }
           errorBox.hidden = false;
         });
@@ -143,6 +150,13 @@
     errorBox.querySelector('.list-retry').addEventListener('click', function () { load(); });
     var first = box.querySelector('.more-button');
     if (first) { first.addEventListener('click', load); }
+
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && errorBox.hidden) { load(); }
+      }, { rootMargin: '400px 0px' });
+      if (next) { io.observe(box); }
+    }
 
     // 복원(30분)
     try {
