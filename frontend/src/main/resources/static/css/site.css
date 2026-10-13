@@ -448,14 +448,19 @@ main.editor { padding-top: 0; }
 .editor-exit { flex: none; color: var(--color-text); text-decoration: none; font-weight: 600; }
 .editor-bar .save-status { flex: 1; min-width: 0; text-align: right; font-size: .88em; }
 .editor-bar .editor-actions { flex: none; }
-.editor-tools { display: flex; gap: 6px; margin: 0 0 8px; }
-.editor-tools button { padding: 4px 12px; font-size: .88em; }
+.editor-tools { flex: none; display: flex; gap: 4px; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--color-border); }
+.editor-tools button { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: .88em; border-color: transparent; background: none; }
+.editor-tools button:hover { background: var(--color-surface-muted); }
 /* 좁은 화면: "저장됨 시각"·"기기에 저장됨"은 숨기고(자동 저장은 그대로), 오프라인·충돌·오류는 버튼 아래 줄에 */
 @media (max-width: 560px) {
     .editor-bar { flex-wrap: wrap; row-gap: 6px; }
     .editor-bar .editor-actions { gap: 6px; margin-left: auto; }
     .editor-bar .editor-actions button { padding: 6px 10px; font-size: .88em; }
     .editor-bar .save-status { order: 3; flex-basis: 100%; text-align: left; }
+    .editor-tools { padding-left: 6px; gap: 2px; }
+    .editor-tools .tool-label { display: none; }
+    .editor-tools button { padding: 6px 8px; }
+    .editor-exit { font-size: .92em; }
     .editor-bar .save-status:empty, .editor-bar .save-status[data-kind="saved"], .editor-bar .save-status[data-kind="local"] { display: none; }
 }
 .publish-panel, .preview-panel { border-radius: 18px; background: var(--color-surface); padding: 16px 20px; }
