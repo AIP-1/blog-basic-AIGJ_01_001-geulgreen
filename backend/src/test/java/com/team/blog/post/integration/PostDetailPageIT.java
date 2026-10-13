@@ -85,13 +85,15 @@ class PostDetailPageIT extends IntegrationTestBase {
         String mine = mockMvc.perform(get("/@detailowner/posts/{id}", id).with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(mine).contains("id=\"visibility-select\"").contains("data-trash-post").contains(">수정</a>")
+                .contains("class=\"sort-menu post-owner-menu\"").contains("id=\"post-settings\"")
                 .doesNotContain("class=\"like-button\"").doesNotContain("class=\"follow-button\"")
                 .doesNotContain("data-view-post-id").contains("수정됨").contains("10월 3일")
                 .contains("article:modified_time");
         String theirs = mockMvc.perform(get("/@detailowner/posts/{id}", id).with(TestAuth.member(reader)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(theirs).contains("class=\"like-button\"").contains("class=\"report-button\"")
-                .contains("data-follow-handle=\"detailowner\"").doesNotContain("id=\"visibility-select\"");
+                .contains("data-follow-handle=\"detailowner\"").doesNotContain("id=\"visibility-select\"")
+                .doesNotContain("post-owner-menu").doesNotContain("id=\"post-settings\"");
         String admin = mockMvc.perform(get("/@detailowner/posts/{id}", id).with(TestAuth.admin(reader)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(admin).doesNotContain("data-view-post-id");

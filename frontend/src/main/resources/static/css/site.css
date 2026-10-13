@@ -169,7 +169,6 @@ main.list-page { max-width: 1120px; }
 .inline-form { display: inline; }
 /* 010 글 상세 */
 .post-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.author-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .reaction-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; color: var(--color-text-muted); }
 .author-card { display: flex; gap: 12px; align-items: flex-start; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 12px 0; margin: 16px 0; }
 .author-card-text { flex: 1; min-width: 0; }
@@ -435,7 +434,6 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
 .post-tags { margin: 28px 0 8px; }
 .reaction-row { padding: 16px 0; border-bottom: 1px solid var(--color-border); gap: 16px; }
 .author-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 20px; margin: 28px 0; }
-.author-actions { margin-top: 8px; }
 
 /* 댓글 */
 .comment { padding: 14px 0; }
@@ -623,6 +621,29 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .post-nav .post-nav-next { text-align: right; }
 .related-posts h2 { font-size: 1.05em; margin: 16px 0 8px; }
 .related-posts ul { margin: 0; padding-left: 1.2em; }
+/* 075 글 상세 작성자 ⋯ 메뉴·글 설정 창(강성찬 개인 확장): 읽는 흐름엔 글만, 작성자 도구는 작성자 줄 오른쪽에 */
+.post-meta-row { display: flex; gap: 8px; align-items: center; }
+.post-meta-row .post-meta { flex: 1; min-width: 0; margin: 0; }
+.post-owner-menu summary { padding: 2px 10px; font-weight: 700; letter-spacing: .1em; }
+.post-owner-menu summary::before, .post-owner-menu summary::after { content: none; }
+.post-owner-menu .sort-menu-panel { min-width: 210px; gap: 2px; }
+.post-owner-menu .sort-menu-panel form { margin: 0; display: flex; }
+.post-owner-menu .sort-menu-panel button, .post-owner-menu .sort-menu-panel #trash-post { all: unset; flex: 1; padding: 8px 12px; border-radius: 8px;
+    color: var(--color-text); font-size: .92em; cursor: pointer; }
+.post-owner-menu .sort-menu-panel button:hover, .post-owner-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
+.post-owner-menu .menu-field { display: flex; flex-direction: column; gap: 4px; padding: 6px 12px; font-size: .85em; color: var(--color-text-muted); }
+.post-owner-menu .sort-menu-panel #trash-post { color: var(--color-danger); border-top: 1px solid var(--color-border); border-radius: 0 0 8px 8px; margin-top: 4px; }
+dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; color: var(--color-text);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
+.post-settings-head { display: flex; align-items: center; justify-content: space-between; }
+.post-settings-head h2 { margin: 0; font-size: 1.1em; }
+.post-settings .teaser-box { margin: 12px 0 0; }
+a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
+a.author-byline.author-nickname:hover { text-decoration: underline; }
+/* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
+.related-posts { margin: 24px 0; }
+.post-category, .post-missions { margin: 8px 0; font-size: .9em; }
+.mission-done-note { margin: 8px 0; padding: 8px 12px; font-size: .88em; }
 /* 037 카테고리·041 시리즈·040 방명록·043 비밀 댓글(강성찬 개인 확장) */
 .blog-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .blog-links a { text-decoration: none; }
