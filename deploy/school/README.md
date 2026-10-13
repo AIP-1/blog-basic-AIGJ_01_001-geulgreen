@@ -57,6 +57,8 @@ Google·GitHub 개발자 콘솔에 운영 주소를 추가한다.
 
 - 자동: `main`에 push. 수동: GitHub Actions → deploy → Run workflow(급하면 테스트 건너뛰기).
 - 서버에서 상태: `docker ps`, 로그: `docker logs --tail 100 team-blog-app`
+- **자동 되돌리기(1.15.0)**: 배포 직전에 돌고 있던 앱 이미지를 `team-blog:previous`로 표시해 두고, 새 버전이 3분 안에 `/actuator/health`에 답하지 않으면 바로 그 이미지로 다시 켠다. 이때 사이트는 전 버전으로 계속 동작하고, Actions는 새 버전이 실패했다고 빨간 X로 알린다(로그에 새 버전의 마지막 80줄). 앱은 한 개만 쓰므로 교체하는 동안 잠깐 끊기는 것은 그대로다.
+- 손으로 전 버전으로 돌리기: `docker rm -f team-blog-app` 후 스크립트의 `docker run`과 같은 옵션으로 이미지 이름만 `team-blog:previous`로 바꿔 실행. 보통은 GitHub에서 문제 커밋을 `git revert`하는 PR을 머지해 다시 배포하는 편이 낫다.
 - 처음 켜질 때 Crowfoot 스키마에 테이블 20개가 만들어진다(Flyway). 검색에 쓰는 `pg_trgm` 확장이 DB에 없고 만들 권한도 없으면 이때 실패하니 로그를 본다.
 - 실패하면 GitHub inbox(오른쪽 위 프로필 왼쪽 아이콘)의 오류를 복사해 Claude에게 보낸다.
 
