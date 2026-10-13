@@ -1,6 +1,7 @@
 /*
  * 종 아이콘(017 FR-024·FR-025): 열 때와 30초마다 안 읽은 수만 확인(탭이 가려지면 멈추고, 보이면 바로 한 번). 99개 초과 "99+",
  * 화면 낭독기 이름 "안 읽은 알림 N개". 누르면 최근 10개 펼침 목록과 [모든 알림 보기]. 글자는 textContent로만 넣는다.
+ * 068(강성찬 개인 확장): 펼치면 모두 읽음으로 바꾼다. 이번에 펼친 목록의 안 읽음 점은 그대로 둬서 무엇이 새것이었는지 보이게 한다.
  */
 (function () {
   'use strict';
@@ -82,11 +83,21 @@
     panel.appendChild(el('p')).appendChild(all);
   }
 
+  function readAll() {
+    fetch('/api/notifications/read-all', { method: 'POST', credentials: 'same-origin', headers: csrf() })
+      .then(function (r) { if (r.ok) { show(0); } })
+      .catch(function () {});
+  }
+
   function load() {
     panel.textContent = '불러오는 중…';
     fetch('/api/notifications?size=10', { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { if (!r.ok) { throw new Error(); } return r.json(); })
-      .then(function (body) { render(body.items || []); })
+      .then(function (body) {
+        var items = body.items || [];
+        render(items);
+        if (items.some(function (i) { return !i.read; })) { readAll(); }
+      })
       .catch(function () { panel.textContent = '알림을 불러오지 못했어요'; });
   }
 

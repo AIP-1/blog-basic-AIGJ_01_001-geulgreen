@@ -194,6 +194,14 @@ class FollowIT extends IntegrationTestBase {
         assertThat(seen).isEqualTo(expected);
         String page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("피드글14").contains("?cursor=").doesNotContain("모르는 사람");
+        // 068 추천 블로그: 팔로우 안 한 작가만, 나와 팔로우한 사람은 빼고, 다음 쪽에서는 안 보임
+        jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
+        page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("class=\"feed-following-heading\""));
+        assertThat(recommended).contains("href=\"/@fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
+                .doesNotContain("/@fdwriter1\"").doesNotContain("/@fdwriter2\"").doesNotContain("/@fdreader\"");
+        assertThat(mockMvc.perform(get("/feed?cursor=" + cursor).with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+                .doesNotContain("class=\"feed-recommended\"");
         // 언팔로우 직후 다음 요청부터 빠짐, 작성자 탈퇴 유예도 빠짐
         mockMvc.perform(delete("/api/members/fdwriter2/follow").with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = ? WHERE id = ?", Timestamp.from(T), w1);

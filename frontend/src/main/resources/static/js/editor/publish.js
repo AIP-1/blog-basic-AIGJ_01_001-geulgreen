@@ -185,16 +185,23 @@
       });
     }
 
+    // 068(강성찬 개인 확장): 발행 설정은 모달 창. Esc·바깥 누름·[취소]로 닫는다.
+    function closePanel() {
+      if (panel.open) { panel.close(); }
+    }
+    panel.addEventListener('close', function () { openButton.setAttribute('aria-expanded', 'false'); });
+    panel.addEventListener('click', function (e) {
+      if (e.target !== panel) { return; }
+      var r = panel.getBoundingClientRect(); // 창 안 여백을 누른 건 닫지 않는다
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { closePanel(); }
+    });
     openButton.addEventListener('click', function () {
       if (editor.isConflict()) { editor.openCompare(); return; }
-      panel.hidden = !panel.hidden;
-      openButton.setAttribute('aria-expanded', String(!panel.hidden));
-      if (!panel.hidden) { renderAlts(); }
+      if (typeof panel.showModal === 'function') { panel.showModal(); } else { panel.setAttribute('open', ''); }
+      openButton.setAttribute('aria-expanded', 'true');
+      renderAlts();
     });
-    document.getElementById('publish-cancel').addEventListener('click', function () {
-      panel.hidden = true;
-      openButton.setAttribute('aria-expanded', 'false');
-    });
+    document.getElementById('publish-cancel').addEventListener('click', closePanel);
 
     function showErrors(list) {
       errors.textContent = '';
@@ -229,7 +236,7 @@
           return;
         }
         done();
-        if (r.status === 409 && r.data.server) { panel.hidden = true; editor.conflict(r.data.server); return; }
+        if (r.status === 409 && r.data.server) { closePanel(); editor.conflict(r.data.server); return; }
         if (r.data.errors) { showErrors(r.data.errors); return; }
         showErrors([{ message: r.data.message || '발행하지 못했어요. 잠시 뒤 다시 시도해 주세요.' }]);
       }, function () {
