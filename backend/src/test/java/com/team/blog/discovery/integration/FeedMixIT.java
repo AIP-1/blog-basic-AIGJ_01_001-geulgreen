@@ -58,7 +58,10 @@ class FeedMixIT extends IntegrationTestBase {
         assertThat(t.subList(6, t.size())).allMatch(s -> s.startsWith("추천")).hasSize(2);
         assertThat(t).doesNotContain("내 글");
         String html = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("팔로우한 글을 모두 봤어요").contains("feed-rec-badge").contains("많이 읽는 글");
+        assertThat(html).contains("팔로우한 글을 모두 봤어요").contains("class=\"card-rec\"").contains("많이 읽는 글");
+        // 084: 같은 글을 두 번 그리지 않는다(추천 카드 + 보통 카드), 추천 칩은 추천 글에만
+        assertThat(html.split("class=\"post-card\"", -1)).hasSize(t.size() + 1);
+        assertThat(html.split("class=\"card-rec\"", -1)).hasSize(t.size() - 5 + 1);
         assertThat(html.indexOf("친구4")).isLessThan(html.indexOf("팔로우한 글을 모두 봤어요"));
     }
 }
