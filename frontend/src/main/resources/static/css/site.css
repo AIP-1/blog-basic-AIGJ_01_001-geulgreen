@@ -605,6 +605,8 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
 .post-settings-head { display: flex; align-items: center; justify-content: space-between; }
 .post-settings-head h2 { margin: 0; font-size: 1.1em; }
 .post-settings .teaser-box { margin: 12px 0 0; }
+a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
+a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
 .related-posts { margin: 24px 0; }
 .post-category, .post-missions { margin: 8px 0; font-size: .9em; }
