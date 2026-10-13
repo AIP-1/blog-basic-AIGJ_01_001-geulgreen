@@ -100,7 +100,7 @@ public class TagPageController {
     @GetMapping("/api/tags")
     @ResponseBody
     public List<TagListingQuery.TagCount> topTags(@RequestParam(value = "limit", defaultValue = "100") int limit) {
-        return tagQuery.top(Math.max(1, Math.min(100, limit)));
+        return tagQuery.top(Math.clamp(limit, 1, 100));
     }
 
     @GetMapping("/api/tags/suggest")

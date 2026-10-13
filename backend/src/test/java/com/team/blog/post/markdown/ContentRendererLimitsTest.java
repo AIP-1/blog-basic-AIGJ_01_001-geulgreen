@@ -14,12 +14,14 @@ class ContentRendererLimitsTest {
 
     @Test
     void quoteAndListNestingOverTwentyIsRejected() {
-        assertThatThrownBy(() -> RENDERER.render(">".repeat(25) + " 깊음")).isInstanceOf(ContentTooComplexException.class);
+        String quote = ">".repeat(25) + " 깊음";
+        assertThatThrownBy(() -> RENDERER.render(quote)).isInstanceOf(ContentTooComplexException.class);
         StringBuilder list = new StringBuilder();
         for (int i = 0; i < 25; i++) {
             list.append("  ".repeat(i)).append("- ").append(i).append('\n');
         }
-        assertThatThrownBy(() -> RENDERER.render(list.toString())).isInstanceOf(ContentTooComplexException.class);
+        String nested = list.toString();
+        assertThatThrownBy(() -> RENDERER.render(nested)).isInstanceOf(ContentTooComplexException.class);
     }
 
     @Test
@@ -42,6 +44,7 @@ class ContentRendererLimitsTest {
     @Test
     void timeoutIsRejected() {
         ContentRenderer tiny = TestRenderers.create(20, Duration.ofNanos(1));
-        assertThatThrownBy(() -> tiny.render("# 제목\n\n본문".repeat(2000))).isInstanceOf(ContentTooComplexException.class);
+        String longText = "# 제목\n\n본문".repeat(2000);
+        assertThatThrownBy(() -> tiny.render(longText)).isInstanceOf(ContentTooComplexException.class);
     }
 }

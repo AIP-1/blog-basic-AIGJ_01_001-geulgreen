@@ -84,7 +84,7 @@ class CommentReadIT extends IntegrationTestBase {
         jdbc.update("UPDATE comment SET deleted_at = now(), content = '' WHERE id = ?", deleted);
         long hidden = insert(post, a, null, "숨긴 내용", T.plusSeconds(3));
         jdbc.update("UPDATE comment SET hidden_at = now() WHERE id = ?", hidden);
-        long withdrawn = insert(post, gone, null, "탈퇴 회원 내용", T.plusSeconds(4));
+        insert(post, gone, null, "탈퇴 회원 내용", T.plusSeconds(4));
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = now() WHERE id = ?", gone);
 
         String asOther = mockMvc.perform(get("/api/posts/{id}/comments", post)).andReturn().getResponse().getContentAsString();

@@ -33,11 +33,11 @@ class DraftCreateIT extends IntegrationTestBase {
                 .andExpect(status().isSeeOther())
                 .andExpect(header().string("Location", "/write/" + onlyPostId()));
         Map<String, Object> row = posts.post(onlyPostId());
-        assertThat(row.get("status")).isEqualTo("DRAFT");
-        assertThat(row.get("edit_version")).isEqualTo(0L);
-        assertThat(row.get("author_id")).isEqualTo(id);
-        assertThat(row.get("title")).isEqualTo("");
-        assertThat(row.get("visibility")).isEqualTo("PUBLIC");
+        assertThat(row).containsEntry("status", "DRAFT")
+                .containsEntry("edit_version", 0L)
+                .containsEntry("author_id", id)
+                .containsEntry("title", "")
+                .containsEntry("visibility", "PUBLIC");
     }
 
     @Test
@@ -45,7 +45,7 @@ class DraftCreateIT extends IntegrationTestBase {
         long id = writer(members, "writertwo");
         jdbc.update("UPDATE member SET default_visibility = 'PRIVATE' WHERE id = ?", id);
         mockMvc.perform(post("/write").with(csrf()).with(TestAuth.member(id))).andExpect(status().isSeeOther());
-        assertThat(posts.post(onlyPostId()).get("visibility")).isEqualTo("PRIVATE");
+        assertThat(posts.post(onlyPostId())).containsEntry("visibility", "PRIVATE");
     }
 
     @Test

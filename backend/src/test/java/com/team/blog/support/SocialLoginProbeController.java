@@ -32,7 +32,7 @@ public class SocialLoginProbeController {
                       @RequestParam(name = "email", required = false) String email,
                       @RequestParam(name = "name", required = false) String name,
                       @RequestParam(name = "picture", required = false) String picture,
-                      HttpServletRequest request, HttpServletResponse response) throws Exception {
+                      HttpServletRequest request, HttpServletResponse response) {
         SocialProfile profile = new SocialProfile(provider, id, email, name, picture);
         SocialOAuth2User principal = new SocialOAuth2User(List.of(new SimpleGrantedAuthority("OAUTH2_USER")),
                 Map.of("id", id), "id", profile);

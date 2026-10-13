@@ -105,9 +105,6 @@
                     <a href="/manage/posts">내 글 관리</a>
                     <a href="/manage/stats">통계</a>
                     <a href="/settings">설정</a>
-                    <!-- 067 후속(강성찬 개인 확장): 목록이 끝없이 이어져 꼬리말에 닿기 어려우니 여기에도 -->
-                    <p class="profile-menu-links"><a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
-                        <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a></p>
                     <form method="post" action="/logout" data-logout-form th:attr="data-member-id=${currentMemberId}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="btn-text">로그아웃</button>

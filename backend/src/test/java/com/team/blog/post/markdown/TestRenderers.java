@@ -45,6 +45,7 @@ final class TestRenderers {
 
             @Override
             public void delete(String key) {
+                // 렌더링 테스트는 지우지 않는다
             }
         };
         return new ContentRenderer(properties, storage);

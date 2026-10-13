@@ -66,9 +66,9 @@ class HandleSignupIT extends IntegrationTestBase {
     void prefixMustMatchProvider() {
         assertViolation("go-kim", Provider.LOCAL, HandleViolation.HANDLE_PREFIX_MISMATCH, null);
         assertViolation("gi-kim", Provider.GOOGLE, HandleViolation.HANDLE_PREFIX_MISMATCH, null);
-        assertThat(handleService.validateForSignup("kim", Provider.GOOGLE).toString()).isEqualTo("go-kim");
-        assertThat(handleService.validateForSignup("go-kim", Provider.GOOGLE).toString()).isEqualTo("go-kim");
-        assertThat(handleService.validateForSignup("kim", Provider.GITHUB).toString()).isEqualTo("gi-kim");
+        assertThat(handleService.validateForSignup("kim", Provider.GOOGLE)).hasToString("go-kim");
+        assertThat(handleService.validateForSignup("go-kim", Provider.GOOGLE)).hasToString("go-kim");
+        assertThat(handleService.validateForSignup("kim", Provider.GITHUB)).hasToString("gi-kim");
     }
 
     @Test
@@ -95,7 +95,7 @@ class HandleSignupIT extends IntegrationTestBase {
 
     @Test
     void uppercaseAndSurroundingSpacesAreNormalized() {
-        assertThat(handleService.validateForSignup("  KimMin  ", Provider.LOCAL).toString()).isEqualTo("kimmin");
+        assertThat(handleService.validateForSignup("  KimMin  ", Provider.LOCAL)).hasToString("kimmin");
     }
 
     @Test

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -30,6 +31,7 @@ public class GitHubOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate;
     private final Function<OAuth2UserRequest, List<Map<String, Object>>> emailsFetcher;
 
+    @Autowired
     public GitHubOAuth2UserService() {
         this(new DefaultOAuth2UserService(), GitHubOAuth2UserService::fetchEmails);
     }

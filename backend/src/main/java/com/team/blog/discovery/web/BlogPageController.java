@@ -137,7 +137,7 @@ public class BlogPageController {
         model.addAttribute("filterCategory", filterCategory);
         // 051 강성찬 개인 확장: 방문자 수(세고 나서 보여 준다)
         if (blogVisits.enabled()) {
-            blogVisits.record(owner.memberId(), currentUserProvider.current(),
+            blogVisits.recordVisit(owner.memberId(), currentUserProvider.current(),
                     com.team.blog.shared.web.VisitorCookie.read(request), ipResolver.resolve(request), request.getHeader("User-Agent"));
             model.addAttribute("blogVisits", blogVisits.counts(owner.memberId()));
         }

@@ -6,7 +6,6 @@ import com.team.blog.mission.application.MissionService;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.time.format.TextStyle;
@@ -32,12 +31,10 @@ public class MissionController {
 
     private final MissionService missions;
     private final CurrentUserProvider currentUserProvider;
-    private final Clock clock;
 
-    public MissionController(MissionService missions, CurrentUserProvider currentUserProvider, Clock clock) {
+    public MissionController(MissionService missions, CurrentUserProvider currentUserProvider) {
         this.missions = missions;
         this.currentUserProvider = currentUserProvider;
-        this.clock = clock;
     }
 
     @GetMapping("/missions")

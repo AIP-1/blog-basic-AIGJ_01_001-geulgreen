@@ -79,8 +79,8 @@ public class PostListQuery {
                           Long groupViewerId) {
         // 친구가 보는 블로그: 친구 공개 글에는 최초 공개 시각이 없으므로 발행 시각으로 대신한다(025 research R-2)
         String at = withFriends ? "COALESCE(p.first_public_at, p.published_at)" : "p.first_public_at";
-        StringBuilder sql = new StringBuilder("""
-                SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt, COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url, """ + at + """
+        StringBuilder sql = new StringBuilder("SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt,"
+                + " COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url, " + at + """
                  AS first_public_at, p.comment_count, p.like_count,
                        m.handle, m.nickname, m.profile_image_url,
                        (SELECT t.name FROM post_tag pt JOIN tag t ON t.id = pt.tag_id

@@ -10,7 +10,7 @@ public class ProfileValidationException extends RuntimeException {
 
     public static final String CODE = "VALIDATION_FAILED";
 
-    private final List<FieldError> errors;
+    private final transient List<FieldError> errors;
 
     public ProfileValidationException(List<FieldError> errors) {
         super(CODE);

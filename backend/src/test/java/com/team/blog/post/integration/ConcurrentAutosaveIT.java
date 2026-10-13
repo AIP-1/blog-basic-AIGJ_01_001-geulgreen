@@ -69,8 +69,8 @@ class ConcurrentAutosaveIT extends IntegrationTestBase {
         assertThat(statuses).filteredOn(s -> s == 200).hasSize(1);
         assertThat(statuses).filteredOn(s -> s == 409).hasSize(19);
         var row = posts.post(postId);
-        assertThat(row.get("edit_version")).isEqualTo(4L);
+        assertThat(row).containsEntry("edit_version", 4L);
         String winner = (String) row.get("title");
-        assertThat(row.get("content_md")).isEqualTo("본문" + winner.substring(1));
+        assertThat(row).containsEntry("content_md", "본문" + winner.substring(1));
     }
 }

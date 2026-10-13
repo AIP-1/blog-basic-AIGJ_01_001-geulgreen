@@ -6,14 +6,14 @@ public class CannotReportOwnException extends RuntimeException {
     public static final String CODE = "CANNOT_REPORT_OWN";
     public static final String MODERATE_OWN = "CANNOT_MODERATE_OWN";
 
-    private final String code;
+    private final String errorCode;
 
     public CannotReportOwnException(String code) {
         super(code);
-        this.code = code;
+        this.errorCode = code;
     }
 
     public String getCode() {
-        return code;
+        return errorCode;
     }
 }

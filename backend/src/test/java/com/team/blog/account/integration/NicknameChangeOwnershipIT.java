@@ -10,6 +10,7 @@ import com.team.blog.shared.error.LoginRequiredException;
 import com.team.blog.shared.error.NicknameChangeTooSoonException;
 import com.team.blog.shared.error.NicknameViolationException;
 import com.team.blog.shared.security.AccountGuard;
+import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.support.IntegrationTestBase;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,8 @@ class NicknameChangeOwnershipIT extends IntegrationTestBase {
 
     @Test
     void guestCannotChange() {
-        assertThatThrownBy(() -> accountGuard.requireLoggedIn(Optional.empty())).isInstanceOf(LoginRequiredException.class);
+        Optional<CurrentUser> guest = Optional.empty();
+        assertThatThrownBy(() -> accountGuard.requireLoggedIn(guest)).isInstanceOf(LoginRequiredException.class);
     }
 
     @Test

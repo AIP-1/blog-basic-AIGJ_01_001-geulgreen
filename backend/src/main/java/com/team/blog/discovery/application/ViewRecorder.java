@@ -65,7 +65,7 @@ public class ViewRecorder {
     }
 
     /** @return 셌으면 true(응답은 셌든 안 셌든 204) */
-    public boolean record(long postId, Visit visit) {
+    public boolean recordView(long postId, Visit visit) {
         PostReadAccess.ReadablePost post = postReadAccess.requireReadable(visit.viewer(), postId);
         if (post.hidden()) {
             throw new com.team.blog.shared.error.NotFoundException();
@@ -73,8 +73,9 @@ public class ViewRecorder {
         if (visit.prefetch() || isBot(visit.userAgent())) {
             return false;
         }
-        if (visit.viewer().isPresent()) {
-            CurrentUser user = visit.viewer().get();
+        Optional<CurrentUser> viewer = visit.viewer();
+        if (viewer.isPresent()) {
+            CurrentUser user = viewer.get();
             if (user.memberId() == post.authorId() || "ADMIN".equals(user.role())) {
                 return false;
             }

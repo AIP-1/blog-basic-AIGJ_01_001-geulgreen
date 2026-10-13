@@ -38,6 +38,6 @@ class PublishRedisDownIT extends IntegrationTestBase {
         mockMvc.perform(publish(postId, "same-key", body).with(TestAuth.member(me))).andExpect(status().isOk());
         mockMvc.perform(publish(postId, "same-key", body).with(TestAuth.member(me)))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("EDIT_CONFLICT"));
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(1L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 1L);
     }
 }

@@ -16,7 +16,7 @@ public enum NotificationType {
 
     public static final List<NotificationType> MUTABLE = List.of(COMMENT, REPLY, LIKE, FOLLOW, NEW_POST);
 
-    public boolean mutable() {
+    public boolean isMutable() {
         return MUTABLE.contains(this);
     }
 

@@ -68,15 +68,19 @@ public class WithdrawalPurgeJob {
                     steps.forEach(step -> step.purge(memberId));
                 });
                 done++;
-                try {
-                    sessionRevoker.revokeAll(memberId);
-                } catch (RuntimeException e) {
-                    log.warn("정리 후 세션 삭제 실패: memberId={}", memberId);
-                }
+                revokeSessions(memberId);
             } catch (RuntimeException e) {
                 log.warn("탈퇴 정리 실패(다음 실행에서 다시): memberId={} cause={}", memberId, e.getClass().getSimpleName());
             }
         }
         return done;
+    }
+
+    private void revokeSessions(long memberId) {
+        try {
+            sessionRevoker.revokeAll(memberId);
+        } catch (RuntimeException e) {
+            log.warn("정리 후 세션 삭제 실패: memberId={}", memberId);
+        }
     }
 }

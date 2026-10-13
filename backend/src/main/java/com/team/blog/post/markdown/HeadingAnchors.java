@@ -25,18 +25,16 @@ final class HeadingAnchors {
             base = "section";
         }
         base = cut(base, MAX);
-        Integer count = used.get(base);
+        Integer count = used.putIfAbsent(base, 0);
         if (count == null) {
-            used.put(base, 0);
             return PREFIX + base;
         }
         while (true) {
             count++;
             String suffix = "-" + count;
             String candidate = cut(base, MAX - suffix.length()) + suffix;
-            if (!used.containsKey(candidate)) {
+            if (used.putIfAbsent(candidate, 0) == null) {
                 used.put(base, count);
-                used.put(candidate, 0);
                 return PREFIX + candidate;
             }
         }

@@ -142,12 +142,12 @@ class ViewCountIT extends IntegrationTestBase {
         redis.opsForHash().put("view:processing:20261007:123", String.valueOf(post), "3");
         redis.opsForHash().put("view:pending:20261008", String.valueOf(post), "2");
         flusher.flush();
-        assertThat(posts.post(post).get("view_count")).isEqualTo(5L);
+        assertThat(posts.post(post)).containsEntry("view_count", 5L);
         assertThat(((Timestamp) posts.post(post).get("updated_at")).toInstant()).isEqualTo(Instant.parse("2026-01-01T00:00:00Z"));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post_view_daily WHERE post_id = ?", Integer.class, post)).isEqualTo(2);
         assertThat(redis.keys("view:processing:*")).isEmpty();
         flusher.flush();
-        assertThat(posts.post(post).get("view_count")).isEqualTo(5L);
+        assertThat(posts.post(post)).containsEntry("view_count", 5L);
         jdbc.update("INSERT INTO post_view_daily (post_id, view_date, views) VALUES (?, ?, 9)", post,
                 Date.valueOf(LocalDate.of(2026, 7, 1)));
         assertThat(flusher.purgeOldDaily(Duration.ofDays(90))).isEqualTo(1);
@@ -165,7 +165,7 @@ class ViewCountIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/viewpage/posts/{id}", post).with(TestAuth.member(author)))
                 .andReturn().getResponse().getContentAsString()).doesNotContain("/js/post/post-view-");
         mockMvc.perform(get("/viewpage/posts/{id}", post)).andExpect(status().isOk());
-        assertThat(posts.post(post).get("view_count")).isEqualTo(0L);
+        assertThat(posts.post(post)).containsEntry("view_count", 0L);
     }
 
     @Test
