@@ -47,8 +47,12 @@ public class PostManageQuery {
         StringBuilder sql = new StringBuilder("""
                 SELECT p.id, p.title, p.status, p.visibility, p.updated_at, p.published_at, p.edited_at, p.deleted_at,
                        p.view_count, p.like_count, p.comment_count, p.hidden_at, p.edit_version,
-                       d.edit_version AS d_version, m.handle
+                       d.edit_version AS d_version, m.handle,
+                       COALESCE(tz.teaser, p.excerpt) AS excerpt, COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url,
+                       (SELECT t.name FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                        WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag
                 FROM post p JOIN member m ON m.id = p.author_id LEFT JOIN post_draft d ON d.post_id = p.id
+                     LEFT JOIN post_teaser tz ON tz.post_id = p.id LEFT JOIN post_cover pcv ON pcv.post_id = p.id
                 WHERE p.author_id = ?""");
         List<Object> args = new ArrayList<>();
         args.add(user.memberId());
@@ -108,7 +112,8 @@ public class PostManageQuery {
                 instant(rs.getTimestamp("published_at")), instant(rs.getTimestamp("edited_at")), deletedAt,
                 deletedAt == null ? null : deletedAt.plus(properties.trash().retention()),
                 rs.getLong("view_count"), rs.getInt("like_count"), rs.getInt("comment_count"),
-                "/@" + rs.getString("handle") + "/posts/" + id);
+                "/@" + rs.getString("handle") + "/posts/" + id,
+                rs.getString("excerpt"), rs.getString("thumbnail_url"), rs.getString("first_tag"));
     }
 
     private static Instant instant(Timestamp ts) {

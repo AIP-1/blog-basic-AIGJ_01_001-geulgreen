@@ -178,13 +178,22 @@ main.list-page { max-width: 1120px; }
 .row-main, .row-actions { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .row-actions form { margin: 0; }
 .untitled { color: var(--color-text-muted); }
-/* 067 내 글도 카드로(강성찬 개인 확장): 위에 제목·정보, 아래에 버튼 */
-#post-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 16px 0; }
-#post-rows .post-row { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 18px;
-    gap: 12px; justify-content: space-between; }
-#post-rows .row-main { flex-direction: column; align-items: flex-start; gap: 6px; }
-#post-rows .row-main > a, #post-rows .row-main > span:first-child:not(.visibility-icon) { font-weight: 700; font-size: 1.05em; overflow-wrap: anywhere; }
-#post-rows .row-actions { border-top: 1px solid var(--color-border); padding-top: 10px; align-items: center; }
+/* 067 후속(강성찬 개인 확장): 내 글은 홈과 같은 카드(fragments/post-card), 관리 정보는 배지·⋯ 메뉴 */
+#post-rows { margin: 16px 0; }
+@media (min-width: 1100px) { main.list-page #post-rows.home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+#post-rows > .post-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; }
+#post-rows > .post-row > .post-card { flex: 1; }
+.manage-badges { margin: 0; padding-right: 36px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .9em; }
+.manage-badges:empty { display: none; }
+.sort-menu.manage-menu { position: absolute; top: 10px; right: 10px; z-index: 2; }
+.sort-menu.manage-menu summary { padding: 2px 10px; font-weight: 700; letter-spacing: .1em; }
+.sort-menu.manage-menu summary::before, .sort-menu.manage-menu summary::after { content: none; }
+.manage-menu .sort-menu-panel form { margin: 0; display: flex; }
+.manage-menu .sort-menu-panel button { all: unset; flex: 1; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+.manage-menu .sort-menu-panel button:hover, .manage-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
+.manage-menu .sort-menu-panel .menu-danger { color: var(--color-danger); }
+/* 메뉴가 열린 카드는 옆 카드 위로, 떠오르는 효과는 끔(메뉴가 가려지지 않게) */
+.post-card:has(.manage-menu[open]) { z-index: 3; transform: none; }
 /* 013 태그 */
 .tag-suggest { list-style: none; margin: 4px 0; padding: 0; border: 1px solid var(--color-border); max-width: 320px; }
 .tag-suggest li { padding: 4px 8px; cursor: pointer; }
@@ -602,12 +611,10 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .series-box { border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 16px; margin: 12px 0; background: var(--color-surface); }
 .series-box summary { cursor: pointer; font-weight: 700; }
 .series-items { margin: 8px 0 0; padding-left: 1.4em; }
-/* 067 시리즈 글도 카드로(강성찬 개인 확장), 순서는 번호로 */
-.series-cards { list-style: none; padding: 0; margin: 16px 0; counter-reset: series; display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.series-cards li { counter-increment: series; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 14px 16px; }
-.series-cards li::before { content: counter(series) "편"; display: block; margin-bottom: 4px; font-size: .82em; color: var(--color-text-muted); }
-.series-cards a { font-weight: 700; overflow-wrap: anywhere; }
+/* 067 시리즈 글도 홈과 같은 카드로(강성찬 개인 확장), 순서는 "N편" 배지 */
+.series-cards { list-style: none; padding: 0; margin: 16px 0; }
+.series-cards > li { display: flex; }
+.series-cards > li > .post-card { flex: 1; }
 .series-nav { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 0; flex-wrap: wrap; }
 .secret-check { display: inline-flex; gap: 6px; align-items: center; margin: 6px 0; font-size: .92em; }
 .schedule-field input[type="datetime-local"] { margin-top: 6px; }

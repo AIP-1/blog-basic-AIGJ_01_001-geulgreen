@@ -4,10 +4,17 @@ import static com.team.blog.shared.web.Redirects.seeOther;
 
 import com.team.blog.account.application.BlogOwner;
 import com.team.blog.account.application.BlogOwnerResolver;
+import com.team.blog.post.application.CardDates;
+import com.team.blog.post.application.PostCard;
 import com.team.blog.series.application.SeriesService;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,11 +32,13 @@ public class SeriesController {
     private final SeriesService series;
     private final BlogOwnerResolver owners;
     private final CurrentUserProvider currentUserProvider;
+    private final Clock clock;
 
-    public SeriesController(SeriesService series, BlogOwnerResolver owners, CurrentUserProvider currentUserProvider) {
+    public SeriesController(SeriesService series, BlogOwnerResolver owners, CurrentUserProvider currentUserProvider, Clock clock) {
         this.series = series;
         this.owners = owners;
         this.currentUserProvider = currentUserProvider;
+        this.clock = clock;
     }
 
     @GetMapping("/@{handle}/series")
@@ -47,7 +56,13 @@ public class SeriesController {
         SeriesService.Series s = series.find(owner.memberId(), id).orElseThrow(NotFoundException::new);
         model.addAttribute("owner", owner);
         model.addAttribute("series", s);
-        model.addAttribute("items", series.items(id));
+        // 067 후속: 홈과 같은 카드
+        List<PostCard> cards = series.cards(id);
+        Instant now = clock.instant();
+        Map<Long, String> dates = new HashMap<>();
+        cards.forEach(c -> dates.put(c.id(), CardDates.label(c.firstPublicAt(), now)));
+        model.addAttribute("cards", cards);
+        model.addAttribute("cardDates", dates);
         return "series/detail";
     }
 
