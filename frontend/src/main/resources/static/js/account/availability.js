@@ -25,7 +25,7 @@
     BANNED_WORD: '사용할 수 없는 단어가 들어 있어요',
     DUPLICATE: '이미 사용 중인 주소예요',
     // 닉네임 (code)
-    NICKNAME_INVALID_FORMAT: '한글·영문·숫자로 2~10자까지 쓸 수 있어요 (공백·특수문자 불가)',
+    NICKNAME_INVALID_FORMAT: '한글·영문·숫자로 2~30자까지 쓸 수 있어요 (공백·특수문자 불가)',
     NICKNAME_LETTER_REQUIRED: '한글이나 영문을 1자 이상 넣어 주세요',
     NICKNAME_RESERVED: '사용할 수 없는 닉네임이에요',
     NICKNAME_BANNED_WORD: '사용할 수 없는 단어가 들어 있어요',

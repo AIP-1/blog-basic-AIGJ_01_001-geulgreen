@@ -57,7 +57,7 @@ class NicknamePolicyIT extends IntegrationTestBase {
     void socialNameSuggestion() {
         assertThat(nicknamePolicy.suggestFromSocialName("Kim Min-seo")).contains("KimMinseo");
         assertThat(nicknamePolicy.suggestFromSocialName("김민서 (Minseo)")).contains("김민서Minseo");
-        assertThat(nicknamePolicy.suggestFromSocialName("Christopher Columbus")).contains("Christophe");
+        assertThat(nicknamePolicy.suggestFromSocialName("Christopher Columbus")).contains("ChristopherColumbus");
         assertThat(nicknamePolicy.suggestFromSocialName("A")).isEmpty();
         members.active("kim755030", "Kim");
         assertThat(nicknamePolicy.suggestFromSocialName("Kim")).isEmpty();

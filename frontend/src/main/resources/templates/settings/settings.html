@@ -56,7 +56,7 @@
 
             <div class="field">
                 <label for="nickname">닉네임</label>
-                <input id="nickname" name="nickname" type="text" maxlength="10" autocomplete="off"
+                <input id="nickname" name="nickname" type="text" maxlength="30" autocomplete="off"
                        th:value="${profile.nickname()}" th:disabled="${nicknameNextAllowed != null}"
                        aria-describedby="nickname-help">
                 <p id="nickname-help" class="help" th:if="${nicknameNextAllowed != null}"
