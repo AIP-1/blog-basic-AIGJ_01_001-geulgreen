@@ -42,7 +42,7 @@ public class OldHandleRedirectFilter extends OncePerRequestFilter {
                       AND NOT EXISTS (SELECT 1 FROM member o WHERE o.handle = h.old_handle)""", String.class, old);
             if (!current.isEmpty()) {
                 String query = request.getQueryString();
-                response.sendRedirect("/" + current.get(0) + (slash < 0 ? "" : uri.substring(slash))
+                response.sendRedirect(com.team.blog.shared.web.BlogPaths.of(current.get(0)) + (slash < 0 ? "" : uri.substring(slash))
                         + (query == null ? "" : "?" + query));
                 return;
             }

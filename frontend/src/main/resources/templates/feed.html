@@ -12,7 +12,7 @@
         <h2 id="feed-recommended-heading">추천 블로그 <span class="help">아직 팔로우하지 않은 블로그예요</span></h2>
         <ul class="recommended-list">
             <li th:each="b : ${recommended}" class="recommended-blog">
-                <a th:href="${'/' + b.handle()}" class="newcomer-who">
+                <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
                     <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 36)}"></th:block>
                     <span th:text="${b.nickname()}">닉네임</span></a>
                 <p class="help recommended-bio" th:if="${b.bio() != null}" th:text="${b.bio()}">소개</p>

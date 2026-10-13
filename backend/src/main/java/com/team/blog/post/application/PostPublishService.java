@@ -146,7 +146,7 @@ public class PostPublishService {
             } else {
                 events.publishEvent(new PostEdited(postId, user.memberId(), input.visibility()));
             }
-            PublishResult result = new PublishResult("/" + handle + "/posts/" + postId, times.publishedAt(),
+            PublishResult result = new PublishResult(com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + postId, times.publishedAt(),
                     times.firstPublicAt(), times.editedAt(), nextVersion);
             return new Applied(result, current.version());
         });

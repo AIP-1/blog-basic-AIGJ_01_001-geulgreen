@@ -46,4 +46,16 @@ class AddressWithoutAtIT extends IntegrationTestBase {
         assertThat(get200("/login").getResponse().getStatus()).isEqualTo(200);
         assertThat(get200("/nobody99").getResponse().getStatus()).isEqualTo(404);
     }
+
+    @Test
+    void existingHandleEqualToASitePathKeepsTheOldAtAddress() throws Exception {
+        long feed = members.active("feed", "피드주인");
+        long id = posts.published(feed, "제목", "본문", 1, clock.instant());
+        MvcResult blog = get200("/@feed");
+        assertThat(blog.getResponse().getStatus()).isEqualTo(200);
+        assertThat(blog.getResponse().getContentAsString()).contains("href=\"/@feed/posts/" + id + "\"");
+        assertThat(get200("/@feed/posts/" + id).getResponse().getStatus()).isEqualTo(200);
+        assertThat(com.team.blog.shared.web.BlogPaths.of("feed")).isEqualTo("/@feed");
+        assertThat(com.team.blog.shared.web.BlogPaths.of("kim755030")).isEqualTo("/kim755030");
+    }
 }

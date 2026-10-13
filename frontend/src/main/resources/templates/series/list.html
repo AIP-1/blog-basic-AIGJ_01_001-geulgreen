@@ -7,11 +7,11 @@
 <body>
 <main class="notes-page">
     <h1 th:text="${'📚 ' + owner.nickname() + '님의 시리즈'}">시리즈</h1>
-    <p><a th:href="${'/' + owner.handle()}">블로그로 돌아가기</a></p>
+    <p><a th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <p th:if="${seriesList.isEmpty()}" class="empty-state">아직 시리즈가 없어요</p>
     <ul class="mission-list">
         <li th:each="s : ${seriesList}" class="mission-card">
-            <a th:href="${'/' + owner.handle() + '/series/' + s.id()}"><strong th:text="${s.title()}">시리즈</strong></a>
+            <a th:href="${paths.blog(owner.handle()) + '/series/' + s.id()}"><strong th:text="${s.title()}">시리즈</strong></a>
             <p class="help" th:text="${'공개 글 ' + s.postCount() + '편'}">공개 글 3편</p>
         </li>
     </ul>

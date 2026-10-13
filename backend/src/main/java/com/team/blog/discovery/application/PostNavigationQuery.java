@@ -15,7 +15,7 @@ public class PostNavigationQuery {
     public record Link(long id, String title, String handle) {
 
         public String url() {
-            return "/" + handle + "/posts/" + id;
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id;
         }
     }
 

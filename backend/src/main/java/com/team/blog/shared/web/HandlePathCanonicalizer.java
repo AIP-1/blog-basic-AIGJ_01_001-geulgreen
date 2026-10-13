@@ -22,7 +22,8 @@ import org.springframework.web.util.UriUtils;
  * <ul>
  *   <li>076 강성찬 개인 확장: 블로그 주소는 {@code /{handle}/**}(@ 없음). 맨 앞 칸이 주소 형식이고 사이트 경로(예약어)가 아니면
  *       안쪽에서 {@code /@{handle}/**}로 바꿔 넘긴다 — 컨트롤러·인터셉터는 예전 경로 그대로 둔다.</li>
- *   <li>예전 {@code /@{handle}/**} GET·HEAD는 새 주소로 301(나머지 경로·쿼리 유지). 폼 POST는 그대로 받는다.</li>
+ *   <li>예전 {@code /@{handle}/**} GET·HEAD는 새 주소로 301(나머지 경로·쿼리 유지). 폼 POST는 그대로 받는다.
+ *       사이트 경로와 같은 아이디는 {@code /@}로 계속 연다({@link BlogPaths}).</li>
  *   <li>주소 부분에 대문자가 있으면 소문자로 301(08 §6). 존재 여부는 보지 않는다.</li>
  * </ul>
  */
@@ -60,10 +61,12 @@ public class HandlePathCanonicalizer extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-        if (read && (old || !lower.equals(segment))) {
+        // 076 전에 생긴, 사이트 경로와 같은 아이디는 예전 /@주소로 계속 연다(넘기지 않음, 링크도 BlogPaths가 /@로 만든다)
+        boolean keepOld = old && handleService.isRouteOrReserved(lower) && lower.equals(segment);
+        if (read && !keepOld && (old || !lower.equals(segment))) {
             String query = request.getQueryString();
             response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-            response.setHeader(HttpHeaders.LOCATION, contextPath + "/" + UriUtils.encodePathSegment(lower, StandardCharsets.UTF_8)
+            response.setHeader(HttpHeaders.LOCATION, contextPath + BlogPaths.of(UriUtils.encodePathSegment(lower, StandardCharsets.UTF_8))
                     + rest + (query == null ? "" : "?" + query));
             return;
         }

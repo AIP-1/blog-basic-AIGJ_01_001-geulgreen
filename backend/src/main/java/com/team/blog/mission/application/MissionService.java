@@ -40,7 +40,7 @@ public class MissionService {
                            String topicTitle, int commentCount, int likeCount, Instant completedAt, boolean friend, boolean mine) {
 
         public String url() {
-            return "/" + handle + "/posts/" + postId;
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + postId;
         }
     }
 

@@ -246,7 +246,7 @@ public class SearchService {
         long id = rs.getLong("id");
         SearchSnippet.Result snippet = SearchSnippet.of(rs.getString("content_md"), rs.getString("title"), terms.words());
         String plain = snippet.parts().stream().map(SearchSnippet.Part::text).reduce("", String::concat);
-        return new SearchCard(id, "/" + handle + "/posts/" + id, rs.getString("title"), plain, snippet.html(),
+        return new SearchCard(id, com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id, rs.getString("title"), plain, snippet.html(),
                 snippet.parts(), rs.getString("thumbnail_url"), rs.getTimestamp("first_public_at").toInstant(),
                 rs.getInt("comment_count"), rs.getInt("like_count"),
                 new PostCard.Author(handle, rs.getString("nickname"), rs.getString("profile_image_url")));

@@ -6,7 +6,7 @@
 </head>
 <body>
 <main class="notes-page list-page">
-    <p class="help"><a th:href="${'/' + owner.handle() + '/series'}" th:text="${owner.nickname() + '님의 시리즈'}">시리즈</a></p>
+    <p class="help"><a th:href="${paths.blog(owner.handle()) + '/series'}" th:text="${owner.nickname() + '님의 시리즈'}">시리즈</a></p>
     <h1 th:text="${'📚 ' + series.title()}">시리즈</h1>
     <p th:if="${cards.isEmpty()}" class="empty-state">아직 공개한 글이 없어요</p>
     <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드, 순서는 "N편" 배지 -->

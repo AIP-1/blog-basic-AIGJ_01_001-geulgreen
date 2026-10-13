@@ -16,7 +16,7 @@
     <ul class="post-rows">
         <li th:each="m : ${members}" class="post-row">
             <div class="row-main">
-                <span th:text="${m.nickname()}">닉네임</span> <a th:href="${'/' + m.handle()}" th:text="${'@' + m.handle()}">@주소</a>
+                <span th:text="${m.nickname()}">닉네임</span> <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a>
                 <span class="badge" th:if="${m.role() == 'ADMIN'}">관리자</span>
                 <!-- 046 강성찬 개인 확장: 이메일·가입일·글 수 -->
                 <span class="help" th:text="${(m.email() != null ? m.email() + ' · ' : '') + '가입 ' + m.joinedLabel() + ' · 글 ' + m.postCount()}">이메일 · 가입일 · 글 수</span>

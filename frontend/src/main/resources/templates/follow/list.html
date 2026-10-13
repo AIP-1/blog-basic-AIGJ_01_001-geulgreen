@@ -7,7 +7,7 @@
 <body>
 <main class="list-page">
     <h1 th:text="${owner.nickname() + (followers ? '님의 팔로워 ' : '님이 팔로우하는 사람 ') + count}">팔로워 0</h1>
-    <p><a th:href="${'/' + owner.handle()}">블로그로 돌아가기</a></p>
+    <p><a th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <p th:if="${continued}"><a th:href="${base}">처음부터 보기</a></p>
     <p th:if="${page.items().isEmpty() and !continued}" class="empty-state"
        th:text="${followers ? '아직 팔로워가 없어요' : '아직 팔로우한 사람이 없어요'}">아직 팔로워가 없어요</p>
@@ -15,7 +15,7 @@
         <li th:each="m : ${page.items()}" class="follow-row">
             <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
             <div class="follow-text">
-                <p><span th:text="${m.nickname()}">닉네임</span> <a th:href="${'/' + m.handle()}" th:text="${'@' + m.handle()}">@주소</a></p>
+                <p><span th:text="${m.nickname()}">닉네임</span> <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a></p>
                 <p class="help" th:if="${m.bio() != null}" th:text="${m.bio()}">소개</p>
             </div>
             <th:block th:unless="${m.me()}">

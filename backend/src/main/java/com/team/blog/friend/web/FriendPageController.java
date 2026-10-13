@@ -45,7 +45,7 @@ public class FriendPageController {
             default -> throw new com.team.blog.shared.error.NotFoundException();
         }
         String target = back != null && back.startsWith("/") && !back.startsWith("//") && !back.contains("\\")
-                ? back : "/" + handle;
+                ? back : com.team.blog.shared.web.BlogPaths.of(handle);
         return seeOther(target);
     }
 

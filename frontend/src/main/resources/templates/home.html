@@ -56,7 +56,7 @@
         <h2 id="newcomers-heading">새로 온 작가 <span class="help">첫 글을 반겨 주세요</span></h2>
         <ul class="newcomer-list">
             <li th:each="n : ${newcomers}" class="newcomer">
-                <a th:href="${'/' + n.handle()}" class="newcomer-who">
+                <a th:href="${paths.blog(n.handle())}" class="newcomer-who">
                     <th:block th:replace="~{fragments/avatar :: avatar(${n.avatar()}, 36)}"></th:block>
                     <span th:text="${n.nickname()}">닉네임</span></a>
                 <a th:href="${n.url()}" class="newcomer-post" th:text="${'첫 글 · ' + n.title()}">첫 글</a>
@@ -81,7 +81,7 @@
             <h2 id="side-rec-heading">추천 블로그</h2>
             <ul class="side-rec-list">
                 <li th:each="b : ${recommended}">
-                    <a th:href="${'/' + b.handle()}" class="newcomer-who">
+                    <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
                         <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 28)}"></th:block>
                         <span th:text="${b.nickname()}">닉네임</span></a>
                     <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, ${currentMemberId != null}, '/login', '/')}"></th:block>

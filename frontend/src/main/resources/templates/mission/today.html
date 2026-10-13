@@ -94,7 +94,7 @@
     <a class="mission-post-title" th:href="${mp.url()}" th:text="${mp.title()}">제목</a>
     <p class="mission-post-excerpt" th:if="${!mp.excerpt().isEmpty()}" th:text="${mp.excerpt()}">요약</p>
     <p class="mission-post-meta">
-        <a class="mission-post-author" th:href="${'/' + mp.handle()}" th:text="${mp.nickname()}">닉네임</a>
+        <a class="mission-post-author" th:href="${paths.blog(mp.handle())}" th:text="${mp.nickname()}">닉네임</a>
         <span class="tag-mini" th:text="${'#' + mp.topicTitle()}">#주제</span>
         <span th:if="${mp.friend()}" class="badge">친구</span>
         <span th:if="${mp.mine()}" class="badge">내 글</span>

@@ -127,7 +127,7 @@ public class NotificationQuery {
             readable = canRead && !hidden;
             ownHidden = canRead && hidden && authorId == user.memberId();
             title = rs.getString("title");
-            postUrl = "/" + rs.getString("p_handle") + "/posts/" + postId;
+            postUrl = com.team.blog.shared.web.BlogPaths.of(rs.getString("p_handle")) + "/posts/" + postId;
         }
         NotificationItem.PostRef post = null;
         String preview = null;

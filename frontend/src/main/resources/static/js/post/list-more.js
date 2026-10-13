@@ -50,7 +50,7 @@
     if (showAuthor || item.firstTag) {
       var top = el('p', 'card-top');
       if (showAuthor) {
-        var a = el('a', 'card-author'); a.href = '/' + item.author.handle;
+        var a = el('a', 'card-author'); a.href = '/@' + item.author.handle;
         a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.nickname || ''));
         top.appendChild(a);
       }

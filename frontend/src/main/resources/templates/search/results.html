@@ -33,7 +33,7 @@
             <article th:each="card : ${results}" class="post-card" th:attr="data-post-id=${card.id()}">
                 <div class="card-body">
                     <p class="card-top">
-                        <a class="card-author" th:href="${'/' + card.author().handle()}">
+                        <a class="card-author" th:href="${paths.blog(card.author().handle())}">
                             <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
                             <span th:text="${card.author().nickname()}">닉네임</span></a>
                     </p>
@@ -60,7 +60,7 @@
             <li th:each="m : ${people}" class="follow-row">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
                 <div class="follow-text">
-                    <p><span th:text="${m.nickname()}">닉네임</span> <a th:href="${'/' + m.handle()}" th:text="${'@' + m.handle()}">@주소</a></p>
+                    <p><span th:text="${m.nickname()}">닉네임</span> <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a></p>
                     <p class="help" th:if="${m.bio() != null}" th:text="${m.bio()}">소개</p>
                 </div>
             </li>

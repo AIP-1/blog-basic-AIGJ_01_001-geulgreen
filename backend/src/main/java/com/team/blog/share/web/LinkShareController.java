@@ -43,6 +43,6 @@ public class LinkShareController {
             throw new NotFoundException();
         }
         shares.regenerate(id);
-        return seeOther("/" + rows.get(0).get("handle") + "/posts/" + id + "#share-link");
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(rows.get(0).get("handle")) + "/posts/" + id + "#share-link");
     }
 }

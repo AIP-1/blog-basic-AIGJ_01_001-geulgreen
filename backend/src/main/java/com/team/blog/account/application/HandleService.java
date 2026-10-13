@@ -51,6 +51,7 @@ public class HandleService {
             words.add(word.strip().toLowerCase(Locale.ROOT));
         }
         this.reserved = Set.copyOf(words);
+        com.team.blog.shared.web.BlogPaths.reserve(this.reserved);
     }
 
     /** 08 §3 1~10단계로 미리 채울 주소. 결과는 그 순간 비어 있는 주소일 뿐 확정이 아니다. 이메일이 없으면 {@code user_}부터. */

@@ -60,7 +60,7 @@ public class PrivateBlogInterceptor implements HandlerInterceptor, WebMvcConfigu
         if (api) {
             throw new NotFoundException();
         }
-        response.sendRedirect(request.getContextPath() + "/" + owner.get().handle());
+        response.sendRedirect(request.getContextPath() + com.team.blog.shared.web.BlogPaths.of(owner.get().handle()));
         return false;
     }
 }
