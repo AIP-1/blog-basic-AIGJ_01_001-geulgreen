@@ -2,11 +2,26 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>팔로잉 피드</title>
+    <title>피드</title>
 </head>
 <body>
 <main class="list-page">
-    <h1>팔로잉 피드</h1>
+    <h1>피드</h1>
+    <!-- 068 강성찬 개인 확장: 추천 블로그와 팔로잉 블로그 글을 나눠 보여 준다 -->
+    <section th:if="${!recommended.isEmpty()}" class="feed-recommended" aria-labelledby="feed-recommended-heading">
+        <h2 id="feed-recommended-heading">추천 블로그 <span class="help">아직 팔로우하지 않은 블로그예요</span></h2>
+        <ul class="recommended-list">
+            <li th:each="b : ${recommended}" class="recommended-blog">
+                <a th:href="${'/@' + b.handle()}" class="newcomer-who">
+                    <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 36)}"></th:block>
+                    <span th:text="${b.nickname()}">닉네임</span></a>
+                <p class="help recommended-bio" th:if="${b.bio() != null}" th:text="${b.bio()}">소개</p>
+                <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, true, null, '/feed')}"></th:block>
+            </li>
+        </ul>
+        <p class="follow-message help" role="status" hidden></p>
+    </section>
+    <h2 class="feed-following-heading">팔로잉 블로그 글</h2>
     <p th:if="${continued}"><a href="/feed">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued}">
         <div class="empty-state" th:unless="${followsAnyone}">팔로우한 사람이 없어요. 홈에서 읽고 싶은 블로그를 찾아보세요 <a href="/">홈</a></div>
@@ -19,6 +34,7 @@
     </div>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
     <script th:src="@{/js/post/list-more.js}" defer></script>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>
 </html>

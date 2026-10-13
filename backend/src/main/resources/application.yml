@@ -310,7 +310,7 @@ blog:
         max-chars: 2000
         max-concurrency: 1
       per-user-daily: 20
-      min-chars: 100
+      min-chars: 20
       max-suggestions: 5
       popular-count: 50
       prompt-version: 1
