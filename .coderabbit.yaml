@@ -12,3 +12,14 @@ reviews:
     - "!gradlew"
     - "!gradlew.bat"
     - "!design-handoff/**"
+  path_instructions:
+    - path: "backend/src/main/java/**/{post,friend,discovery,share,teaser,writing}/**"
+      instructions: >-
+        비공개·친한 친구 공개 글이 목록, 검색, 공유, 미리보기, 피드, 외부 AI 호출로 새지 않는지 본다.
+        공개 범위 판단은 post/application/visibility와 PostAccessPolicy를 거치는지 확인한다.
+    - path: "backend/src/main/**"
+      instructions: >-
+        개인 확장 기능(025 이후)은 application.yml의 설정 스위치로 끌 수 있어야 하고, 꺼졌을 때 기본 기능이 그대로 동작하는지 본다.
+    - path: "frontend/src/main/resources/**/*.{css,html}"
+      instructions: >-
+        색은 static/css/theme.css의 색 역할 이름(var(--color-…))만 쓴다. 다른 파일에 색 값(#hex, rgb)을 직접 쓰면 지적한다.
