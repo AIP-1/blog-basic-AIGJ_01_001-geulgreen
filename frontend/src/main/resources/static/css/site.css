@@ -751,7 +751,9 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
 /* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
 .side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
-@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; } }
+@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; }
+    /* 프로필 메뉴 안 같은 링크도 이때는 숨김(오른쪽 칸 없는 화면·휴대폰은 그대로) */
+    body:has(.home-side .side-links) .profile-menu-links { display: none; } }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
