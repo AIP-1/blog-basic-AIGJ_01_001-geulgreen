@@ -3,6 +3,7 @@ package com.team.blog.admin.web;
 import static com.team.blog.shared.web.Redirects.seeOther;
 
 import com.team.blog.admin.application.AdminToolsService;
+import com.team.blog.admin.application.SamplePostsService;
 import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.shared.security.CurrentUserProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,10 +21,12 @@ public class AdminToolsController {
 
     private final AdminToolsService tools;
     private final CurrentUserProvider currentUserProvider;
+    private final SamplePostsService samplePosts;
 
-    public AdminToolsController(AdminToolsService tools, CurrentUserProvider currentUserProvider) {
+    public AdminToolsController(AdminToolsService tools, CurrentUserProvider currentUserProvider, SamplePostsService samplePosts) {
         this.tools = tools;
         this.currentUserProvider = currentUserProvider;
+        this.samplePosts = samplePosts;
     }
 
     @GetMapping("/admin")
@@ -31,7 +34,22 @@ public class AdminToolsController {
         noStore(response, model);
         model.addAttribute("dash", tools.dashboard(currentUserProvider.current()));
         model.addAttribute("adminTab", "dashboard");
+        model.addAttribute("samplePostsEnabled", samplePosts.enabled());
+        model.addAttribute("samplePostCount", samplePosts.count());
         return "admin/dashboard";
+    }
+
+    /** 083 테스트용 긴 글 넣기·모두 지우기(강성찬 개인 확장). */
+    @PostMapping("/admin/sample-posts")
+    public RedirectView seedSamplePosts() {
+        samplePosts.seed(currentUserProvider.current());
+        return seeOther("/admin");
+    }
+
+    @PostMapping("/admin/sample-posts/remove")
+    public RedirectView removeSamplePosts() {
+        samplePosts.remove(currentUserProvider.current());
+        return seeOther("/admin");
     }
 
     @GetMapping("/admin/content")

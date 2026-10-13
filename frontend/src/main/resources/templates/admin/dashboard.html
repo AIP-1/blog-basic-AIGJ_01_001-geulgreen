@@ -34,6 +34,18 @@
                 <td th:text="${d.posts()}">0</td><td th:text="${d.comments()}">0</td></tr></tbody>
         </table>
     </section>
+    <section aria-labelledby="sample-heading" th:if="${samplePostsEnabled}">
+        <h2 id="sample-heading">테스트용 긴 글</h2>
+        <p class="help" th:text="${'테스트 계정 4개(@test_로 시작)가 쓴 긴 글이에요. 지금 ' + samplePostCount + '편 있어요. 다시 눌러도 이미 있는 글은 건너뛰어요.'}">테스트 글</p>
+        <form method="post" action="/admin/sample-posts" class="row-actions">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-primary btn-sm">테스트 글 넣기</button>
+        </form>
+        <form method="post" action="/admin/sample-posts/remove" class="row-actions" th:if="${samplePostCount > 0}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-sm">테스트 계정과 글 모두 지우기</button>
+        </form>
+    </section>
 </main>
 </body>
 </html>

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-/** 블로그 주소를 바꾸는 경로가 코드에 없음을 소스 검색으로 확인한다(SC-004, FR-011). 074 강성찬 개인 확장의 {@code HandleChangeService}만 예외. */
+/** 블로그 주소를 바꾸는 경로가 코드에 없음을 소스 검색으로 확인한다(SC-004, FR-011). 074 강성찬 개인 확장의 {@code HandleChangeService}, 083 테스트 계정을 지울 때 아이디를 비우는 {@code SamplePostsService}만 예외. */
 class NoHandleUpdatePathTest {
 
     private static final Path MAIN = Path.of("src/main/java");
@@ -28,7 +28,7 @@ class NoHandleUpdatePathTest {
     void noSqlOrJpqlUpdatesTheHandleColumn() throws IOException {
         List<String> offenders = new ArrayList<>();
         for (Path file : javaFiles()) {
-            if (file.endsWith("HandleChangeService.java")) {
+            if (file.endsWith("HandleChangeService.java") || file.endsWith("SamplePostsService.java")) {
                 continue;
             }
             String source = Files.readString(file);
