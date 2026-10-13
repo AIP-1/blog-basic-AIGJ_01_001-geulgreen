@@ -129,6 +129,7 @@ blog:
         - actuator
         - auth
         - error
+        - explore
         - feed
         - missions
         - notes
