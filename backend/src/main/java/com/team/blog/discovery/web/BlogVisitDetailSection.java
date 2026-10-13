@@ -32,7 +32,7 @@ public class BlogVisitDetailSection implements PostDetailSection {
             return;
         }
         HttpServletRequest request = attrs.getRequest();
-        visits.record(post.authorId(), viewer, VisitorCookie.read(request), ipResolver.resolve(request),
+        visits.recordVisit(post.authorId(), viewer, VisitorCookie.read(request), ipResolver.resolve(request),
                 request.getHeader("User-Agent"));
     }
 }

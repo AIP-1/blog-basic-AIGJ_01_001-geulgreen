@@ -58,11 +58,10 @@ public class PostEditStore {
 
     /** 새 임시글({@code edit_version} 0). */
     public long insertDraft(long authorId, String title, String contentMd, String visibility, Instant now) {
-        Long id = jdbc.queryForObject("""
+        return jdbc.queryForObject("""
                 INSERT INTO post (author_id, title, content_md, status, visibility, edit_version, created_at, updated_at)
                 VALUES (?, ?, ?, 'DRAFT', ?, 0, ?, ?) RETURNING id
                 """, Long.class, authorId, title, contentMd, visibility, ts(now), ts(now));
-        return id;
     }
 
     /** 임시글 반영: 현재 DB 버전보다 새 버전일 때만. 바뀐 행 수. */

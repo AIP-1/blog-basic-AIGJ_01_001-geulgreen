@@ -65,7 +65,7 @@ public class ViewRecorder {
     }
 
     /** @return 셌으면 true(응답은 셌든 안 셌든 204) */
-    public boolean record(long postId, Visit visit) {
+    public boolean recordView(long postId, Visit visit) {
         PostReadAccess.ReadablePost post = postReadAccess.requireReadable(visit.viewer(), postId);
         if (post.hidden()) {
             throw new com.team.blog.shared.error.NotFoundException();

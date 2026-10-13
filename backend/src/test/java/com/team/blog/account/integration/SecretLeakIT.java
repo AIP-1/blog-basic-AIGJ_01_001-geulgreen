@@ -48,8 +48,8 @@ class SecretLeakIT extends IntegrationTestBase {
 
         String logs = output.getAll();
         assertThat(logs).doesNotContain(PASSWORD).doesNotContain(NEW_PASSWORD).doesNotContain("Wrong#Pass99")
-                .doesNotContain(verifyToken).doesNotContain(resetToken).doesNotContain(EMAIL);
-        assertThat(logs).contains("메일 발송"); // 마스킹한 발송 로그는 남는다
+                .doesNotContain(verifyToken).doesNotContain(resetToken).doesNotContain(EMAIL)
+                .contains("메일 발송"); // 마스킹한 발송 로그는 남는다
         for (Set<String> keys : java.util.List.of(keysWithToken, keysWithReset, redis.keys("*"))) {
             assertThat(keys).noneMatch(k -> k.contains(verifyToken) || k.contains(resetToken) || k.contains(EMAIL)
                     || k.contains("leakcheck@"));

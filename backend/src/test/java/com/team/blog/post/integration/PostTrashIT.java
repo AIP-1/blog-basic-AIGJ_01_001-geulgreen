@@ -75,7 +75,7 @@ class PostTrashIT extends IntegrationTestBase {
         mockMvc.perform(post("/api/posts/{id}/restore", id).with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
         Map<String, Object> after = row(id);
         for (String kept : new String[] {"first_public_at", "status", "visibility", "like_count", "comment_count", "edit_version"}) {
-            assertThat(after.get(kept)).as(kept).isEqualTo(before.get(kept));
+            assertThat(after).as(kept).containsEntry(kept, before.get(kept));
         }
         assertThat(after.get("deleted_at")).isNull();
         assertThat(listQuery.feed(null).items()).extracting("id").containsExactly(newer, id, older);
@@ -176,7 +176,7 @@ class PostTrashIT extends IntegrationTestBase {
         }
         pool.shutdown();
         if (posts.exists(id)) {
-            assertThat(row(id).get("status")).isEqualTo("PUBLISHED");
+            assertThat(row(id)).containsEntry("status", "PUBLISHED");
         }
     }
 }

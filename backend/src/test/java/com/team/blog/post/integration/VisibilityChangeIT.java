@@ -69,7 +69,7 @@ class VisibilityChangeIT extends IntegrationTestBase {
         mockMvc.perform(change(postId, "PUBLIC").with(TestAuth.member(me))).andExpect(status().isOk());
         Map<String, Object> after = posts.post(postId);
         for (String kept : new String[] {"edited_at", "edit_version", "first_public_at", "published_at", "comment_count", "like_count"}) {
-            assertThat(after.get(kept)).as(kept).isEqualTo(before.get(kept));
+            assertThat(after).as(kept).containsEntry(kept, before.get(kept));
         }
         assertThat(posts.workingCopyRow(postId)).containsEntry("title", "작업본");
         mockMvc.perform(get("/visowner/posts/{id}", postId)).andExpect(status().isOk());
@@ -98,7 +98,7 @@ class VisibilityChangeIT extends IntegrationTestBase {
         assertThat(posts.post(draft).get("first_public_at")).isNull();
         Object updated = posts.post(draft).get("updated_at");
         mockMvc.perform(change(draft, "PUBLIC").with(TestAuth.member(me))).andExpect(status().isOk());
-        assertThat(posts.post(draft).get("updated_at")).isEqualTo(updated);
+        assertThat(posts.post(draft)).containsEntry("updated_at", updated);
     }
 
     @Test

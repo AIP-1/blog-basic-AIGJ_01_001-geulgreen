@@ -87,13 +87,12 @@ public class MemberFixtures {
     }
 
     private long insert(String handle, String nickname, String status, Instant withdrawnAt, Instant deletedAt) {
-        Long id = jdbc.queryForObject("""
+        return jdbc.queryForObject("""
                 INSERT INTO member (handle, nickname, status, withdrawn_at, deleted_at)
                 VALUES (?, ?, ?, ?, ?) RETURNING id
                 """, Long.class, handle, nickname, status,
                 withdrawnAt == null ? null : Timestamp.from(withdrawnAt),
                 deletedAt == null ? null : Timestamp.from(deletedAt));
-        return id;
     }
 
     /** 069 친한 친구: {@code owner}가 {@code friend}를 팔로우하고, owner가 friend를 친구로 넣는다(friend가 owner의 친구 공개 글을 읽는다). */

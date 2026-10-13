@@ -2,7 +2,6 @@ package com.team.blog.media.integration;
 
 import static com.team.blog.account.integration.ProfileImageTestAccess.patchProfile;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -113,7 +112,7 @@ class ImageCleanupIT extends IntegrationTestBase {
         long id = verified();
         long imageId = new ImageFlow(mockMvc).uploadProfile(id);
         String key = key(imageId);
-        doThrow(new IllegalStateException("storage down")).when(storage).delete(eq(key));
+        doThrow(new IllegalStateException("storage down")).when(storage).delete(key);
 
         clock.advance(Duration.ofDays(2));
         cleanup.runOnce();
@@ -121,7 +120,7 @@ class ImageCleanupIT extends IntegrationTestBase {
         assertThat(redis.opsForSet().isMember(ImageCleanupService.ORPHAN_KEYS, key)).isTrue();
         assertThat(storage.inspect(key)).isPresent();
 
-        doCallRealMethod().when(storage).delete(eq(key));
+        doCallRealMethod().when(storage).delete(key);
         cleanup.runOnce();
         assertThat(redis.opsForSet().isMember(ImageCleanupService.ORPHAN_KEYS, key)).isFalse();
         assertThat(storage.inspect(key)).isEmpty();

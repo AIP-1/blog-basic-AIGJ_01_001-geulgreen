@@ -34,14 +34,14 @@ class RerenderIT extends IntegrationTestBase {
 
         assertThat(rerender.runAll()).isEqualTo(1);
         Map<String, Object> after = posts.post(old);
-        assertThat(after.get("render_version")).isEqualTo(ContentRenderer.RENDER_VERSION);
+        assertThat(after).containsEntry("render_version", ContentRenderer.RENDER_VERSION);
         assertThat((String) after.get("content_html")).contains("<h2 id=\"h-제목\">제목</h2>").contains("&lt;b&gt;글자&lt;/b&gt;");
-        assertThat(after.get("excerpt")).isEqualTo("제목 <b>글자</b> 본문");
+        assertThat(after).containsEntry("excerpt", "제목 <b>글자</b> 본문");
         for (String unchanged : new String[] {"edited_at", "edit_version", "updated_at", "published_at", "first_public_at", "title"}) {
-            assertThat(after.get(unchanged)).as(unchanged).isEqualTo(before.get(unchanged));
+            assertThat(after).as(unchanged).containsEntry(unchanged, before.get(unchanged));
         }
-        assertThat(posts.post(current).get("content_html")).isEqualTo("<p>발행본</p>");
-        assertThat(posts.post(draft).get("render_version")).isEqualTo(0);
+        assertThat(posts.post(current)).containsEntry("content_html", "<p>발행본</p>");
+        assertThat(posts.post(draft)).containsEntry("render_version", 0);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE status='PUBLISHED' AND render_version < ?",
                 Integer.class, ContentRenderer.RENDER_VERSION)).isZero();
     }

@@ -50,10 +50,12 @@ final class ExcerptExtractor extends AbstractVisitor {
 
     @Override
     public void visit(IndentedCodeBlock indentedCodeBlock) {
+        // 코드 블록은 뺀다
     }
 
     @Override
     public void visit(Image image) {
+        // 이미지 대체 글은 요약에 넣지 않는다
     }
 
     @Override

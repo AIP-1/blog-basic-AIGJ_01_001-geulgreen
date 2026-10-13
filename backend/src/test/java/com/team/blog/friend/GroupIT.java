@@ -30,18 +30,14 @@ class GroupIT extends IntegrationTestBase {
                 "Blog#2026ok", true);
     }
 
-    private void befriend(long a, String aHandle, long b, String bHandle) throws Exception {
-        members.befriend(a, b);
-    }
-
     @Test
     void onlyChosenGroupMembersReadGroupPosts() throws Exception {
         long owner = member("growner");
         long inGroup = member("grin");
         long friendOnly = member("grfriend");
         long stranger = member("grstranger");
-        befriend(owner, "growner", inGroup, "grin");
-        befriend(owner, "growner", friendOnly, "grfriend");
+        members.befriend(owner, inGroup);
+        members.befriend(owner, friendOnly);
         mockMvc.perform(post("/settings/groups").param("name", "대학 친구").with(csrf()).with(TestAuth.member(owner)))
                 .andExpect(status().is3xxRedirection());
         long group = jdbc.queryForObject("SELECT id FROM friend_group WHERE owner_id = ?", Long.class, owner);

@@ -105,7 +105,7 @@ public class PostDetailController {
     }
 
     private static long parseId(String raw) {
-        if (raw == null || !raw.matches("[1-9][0-9]{0,18}")) {
+        if (raw == null || !raw.matches("[1-9]\\d{0,18}")) {
             throw new NotFoundException();
         }
         try {

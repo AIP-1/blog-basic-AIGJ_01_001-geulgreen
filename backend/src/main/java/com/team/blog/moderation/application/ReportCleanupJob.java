@@ -4,7 +4,6 @@ import com.team.blog.post.application.JobLock;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

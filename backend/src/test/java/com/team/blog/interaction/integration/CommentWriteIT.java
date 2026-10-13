@@ -60,7 +60,7 @@ class CommentWriteIT extends IntegrationTestBase {
         long self = id(mockMvc.perform(create(post, "내 답글에 내가", replyToReply).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString());
         assertThat(row(self).get("reply_to_member_id")).isNull();
-        assertThat(posts.post(post).get("comment_count")).isEqualTo(4);
+        assertThat(posts.post(post)).containsEntry("comment_count", 4);
         // 다른 글의 댓글·삭제된 댓글은 대상이 될 수 없다
         long otherPost = posts.published(author, "다른 글", "본문", 1, T);
         mockMvc.perform(create(otherPost, "엉뚱한 대상", root).with(TestAuth.member(a)))
@@ -113,7 +113,7 @@ class CommentWriteIT extends IntegrationTestBase {
         long again = id(mockMvc.perform(create(post, "같은 내용", null).with(TestAuth.member(a)))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
         assertThat(again).isEqualTo(first);
-        assertThat(posts.post(post).get("comment_count")).isEqualTo(1);
+        assertThat(posts.post(post)).containsEntry("comment_count", 1);
         // 요청 횟수 검사는 중복 판정보다 먼저라 위 두 요청도 센다(FR-003): 8개 더 → 10개
         for (int i = 0; i < 8; i++) {
             mockMvc.perform(create(post, "다른 내용 " + i, null).with(TestAuth.member(a))).andExpect(status().isCreated());
@@ -132,11 +132,11 @@ class CommentWriteIT extends IntegrationTestBase {
         mockMvc.perform(edit(c, "글 주인이 고침").with(TestAuth.member(author))).andExpect(status().isNotFound());
         Object before = row(c).get("updated_at");
         mockMvc.perform(edit(c, "  원래  ").with(TestAuth.member(a))).andExpect(status().isOk()).andExpect(jsonPath("$.edited").value(false));
-        assertThat(row(c).get("updated_at")).isEqualTo(before);
+        assertThat(row(c)).containsEntry("updated_at", before);
         clock.advance(java.time.Duration.ofMinutes(5));
         mockMvc.perform(edit(c, "고친 내용").with(TestAuth.member(a))).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value("고친 내용")).andExpect(jsonPath("$.edited").value(true));
-        assertThat(posts.post(post).get("comment_count")).isEqualTo(1);
+        assertThat(posts.post(post)).containsEntry("comment_count", 1);
         jdbc.update("UPDATE comment SET hidden_at = now() WHERE id = ?", c);
         mockMvc.perform(edit(c, "숨김 뒤 수정").with(TestAuth.member(a))).andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("COMMENT_HIDDEN"));

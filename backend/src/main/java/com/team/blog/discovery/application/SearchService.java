@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -121,17 +120,10 @@ public class SearchService {
         return new SearchPage(rows.stream().map(Row::card).toList(), next, notice);
     }
 
-    private String titleHas() {
-        return "p.title ILIKE ? ESCAPE '\\'";
-    }
-
-    private String tagHas() {
-        return "EXISTS (SELECT 1 FROM post_tag pt JOIN tag g ON g.id = pt.tag_id WHERE pt.post_id = p.id AND g.name ILIKE ? ESCAPE '\\')";
-    }
-
-    private String bodyHas() {
-        return "p.content_md ILIKE ? ESCAPE '\\'";
-    }
+    private static final String TITLE_HAS = "p.title ILIKE ? ESCAPE '\\'";
+    private static final String TAG_HAS =
+            "EXISTS (SELECT 1 FROM post_tag pt JOIN tag g ON g.id = pt.tag_id WHERE pt.post_id = p.id AND g.name ILIKE ? ESCAPE '\\')";
+    private static final String BODY_HAS = "p.content_md ILIKE ? ESCAPE '\\'";
 
     /** 단계 조건과 그 인자. 0 = 어딘가에 모두(최신순), 1 = 제목에 모두, 2 = ①이 아니고 제목·태그에 모두, 3 = ①②가 아니고 어딘가에 모두. */
     private void stageCondition(SearchTerms terms, int stage, StringBuilder sql, List<Object> args) {
@@ -144,16 +136,16 @@ public class SearchService {
         for (String w : terms.words()) {
             String pattern = SearchTerms.likePattern(w);
             String tagPattern = SearchTerms.likePattern(w.toLowerCase(Locale.ROOT));
-            titles.append(titles.isEmpty() ? "" : " AND ").append(titleHas());
+            titles.append(titles.isEmpty() ? "" : " AND ").append(TITLE_HAS);
             titleArgs.add(pattern);
-            titleTags.append(titleTags.isEmpty() ? "" : " AND ").append("(").append(titleHas()).append(" OR ").append(tagHas()).append(")");
+            titleTags.append(titleTags.isEmpty() ? "" : " AND ").append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS).append(")");
             titleTagArgs.add(pattern);
             titleTagArgs.add(tagPattern);
-            all.append(all.isEmpty() ? "" : " AND ").append("(").append(titleHas()).append(" OR ").append(tagHas());
+            all.append(all.isEmpty() ? "" : " AND ").append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS);
             allArgs.add(pattern);
             allArgs.add(tagPattern);
             if (SearchTerms.searchesBody(w)) {
-                all.append(" OR ").append(bodyHas());
+                all.append(" OR ").append(BODY_HAS);
                 allArgs.add(pattern);
             }
             all.append(")");

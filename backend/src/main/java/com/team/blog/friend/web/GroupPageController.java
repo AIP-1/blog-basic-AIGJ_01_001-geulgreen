@@ -5,7 +5,6 @@ import static com.team.blog.shared.web.Redirects.seeOther;
 import com.team.blog.friend.application.FriendQuery;
 import com.team.blog.friend.application.GroupService;
 import com.team.blog.shared.security.AccountGuard;
-import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
