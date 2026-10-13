@@ -23,7 +23,7 @@
         <img class="tags-hero-art" src="/images/sleeping-cat.jpg" alt="" width="880" height="641">
     </section>
 
-    <!-- 내 기록(완료 횟수·연속 일수, 배지는 아직 없음) -->
+    <!-- 내 기록(완료 횟수·연속 일수) -->
     <section th:if="${myStats != null}" class="mission-stats" aria-label="내 미션 기록">
         <p class="mission-stat"><span class="help">지금까지</span><strong th:text="${myStats.total() + '번'}">0번</strong></p>
         <p class="mission-stat"><span class="help">연속</span><strong th:text="${'🔥 ' + myStats.streak() + '일'}">0일</strong></p>
@@ -33,6 +33,18 @@
                 <a th:if="${myTodayPost != null}" th:href="${myTodayPost.url()}" th:text="${'「' + myTodayPost.title() + '」'}">내 글</a></th:block>
             <th:block th:unless="${myStats.doneToday()}">아직 오늘 미션을 안 했어요. 아래에서 주제를 골라 보세요</th:block>
         </p>
+    </section>
+
+    <!-- 066 강성찬 개인 확장: 미션 배지(완료한 날 수·최고 연속으로 정함, 나만 봄) -->
+    <section th:if="${myBadges != null}" class="mission-badges" aria-labelledby="badges-heading">
+        <h2 id="badges-heading">🏅 내 배지 <span class="count-chip" th:text="${myBadgeCount + ' / ' + myBadges.size()}">1 / 7</span></h2>
+        <ul class="badge-list">
+            <li th:each="b : ${myBadges}" th:class="${b.earned() ? 'badge-item is-earned' : 'badge-item'}">
+                <span class="badge-emoji" aria-hidden="true" th:text="${b.emoji()}">🌱</span>
+                <strong th:text="${b.name()}">첫 미션</strong>
+                <span class="help" th:text="${b.earned() ? '받았어요' : b.rule()}">받았어요</span>
+            </li>
+        </ul>
     </section>
 
     <section class="tags-box" aria-labelledby="topics-heading">

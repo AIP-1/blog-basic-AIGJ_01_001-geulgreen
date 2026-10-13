@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * 057 오늘의 미션 화면(강성찬 개인 확장): 오늘(또는 지난날) 주제 3개, 내 기록, 친구들의 글·모두의 글, 지난 7일.
+ * 057 오늘의 미션 화면(강성찬 개인 확장): 오늘(또는 지난날) 주제 3개, 내 기록·066 배지, 친구들의 글·모두의 글, 지난 7일.
  * [이 주제로 쓰기]는 그 주제의 임시글을 열어 글쓰기 화면으로 보낸다.
  */
 @Controller
@@ -67,7 +67,11 @@ public class MissionController {
         model.addAttribute("prevDay", day.minusDays(1).toString());
         model.addAttribute("nextDay", day.isBefore(today) ? day.plusDays(1).toString() : null);
         viewer.ifPresent(v -> {
-            model.addAttribute("myStats", missions.stats(v.memberId()));
+            MissionService.Stats stats = missions.stats(v.memberId());
+            List<MissionService.Badge> badges = MissionService.badges(stats);
+            model.addAttribute("myStats", stats);
+            model.addAttribute("myBadges", badges);
+            model.addAttribute("myBadgeCount", badges.stream().filter(MissionService.Badge::earned).count());
             missions.myToday(v.memberId()).ifPresent(p -> model.addAttribute("myTodayPost", p));
         });
         model.addAttribute("anyAi", topics.stream().anyMatch(MissionService.Topic::ai));

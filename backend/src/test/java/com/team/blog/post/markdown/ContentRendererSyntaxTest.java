@@ -43,6 +43,15 @@ class ContentRendererSyntaxTest {
         assertThat(html).contains("<table>").contains("<th align=\"left\">이름</th>").contains("<td align=\"right\">1</td>");
     }
 
+    /** 065 강성찬 개인 확장: 글쓰기의 [표]가 넣는 빈 표와, 칸 안의 \| 가 표로 그려진다. */
+    @Test
+    void emptyTableFromEditorAndEscapedPipe() {
+        String html = html("|  |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |");
+        assertThat(html).contains("<table>").contains("<thead>").contains("<tbody>");
+        assertThat(html.split("<td", -1)).hasSize(7);
+        assertThat(html("| 식 | 뜻 |\n| --- | --- |\n| a \\| b | 또는 |")).contains("<td>a | b</td>");
+    }
+
     @Test
     void taskListIsReadOnly() {
         String html = html("- [x] 완료\n- [ ] 할 일");
