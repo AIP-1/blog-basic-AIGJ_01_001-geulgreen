@@ -92,6 +92,10 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions", null)).doesNotContain("오늘의 미션 글");
         // 내 기록과 글 화면 표시
         assertThat(page("/missions", writer)).contains("1번").contains("🔥 1일").contains("오늘 미션 완료");
+        // 066 배지: 첫 미션만 받음, 나머지는 받는 법이 보인다. 로그인 안 한 사람에게는 배지 칸이 없다
+        assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 미션").contains("받았어요")
+                .contains("3일 연속 완료하면");
+        assertThat(page("/missions", null)).doesNotContain("내 배지");
         assertThat(page("/@mswriter/posts/" + postId, writer)).contains("🗓 오늘의 미션 · ").contains("미션 완료");
         assertThat(missions.stats(writer).total()).isEqualTo(1);
         // 다음 날: 어제 주제로는 새로 시작할 수 없고, 어제 화면에서 글을 볼 수 있다
@@ -130,6 +134,11 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(s.doneToday()).isFalse();
         days.add(today);
         assertThat(statsOf(days, today).streak()).isEqualTo(4);
+        // 066 배지: 4번·최고 4일 연속 → 첫 미션, 3일 연속
+        assertThat(MissionService.badges(statsOf(days, today))).filteredOn(MissionService.Badge::earned)
+                .extracting(MissionService.Badge::name).containsExactly("첫 미션", "3일 연속");
+        assertThat(MissionService.badges(new MissionService.Stats(100, 0, 30, false))).allMatch(MissionService.Badge::earned);
+        assertThat(MissionService.badges(new MissionService.Stats(0, 0, 0, false))).noneMatch(MissionService.Badge::earned);
         assertThat(TopicPool.size()).isEqualTo(120);
         assertThat(com.team.blog.mission.application.TopicAi.parse("1. 첫 번째 주제|안내 하나\n- 두 번째 주제|안내 둘\n이상한 줄\n**세 번째 주제**|안내 셋", 3))
                 .extracting(TopicPool.Topic::title).containsExactly("첫 번째 주제", "두 번째 주제", "세 번째 주제");

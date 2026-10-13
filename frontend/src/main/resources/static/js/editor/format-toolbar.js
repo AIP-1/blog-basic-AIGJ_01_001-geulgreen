@@ -231,6 +231,47 @@
     return !u || /^(https?:\/\/|mailto:|\/|#)/i.test(u) ? u : 'https://' + u;
   }
 
+  /* ---------- 064 / 명령·065 표 넣기(Markdown 칸) ---------- */
+
+  var SLASH = /^\/([^\s/]{0,12})$/;
+  var PREFIXES = { h2: '## ', h3: '### ', ul: '- ', ol: '1. ', task: '- [ ] ', quote: '> ' };
+
+  // 줄 처음에 쓴 "/검색어"(커서가 그 끝에 있을 때)의 검색어, 아니면 null
+  function slashQuery(value, pos) {
+    var m = SLASH.exec(value.slice(lineStartOf(value, pos), pos));
+    return m ? m[1] : null;
+  }
+
+  // 빈 표(머리 줄 + 칸 줄). 칸마다 빈칸이 둘이라 그 가운데에 커서를 둘 수 있다
+  function tableMarkdown(cols, rows) {
+    var row = '|' + new Array(cols + 1).join('  |'), lines = [row, '|' + new Array(cols + 1).join(' --- |')];
+    for (var i = 0; i < rows; i++) { lines.push(row); }
+    return lines.join('\n');
+  }
+
+  // 표·구분선 같은 덩어리를 제 줄에: 앞뒤 글과 빈 줄로 띄운다(--- 가 위 글을 제목으로 만들지 않게). caret은 md 안 커서 자리(없으면 덩어리 뒤)
+  function insertBlock(value, from, to, md, caret) {
+    var before = value.slice(0, from), after = value.slice(to);
+    var pre = !before || /\n\n$/.test(before) ? '' : /\n$/.test(before) ? '\n' : '\n\n';
+    var post = /^\n\n/.test(after) ? '' : !after || /^\n/.test(after) ? '\n' : '\n\n';
+    var at = from + pre.length + (caret === undefined ? md.length + post.length : caret);
+    return { from: from, to: to, text: pre + md + post, selStart: at, selEnd: at };
+  }
+
+  // 고른 / 명령: "/검색어"를 지우고 그 줄을 고른 서식으로(제목·목록·인용은 줄 앞 표시, 코드는 ``` 로 감싸고, 표·구분선은 제 줄에)
+  function slashChange(value, pos, kind) {
+    var from = lineStartOf(value, pos), end = value.indexOf('\n', pos), p = PREFIXES[kind];
+    if (end < 0) { end = value.length; }
+    if (p) { return { from: from, to: pos, text: p, selStart: from + p.length, selEnd: from + p.length }; }
+    if (kind === 'code') {
+      var rest = value.slice(pos, end);
+      return { from: from, to: end, text: '```\n' + rest + '\n```', selStart: from + 4 + rest.length, selEnd: from + 4 + rest.length };
+    }
+    if (kind === 'table') { return insertBlock(value, from, pos, tableMarkdown(3, 2), 2); }
+    if (kind === 'hr') { return insertBlock(value, from, pos, '---'); }
+    return { from: from, to: pos, text: '', selStart: from, selEnd: from };
+  }
+
   function format(value, start, end, key) {
     if (WRAPS[key]) { return toggleWrap(value, start, end, key); }
     return key === 'clear' ? clearFormat(value, start, end) : null;
@@ -250,7 +291,8 @@
   }
 
   var api = { format: format, setBlock: setBlock, blockKind: blockKind, setColor: setColor, link: link, unlink: unlink,
-    findLink: findLink, normalizeUrl: normalizeUrl, activeFormats: activeFormats, COLORS: COLORS };
+    findLink: findLink, normalizeUrl: normalizeUrl, activeFormats: activeFormats, slashQuery: slashQuery, slashChange: slashChange,
+    tableMarkdown: tableMarkdown, insertBlock: insertBlock, COLORS: COLORS };
   root.blogFormat = api;
   if (typeof module === 'object' && module.exports) { module.exports = api; }
   if (typeof document === 'undefined') { return; }
@@ -271,10 +313,18 @@
     ul: svg('<path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>'),
     ol: svg('<path d="M10 6h11M10 12h11M10 18h11"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>'),
     task: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>'),
-    code: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 9-3 3 3 3"/><path d="m14 15 3-3-3-3"/>')
+    code: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m10 9-3 3 3 3"/><path d="m14 15 3-3-3-3"/>'),
+    table: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>'),
+    hr: svg('<path d="M3 12h18"/>'),
+    image: svg('<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>')
   };
   var BLOCK_ITEMS = [['text', '본문', 'T'], ['h2', '제목', 'H2'], ['h3', '소제목', 'H3'], ['ul', '글머리 목록'], ['ol', '번호 목록'],
     ['task', '할 일 목록'], ['quote', '인용'], ['code', '코드 블록']];
+  // 064 / 명령: 서식 종류 + 넣을 것. 검색어는 이름·영어 낱말의 앞부분으로 찾는다("/목" → 글머리 목록·번호 목록·할 일 목록)
+  var SLASH_ITEMS = BLOCK_ITEMS.concat([['table', '표'], ['hr', '구분선'], ['image', '사진']]);
+  var SLASH_WORDS = { text: 'text paragraph 글', h2: 'h1 h2 heading title', h3: 'h3 heading subtitle', ul: 'ul bullet list',
+    ol: 'ol number list', task: 'todo task check 체크', quote: 'quote', code: 'code', table: 'table', hr: 'hr divider line 선',
+    image: 'image photo picture img 그림' };
   var BLOCK_LABEL = { mixed: '여러 종류' };
   BLOCK_ITEMS.forEach(function (b) { BLOCK_LABEL[b[0]] = b[1]; });
   var GRID = [['color', '글자 색', '<span class="fmt-a">A</span>'], ['bold', '굵게 (Ctrl/⌘+B)', 'B'], ['italic', '기울임 (Ctrl/⌘+I)', 'I'],
@@ -505,7 +555,11 @@
         if (at < 0) { at = ta.value.length; }
         apply({ from: at, to: at, text: '\n\n' + md, selStart: at + 2, selEnd: at + 2 + md.length });
       },
-      focus: function () { ta.focus(); }
+      focus: function () { ta.focus(); },
+      slash: function () { return ta.selectionStart === ta.selectionEnd ? slashQuery(ta.value, ta.selectionStart) : null; },
+      applySlash: function (kind) { apply(slashChange(ta.value, ta.selectionStart, kind)); },
+      insertTable: function () { apply(insertBlock(ta.value, ta.selectionStart, ta.selectionEnd, tableMarkdown(3, 2), 2)); },
+      caret: function () { return caretPoint(ta, ta.selectionStart); }
     };
 
     function S() { return window.blogVisual && window.blogVisual.active() ? window.blogVisual.adapter : textSurface; }
@@ -713,9 +767,109 @@
       run(key);
     }
 
+    /* ---------- 064 / 명령(노션처럼): 줄 처음에 /를 쓰면 넣을 것을 고르는 창. 글자를 더 쓰면 걸러지고 ↑↓·Enter로 고른다 ---------- */
+
+    var imagePick = document.getElementById('image-pick');
+    var slashPanel = el('div', 'format-panel slash-panel');
+    slashPanel.setAttribute('role', 'listbox');
+    slashPanel.setAttribute('aria-label', '넣을 것 고르기');
+    slashPanel.hidden = true;
+    document.body.appendChild(slashPanel);
+    var slashFound = [], slashAt = 0, slashQ = null, slashMuted = false;
+
+    function slashClose() { slashPanel.hidden = true; slashQ = null; }
+
+    function slashShow() {
+      slashPanel.textContent = '';
+      slashFound.forEach(function (it, i) {
+        var b = button('fmt-row' + (i === slashAt ? ' is-active' : ''),
+          '<span class="fmt-ico" aria-hidden="true">' + (it[2] || ICONS[it[0]]) + '</span>' + it[1], null, { slash: it[0] });
+        b.setAttribute('role', 'option');
+        b.setAttribute('aria-selected', i === slashAt ? 'true' : 'false');
+        b.tabIndex = -1;
+        slashPanel.appendChild(b);
+      });
+      slashPanel.hidden = false;
+      var c = S().caret();
+      if (!c) { return; }
+      var h = slashPanel.offsetHeight, w = slashPanel.offsetWidth, cw = document.documentElement.clientWidth, vh = window.innerHeight;
+      var top = c.top + c.height + 6;
+      if (top + h > vh - 8 && c.top - h - 6 >= 8) { top = c.top - h - 6; }
+      slashPanel.style.top = (top + window.scrollY) + 'px';
+      slashPanel.style.left = (Math.max(8, Math.min(c.left, cw - w - 8)) + window.scrollX) + 'px';
+      // 고른 줄이 창 안에 보이게(창만 스크롤, 화면은 그대로)
+      var on = slashPanel.children[slashAt];
+      if (on.offsetTop < slashPanel.scrollTop) { slashPanel.scrollTop = on.offsetTop; }
+      else if (on.offsetTop + on.offsetHeight > slashPanel.scrollTop + slashPanel.clientHeight) {
+        slashPanel.scrollTop = on.offsetTop + on.offsetHeight - slashPanel.clientHeight;
+      }
+    }
+
+    // 커서 앞이 줄 처음의 "/검색어"이면 맞는 것만 띄우고, 아니면 닫는다(Esc로 닫았으면 그 / 를 벗어날 때까지 다시 띄우지 않는다)
+    function slashCheck() {
+      var surface = S(), q = document.activeElement === surface.el() ? surface.slash() : null;
+      if (q === null) { slashMuted = false; slashClose(); return; }
+      if (slashMuted) { return; }
+      if (q !== slashQ) { slashAt = 0; }
+      slashQ = q;
+      var low = q.toLowerCase();
+      slashFound = SLASH_ITEMS.filter(function (it) {
+        return (it[0] !== 'image' || !!imagePick)
+          && (it[1] + ' ' + SLASH_WORDS[it[0]]).split(' ').some(function (w) { return w.indexOf(low) === 0; });
+      });
+      if (!slashFound.length) { slashClose(); return; }
+      slashShow();
+    }
+
+    function slashChoose(kind) {
+      slashClose();
+      S().applySlash(kind === 'image' ? 'text' : kind);
+      if (kind === 'image') { imagePick.click(); }
+    }
+
+    function slashKey(ev) {
+      if (slashPanel.hidden || ev.isComposing) { return; }
+      if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+        slashAt = (slashAt + (ev.key === 'ArrowDown' ? 1 : slashFound.length - 1)) % slashFound.length;
+        slashShow();
+      } else if (ev.key === 'Enter' || ev.key === 'Tab') {
+        slashChoose(slashFound[slashAt][0]);
+      } else if (ev.key === 'Escape') {
+        slashMuted = true;
+        slashClose();
+      } else {
+        return;
+      }
+      ev.preventDefault();
+    }
+
+    slashPanel.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
+    slashPanel.addEventListener('click', function (ev) {
+      var b = ev.target.closest('button');
+      if (b && b.dataset.slash) { slashChoose(b.dataset.slash); }
+    });
+    window.addEventListener('resize', function () { if (!slashPanel.hidden) { slashShow(); } });
+
+    // 065 표 넣기 버튼: 커서 자리(보이는 대로 쓰기 칸은 마지막 커서 자리)에 3칸 표
+    var tableButton = document.getElementById('table-insert');
+    if (tableButton) { tableButton.addEventListener('click', function () { slashClose(); close(); S().insertTable(); }); }
+
     // Markdown 칸과 보이는 대로 쓰기 칸 모두에서 고르면 뜬다
     [ta, window.blogVisual && window.blogVisual.adapter.el()].forEach(function (el) {
       if (!el) { return; }
+      el.addEventListener('keydown', slashKey);
+      el.addEventListener('input', slashCheck);
+      el.addEventListener('click', slashCheck);
+      el.addEventListener('keyup', function (ev) { if (ev.key !== 'Escape') { slashCheck(); } });
+      el.addEventListener('blur', function () { window.setTimeout(function () { if (document.activeElement !== el) { slashClose(); } }, 0); });
+      // 한글 입력 중 Enter는 조합을 끝내며 줄을 나누려 하므로, 창이 떠 있으면 그 줄 나누기를 막고 고른다
+      el.addEventListener('beforeinput', function (ev) {
+        if (slashPanel.hidden || (ev.inputType !== 'insertParagraph' && ev.inputType !== 'insertLineBreak')) { return; }
+        slashCheck();
+        if (slashPanel.hidden) { return; }
+        ev.preventDefault();
+        slashChoose(slashFound[slashAt][0]);
+      });
       el.addEventListener('keyup', later);
       el.addEventListener('keydown', onKeydown);
       el.addEventListener('touchend', function () { window.setTimeout(refresh, 300); });

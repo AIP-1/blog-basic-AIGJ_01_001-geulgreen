@@ -20,6 +20,8 @@
   var SAFE_HREF = /^(https?:|mailto:|\/|#)/i;
   // 줄 처음에 쓰고 띄어쓰기하면 바뀌는 노션식 단축 입력
   var SHORTCUTS = { '#': 'h1', '##': 'h2', '###': 'h3', '-': 'ul', '*': 'ul', '1.': 'ol', '>': 'quote', '[]': 'task', '```': 'code' };
+  // 064 / 명령: 문단 처음에 쓴 "/검색어"
+  var SLASH = /^\/([^\s/]{0,12})$/;
   var TAGS = { text: 'p', h1: 'h2', h2: 'h3', h3: 'h4', quote: 'blockquote', code: 'pre' };
 
   var ta, box, toggle, td, colorOf = {}, classOf = {}, syncing = false, timer = null, lastMd = null, lastRange = null;
@@ -231,6 +233,10 @@
       }
       content = content.replace(/^\n+/, '').replace(/\n+$/, '\n').replace(/\n/gm, '\n' + ' '.repeat(prefix.length));
       return prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '');
+    } });
+    // 065 표 칸은 한 줄로(GFM 표 칸에는 줄바꿈이 없다), 칸 안의 | 는 \| 로. 뒤에 더한 규칙이라 GFM 플러그인의 칸 규칙보다 먼저 쓴다
+    t.addRule('tableCell', { filter: ['th', 'td'], replacement: function (content, node) {
+      return (node.previousElementSibling ? ' ' : '| ') + content.replace(/\s*\n+\s*/g, ' ').replace(/\|/g, '\\|').trim() + ' |';
     } });
     return t;
   }
@@ -523,28 +529,112 @@
       exec('insertParagraph');
       insertMarkdown(md);
     },
-    focus: function () { box.focus(); }
+    focus: function () { box.focus(); },
+    // 064 / 명령·065 표 넣기(서식 창 스크립트가 부른다)
+    slash: function () { var t = typedBefore(), m = t && SLASH.exec(t.text); return m ? m[1] : null; },
+    applySlash: function (kind) { applySlash(kind); },
+    insertTable: function () { restoreRange(); insertElement('table'); },
+    caret: function () {
+      var r = currentRange(), rect = r && r.getBoundingClientRect();
+      return rect ? { top: rect.top, left: rect.left, height: rect.height } : null;
+    }
   };
 
   /* ---------- 입력: 노션식 단축 입력, 코드 블록 안 Enter, 목록 Tab ---------- */
 
-  // 방금 띄어쓴 줄이 "# "·"- "·"1. "·"> " 같은 표시뿐이면 그 서식으로 바꾼다(입력 이벤트로 들어 휴대폰 자판·한글 입력에서도 된다)
-  function blockShortcut() {
+  // 문단 처음부터 커서까지(커서가 접혀 있고 문단 안일 때만): 단축 입력과 / 명령이 본다
+  function typedBefore() {
     var sel = window.getSelection();
-    if (!sel.rangeCount || !sel.isCollapsed || !box.contains(sel.anchorNode)) { return false; }
+    if (!sel.rangeCount || !sel.isCollapsed || !box.contains(sel.anchorNode)) { return null; }
     var block = blockOf(sel.anchorNode);
-    if (block !== box && block.nodeName !== 'P' && block.nodeName !== 'DIV') { return false; }
+    if (block !== box && block.nodeName !== 'P' && block.nodeName !== 'DIV') { return null; }
     var r = document.createRange();
     r.setStart(block, 0);
     r.setEnd(sel.anchorNode, sel.anchorOffset);
-    var typed = r.toString().replace(/\u00a0/g, ' ');
-    var kind = /\s$/.test(typed) ? SHORTCUTS[typed.slice(0, -1)] : null;
+    return { range: r, text: r.toString().replace(/\u00a0/g, ' ') };
+  }
+
+  // 방금 띄어쓴 줄이 "# "·"- "·"1. "·"> " 같은 표시뿐이면 그 서식으로 바꾼다(입력 이벤트로 들어 휴대폰 자판·한글 입력에서도 된다)
+  function blockShortcut() {
+    var t = typedBefore();
+    var kind = t && /\s$/.test(t.text) ? SHORTCUTS[t.text.slice(0, -1)] : null;
     if (!kind) { return false; }
-    select(r);
+    select(t.range);
     exec('delete');
     setBlock(kind);
     sync();
     return true;
+  }
+
+  // 064 / 명령으로 고른 것: "/검색어"를 지우고 그 문단을 고른 서식으로, 표·구분선은 그 자리에 넣는다
+  function applySlash(kind) {
+    var t = typedBefore();
+    if (!t || !SLASH.test(t.text)) { return; }
+    select(t.range);
+    exec('delete');
+    if (kind === 'table' || kind === 'hr') { insertElement(kind); return; }
+    if (kind !== 'text') { setBlock(kind); }
+    sync();
+  }
+
+  function emptyRow(tag) { return '<tr>' + new Array(4).join('<' + tag + '><br></' + tag + '>') + '</tr>'; }
+
+  // 065 표·구분선: 커서 자리 문단을 나눠 넣는다(목록·표·코드·인용 안이면 그 덩어리 밑에). 표는 첫 칸에, 구분선은 밑 문단에 커서
+  function insertElement(kind) {
+    var node = document.createElement(kind === 'table' ? 'table' : 'hr'), r = currentRange(), top = r ? r.startContainer : null;
+    if (kind === 'table') { node.innerHTML = '<thead>' + emptyRow('th') + '</thead><tbody>' + emptyRow('td') + emptyRow('td') + '</tbody>'; }
+    while (top && top !== box && top.parentNode !== box) { top = top.parentNode; }
+    if (top && top !== box && !/^(P|DIV|H[1-6])$/.test(top.nodeName)) {
+      var after = document.createRange();
+      after.setStartAfter(top);
+      after.collapse(true);
+      select(after);
+    }
+    insertBlock(node);
+    var next = node.nextElementSibling;
+    if (!next || next.nodeName !== 'P') {
+      next = document.createElement('p');
+      next.appendChild(document.createElement('br'));
+      node.parentNode.insertBefore(next, node.nextSibling);
+    }
+    var at = document.createRange();
+    at.selectNodeContents(kind === 'table' ? node.querySelector('th') : next);
+    at.collapse(true);
+    select(at);
+    updateEmpty();
+    sync();
+  }
+
+  function caretTo(cell, atEnd) {
+    var r = document.createRange();
+    r.selectNodeContents(cell);
+    r.collapse(!atEnd);
+    select(r);
+  }
+
+  // 표 칸에서 Tab은 다음 칸(마지막 칸이면 줄을 하나 더), Shift+Tab은 앞 칸
+  function tabCell(cell, back) {
+    var table = cell.closest('table'), cells = Array.prototype.slice.call(table.querySelectorAll('th, td')), i = cells.indexOf(cell);
+    if (back) { if (i > 0) { caretTo(cells[i - 1], true); } return; }
+    if (i < cells.length - 1) { caretTo(cells[i + 1], true); return; }
+    var row = (table.tBodies[0] || table.createTBody()).insertRow(-1);
+    for (var c = 0; c < cell.parentNode.cells.length; c++) { row.insertCell(-1).appendChild(document.createElement('br')); }
+    caretTo(row.cells[0], false);
+    sync();
+  }
+
+  // 표 칸에서 Enter는 아래 칸으로(마지막 줄이면 표 밑 문단으로). 칸 안에서는 줄을 나누지 않는다
+  function downCell(cell) {
+    var table = cell.closest('table'), rows = Array.prototype.slice.call(table.rows), below = rows[rows.indexOf(cell.parentNode) + 1];
+    if (below && below.cells[cell.cellIndex]) { caretTo(below.cells[cell.cellIndex], true); return; }
+    var next = table.nextElementSibling;
+    if (!next || next.nodeName !== 'P') {
+      next = document.createElement('p');
+      next.appendChild(document.createElement('br'));
+      table.parentNode.insertBefore(next, table.nextSibling);
+      sync();
+    }
+    caretTo(next, false);
   }
 
   // 코드 블록 안 Enter는 줄바꿈(<br>), 끝의 빈 줄에서 한 번 더 누르면 코드 블록 밖 새 문단으로
@@ -655,14 +745,18 @@
       e.target.checked = on;
       sync();
     });
-    // 코드 블록 안 Enter(휴대폰 자판도 같은 입력 종류로 온다)
+    // 코드 블록 안 Enter(휴대폰 자판도 같은 입력 종류로 온다). 065 표 칸 안 Enter는 아래 칸으로, 칸 안 줄바꿈은 막는다
     box.addEventListener('beforeinput', function (e) {
+      var cell = /^insert(Paragraph|LineBreak)$/.test(e.inputType) ? closestIn(window.getSelection().anchorNode, 'th, td') : null;
+      if (cell) { e.preventDefault(); if (e.inputType === 'insertParagraph') { downCell(cell); } return; }
       if (e.inputType === 'insertParagraph' && !composing && enterInCode()) { e.preventDefault(); }
     });
     box.addEventListener('compositionstart', function () { composing = true; });
     box.addEventListener('compositionend', function () { composing = false; });
     box.addEventListener('keydown', function (e) {
       if (composing || e.isComposing) { return; }
+      var cell = e.key === 'Tab' ? closestIn(window.getSelection().anchorNode, 'th, td') : null;
+      if (cell) { e.preventDefault(); tabCell(cell, e.shiftKey); return; }
       if (e.key === 'Tab' && closestIn(window.getSelection().anchorNode, 'li')) { e.preventDefault(); exec(e.shiftKey ? 'outdent' : 'indent'); }
     });
     document.addEventListener('selectionchange', function () {
