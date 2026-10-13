@@ -6,8 +6,11 @@
   카드 전체는 제목 링크를 늘린 영역(::after)으로 글 상세에, 작성자 링크는 그 위에 따로 블로그로 간다(키보드 링크 2개).
   출력은 th:text(이스케이프)만 쓴다.
 -->
-<article th:fragment="card(card, date, showAuthor)" class="post-card" th:attr="data-post-id=${card.id()}">
+<article th:fragment="card(card, date, showAuthor)" th:replace="~{fragments/post-card :: cardWith(${card}, ${date}, ${showAuthor}, ~{})}"></article>
+<!-- 067 후속(강성찬 개인 확장): extra = 카드 안에 덧붙일 조각(내 글 관리의 상태 배지·⋯ 메뉴). 홈 등은 빈 조각 -->
+<article th:fragment="cardWith(card, date, showAuthor, extra)" class="post-card" th:attr="data-post-id=${card.id()}">
     <div class="card-body">
+        <th:block th:replace="${extra}"></th:block>
         <p class="card-top" th:if="${showAuthor or card.firstTag() != null}">
             <a th:if="${showAuthor}" class="card-author" th:href="${'/@' + card.author().handle()}">
                 <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>

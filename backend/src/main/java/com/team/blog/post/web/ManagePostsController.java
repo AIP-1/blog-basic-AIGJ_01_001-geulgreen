@@ -2,6 +2,7 @@ package com.team.blog.post.web;
 
 import com.team.blog.post.application.CardDates;
 import com.team.blog.post.application.ManagePage;
+import com.team.blog.post.application.PostCard;
 import com.team.blog.post.application.ManageRow;
 import com.team.blog.post.application.ManageTab;
 import com.team.blog.post.application.PostManageQuery;
@@ -62,11 +63,18 @@ public class ManagePostsController {
         Map<Long, String> dates = new HashMap<>();
         Map<Long, String> views = new HashMap<>();
         Map<Long, Long> daysLeft = new HashMap<>();
+        // 067 후속(강성찬 개인 확장): 홈 카드 조각에 넘길 카드와 카드 아래 날짜 글자
+        Map<Long, PostCard> cards = new HashMap<>();
+        Map<Long, String> cardLabels = new HashMap<>();
         for (ManageRow row : page.items()) {
             savedLabels.put(row.id(), CardDates.label(row.updatedAt(), now));
             dates.put(row.id(), tab == ManageTab.TRASH ? KoreanDateFormatter.monthDay(row.deletedAt())
                     : CardDates.label(row.publishedAt(), now));
             views.put(row.id(), ViewCountFormat.format(row.viewCount()));
+            cards.put(row.id(), row.card(tab == ManageTab.DRAFTS ? "/write/" + row.id() : tab == ManageTab.TRASH ? null : row.url()));
+            cardLabels.put(row.id(), tab == ManageTab.DRAFTS ? "마지막 저장 " + savedLabels.get(row.id())
+                    : tab == ManageTab.TRASH ? "삭제 " + dates.get(row.id())
+                    : dates.get(row.id()) + (row.editedAt() != null ? " · 수정됨 " + KoreanDateFormatter.monthDay(row.editedAt()) : ""));
             if (row.purgeAt() != null) {
                 daysLeft.put(row.id(), Math.max(0, (Duration.between(now, row.purgeAt()).toHours() + 23) / 24));
             }
@@ -81,6 +89,8 @@ public class ManagePostsController {
         model.addAttribute("dates", dates);
         model.addAttribute("views", views);
         model.addAttribute("daysLeft", daysLeft);
+        model.addAttribute("cards", cards);
+        model.addAttribute("cardLabels", cardLabels);
         return "post/manage";
     }
 

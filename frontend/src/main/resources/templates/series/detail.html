@@ -5,13 +5,17 @@
     <title th:text="${series.title()}">시리즈</title>
 </head>
 <body>
-<main class="notes-page">
+<main class="notes-page list-page">
     <p class="help"><a th:href="${'/@' + owner.handle() + '/series'}" th:text="${owner.nickname() + '님의 시리즈'}">시리즈</a></p>
     <h1 th:text="${'📚 ' + series.title()}">시리즈</h1>
-    <p th:if="${items.isEmpty()}" class="empty-state">아직 공개한 글이 없어요</p>
-    <ol class="series-cards">
-        <li th:each="it : ${items}"><a th:href="${it.url()}" th:text="${it.title()}">글</a></li>
+    <p th:if="${cards.isEmpty()}" class="empty-state">아직 공개한 글이 없어요</p>
+    <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드, 순서는 "N편" 배지 -->
+    <ol class="series-cards card-grid home-cards">
+        <li th:each="card, st : ${cards}">
+            <article th:replace="~{fragments/post-card :: cardWith(${card}, ${cardDates.get(card.id())}, false, ~{series/detail :: seriesExtra})}"></article>
+        </li>
     </ol>
 </main>
+<th:block th:fragment="seriesExtra"><p class="manage-badges"><span class="badge" th:text="${st.count + '편'}">1편</span></p></th:block>
 </body>
 </html>

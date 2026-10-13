@@ -61,7 +61,8 @@ class ManagePostsIT extends IntegrationTestBase {
         assertThat(byDefault.indexOf(">발행 글 2<")).isLessThan(byDefault.indexOf(">임시글 2<"));
         assertThat(published).contains("공개 발행").contains("비공개 발행").contains("수정 중").contains("이어서 수정")
                 .contains("변경 취소").contains(">숨김</span>").contains("조회 1.2만").contains("수정됨")
-                .contains(">공개<").contains(">비공개<").doesNotContain("버린 글");
+                .contains(">공개<").contains(">비공개<").doesNotContain("버린 글")
+                .contains("class=\"post-card\"").contains("manage-menu"); // 067 후속: 홈과 같은 카드 + ⋯ 메뉴
         String onlyPrivate = mockMvc.perform(get("/manage/posts").param("tab", "published").param("visibility", "private")
                 .with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(onlyPrivate).contains("비공개 발행").doesNotContain(">공개 발행</a>");
