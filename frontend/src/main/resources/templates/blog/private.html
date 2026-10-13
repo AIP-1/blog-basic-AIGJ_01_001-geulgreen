@@ -11,7 +11,7 @@
     <header class="blog-header profile-header">
         <th:block th:replace="~{fragments/avatar :: avatar(${owner.avatar()}, 96)}"></th:block>
         <div class="profile-text">
-            <h1 th:replace="~{fragments/author :: profile(${author})}">닉네임 @주소</h1>
+            <h1 th:replace="~{fragments/author :: profile(${author})}">아이디 / 닉네임</h1>
             <p class="profile-bio" th:if="${owner.bio() != null}" th:text="${owner.bio()}">소개</p>
             <p class="help">
                 <span th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</span> ·
