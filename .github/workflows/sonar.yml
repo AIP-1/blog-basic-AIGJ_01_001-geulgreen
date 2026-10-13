@@ -34,6 +34,14 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: gradle
+      - name: 진단(임시)
+        if: ${{ env.SONAR_TOKEN != '' }}
+        run: |
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/authentication/validate"; echo
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/components/search?qualifiers=TRK&ps=500" | jq -r '.components[]?.key'
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/projects/search?ps=500" | jq -r '.components[]?.key' | head -50
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/user_tokens/search" | jq -c '.userTokens[]? | {name,type,project}'
+          curl -s -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/permissions/search_global_permissions" | head -c 600; echo
       - name: 테스트·커버리지·분석
         if: ${{ env.SONAR_TOKEN != '' }}
         run: ./gradlew --no-daemon test jacocoTestReport sonar
