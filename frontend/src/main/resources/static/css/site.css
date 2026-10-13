@@ -331,9 +331,9 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
     background: linear-gradient(120deg, var(--color-hero-from), var(--color-hero-to)); }
 .hero-inner { max-width: 1120px; margin: 0 auto; padding: 48px 48px; min-height: 340px; display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
-/* 사진 배너(static/images/hero.jpg, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
+/* 사진 배너(static/images/hero.webp, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
    검색창만 사진의 문구 아래(가로 18.5%, 세로 72%)에 얹는다. 비율을 그대로 지켜 문구 위치가 어긋나지 않게 한다 */
-.hero-photo { background: url("/images/hero.jpg") center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
+.hero-photo { background: url("/images/hero.webp") center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
 .hero-photo .hero-inner { position: absolute; inset: 0; max-width: none; padding: 0; min-height: 0; display: block; }
 .hero-photo .hero-slogan, .hero-photo .hero-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hero-photo .hero-search { position: absolute; left: 18.5%; top: 70%; width: 34%; min-width: 240px; max-width: none; }
@@ -486,6 +486,8 @@ html, body { overflow-x: clip; }
 /* 025 친구(강성찬 개인 확장) */
 .friend-form { display: inline-flex; gap: 6px; align-items: center; margin: 0 0 0 6px; }
 .friend-badge { color: var(--color-brand); font-weight: 600; font-size: .9em; }
+.friend-search { display: flex; gap: 6px; margin: 0 0 12px; }
+.friend-search input { flex: 1; min-width: 0; }
 .friends-page section { margin: 24px 0; }
 /* 028 답글 무제한 깊이(강성찬 개인 확장): 들여쓰기는 3단계 폭까지만 늘고 그 뒤로는 같은 폭 */
 .reply-list .reply-list .reply-list .reply-list { margin-left: 0; }
@@ -632,8 +634,10 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 50; background: transparent; pointer-events: none; }
 .read-progress span { display: block; height: 100%; width: 0; background: var(--color-brand); border-radius: 0 4px 4px 0;
     transition: width .08s linear; }
-.share-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
-.share-row a.btn { text-decoration: none; }
+.share-menu summary::before, .share-menu summary::after { content: none; }
+.share-menu .sort-menu-panel { left: 0; right: auto; }
+.share-menu .sort-menu-panel button { all: unset; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+.share-menu .sort-menu-panel button:hover, .share-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
 .pin-form { margin: 8px 0; }
 .pinned-post { margin: 0 0 18px; }
 .pinned-label { margin: 0 0 8px; font-weight: 700; }

@@ -165,7 +165,8 @@
     <div class="settings-panel" id="settings-friends">
     <section aria-labelledby="friends-heading">
         <h2 id="friends-heading">친구</h2>
-        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구 관리</a> · <a href="/settings/groups">친구 그룹</a></p>
+        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구 관리</a> · <a href="/settings/groups">친구 그룹</a>
+            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">🔒 비공개 계정·팔로우 요청</a></th:block></p>
     </section>
     </div>
     <div class="settings-panel" id="settings-display">

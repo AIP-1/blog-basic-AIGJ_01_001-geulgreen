@@ -63,7 +63,7 @@
     a.appendChild(el('span', 'help', '@' + c.author.handle));
     head.appendChild(a);
     if (c.author.isPostAuthor) { head.appendChild(el('span', 'badge', '작성자')); }
-    if (c.secret) { head.appendChild(el('span', 'help', '🔒 비밀')); }
+    if (c.secret) { head.appendChild(el('span', 'help secret-mark', '🔒 비밀')); }
     var t = el('time', 'help', dateLabel(c.createdAt)); t.setAttribute('datetime', c.createdAt); head.appendChild(t);
     if (c.edited) { head.appendChild(el('span', 'help', ' · 수정됨')); }
     box.appendChild(head);
@@ -107,7 +107,7 @@
       });
     }
 
-    function inlineForm(box, initial, label, onSubmit) {
+    function inlineForm(box, initial, label, onSubmit, withSecret) {
       var existing = box.querySelector('.comment-inline-form');
       if (existing) { existing.remove(); return; }
       var f = el('form', 'comment-inline-form');
@@ -115,8 +115,18 @@
       var ok = el('button', null, label); ok.type = 'submit';
       var cancel = el('button', null, '취소'); cancel.type = 'button';
       cancel.addEventListener('click', function () { f.remove(); });
-      f.appendChild(ta); f.appendChild(ok); f.appendChild(cancel);
-      f.addEventListener('submit', function (e) { e.preventDefault(); onSubmit(ta.value); });
+      f.appendChild(ta);
+      // 043 강성찬 개인 확장: 비밀 답글. 비밀 댓글에 다는 답글은 서버가 늘 비밀로 만든다
+      var secret = null;
+      if (withSecret) {
+        var parentSecret = !!box.querySelector(':scope > .comment-head .secret-mark');
+        var lab = el('label', 'secret-check'); secret = el('input'); secret.type = 'checkbox';
+        secret.checked = parentSecret; secret.disabled = parentSecret;
+        lab.appendChild(secret); lab.appendChild(document.createTextNode(' 🔒 비밀 답글 (글쓴이·이 댓글 쓴 사람과 나만 보기)'));
+        f.appendChild(lab);
+      }
+      f.appendChild(ok); f.appendChild(cancel);
+      f.addEventListener('submit', function (e) { e.preventDefault(); onSubmit(ta.value, !!(secret && secret.checked)); });
       box.appendChild(f);
       ta.focus();
     }
@@ -126,10 +136,10 @@
       if (!button) { return; }
       var box = button.closest('.comment');
       if (button.classList.contains('comment-reply')) {
-        inlineForm(box, '', '답글 쓰기', function (text) {
-          call('POST', '/api/posts/' + postId + '/comments', { content: text, replyToCommentId: Number(box.dataset.commentId) })
+        inlineForm(box, '', '답글 쓰기', function (text, secret) {
+          call('POST', '/api/posts/' + postId + '/comments', { content: text, replyToCommentId: Number(box.dataset.commentId), secret: secret })
             .then(function (c) { reopen(c.id); }).catch(function (err) { showError(box, err.message); });
-        });
+        }, !!document.getElementById('comment-secret'));
       } else if (button.classList.contains('comment-edit')) {
         var current = box.querySelector('.comment-content').textContent;
         inlineForm(box, current, '수정', function (text) {

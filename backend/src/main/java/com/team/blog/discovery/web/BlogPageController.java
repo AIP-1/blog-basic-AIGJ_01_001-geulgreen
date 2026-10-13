@@ -36,6 +36,7 @@ public class BlogPageController {
     private final com.team.blog.discovery.application.BlogVisitService blogVisits;
     private final com.team.blog.discovery.application.PinService pins;
     private final com.team.blog.shared.web.ClientIpResolver ipResolver;
+    private final com.team.blog.privacy.application.PrivateAccountService privacy;
 
     public BlogPageController(BlogOwnerResolver blogOwnerResolver, PostListQuery listQuery,
                               CurrentUserProvider currentUserProvider, Clock clock,
@@ -48,7 +49,9 @@ public class BlogPageController {
                               com.team.blog.category.application.CategoryService categoryService,
                               com.team.blog.discovery.application.BlogVisitService blogVisits,
                               com.team.blog.discovery.application.PinService pins,
-                              com.team.blog.shared.web.ClientIpResolver ipResolver) {
+                              com.team.blog.shared.web.ClientIpResolver ipResolver,
+                              com.team.blog.privacy.application.PrivateAccountService privacy) {
+        this.privacy = privacy;
         this.blogVisits = blogVisits;
         this.pins = pins;
         this.ipResolver = ipResolver;
@@ -74,6 +77,16 @@ public class BlogPageController {
                        @RequestParam(value = "category", required = false) String categoryRaw,
                        jakarta.servlet.http.HttpServletRequest request, Model model) {
         BlogOwner owner = blogOwnerResolver.resolve(handle).orElseThrow(NotFoundException::new);
+        // 073 강성찬 개인 확장: 수락받지 않은 사람에게 비공개 계정은 프로필 윗부분만
+        if (!privacy.canSee(currentUserProvider.current(), owner.memberId())) {
+            model.addAttribute("owner", owner);
+            model.addAttribute("author", owner.toAuthorDisplay());
+            model.addAttribute("followCounts", followQuery.counts(owner.memberId()));
+            model.addAttribute("followRequested", currentUserProvider.current()
+                    .map(v -> privacy.requested(v.memberId(), owner.memberId())).orElse(false));
+            model.addAttribute("loginRedirect", "/login?redirect=/@" + owner.handle());
+            return "blog/private";
+        }
         // 020 FR-017: 블로그 안 검색
         if (q != null) {
             return searchController.blog(owner, q, sort, cursor, request, model);
@@ -116,7 +129,7 @@ public class BlogPageController {
             }
             if (filterCategory != null) {
                 java.util.List<Long> ids = categoryService.postIds(filterCategory.id());
-                java.util.Map<Long, com.team.blog.post.application.PostCard> byId = listQuery.cardsByIds(ids);
+                java.util.Map<Long, com.team.blog.post.application.PostCard> byId = listQuery.cardsByIds(ids, true);
                 page = new CardPage(ids.stream().map(byId::get).filter(java.util.Objects::nonNull).toList(), null);
                 tag = null;
             }
@@ -130,7 +143,7 @@ public class BlogPageController {
         }
         // 054 강성찬 개인 확장: 고정 글(첫 화면, 필터 없을 때, 공개 글일 때만)
         if ((cursor == null || cursor.isEmpty()) && tag == null && filterCategory == null) {
-            pins.pinnedPostId(owner.memberId()).map(id -> listQuery.cardsByIds(java.util.List.of(id)).get(id)).ifPresent(card -> {
+            pins.pinnedPostId(owner.memberId()).map(id -> listQuery.cardsByIds(java.util.List.of(id), true).get(id)).ifPresent(card -> {
                 model.addAttribute("pinnedCard", card);
                 model.addAttribute("pinnedDate", com.team.blog.post.application.CardDates.label(card.firstPublicAt(), clock.instant()));
             });
