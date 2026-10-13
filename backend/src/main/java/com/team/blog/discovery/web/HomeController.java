@@ -51,10 +51,10 @@ public class HomeController {
         boolean snapshotExpired = expired != null;
         CardPage page;
         try {
-            page = trending ? trendingService.page(cursor) : listQuery.feed(cursor);
+            page = trending ? trendingThenLatest(cursor) : listQuery.feed(cursor);
         } catch (PostContentException | SnapshotExpiredException e) {
             snapshotExpired = snapshotExpired || e instanceof SnapshotExpiredException;
-            page = trending ? trendingService.page(null) : listQuery.feed(null);
+            page = trending ? trendingThenLatest(null) : listQuery.feed(null);
             cursor = null;
         }
         CardModel.fill(model, page, clock.instant());
@@ -78,6 +78,23 @@ public class HomeController {
     @GetMapping("/api/posts/trending")
     @ResponseBody
     public CardPage trending(@RequestParam(value = "cursor", required = false) String cursor) {
-        return trendingService.page(cursor);
+        return trendingThenLatest(cursor);
+    }
+
+    /** 067 후속(강성찬 개인 확장): 트렌딩 다음 커서 중 이 머리로 시작하면 최신 글 목록으로 이어진다. */
+    static final String THEN_LATEST = "latest:";
+
+    /**
+     * 트렌딩 순위(최근 7일·반응 있는 글)가 끝나면 최신 글로 이어 붙여 무한 스크롤이 멈추지 않게 한다.
+     * 이미 본 글은 화면(list-more.js)이 건너뛴다. 트렌딩 글이 하나도 없으면 빈 화면 안내를 그대로 둔다.
+     */
+    private CardPage trendingThenLatest(String cursor) {
+        if (cursor != null && cursor.startsWith(THEN_LATEST)) {
+            String rest = cursor.substring(THEN_LATEST.length());
+            CardPage feed = listQuery.feed(rest.isEmpty() ? null : rest);
+            return new CardPage(feed.items(), feed.nextCursor() == null ? null : THEN_LATEST + feed.nextCursor());
+        }
+        CardPage page = trendingService.page(cursor);
+        return page.nextCursor() != null || page.items().isEmpty() ? page : new CardPage(page.items(), THEN_LATEST);
     }
 }

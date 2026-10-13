@@ -163,6 +163,9 @@ main.list-page { max-width: 1120px; }
 .card-likes { color: var(--color-like); font-weight: 600; }
 .card-date { margin-left: auto; }
 .list-more { text-align: center; margin: 24px 0; }
+/* 067 후속(강성찬 개인 확장): 무한 스크롤이면 [더 보기]는 숨기고(화면 낭독용으로만 남김) 불러오는 동안만 작게 알림 */
+.list-more.infinite .more-button { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.list-more.infinite.loading::before { content: "불러오는 중…"; color: var(--color-text-muted); font-size: .9em; }
 .inline-form { display: inline; }
 /* 010 글 상세 */
 .post-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -480,8 +483,6 @@ body > main + .site-footer, body > div + .site-footer { margin-top: auto; }
 /* 홈 탭 줄: 왼쪽 탭, 오른쪽 더보기 */
 .home-tabs-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--color-border); margin: 8px 0 20px; }
 .home-tabs-row .manage-tabs { border-bottom: 0; margin: 0; }
-.home-more { color: var(--color-text-muted); text-decoration: none; font-size: .92em; padding: 8px 2px; }
-.home-more:hover { color: var(--color-text); }
 html, body { overflow-x: clip; }
 /* 025 친구(강성찬 개인 확장) */
 .friend-form { display: inline-flex; gap: 6px; align-items: center; margin: 0 0 0 6px; }
@@ -660,7 +661,6 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .home-section-title { margin: 0 12px 6px 0; font-size: 1.35em; font-weight: 800; }
 .home-tabs-row { align-items: center; }
 .home-tabs-row .home-tabs { flex: 1; }
-.home-more { color: var(--color-brand); text-decoration: none; font-weight: 600; font-size: .92em; }
 /* 가로 카드 2열 */
 main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 @media (min-width: 700px) { main.list-page .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -676,6 +676,11 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .home-cards .card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 /* 오른쪽 */
 .home-side { display: flex; flex-direction: column; gap: 18px; }
+.side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
+.side-links a { color: var(--color-text-muted); text-decoration: none; }
+.side-links a:hover { color: var(--color-text); text-decoration: underline; }
+.profile-menu-panel .profile-menu-links { margin: 4px 0; padding: 6px 12px 2px; border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.profile-menu-panel .profile-menu-links a { display: inline; width: auto; padding: 2px 0; font-size: .8em; color: var(--color-text-muted); }
 .side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
 .side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
 .side-box h2 .icon { width: 18px; height: 18px; }
