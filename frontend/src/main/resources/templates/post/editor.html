@@ -33,9 +33,9 @@
         <label for="post-content" class="visually-hidden">본문 (Markdown)</label>
         <textarea id="post-content" placeholder="Markdown으로 써 보세요. 글을 드래그하면 서식 창이 떠요" aria-describedby="format-hint"
                   th:data-writing-ai="${writingAi}" th:text="${post.contentMd()}"></textarea>
-        <!-- 058~060 강성찬 개인 확장: 서식 창 안내 -->
+        <!-- 058~060·064 강성찬 개인 확장: 서식 창·/ 명령 안내 -->
         <p id="format-hint" class="help">글을 고르면 서식 창이 떠요(제목·목록·글자 색·밑줄·링크<th:block th:if="${writingAi}">·AI로 고치기</th:block>).
-            줄 처음에 #, -, 1., &gt; 를 쓰고 띄어쓰면 제목·목록·인용이 돼요.
+            줄 처음에 #, -, 1., &gt; 를 쓰고 띄어쓰면 제목·목록·인용이 돼요. 줄 처음에 / 를 쓰면 제목·목록·표·구분선·사진을 골라 넣어요.
             단축키 Ctrl/⌘+B 굵게, I 기울임, U 밑줄, K 링크, E 코드<th:block th:if="${writingAi}">, J AI에게 부탁</th:block></p>
     </div>
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
@@ -48,6 +48,8 @@
         <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <div class="editor-actions">
             <button type="button" id="image-pick">사진</button>
+            <!-- 065 강성찬 개인 확장: 표 넣기 -->
+            <button type="button" id="table-insert">표</button>
             <input type="file" id="image-file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
             <button type="button" id="preview-toggle" aria-controls="preview-panel" aria-expanded="false">미리보기</button>
             <button type="button" id="discard-working-copy" th:if="${published}">변경 취소</button>

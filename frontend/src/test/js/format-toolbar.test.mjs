@@ -144,4 +144,50 @@ test('버튼 눌림 표시', () => {
   assert.equal(f.activeFormats('[a](b)', 1, 2).link, true);
 });
 
+// 064 / 명령: '|' 자리를 커서로 보고 고른 것을 적용 → [새 글, 새 커서 앞 글]
+function slash(value, kind) {
+  const pos = value.indexOf('|');
+  const v = value.replace('|', '');
+  const c = f.slashChange(v, pos, kind);
+  const next = v.slice(0, c.from) + c.text + v.slice(c.to);
+  assert.equal(c.selStart, c.selEnd);
+  return [next, next.slice(0, c.selStart)];
+}
+
+test('/ 명령: 줄 처음의 /검색어만 찾는다', () => {
+  assert.equal(f.slashQuery('/', 1), '');
+  assert.equal(f.slashQuery('글\n/제목', 5), '제목');
+  assert.equal(f.slashQuery('/h2', 2), 'h');
+  assert.equal(f.slashQuery('글 /제목', 5), null);
+  assert.equal(f.slashQuery('/제 목', 4), null);
+  assert.equal(f.slashQuery('/usr/bin', 8), null);
+});
+
+test('/ 명령: 제목·목록·인용은 줄 앞 표시로, 줄의 나머지 글은 그대로', () => {
+  assert.deepEqual(slash('위\n/제목|', 'h2'), ['위\n## ', '위\n## ']);
+  assert.deepEqual(slash('/할|', 'task'), ['- [ ] ', '- [ ] ']);
+  assert.deepEqual(slash('/|사과', 'ol'), ['1. 사과', '1. ']);
+  assert.deepEqual(slash('/본|', 'text'), ['', '']);
+});
+
+test('/ 명령: 코드 블록은 그 줄을 ``` 로 감싸고 커서는 안쪽', () => {
+  assert.deepEqual(slash('/코|', 'code'), ['```\n\n```', '```\n']);
+  assert.deepEqual(slash('/|let a', 'code'), ['```\nlet a\n```', '```\nlet a']);
+});
+
+test('/ 명령·표 넣기: 표와 구분선은 빈 줄로 띄운 제 줄에(--- 가 위 글의 제목 표시가 되지 않게)', () => {
+  const table = f.tableMarkdown(3, 2);
+  assert.equal(table, '|  |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |');
+  const [v1, before1] = slash('첫 글\n/표|', 'table');
+  assert.equal(v1, '첫 글\n\n' + table + '\n');
+  assert.equal(before1, '첫 글\n\n| ');
+  const [v2, before2] = slash('위\n/구분|\n아래', 'hr');
+  assert.equal(v2, '위\n\n---\n\n아래');
+  assert.equal(before2, '위\n\n---\n');
+  // 표 넣기 버튼: 글 가운데 커서 자리면 앞뒤를 띄운다
+  const c = f.insertBlock('가나다', 1, 1, table, 2);
+  assert.equal('가나다'.slice(0, c.from) + c.text + '가나다'.slice(c.to), '가\n\n' + table + '\n\n나다');
+  assert.equal(f.insertBlock('', 0, 0, '---').text, '---\n');
+});
+
 console.log(`\n${passed} passed`);

@@ -29,6 +29,8 @@ class EditorPageIT extends IntegrationTestBase {
         // 060 보이는 대로 쓰기: 변환 도구와 편집 칸 스크립트(Markdown 칸은 그대로 남아 저장·자동 저장에 쓰인다)
         assertThat(html).contains("/js/editor/visual-editor-").contains("/webjars/marked/").contains("/webjars/turndown/")
                 .contains("id=\"post-content\"");
+        // 064·065 강성찬 개인 확장: / 명령 안내와 [표] 버튼
+        assertThat(html).contains("줄 처음에 / 를 쓰면").contains("id=\"table-insert\"");
         // 임시글에는 [변경 취소]가 없다
         assertThat(html).doesNotContain("discard-working-copy");
     }

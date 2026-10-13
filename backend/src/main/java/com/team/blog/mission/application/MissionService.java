@@ -24,7 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * 057 오늘의 미션(강성찬 개인 확장, 034를 바꿈): 날마다 주제 3개(AI 또는 내장 주제), 주제를 고르면 그 주제의 임시글을 열고,
- * 그 글을 주제가 나온 날(한국 시간) 안에 처음 발행하면 완료. 완료 횟수·연속 일수는 세지만 배지는 아직 없다.
+ * 그 글을 주제가 나온 날(한국 시간) 안에 처음 발행하면 완료. 완료 횟수·연속 일수를 세고, 066 배지는 그 기록으로 정한다.
  */
 @Service
 public class MissionService {
@@ -45,6 +45,10 @@ public class MissionService {
 
     /** 내 기록: 완료한 날 수, 지금 연속, 최고 연속, 오늘 했는지. */
     public record Stats(int total, int streak, int best, boolean doneToday) {
+    }
+
+    /** 066 미션 배지(강성찬 개인 확장): {@code rule}은 아직 못 받았을 때 보이는 받는 법. */
+    public record Badge(String emoji, String name, String rule, boolean earned) {
     }
 
     /** 글이 미션 글이면 그 주제와 완료 여부. */
@@ -254,6 +258,18 @@ public class MissionService {
             prev = day;
         }
         return new Stats(days.size(), streak, best, doneToday);
+    }
+
+    /** 066 배지: 따로 저장하지 않고 지금 기록(완료한 날 수·최고 연속)으로 정한다. 미션 글을 지우면 빠질 수 있다. */
+    public static List<Badge> badges(Stats s) {
+        return List.of(
+                new Badge("🌱", "첫 미션", "미션을 처음 완료하면", s.total() >= 1),
+                new Badge("🔥", "3일 연속", "3일 연속 완료하면", s.best() >= 3),
+                new Badge("🌿", "미션 10번", "10번 완료하면", s.total() >= 10),
+                new Badge("⭐", "일주일 연속", "7일 연속 완료하면", s.best() >= 7),
+                new Badge("🌳", "미션 30번", "30번 완료하면", s.total() >= 30),
+                new Badge("👑", "한 달 연속", "30일 연속 완료하면", s.best() >= 30),
+                new Badge("🏆", "미션 100번", "100번 완료하면", s.total() >= 100));
     }
 
     /** 오늘 내가 완료한 글(있으면 첫 글). */

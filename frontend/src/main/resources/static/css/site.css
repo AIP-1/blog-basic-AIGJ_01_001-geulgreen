@@ -761,6 +761,16 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
     display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
 .mission-stat strong { font-size: 1.4em; }
 .mission-today-state { flex: 1; min-width: 240px; justify-content: center; }
+/* 066 미션 배지: 받은 것은 색, 아직인 것은 흐리게 받는 법과 함께 */
+.mission-badges { margin: 0 0 22px; }
+.mission-badges h2 { font-size: 1.1em; margin: 0 0 10px; }
+.badge-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.badge-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 8px; text-align: center;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; opacity: .55; }
+.badge-item.is-earned { opacity: 1; border-color: var(--color-brand); background: var(--color-brand-soft); }
+.badge-item .help { font-size: .8em; }
+.badge-emoji { font-size: 1.8em; line-height: 1.2; }
+.badge-item:not(.is-earned) .badge-emoji { filter: grayscale(1); }
 .topic-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (min-width: 800px) { .topic-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .topic-card { background: var(--tone-bg); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
@@ -824,6 +834,9 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .fmt-ai-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 8px 6px; }
 .fmt-consent { padding: 4px 10px 8px; }
 .fmt-consent .help { margin: 0 0 8px; font-size: .82rem; }
+/* 064 / 명령 창(강성찬 개인 확장): 서식 창 모양, ↑↓로 고른 줄 표시 */
+.slash-panel { width: 220px; max-height: min(340px, 50vh); overflow-y: auto; }
+.slash-panel .fmt-row.is-active { background: var(--color-surface-muted); }
 /* 058 글자 색·배경색: 본문(<span class="md-…">)과 서식 창 견본에 같이 쓴다 */
 .md-c-gray { color: var(--color-text-muted); }
 .md-c-brown { color: var(--tone-sand-fg); }
@@ -857,6 +870,8 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .visual-editor li > input[type=checkbox] { margin-right: 6px; cursor: pointer; }
 .post-body li:has(> input[type=checkbox]) { list-style: none; margin-left: -1.2em; }
 .visual-editor pre { white-space: pre-wrap; }
+/* 065 표 넣기: 빈 칸도 누르기 쉽게 */
+.visual-editor th, .visual-editor td { min-width: 4em; height: 2em; }
 
 /* 061 화면 테마(강성찬 개인 확장): 설정 화면에서 고른다 */
 .theme-choices { display: flex; flex-wrap: wrap; gap: 8px 20px; border: 0; padding: 0; margin: 0 0 8px; }
