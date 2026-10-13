@@ -36,7 +36,7 @@ class PublishConflictIT extends IntegrationTestBase {
     }
 
     @Test
-    void autosaveArrivingAfterVersionCheckSurvivesPublish() throws Exception {
+    void autosaveArrivingAfterVersionCheckSurvivesPublish() {
         long me = writer(members, "pubrace");
         long postId = posts.draft(me, "", "", 0);
         buffer.save(postId, me, 0, 0, "버퍼 v1", "", Instant.now());

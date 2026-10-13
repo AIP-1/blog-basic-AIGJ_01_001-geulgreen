@@ -35,10 +35,6 @@ class DailyMissionIT extends IntegrationTestBase {
         return members.localMember(handle, handle.substring(0, Math.min(10, handle.length())), handle + "@example.com", "Blog#2026ok", true);
     }
 
-    private void befriend(String a, long aId, String b, long bId) throws Exception {
-        members.befriend(aId, bId);
-    }
-
     private long startWriting(long who, long topicId) throws Exception {
         String location = mockMvc.perform(post("/missions/topics/{id}/write", topicId).with(csrf()).with(TestAuth.member(who)))
                 .andExpect(status().is3xxRedirection()).andReturn().getResponse().getRedirectedUrl();
@@ -63,7 +59,7 @@ class DailyMissionIT extends IntegrationTestBase {
         long writer = member("mswriter");
         long friend = member("msfriend");
         long stranger = member("msstranger");
-        befriend("mswriter", writer, "msfriend", friend);
+        members.befriend(writer, friend);
         // 오늘의 주제 3개가 내장 주제로 만들어진다
         String today = page("/missions", writer);
         List<TopicPool.Topic> expected = TopicPool.forDay(DAY, 3);
@@ -111,7 +107,7 @@ class DailyMissionIT extends IntegrationTestBase {
         clock.set(T);
         long writer = member("msonce");
         long friend = member("msoncefriend");
-        befriend("msonce", writer, "msoncefriend", friend);
+        members.befriend(writer, friend);
         long topicId = missions.topics(DAY).get(1).id();
         long postId = startWriting(writer, topicId);
         publish(writer, postId, "PUBLIC");

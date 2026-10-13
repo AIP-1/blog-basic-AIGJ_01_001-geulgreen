@@ -51,8 +51,8 @@ public class SocialLoginSuccessHandler implements AuthenticationSuccessHandler {
             return;
         }
         SocialLoginService.Resolution resolution = socialLoginService.resolve(holder.socialProfile());
-        if (resolution instanceof SocialLoginService.NewSignupRequired newSignup) {
-            request.getSession(true).setAttribute(PendingSocialSignup.SESSION_ATTRIBUTE, newSignup.pending());
+        if (resolution instanceof SocialLoginService.NewSignupRequired(PendingSocialSignup pending)) {
+            request.getSession(true).setAttribute(PendingSocialSignup.SESSION_ATTRIBUTE, pending);
             AuthResponses.seeOther(request, response, "/signup/social");
             return;
         }

@@ -158,15 +158,12 @@ public class CommentQuery {
         }
         Long[] ids = roots.stream().map(Row::id).toArray(Long[]::new);
         Map<Long, List<Row>> children = new LinkedHashMap<>();
-        jdbc.query(con -> {
-            var ps = con.prepareStatement("""
-                    WITH RECURSIVE t(id) AS (
-                      SELECT c.id FROM comment c WHERE c.parent_id = ANY(?)
-                      UNION ALL SELECT c.id FROM comment c JOIN t ON c.parent_id = t.id)
-                    """ + SELECT + " WHERE c.id IN (SELECT id FROM t LIMIT 2000) ORDER BY c.created_at, c.id");
-            ps.setArray(1, con.createArrayOf("bigint", ids));
-            return ps;
-        }, rs -> {
+        jdbc.query("""
+                WITH RECURSIVE t(id) AS (
+                  SELECT c.id FROM comment c WHERE c.parent_id = ANY(?)
+                  UNION ALL SELECT c.id FROM comment c JOIN t ON c.parent_id = t.id)
+                """ + SELECT + " WHERE c.id IN (SELECT id FROM t LIMIT 2000) ORDER BY c.created_at, c.id",
+                ps -> ps.setArray(1, ps.getConnection().createArrayOf("bigint", ids)), rs -> {
             Row r = row(rs);
             children.computeIfAbsent(r.parentId(), k -> new ArrayList<>()).add(r);
         });

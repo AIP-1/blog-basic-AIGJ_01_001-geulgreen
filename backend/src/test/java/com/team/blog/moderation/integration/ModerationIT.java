@@ -89,9 +89,9 @@ class ModerationIT extends IntegrationTestBase {
         report(a, "POST", p, "ABUSE", null).andExpect(status().isOk());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM report", Integer.class)).isEqualTo(1);
         var snap = jdbc.queryForMap("SELECT * FROM report_case WHERE post_id = ?", p);
-        assertThat(snap.get("snapshot_title")).isEqualTo("신고될 글");
+        assertThat(snap).containsEntry("snapshot_title", "신고될 글");
         assertThat((String) snap.get("snapshot_content")).hasSize(2000);
-        assertThat(snap.get("target_author_id")).isEqualTo(author);
+        assertThat(snap).containsEntry("target_author_id", author);
         // 동시에 여러 사람이 처음 신고해도 대기 묶음은 하나
         List<Long> reporters = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -168,11 +168,11 @@ class ModerationIT extends IntegrationTestBase {
         mockMvc.perform(post("/api/admin/reports/{id}/hide", c).with(csrf()).with(TestAuth.admin(ad))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"reason\":\"ABUSE\"}")).andExpect(status().isNoContent());
         var cs = jdbc.queryForMap("SELECT * FROM report_case WHERE id = ?", c);
-        assertThat(cs.get("status")).isEqualTo("HIDDEN");
-        assertThat(cs.get("handled_by")).isEqualTo(ad);
+        assertThat(cs).containsEntry("status", "HIDDEN")
+                .containsEntry("handled_by", ad);
         var hiddenPost = posts.post(p);
-        assertThat(hiddenPost.get("hidden_by")).isEqualTo(ad);
-        assertThat(hiddenPost.get("hidden_reason")).isEqualTo("ABUSE");
+        assertThat(hiddenPost).containsEntry("hidden_by", ad)
+                .containsEntry("hidden_reason", "ABUSE");
         // 알림: 신고자마다 처리 결과, 작성자에게 숨김 1건(행동한 사람 없음)
         assertThat(jdbc.queryForList("SELECT receiver_id FROM notification WHERE type = 'REPORT_RESOLVED' AND result = 'ACTION_TAKEN' ORDER BY receiver_id", Long.class))
                 .containsExactly(r1, r2);
@@ -204,7 +204,7 @@ class ModerationIT extends IntegrationTestBase {
         assertThat(done).contains("숨김 해제");
         mockMvc.perform(post("/admin/reports/{id}/unhide", c).with(csrf()).with(TestAuth.admin(ad))).andExpect(status().isSeeOther());
         mockMvc.perform(get(url)).andExpect(status().isOk());
-        assertThat(posts.post(p).get("like_count")).isEqualTo(3);
+        assertThat(posts.post(p)).containsEntry("like_count", 3);
         assertThat(posts.post(p).get("hidden_by")).isNull();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM notification", Long.class)).isEqualTo(before);
         // 이미 처리된 신고는 다시 처리할 수 없음
@@ -227,7 +227,7 @@ class ModerationIT extends IntegrationTestBase {
         report(r1, "COMMENT", cm, "ABUSE", null).andExpect(status().isCreated());
         mockMvc.perform(post("/admin/reports/{id}/hide", caseOf("comment_id", cm)).with(csrf()).with(TestAuth.admin(ad))
                 .param("reason", "ABUSE")).andExpect(status().isSeeOther());
-        assertThat(posts.post(p).get("comment_count")).isEqualTo(1);
+        assertThat(posts.post(p)).containsEntry("comment_count", 1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE type = 'COMMENT' AND comment_id = ?", Integer.class, cm)).isZero();
         assertThat(jdbc.queryForMap("SELECT * FROM notification WHERE type = 'CONTENT_HIDDEN'")).containsEntry("receiver_id", writer)
                 .containsEntry("comment_id", cm);
@@ -237,7 +237,7 @@ class ModerationIT extends IntegrationTestBase {
         assertThat(mine).contains("나쁜 댓글").contains("숨겨졌어요 (나만 보여요)");
         mockMvc.perform(post("/api/admin/reports/{id}/unhide", caseOf("comment_id", cm)).with(csrf()).with(TestAuth.admin(ad)))
                 .andExpect(status().isNoContent());
-        assertThat(posts.post(p).get("comment_count")).isEqualTo(2);
+        assertThat(posts.post(p)).containsEntry("comment_count", 2);
         // 문제없음
         long other = posts.published(author, "멀쩡한 글", "본문", 1, T);
         report(r1, "POST", other, "SPAM", null).andExpect(status().isCreated());
@@ -274,7 +274,7 @@ class ModerationIT extends IntegrationTestBase {
         mockMvc.perform(post("/admin/members/{id}/suspend", m).with(csrf()).with(TestAuth.admin(ad))
                 .param("period", "7").param("reason", "도배")).andExpect(status().isSeeOther());
         var s = jdbc.queryForMap("SELECT * FROM member_suspension WHERE member_id = ?", m);
-        assertThat(s.get("reason")).isEqualTo("도배");
+        assertThat(s).containsEntry("reason", "도배");
         assertThat(s.get("ends_at")).isNotNull();
         assertThat(jdbc.queryForObject("SELECT status FROM member WHERE id = ?", String.class, m)).isEqualTo("SUSPENDED");
         assertThat(mockMvc.perform(get("/admin/members?q=spuser").with(TestAuth.admin(ad))).andReturn().getResponse().getContentAsString())

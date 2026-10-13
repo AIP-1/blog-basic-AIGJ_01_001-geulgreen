@@ -94,6 +94,7 @@ public class PostPublishService {
             case IN_PROGRESS -> throw new PublishInProgressException();
             case REUSED -> throw new IdempotencyKeyReusedException();
             default -> {
+                // NEW·UNAVAILABLE: 그대로 발행한다
             }
         }
         boolean tracked = begin.state() == PublishIdempotency.State.NEW;

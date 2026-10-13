@@ -101,7 +101,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         long b = member("moreb");
         long v = member("morev");
         long src = posts.published(a, "지금 글", "본문", 1, T.minusSeconds(500));
-        long sameAuthor = posts.published(a, "같은 작가 글", "본문", 1, T.minusSeconds(900));
+        posts.published(a, "같은 작가 글", "본문", 1, T.minusSeconds(900));
         long sameTag = posts.published(b, "같은 태그 글", "본문", 1, T.minusSeconds(800));
         long hidden = posts.published(b, "비공개 같은 태그", "본문", 1, T.minusSeconds(100));
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", hidden);

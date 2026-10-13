@@ -15,6 +15,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import com.team.blog.privacy.application.PrivateAccountService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -114,7 +115,7 @@ public class MissionService {
         Boolean replaced = tx.execute(status -> {
             List<Topic> existing = load(day);
             if (!existing.isEmpty()) {
-                boolean untouched = existing.stream().noneMatch(t -> t.ai()) && jdbc.queryForObject(
+                boolean untouched = existing.stream().noneMatch(Topic::ai) && jdbc.queryForObject(
                         "SELECT NOT EXISTS (SELECT 1 FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id WHERE dt.day = ?)",
                         Boolean.class, Date.valueOf(day));
                 if (!untouched) {
@@ -247,7 +248,7 @@ public class MissionService {
     }
 
     /** 날짜 모음으로 기록 계산(테스트도 쓴다). */
-    public static Stats stats(TreeSet<LocalDate> days, LocalDate today) {
+    public static Stats stats(SortedSet<LocalDate> days, LocalDate today) {
         boolean doneToday = days.contains(today);
         int streak = 0;
         LocalDate d = doneToday ? today : today.minusDays(1);

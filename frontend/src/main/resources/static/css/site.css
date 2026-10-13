@@ -642,7 +642,6 @@ a.author-byline.author-nickname { color: var(--color-text); text-decoration: non
 a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
 .post-category, .post-missions { margin: 8px 0; font-size: .9em; }
-.mission-done-note { margin: 8px 0; padding: 8px 12px; font-size: .88em; }
 /* 080 강성찬 개인 확장: velog처럼 작성자 줄 오른쪽 팔로우, 태그는 그 아래, 댓글 다음 관심 있을 만한 글 */
 .post-meta-row .follow-form, .post-meta-row > .follow-button { flex: none; }
 .post-head .post-tags { margin: 14px 0 0; }
@@ -769,21 +768,18 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .side-rec-list .follow-button { padding: 4px 12px; font-size: .82em; }
 /* 067 후속: 링크 넷은 한 줄(작은 회색 글씨, 사이에 ·), 슬로건만 다음 줄 */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
+.settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .side-links a { color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
 .side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
 /* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
 .side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; font-size: 1.1em; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
-@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; }
-    /* 프로필 메뉴 안 같은 링크도 이때는 숨김(오른쪽 칸 없는 화면·휴대폰은 그대로) */
-    body:has(.home-side .side-links) .profile-menu-links { display: none; } }
+@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; } }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
     .site-nav .menu-links a { font-size: .82em; color: var(--color-text-muted); padding: 2px 0; }
 }
-.profile-menu-panel .profile-menu-links { margin: 4px 0; padding: 6px 12px 2px; border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: 2px 10px; }
-.profile-menu-panel .profile-menu-links a { display: inline; width: auto; padding: 2px 0; font-size: .8em; color: var(--color-text-muted); }
 .side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
 .side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
 .side-box h2 .icon { width: 18px; height: 18px; }
@@ -935,7 +931,15 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-info .mission-past { margin-top: 0; }
 .mission-past-links a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-size: .9em; }
 .mission-editor-note strong { margin-right: 6px; }
-.mission-done-note a { color: var(--color-brand); }
+/* 글 상세 미션 완료 상자: 이모지 · 축하·기록 · 버튼, 휴대폰은 버튼이 아래 한 줄 */
+.mission-done-note { margin: 20px 0; padding: 18px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
+.mission-done-note.is-done { background: var(--color-brand-soft); border-color: var(--color-brand-soft); }
+.mission-done-emoji { font-size: 2em; line-height: 1; }
+.mission-done-text { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 6px; }
+.mission-done-text strong { font-size: 1.08em; }
+.mission-done-stats { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .9em; }
+@media (max-width: 560px) { .mission-done-note > .btn { flex: 1 1 100%; } }
 
 /* 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 글을 고르면 뜨는 창. 059 AI로 고치기 칸 */
 .format-panel { position: absolute; z-index: 40; width: 256px; max-width: calc(100vw - 16px); padding: 6px;

@@ -82,7 +82,7 @@ public class SecurityConfig {
                                                    GitHubOAuth2UserService gitHubOAuth2UserService,
                                                    SocialLoginSuccessHandler socialLoginSuccessHandler,
                                                    SocialLoginFailureHandler socialLoginFailureHandler,
-                                                   ContentSecurityPolicy contentSecurityPolicy) throws Exception {
+                                                   ContentSecurityPolicy contentSecurityPolicy) {
         HttpSessionCsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
         csrfTokenRepository.setHeaderName(CSRF_HEADER);
 

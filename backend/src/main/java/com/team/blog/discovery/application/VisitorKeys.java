@@ -8,6 +8,7 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +27,21 @@ public class VisitorKeys {
     private final AtomicReference<DailySecret> secret = new AtomicReference<>();
 
     private record DailySecret(LocalDate day, byte[] value) {
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof DailySecret d && day.equals(d.day) && Arrays.equals(value, d.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * day.hashCode() + Arrays.hashCode(value);
+        }
+
+        @Override
+        public String toString() {
+            return "DailySecret[day=" + day + "]"; // 비밀값은 로그에 남기지 않는다
+        }
     }
 
     public VisitorKeys(Clock clock) {

@@ -56,7 +56,7 @@ class RepublishIT extends IntegrationTestBase {
                 .andExpect(jsonPath("$.version").value(3));
         Map<String, Object> after = posts.post(postId);
         for (String kept : new String[] {"published_at", "first_public_at", "view_count", "like_count", "comment_count", "id"}) {
-            assertThat(after.get(kept)).as(kept).isEqualTo(first.get(kept));
+            assertThat(after).as(kept).containsEntry(kept, first.get(kept));
         }
         assertThat(after).containsEntry("title", "고친 제목");
         assertThat(((Timestamp) after.get("edited_at")).toInstant()).isEqualTo(T0.plus(Duration.ofDays(2)));

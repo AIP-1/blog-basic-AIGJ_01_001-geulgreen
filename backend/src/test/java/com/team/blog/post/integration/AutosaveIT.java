@@ -32,7 +32,7 @@ class AutosaveIT extends IntegrationTestBase {
                 .containsEntry("memberId", String.valueOf(me));
         assertThat(posts.dirty(postId)).isTrue();
         // DB는 반영 작업 전까지 그대로
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(0L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 0L);
 
         posts.resetRateLimit(me);
         mockMvc.perform(autosave(postId, "JPA N+1 정리", "## 문제\n쿼리가 N번 실행", 1).with(TestAuth.member(me)))
@@ -88,7 +88,7 @@ class AutosaveIT extends IntegrationTestBase {
                 .andExpect(status().isOk());
         assertThat(posts.buffer(postId)).containsEntry("title", "줄 바꿈").containsEntry("contentMd", "a\nb")
                 .doesNotContainKey("tags");
-        assertThat(posts.post(postId).get("visibility")).isEqualTo("PUBLIC");
+        assertThat(posts.post(postId)).containsEntry("visibility", "PUBLIC");
     }
 
     @Test

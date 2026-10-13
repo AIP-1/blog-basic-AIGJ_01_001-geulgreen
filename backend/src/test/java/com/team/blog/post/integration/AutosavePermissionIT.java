@@ -26,9 +26,9 @@ class AutosavePermissionIT extends IntegrationTestBase {
 
     private void assertUntouched(long postId, Map<String, Object> before) {
         Map<String, Object> after = posts.post(postId);
-        assertThat(after.get("title")).isEqualTo(before.get("title"));
-        assertThat(after.get("content_md")).isEqualTo(before.get("content_md"));
-        assertThat(after.get("edit_version")).isEqualTo(before.get("edit_version"));
+        assertThat(after).containsEntry("title", before.get("title"))
+                .containsEntry("content_md", before.get("content_md"))
+                .containsEntry("edit_version", before.get("edit_version"));
         assertThat(posts.buffer(postId)).isEmpty();
     }
 
@@ -113,7 +113,7 @@ class AutosavePermissionIT extends IntegrationTestBase {
         // 100자 제목·10만 자 본문은 된다(이모지는 1자로 센다)
         mockMvc.perform(manualSave(postId, "😀".repeat(100), "b".repeat(100_000), 0).with(TestAuth.member(me)))
                 .andExpect(status().isOk());
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(1L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 1L);
     }
 
     @Test

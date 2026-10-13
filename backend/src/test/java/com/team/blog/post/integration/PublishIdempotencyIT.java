@@ -47,7 +47,7 @@ class PublishIdempotencyIT extends IntegrationTestBase {
             responses.add(f.get());
         }
         pool.shutdown();
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(6L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 6L);
         assertThat(responses).allMatch(r -> r.getStatus() == 200 || r.getStatus() == 409);
         assertThat(responses).filteredOn(r -> r.getStatus() == 409)
                 .allMatch(r -> contentOf(r).contains("IN_PROGRESS"));
@@ -55,7 +55,7 @@ class PublishIdempotencyIT extends IntegrationTestBase {
         String success = mockMvc.perform(publish(postId, key, body).with(TestAuth.member(me)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(responses).filteredOn(r -> r.getStatus() == 200).allMatch(r -> contentOf(r).equals(success));
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(6L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 6L);
     }
 
     private static String contentOf(MockHttpServletResponse r) {
@@ -84,7 +84,7 @@ class PublishIdempotencyIT extends IntegrationTestBase {
         mockMvc.perform(publish(postId, done, body).with(TestAuth.member(me))).andExpect(status().isOk());
         mockMvc.perform(publish(postId, done, body).with(TestAuth.member(me))).andExpect(status().isOk())
                 .andExpect(jsonPath("$.version").value(1));
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(1L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 1L);
         assertThat(redis.getExpire("idem:publish:" + me + ":" + done)).isBetween(1L, 600L);
     }
 
@@ -120,6 +120,6 @@ class PublishIdempotencyIT extends IntegrationTestBase {
         mockMvc.perform(publish(postId, "key-b", body).with(TestAuth.member(me)))
                 .andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("EDIT_CONFLICT"))
                 .andExpect(jsonPath("$.server.version").value(1));
-        assertThat(posts.post(postId).get("edit_version")).isEqualTo(1L);
+        assertThat(posts.post(postId)).containsEntry("edit_version", 1L);
     }
 }

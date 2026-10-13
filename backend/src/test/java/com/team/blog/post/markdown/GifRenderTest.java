@@ -50,6 +50,7 @@ class GifRenderTest {
             }
 
             public void delete(String k) {
+                // 렌더링 테스트는 지우지 않는다
             }
         };
     }

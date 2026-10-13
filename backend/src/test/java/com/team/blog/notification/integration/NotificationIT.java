@@ -82,22 +82,20 @@ class NotificationIT extends IntegrationTestBase {
         long d = member("ntd");
         long p = posts.published(a, "제목글", "본문", 1, T);
         long bc = comment(b, p, "B의 댓글입니다", null);
-        assertThat(rows(a)).singleElement().satisfies(n -> {
-            assertThat(n.get("type")).isEqualTo("COMMENT");
-            assertThat(n.get("comment_id")).isEqualTo(bc);
-            assertThat(n.get("last_actor_id")).isEqualTo(b);
-        });
+        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n).containsEntry("type", "COMMENT")
+                .containsEntry("comment_id", bc)
+                .containsEntry("last_actor_id", b));
         long cc = comment(c, p, "C의 답글", bc);
-        assertThat(rows(b)).singleElement().satisfies(n -> assertThat(n.get("type")).isEqualTo("REPLY"));
+        assertThat(rows(b)).singleElement().satisfies(n -> assertThat(n).containsEntry("type", "REPLY"));
         assertThat(rows(a)).hasSize(2);
         comment(d, p, "D가 C에게", cc);
-        assertThat(rows(c)).singleElement().satisfies(n -> assertThat(n.get("type")).isEqualTo("REPLY"));
+        assertThat(rows(c)).singleElement().satisfies(n -> assertThat(n).containsEntry("type", "REPLY"));
         assertThat(rows(b)).hasSize(1);
         // 답글 대상이 글 작성자면 답글 하나만
         long ac = comment(a, p, "작성자 댓글", null);
         assertThat(rows(a)).hasSize(3);
         comment(b, p, "작성자에게 답글", ac);
-        assertThat(rows(a)).hasSize(4).last().satisfies(n -> assertThat(n.get("type")).isEqualTo("REPLY"));
+        assertThat(rows(a)).hasSize(4).last().satisfies(n -> assertThat(n).containsEntry("type", "REPLY"));
         // 자기 댓글에 답글: 알림 없음
         comment(a, p, "내가 나에게", ac);
         assertThat(rows(a)).hasSize(4);
@@ -186,30 +184,28 @@ class NotificationIT extends IntegrationTestBase {
             assertThat(f.get()).isEqualTo(200);
         }
         pool.shutdown();
-        assertThat(rows(a)).singleElement().satisfies(n -> {
-            assertThat(n.get("actor_count")).isEqualTo(10);
-            assertThat(n.get("group_key")).isEqualTo("LIKE:post:" + p);
-        });
+        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n).containsEntry("actor_count", 10)
+                .containsEntry("group_key", "LIKE:post:" + p));
         assertThat(list(a)).contains("외 9명이 「좋은글」을(를) 좋아해요").contains("\"othersCount\":9");
         long x = likers.get(0);
         for (int i = 0; i < 5; i++) {
             mockMvc.perform(delete("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(x))).andExpect(status().isOk());
             mockMvc.perform(put("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(x))).andExpect(status().isOk());
         }
-        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n.get("actor_count")).isEqualTo(10));
+        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n).containsEntry("actor_count", 10));
         // 취소: 안 읽은 묶음에서 빠지고 대표는 남은 사람 중 최근
         clock.set(T.plusSeconds(60));
         long last = likers.get(9);
         mockMvc.perform(delete("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(x))).andExpect(status().isOk());
-        assertThat(rows(a).get(0).get("actor_count")).isEqualTo(9);
+        assertThat(rows(a).get(0)).containsEntry("actor_count", 9);
         // 읽은 뒤: 취소해도 그대로, 들어간 적 있는 사람은 다시 안 넣음, 새 사람은 새 묶음
         mockMvc.perform(post("/api/notifications/read-all").with(csrf()).with(TestAuth.member(a))).andExpect(status().isOk());
         mockMvc.perform(delete("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(last))).andExpect(status().isOk());
         mockMvc.perform(put("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(last))).andExpect(status().isOk());
-        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n.get("actor_count")).isEqualTo(9));
+        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n).containsEntry("actor_count", 9));
         mockMvc.perform(put("/api/posts/{id}/like", p).with(csrf()).with(TestAuth.member(x))).andExpect(status().isOk());
         assertThat(rows(a)).hasSize(2).last().satisfies(n -> {
-            assertThat(n.get("actor_count")).isEqualTo(1);
+            assertThat(n).containsEntry("actor_count", 1);
             assertThat(n.get("read_at")).isNull();
         });
         // 0명이면 삭제
@@ -334,9 +330,7 @@ class NotificationIT extends IntegrationTestBase {
         writer.single(a, NotificationType.COMMENT, p, null, b);
         cleanup.purgeWithdrawn(b);
         assertThat(rows(b)).isEmpty();
-        assertThat(rows(a)).singleElement().satisfies(n -> {
-            assertThat(n.get("actor_count")).isEqualTo(1);
-            assertThat(n.get("last_actor_id")).isEqualTo(c);
-        });
+        assertThat(rows(a)).singleElement().satisfies(n -> assertThat(n).containsEntry("actor_count", 1)
+                .containsEntry("last_actor_id", c));
     }
 }

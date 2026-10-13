@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import tools.jackson.databind.JsonNode;
@@ -66,9 +65,7 @@ public class GeminiTagSuggester implements TagSuggester {
                                 : ProviderException.Kind.TIMEOUT_OR_SERVER);
                     })
                     .body(String.class);
-        } catch (ResourceAccessException e) {
-            throw new ProviderException(ProviderException.Kind.TIMEOUT_OR_SERVER);
-        } catch (RestClientException e) {
+        } catch (RestClientException e) { // ResourceAccessException(시간 초과)도 여기서
             throw new ProviderException(ProviderException.Kind.TIMEOUT_OR_SERVER);
         }
         try {

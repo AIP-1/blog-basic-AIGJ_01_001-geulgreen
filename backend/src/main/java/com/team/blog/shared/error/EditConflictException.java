@@ -9,7 +9,7 @@ public class EditConflictException extends RuntimeException {
 
     public static final String CODE = "EDIT_CONFLICT";
 
-    private final ErrorResponse.ServerContent server;
+    private final transient ErrorResponse.ServerContent server;
 
     public EditConflictException(String title, String contentMd, long version, Instant savedAt) {
         super(CODE);

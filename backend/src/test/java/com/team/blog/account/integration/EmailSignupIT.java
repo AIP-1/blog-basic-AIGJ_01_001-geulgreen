@@ -46,9 +46,9 @@ class EmailSignupIT extends IntegrationTestBase {
         assertThat(browser.sessionCookieValue()).isNotNull().isNotEqualTo(before);
 
         Map<String, Object> identity = jdbc.queryForMap("SELECT * FROM auth_identity");
-        assertThat(identity.get("provider")).isEqualTo("LOCAL");
-        assertThat(identity.get("provider_user_id")).isEqualTo("kim.min@example.com");
-        assertThat(identity.get("email")).isEqualTo("kim.min@example.com");
+        assertThat(identity).containsEntry("provider", "LOCAL")
+                .containsEntry("provider_user_id", "kim.min@example.com")
+                .containsEntry("email", "kim.min@example.com");
         assertThat(identity.get("email_verified_at")).isNull();
         assertThat((String) identity.get("password_hash")).startsWith("{bcrypt}").doesNotContain(PASSWORD);
         long memberId = ((Number) identity.get("member_id")).longValue();
