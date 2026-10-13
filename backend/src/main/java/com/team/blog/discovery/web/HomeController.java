@@ -31,6 +31,7 @@ public class HomeController {
     private final com.team.blog.post.application.TagListingQuery tagListingQuery;
     private final com.team.blog.tag.application.icon.TagIconService tagIcons;
     private final com.team.blog.discovery.application.RecommendedBlogQuery recommendedBlogQuery;
+    private final com.team.blog.discovery.application.RecommendedPostQuery recommendedPostQuery;
     private final com.team.blog.shared.security.CurrentUserProvider currentUserProvider;
 
     public HomeController(PostListQuery listQuery, TrendingService trendingService, Clock clock,
@@ -38,9 +39,11 @@ public class HomeController {
                           com.team.blog.post.application.TagListingQuery tagListingQuery,
                           com.team.blog.tag.application.icon.TagIconService tagIcons,
                           com.team.blog.discovery.application.RecommendedBlogQuery recommendedBlogQuery,
+                          com.team.blog.discovery.application.RecommendedPostQuery recommendedPostQuery,
                           com.team.blog.shared.security.CurrentUserProvider currentUserProvider) {
         this.tagIcons = tagIcons;
         this.recommendedBlogQuery = recommendedBlogQuery;
+        this.recommendedPostQuery = recommendedPostQuery;
         this.currentUserProvider = currentUserProvider;
         this.tagListingQuery = tagListingQuery;
         this.newcomerQuery = newcomerQuery;
@@ -79,8 +82,10 @@ public class HomeController {
             model.addAttribute("newcomers", newcomerQuery.recent());
         }
         // 067 후속(강성찬 개인 확장): 오른쪽 칸 추천 블로그(피드 068과 같은 고르기, 비회원은 팔로우 대신 로그인으로)
-        model.addAttribute("recommended", recommendedBlogQuery.forMember(
-                currentUserProvider.current().map(com.team.blog.shared.security.CurrentUser::memberId).orElse(-1L)));
+        long viewer = currentUserProvider.current().map(com.team.blog.shared.security.CurrentUser::memberId).orElse(-1L);
+        model.addAttribute("recommended", recommendedBlogQuery.forMember(viewer));
+        // 077 강성찬 개인 확장: 오른쪽 칸 추천 글
+        model.addAttribute("recommendedPosts", recommendedPostQuery.forMember(viewer));
         return "home";
     }
 
