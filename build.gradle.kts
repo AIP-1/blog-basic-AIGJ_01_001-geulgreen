@@ -8,8 +8,8 @@ plugins {
 
 sonar {
     properties {
-        property("sonar.projectKey", "blog-basic-AIGJ_01_001-geulgreen")
-        property("sonar.projectName", "글그린 블로그")
+        property("sonar.projectKey", "geulgreen")
+        property("sonar.projectName", "geulgreen")
     }
 }
 
