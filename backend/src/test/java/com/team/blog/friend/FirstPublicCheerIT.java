@@ -44,12 +44,11 @@ class FirstPublicCheerIT extends IntegrationTestBase {
         long author = member("fpauthor");
         long friend = member("fpfriend");
         long fan = member("fpfan");
-        mockMvc.perform(post("/@fpauthor/friend").param("action", "request").with(csrf()).with(TestAuth.member(friend)));
-        mockMvc.perform(post("/@fpfriend/friend").param("action", "accept").with(csrf()).with(TestAuth.member(author)));
         for (long follower : new long[] {friend, fan}) {
             jdbc.update("INSERT INTO follow (follower_id, followee_id, created_at) VALUES (?, ?, ?)", follower, author,
                     Timestamp.from(T));
         }
+        members.addFriend(author, friend);
         posts.published(author, "예전부터 공개된 글", "본문", 1, T.minusSeconds(3600));
         long old = posts.published(author, "한 달 전에 쓴 친구 글", "본문", 1, T.minusSeconds(30L * 24 * 3600));
         jdbc.update("UPDATE post SET visibility = 'FRIENDS', first_public_at = NULL WHERE id = ?", old);
@@ -78,8 +77,7 @@ class FirstPublicCheerIT extends IntegrationTestBase {
     void privatePostGoingPublicHasNoCheer() throws Exception {
         long author = member("fpprivate");
         long friend = member("fpprivfriend");
-        mockMvc.perform(post("/@fpprivate/friend").param("action", "request").with(csrf()).with(TestAuth.member(friend)));
-        mockMvc.perform(post("/@fpprivfriend/friend").param("action", "accept").with(csrf()).with(TestAuth.member(author)));
+        members.addFriend(author, friend);
         long id = posts.published(author, "나만 보던 글", "본문", 1, T);
         jdbc.update("UPDATE post SET visibility = 'PRIVATE', first_public_at = NULL WHERE id = ?", id);
         change(author, id, "PUBLIC");

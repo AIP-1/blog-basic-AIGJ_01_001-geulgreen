@@ -31,8 +31,7 @@ class NoteIT extends IntegrationTestBase {
         long me = member("noteme");
         long friend = member("notefriend");
         long stranger = member("notestranger");
-        mockMvc.perform(post("/@notefriend/friend").param("action", "request").with(csrf()).with(TestAuth.member(me)));
-        mockMvc.perform(post("/@noteme/friend").param("action", "accept").with(csrf()).with(TestAuth.member(friend)));
+        members.befriend(me, friend);
         for (String[] n : new String[][] {{"모두에게 <b>안녕</b>", "PUBLIC"}, {"친구에게만", "FRIENDS"}, {"나만 보는 메모", "PRIVATE"}}) {
             mockMvc.perform(post("/notes").param("content", n[0]).param("visibility", n[1]).param("back", "/@noteme")
                     .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
