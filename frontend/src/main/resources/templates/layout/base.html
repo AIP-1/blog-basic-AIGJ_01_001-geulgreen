@@ -63,6 +63,11 @@
                     <a href="/signup" class="btn btn-primary btn-sm">가입하기</a>
                 </th:block>
             </div>
+            <!-- 067 후속(강성찬 개인 확장): 좁은 화면 ☰ 메뉴 안 사이트 링크(목록이 끝없이 이어져 꼬리말에 닿기 어려움, 비회원도) -->
+            <div class="menu-links">
+                <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+                <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
+            </div>
         </div>
         <!-- 항상 보이는 것: 검색, 알림 종, 좁은 화면의 메뉴 버튼(테마 전환은 061부터 설정 화면에) -->
         <span class="header-quick">
