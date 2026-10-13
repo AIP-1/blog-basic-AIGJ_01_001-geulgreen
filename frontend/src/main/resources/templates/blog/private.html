@@ -11,14 +11,14 @@
     <header class="blog-header profile-header">
         <th:block th:replace="~{fragments/avatar :: avatar(${owner.avatar()}, 96)}"></th:block>
         <div class="profile-text">
-            <h1 th:replace="~{fragments/author :: byline(${author})}">닉네임 @주소</h1>
+            <h1 th:replace="~{fragments/author :: profile(${author})}">닉네임 @주소</h1>
             <p class="profile-bio" th:if="${owner.bio() != null}" th:text="${owner.bio()}">소개</p>
             <p class="help">
                 <span th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</span> ·
                 <span th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</span>
             </p>
             <p>
-                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${'/@' + owner.handle()})}"></th:block>
+                <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${paths.blog(owner.handle())})}"></th:block>
             </p>
             <p class="follow-message help" role="status" hidden></p>
         </div>

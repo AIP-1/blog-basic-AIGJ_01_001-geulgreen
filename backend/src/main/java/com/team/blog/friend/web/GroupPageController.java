@@ -79,6 +79,6 @@ public class GroupPageController {
         long me = me();
         groups.setPostGroups(me, id, groupIds);
         String handle = jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, me);
-        return seeOther("/@" + handle + "/posts/" + id + "#post-groups");
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id + "#post-groups");
     }
 }

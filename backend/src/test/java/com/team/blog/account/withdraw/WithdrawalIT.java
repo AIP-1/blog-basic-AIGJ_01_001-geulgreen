@@ -103,10 +103,10 @@ class WithdrawalIT extends IntegrationTestBase {
         assertThat(row.get("status")).isEqualTo("WITHDRAWN");
         assertThat(((Timestamp) row.get("withdrawn_at")).toInstant()).isEqualTo(T);
         assertThat(mailpit.awaitMessagesTo("wdgone@example.com", 1).getFirst().body()).contains("2026년 10월 31일");
-        mockMvc.perform(get("/@wdgone")).andExpect(status().isNotFound());
-        mockMvc.perform(get("/@wdgone/posts/" + p).with(TestAuth.member(reader))).andExpect(status().isNotFound());
+        mockMvc.perform(get("/wdgone")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/wdgone/posts/" + p).with(TestAuth.member(reader))).andExpect(status().isNotFound());
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("사라질 글");
-        String opPage = mockMvc.perform(get("/@wdreader/posts/" + op)).andReturn().getResponse().getContentAsString();
+        String opPage = mockMvc.perform(get("/wdreader/posts/" + op)).andReturn().getResponse().getContentAsString();
         assertThat(opPage).contains("탈퇴한 사용자의 댓글이에요").doesNotContain("내가 쓴 댓글");
         assertThat(posts.post(op)).containsEntry("comment_count", 1).containsEntry("like_count", 1);
         // 유예 중 새 알림 없음
@@ -132,8 +132,8 @@ class WithdrawalIT extends IntegrationTestBase {
         assertThat(browser.perform(get("/manage/posts")).getResponse().getStatus()).isEqualTo(200);
         assertThat(jdbc.queryForMap("SELECT status, withdrawn_at FROM member WHERE id = ?", me))
                 .containsEntry("status", "ACTIVE").containsEntry("withdrawn_at", null);
-        mockMvc.perform(get("/@wdgone/posts/" + p)).andExpect(status().isOk());
-        assertThat(mockMvc.perform(get("/@wdreader/posts/" + op)).andReturn().getResponse().getContentAsString()).contains("내가 쓴 댓글");
+        mockMvc.perform(get("/wdgone/posts/" + p)).andExpect(status().isOk());
+        assertThat(mockMvc.perform(get("/wdreader/posts/" + op)).andReturn().getResponse().getContentAsString()).contains("내가 쓴 댓글");
         assertThat(mailpit.awaitMessagesTo("wdgone@example.com", 2)).hasSize(2);
     }
 
@@ -191,7 +191,7 @@ class WithdrawalIT extends IntegrationTestBase {
                 .containsEntry("actor_count", 1).containsEntry("last_actor_id", b);
         assertThat(jdbc.queryForObject("SELECT status FROM report_case WHERE target_author_id = ?", String.class, me)).isEqualTo("CLOSED_NO_TARGET");
         // 주소는 영구 예약, 같은 이메일은 새로 가입 가능(다른 주소)
-        mockMvc.perform(get("/@wdpurge")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/wdpurge")).andExpect(status().isNotFound());
         mockMvc.perform(post("/signup").with(csrf()).param("email", "wdpurge@example.com").param("handle", "wdpurge")
                 .param("password", "Blog#2026ok").param("passwordConfirm", "Blog#2026ok").param("nickname", "새사람")
                 .param("agreeTerms", "true").param("agreePrivacy", "true")).andExpect(status().is4xxClientError());
@@ -199,7 +199,7 @@ class WithdrawalIT extends IntegrationTestBase {
                 .param("password", "Blog#2026ok").param("passwordConfirm", "Blog#2026ok").param("nickname", "새사람")
                 .param("agreeTerms", "true").param("agreePrivacy", "true")).andExpect(status().isSeeOther());
         // 화면: 남은 자리는 "탈퇴한 사용자"
-        String page = mockMvc.perform(get("/@wdpa/posts/" + aPost)).andReturn().getResponse().getContentAsString();
+        String page = mockMvc.perform(get("/wdpa/posts/" + aPost)).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("탈퇴한 사용자").doesNotContain("답글 달린 내 댓글").contains("B의 답글");
         assertThat(purgeJob.run()).isZero();
     }

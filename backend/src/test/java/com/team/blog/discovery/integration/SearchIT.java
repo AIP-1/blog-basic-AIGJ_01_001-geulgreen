@@ -100,7 +100,7 @@ class SearchIT extends IntegrationTestBase {
         post(leaving, "탈퇴 검색어글", "본문", 6);
         assertThat(ids(search.posts(SearchTerms.parse("검색어글"), false, null, null))).containsExactly(other, pub);
         assertThat(ids(search.posts(SearchTerms.parse("검색어글"), false, a, null))).containsExactly(pub);
-        String blog = mockMvc.perform(get("/@srvis?q=검색어글")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String blog = mockMvc.perform(get("/srvis?q=검색어글")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(blog).contains("공개 검색어글").doesNotContain("남의 검색어글").contains("<meta name=\"robots\" content=\"noindex\">");
         mockMvc.perform(get("/api/search/posts?q=검색어글&blog=srvisb")).andExpect(jsonPath("$.items.length()").value(1));
     }

@@ -125,7 +125,7 @@ class CommentReadIT extends IntegrationTestBase {
         // 없는·다른 글 댓글이면 첫 페이지
         mockMvc.perform(get("/api/posts/{id}/comments", post).param("around", "999999"))
                 .andExpect(jsonPath("$.items[0].content").value("최상위 0"));
-        String html = mockMvc.perform(get("/@aroundauthor/posts/{id}", post).param("comment", String.valueOf(fifth)))
+        String html = mockMvc.perform(get("/aroundauthor/posts/{id}", post).param("comment", String.valueOf(fifth)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).contains("id=\"comment-" + fifth + "\"").contains("이전 댓글 보기")
                 .contains("data-comment-target=\"" + fifth + "\"");
@@ -138,21 +138,21 @@ class CommentReadIT extends IntegrationTestBase {
         long post = posts.published(author, "글", "본문", 1, T);
         jdbc.update("UPDATE post SET comment_count = 1 WHERE id = ?", post);
         insert(post, a, null, "<script>alert(1)</script>\n둘째 줄 https://x.dev", T);
-        String guest = mockMvc.perform(get("/@ssrcmt/posts/{id}", post)).andReturn().getResponse().getContentAsString();
+        String guest = mockMvc.perform(get("/ssrcmt/posts/{id}", post)).andReturn().getResponse().getContentAsString();
         assertThat(guest).contains("댓글 1").contains("&lt;script&gt;alert(1)&lt;/script&gt;").doesNotContain("<a href=\"https://x.dev")
                 .contains("로그인하고 댓글 쓰기").doesNotContain("id=\"comment-form\"");
-        String member = mockMvc.perform(get("/@ssrcmt/posts/{id}", post).with(TestAuth.member(a)))
+        String member = mockMvc.perform(get("/ssrcmt/posts/{id}", post).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(member).contains("id=\"comment-form\"").contains("comment-edit").doesNotContain("comment-report");
         long unverified = members.localMember("ssrunver", "미인증", "ssrunver@example.com", "Blog#2026ok", false);
-        assertThat(mockMvc.perform(get("/@ssrcmt/posts/{id}", post).with(TestAuth.member(unverified)))
+        assertThat(mockMvc.perform(get("/ssrcmt/posts/{id}", post).with(TestAuth.member(unverified)))
                 .andReturn().getResponse().getContentAsString()).contains("이메일 인증을 마치면 댓글을 쓸 수 있어요");
         long empty = posts.published(author, "빈 글", "본문", 1, T);
-        assertThat(mockMvc.perform(get("/@ssrcmt/posts/{id}", empty)).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/ssrcmt/posts/{id}", empty)).andReturn().getResponse().getContentAsString())
                 .contains("첫 댓글을 남겨 보세요");
         mockMvc.perform(get("/api/posts/{id}/comments", post)).andExpect(header().string("Cache-Control", "private, no-store"));
         // 스크립트 없는 작성 폼
-        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/@ssrcmt/posts/{id}/comments", post)
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/ssrcmt/posts/{id}/comments", post)
                         .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .with(TestAuth.member(a)).param("content", "폼으로 쓴 댓글"))
                 .andExpect(status().isSeeOther());

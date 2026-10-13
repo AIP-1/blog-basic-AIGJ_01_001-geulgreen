@@ -56,7 +56,7 @@
         <h2 id="newcomers-heading">새로 온 작가 <span class="help">첫 글을 반겨 주세요</span></h2>
         <ul class="newcomer-list">
             <li th:each="n : ${newcomers}" class="newcomer">
-                <a th:href="${'/@' + n.handle()}" class="newcomer-who">
+                <a th:href="${paths.blog(n.handle())}" class="newcomer-who">
                     <th:block th:replace="~{fragments/avatar :: avatar(${n.avatar()}, 36)}"></th:block>
                     <span th:text="${n.nickname()}">닉네임</span></a>
                 <a th:href="${n.url()}" class="newcomer-post" th:text="${'첫 글 · ' + n.title()}">첫 글</a>
@@ -71,17 +71,23 @@
     <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()}, ${moreLinkBase}, ${tab == 'trending' ? '/?tab=trending&expired=1' : null})}"></div>
     </div>
     <!-- 오른쪽: 인기 태그, 고양이 카드 -->
-    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 고양이 카드, 추천 블로그, 인기 태그, 사이트 링크 -->
+    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 추천 글, 추천 블로그, 인기 태그, 사이트 링크 -->
     <aside class="home-side" aria-label="둘러보기">
-        <section class="side-box side-cat" aria-label="글그린 한마디">
-            <p class="side-cat-text">좋은 글은<br>언제나<br>마음에 남아요 <th:block th:replace="~{fragments/icons :: paw}"></th:block></p>
-            <img th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641" loading="lazy">
+        <!-- 077 강성찬 개인 확장: 추천 글(내 태그와 같은 새 사람 글 → 최근 7일 조회수) -->
+        <section th:if="${!recommendedPosts.isEmpty()}" class="side-box side-rec-posts" aria-labelledby="side-posts-heading">
+            <h2 id="side-posts-heading">추천 글</h2>
+            <ol class="side-post-list">
+                <li th:each="p : ${recommendedPosts}">
+                    <a th:href="${p.url()}" th:text="${p.title()}">제목</a>
+                    <span class="help" th:text="${p.author().nickname()}">작가</span>
+                </li>
+            </ol>
         </section>
         <section th:if="${!recommended.isEmpty()}" class="side-box side-recommended" aria-labelledby="side-rec-heading">
             <h2 id="side-rec-heading">추천 블로그</h2>
             <ul class="side-rec-list">
                 <li th:each="b : ${recommended}">
-                    <a th:href="${'/@' + b.handle()}" class="newcomer-who">
+                    <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
                         <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 28)}"></th:block>
                         <span th:text="${b.nickname()}">닉네임</span></a>
                     <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, ${currentMemberId != null}, '/login', '/')}"></th:block>
@@ -99,6 +105,8 @@
         <nav class="side-links" aria-label="사이트 정보">
             <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
             <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
+            <!-- 넓은 화면은 맨 아래 꼬리말을 숨기고 문구를 여기에(인스타그램 PC처럼) -->
+            <p class="side-slogan">좋은 글이 머무는 곳, 글그린</p>
         </nav>
     </aside>
     </div>

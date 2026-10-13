@@ -56,20 +56,20 @@ class PrivateAccountIT extends IntegrationTestBase {
         makePrivate(owner);
 
         // 수락받지 않은 사람: 프로필 윗부분만, 글·다른 주소·API는 막힘
-        assertThat(page("/@pvowner", fan)).contains("비공개 계정이에요").doesNotContain("비공개 계정의 글");
-        assertThat(mockMvc.perform(get("/@pvowner")).andReturn().getResponse().getContentAsString())
+        assertThat(page("/pvowner", fan)).contains("비공개 계정이에요").doesNotContain("비공개 계정의 글");
+        assertThat(mockMvc.perform(get("/pvowner")).andReturn().getResponse().getContentAsString())
                 .contains("비공개 계정이에요").doesNotContain("비공개 계정의 글");
-        String url = "/@pvowner/posts/" + postId;
+        String url = "/pvowner/posts/" + postId;
         assertThat(mockMvc.perform(get(url).with(TestAuth.member(fan))).andReturn().getResponse().getRedirectedUrl())
-                .isEqualTo("/@pvowner");
-        assertThat(mockMvc.perform(get("/@pvowner/followers").with(TestAuth.member(fan))).andReturn().getResponse()
-                .getRedirectedUrl()).isEqualTo("/@pvowner");
+                .isEqualTo("/pvowner");
+        assertThat(mockMvc.perform(get("/pvowner/followers").with(TestAuth.member(fan))).andReturn().getResponse()
+                .getRedirectedUrl()).isEqualTo("/pvowner");
         mockMvc.perform(get("/api/members/pvowner/posts").with(TestAuth.member(fan))).andExpect(status().isNotFound());
         mockMvc.perform(put("/api/posts/{id}/like", postId).with(csrf()).with(TestAuth.member(fan))).andExpect(status().isNotFound());
         // 원래 팔로워·본인은 그대로 본다
-        assertThat(page("/@pvowner", old)).contains("비공개 계정의 글");
+        assertThat(page("/pvowner", old)).contains("비공개 계정의 글");
         assertThat(page(url, old)).contains("비공개 계정의 글");
-        assertThat(page("/@pvowner", owner)).contains("비공개 계정의 글");
+        assertThat(page("/pvowner", owner)).contains("비공개 계정의 글");
 
         // 팔로우를 누르면 요청: 알림 1건, 다시 눌러도 한 줄, 화면은 "요청됨"
         String res = mockMvc.perform(put("/api/members/pvowner/follow").with(csrf()).with(TestAuth.member(fan)))
@@ -79,7 +79,7 @@ class PrivateAccountIT extends IntegrationTestBase {
         assertThat(count("SELECT count(*) FROM follow_request WHERE target_id = ?", owner)).isEqualTo(1);
         assertThat(count("SELECT count(*) FROM follow WHERE follower_id = ?", fan)).isZero();
         assertThat(count("SELECT count(*) FROM notification WHERE receiver_id = ? AND type = 'FOLLOW_REQUEST'", owner)).isEqualTo(1);
-        assertThat(page("/@pvowner", fan)).contains("요청됨").contains("팔로우 요청을 보냈어요");
+        assertThat(page("/pvowner", fan)).contains("요청됨").contains("팔로우 요청을 보냈어요");
         assertThat(page("/settings/privacy", owner)).contains("받은 팔로우 요청 1").contains("@pvfan");
 
         // 수락: 팔로우가 되고 글이 열린다, 요청 알림은 빠진다
@@ -92,12 +92,12 @@ class PrivateAccountIT extends IntegrationTestBase {
         assertThat(page("/api/members/pvowner/posts", fan)).contains("비공개 계정의 글");
         // 팔로잉 피드에는 나오고, 여러 사람이 섞이는 목록에는 팔로워에게도 나오지 않는다
         assertThat(page("/feed", fan)).contains("비공개 계정의 글");
-        for (String path : new String[] {"/", "/api/posts", "/search?q=비공개", "/sitemap.xml", "/@pvowner/rss"}) {
+        for (String path : new String[] {"/", "/api/posts", "/search?q=비공개", "/sitemap.xml", "/pvowner/rss"}) {
             assertThat(page(path, fan)).as(path).doesNotContain("비공개 계정의 글");
         }
         // 언팔로우하면 다시 잠긴다
         mockMvc.perform(delete("/api/members/pvowner/follow").with(csrf()).with(TestAuth.member(fan))).andExpect(status().isOk());
-        assertThat(page("/@pvowner", fan)).contains("비공개 계정이에요");
+        assertThat(page("/pvowner", fan)).contains("비공개 계정이에요");
     }
 
     @Test
@@ -134,10 +134,10 @@ class PrivateAccountIT extends IntegrationTestBase {
         long me = member("pvfrme");
         makePrivate(owner);
         mockMvc.perform(put("/api/members/pvfrowner/follow").with(csrf()).with(TestAuth.member(me)));
-        mockMvc.perform(post("/@pvfrowner/friend").param("action", "add").with(csrf()).with(TestAuth.member(me)));
+        mockMvc.perform(post("/pvfrowner/friend").param("action", "add").with(csrf()).with(TestAuth.member(me)));
         assertThat(count("SELECT count(*) FROM close_friend")).isZero();
         mockMvc.perform(post("/settings/privacy/requests/pvfrme").param("action", "accept").with(csrf()).with(TestAuth.member(owner)));
-        mockMvc.perform(post("/@pvfrowner/friend").param("action", "add").with(csrf()).with(TestAuth.member(me)));
+        mockMvc.perform(post("/pvfrowner/friend").param("action", "add").with(csrf()).with(TestAuth.member(me)));
         assertThat(count("SELECT count(*) FROM close_friend WHERE owner_id = ? AND friend_id = ?", me, owner)).isEqualTo(1);
     }
 

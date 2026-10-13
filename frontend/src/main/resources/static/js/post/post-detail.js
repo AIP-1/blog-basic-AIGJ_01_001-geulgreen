@@ -50,6 +50,16 @@
           .catch(function () { status.textContent = '삭제하지 못했어요.'; });
       });
     }
+    // 075 강성찬 개인 확장: ⋯ 메뉴의 [글 설정]이 카테고리·시리즈·카드 한 줄 소개 창을 연다. 소개 저장·AI 제안 뒤(#teaser)엔 다시 연다
+    var settings = document.getElementById('post-settings');
+    var openSettings = document.querySelector('[data-open-post-settings]');
+    if (settings && openSettings) {
+      openSettings.addEventListener('click', function () {
+        openSettings.closest('details').open = false;
+        settings.showModal();
+      });
+      if (window.location.hash === '#teaser') { settings.showModal(); }
+    }
     var discard = document.getElementById('discard-editing');
     if (discard) {
       discard.addEventListener('click', function () {

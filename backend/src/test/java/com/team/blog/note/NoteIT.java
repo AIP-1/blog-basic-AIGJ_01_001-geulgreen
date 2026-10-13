@@ -33,14 +33,14 @@ class NoteIT extends IntegrationTestBase {
         long stranger = member("notestranger");
         members.befriend(me, friend);
         for (String[] n : new String[][] {{"모두에게 <b>안녕</b>", "PUBLIC"}, {"친구에게만", "FRIENDS"}, {"나만 보는 메모", "PRIVATE"}}) {
-            mockMvc.perform(post("/notes").param("content", n[0]).param("visibility", n[1]).param("back", "/@noteme")
+            mockMvc.perform(post("/notes").param("content", n[0]).param("visibility", n[1]).param("back", "/noteme")
                     .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
         }
-        String guest = mockMvc.perform(get("/@noteme/notes")).andReturn().getResponse().getContentAsString();
+        String guest = mockMvc.perform(get("/noteme/notes")).andReturn().getResponse().getContentAsString();
         assertThat(guest).contains("모두에게 &lt;b&gt;안녕&lt;/b&gt;").doesNotContain("친구에게만").doesNotContain("나만 보는 메모");
-        assertThat(mockMvc.perform(get("/@noteme/notes").with(TestAuth.member(friend))).andReturn().getResponse()
+        assertThat(mockMvc.perform(get("/noteme/notes").with(TestAuth.member(friend))).andReturn().getResponse()
                 .getContentAsString()).contains("친구에게만").doesNotContain("나만 보는 메모");
-        assertThat(mockMvc.perform(get("/@noteme").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/noteme").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
                 .contains("짧은 기록").contains("나만 보는 메모").contains("기록하기");
         // 280자 넘음·빈 글은 400, 남의 기록은 못 지움
         mockMvc.perform(post("/notes").param("content", "가".repeat(281)).with(csrf()).with(TestAuth.member(me)))

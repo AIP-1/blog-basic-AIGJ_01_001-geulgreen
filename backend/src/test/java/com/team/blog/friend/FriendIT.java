@@ -41,7 +41,7 @@ class FriendIT extends IntegrationTestBase {
     }
 
     private MockHttpServletRequestBuilder friend(String handle, String action) {
-        return post("/@" + handle + "/friend").param("action", action).with(csrf());
+        return post("/" + handle + "/friend").param("action", action).with(csrf());
     }
 
     private void follow(long follower, long followee) {
@@ -97,7 +97,7 @@ class FriendIT extends IntegrationTestBase {
         members.addFriend(author, friend);
         posts.published(author, "공개 글 하나", "본문", 1, T.minusSeconds(3600));
         long secret = friendsPost(author, "친구만 보는 비밀글", T.minusSeconds(60));
-        String url = "/@frauthor/posts/" + secret;
+        String url = "/frauthor/posts/" + secret;
         mockMvc.perform(get(url).with(TestAuth.member(friend))).andExpect(status().isOk());
         mockMvc.perform(get(url).with(TestAuth.member(author))).andExpect(status().isOk());
         String strangerPage = mockMvc.perform(get(url).with(TestAuth.member(stranger))).andExpect(status().isNotFound())
@@ -113,14 +113,14 @@ class FriendIT extends IntegrationTestBase {
         mockMvc.perform(get(url).with(TestAuth.admin(admin))).andExpect(status().isNotFound());
         // 한쪽 관계: 글쓴이는 친구가 넣지 않았으니 친구의 친구 공개 글을 못 본다
         long back = friendsPost(friend, "거꾸로는 안 보이는 글", T.minusSeconds(30));
-        mockMvc.perform(get("/@frfriend/posts/" + back).with(TestAuth.member(author))).andExpect(status().isNotFound());
+        mockMvc.perform(get("/frfriend/posts/" + back).with(TestAuth.member(author))).andExpect(status().isNotFound());
         // 친구가 보는 블로그: 공개 + 친구 공개(발행 시각 최신순), 다른 사람에게는 공개만
-        String friendBlog = mockMvc.perform(get("/@frauthor").with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString();
+        String friendBlog = mockMvc.perform(get("/frauthor").with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString();
         assertThat(friendBlog).contains("친구만 보는 비밀글").contains("공개 글 하나");
         assertThat(friendBlog.indexOf("친구만 보는 비밀글")).isLessThan(friendBlog.indexOf("공개 글 하나"));
         assertThat(mockMvc.perform(get("/api/members/frauthor/posts").with(TestAuth.member(friend))).andReturn().getResponse()
                 .getContentAsString()).contains("친구만 보는 비밀글");
-        for (String path : new String[] {"/@frauthor", "/api/members/frauthor/posts"}) {
+        for (String path : new String[] {"/frauthor", "/api/members/frauthor/posts"}) {
             assertThat(mockMvc.perform(get(path).with(TestAuth.member(stranger))).andReturn().getResponse().getContentAsString())
                     .as(path).contains("공개 글 하나").doesNotContain("친구만 보는 비밀글");
         }
@@ -137,7 +137,7 @@ class FriendIT extends IntegrationTestBase {
         // 글쓴이가 빼면 즉시 404, 블로그에서도 빠진다
         mockMvc.perform(friend("frfriend", "remove").with(TestAuth.member(author)));
         mockMvc.perform(get(url).with(TestAuth.member(friend))).andExpect(status().isNotFound());
-        assertThat(mockMvc.perform(get("/@frauthor").with(TestAuth.member(friend))).andReturn().getResponse()
+        assertThat(mockMvc.perform(get("/frauthor").with(TestAuth.member(friend))).andReturn().getResponse()
                 .getContentAsString()).doesNotContain("친구만 보는 비밀글");
     }
 
@@ -147,11 +147,11 @@ class FriendIT extends IntegrationTestBase {
         long followed = member("frbtnfan");
         member("frbtnother");
         follow(me, followed);
-        assertThat(mockMvc.perform(get("/@frbtnfan").with(TestAuth.member(me))).andReturn().getResponse()
+        assertThat(mockMvc.perform(get("/frbtnfan").with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).contains("친구로 넣기");
-        assertThat(mockMvc.perform(get("/@frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
+        assertThat(mockMvc.perform(get("/frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).doesNotContain("친구로 넣기").doesNotContain("친구 요청");
-        assertThat(mockMvc.perform(get("/@frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
+        assertThat(mockMvc.perform(get("/frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
     }
 
     @Test

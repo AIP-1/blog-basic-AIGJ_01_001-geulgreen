@@ -29,21 +29,21 @@ class BlogAddressRoutingIT extends IntegrationTestBase {
 
     @Test
     void uppercaseHandleRedirectsPermanentlyBeforeExistenceCheck() throws Exception {
-        mockMvc.perform(get("/@Kim755030"))
+        mockMvc.perform(get("/Kim755030"))
                 .andExpect(status().isMovedPermanently())
-                .andExpect(header().string("Location", "/@kim755030"));
-        mockMvc.perform(get("/@Kim755030/posts/12").queryParam("x", "1"))
+                .andExpect(header().string("Location", "/kim755030"));
+        mockMvc.perform(get("/Kim755030/posts/12").queryParam("x", "1"))
                 .andExpect(status().isMovedPermanently())
-                .andExpect(header().string("Location", "/@kim755030/posts/12?x=1"));
+                .andExpect(header().string("Location", "/kim755030/posts/12?x=1"));
     }
 
     @Test
     void activeMemberBlogShowsByline() throws Exception {
         members.active("kim755030", "김민서");
-        mockMvc.perform(get("/@kim755030"))
+        mockMvc.perform(get("/kim755030"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("김민서")))
-                .andExpect(content().string(Matchers.containsString("href=\"/@kim755030\"")));
+                .andExpect(content().string(Matchers.containsString("href=\"/kim755030\"")));
     }
 
     @Test
@@ -51,7 +51,7 @@ class BlogAddressRoutingIT extends IntegrationTestBase {
         members.withdrawing("kim755030", "김민서", Instant.now());
         members.anonymized("lee755030", Instant.now().minusSeconds(3600), Instant.now());
         String reference = body404("/no-such-page");
-        for (String path : new String[] {"/@nobody123", "/@없는주소", "/@kim755030", "/@lee755030"}) {
+        for (String path : new String[] {"/nobody123", "/없는주소", "/kim755030", "/lee755030"}) {
             assertThat(body404(path)).as(path).isEqualTo(reference);
         }
     }

@@ -77,7 +77,7 @@ public class AuthorStatsQuery {
                 WHERE p.author_id = ? AND d.view_date >= ? AND p.deleted_at IS NULL
                 GROUP BY p.id, p.title, m.handle ORDER BY views DESC, p.id DESC LIMIT 5
                 """, (rs, n) -> new TopPost(rs.getLong("id"), rs.getString("title"),
-                "/@" + rs.getString("handle") + "/posts/" + rs.getLong("id"), rs.getInt("views")), memberId, Date.valueOf(from));
+                com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + rs.getLong("id"), rs.getInt("views")), memberId, Date.valueOf(from));
         return new Stats(totals, days, recent, top);
     }
 }

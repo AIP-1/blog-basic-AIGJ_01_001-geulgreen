@@ -152,18 +152,18 @@ class LikeIT extends IntegrationTestBase {
         long author = member("likeview");
         long a = member("likeviewa");
         long post = posts.published(author, "글", "본문", 1, T);
-        String before = mockMvc.perform(get("/@likeview/posts/{id}", post).with(TestAuth.member(a)))
+        String before = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(before).contains("aria-pressed=\"false\"").contains("aria-label=\"좋아요 (0)\"").contains("♡");
-        mockMvc.perform(post("/@likeview/posts/{id}/like", post).param("liked", "true").with(csrf()).with(TestAuth.member(a)))
+        mockMvc.perform(post("/likeview/posts/{id}/like", post).param("liked", "true").with(csrf()).with(TestAuth.member(a)))
                 .andExpect(status().isSeeOther());
-        String after = mockMvc.perform(get("/@likeview/posts/{id}", post).with(TestAuth.member(a)))
+        String after = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(after).contains("aria-pressed=\"true\"").contains("좋아요 취소 (1)").contains("♥");
-        String mine = mockMvc.perform(get("/@likeview/posts/{id}", post).with(TestAuth.member(author)))
+        String mine = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(author)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(mine).doesNotContain("class=\"like-button\"").contains("♥ 1");
-        assertThat(mockMvc.perform(get("/@likeview/posts/{id}", post)).andReturn().getResponse().getContentAsString())
+        assertThat(mockMvc.perform(get("/likeview/posts/{id}", post)).andReturn().getResponse().getContentAsString())
                 .contains("data-guest=\"true\"").contains("class=\"like-button\"");
     }
 }

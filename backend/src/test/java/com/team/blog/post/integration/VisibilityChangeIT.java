@@ -61,7 +61,7 @@ class VisibilityChangeIT extends IntegrationTestBase {
         mockMvc.perform(change(postId, "PRIVATE").with(TestAuth.member(me)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.visibility").value("PRIVATE"))
                 .andExpect(jsonPath("$.firstPublicAt").value("2026-10-01T00:00:00Z"));
-        mockMvc.perform(get("/@visowner/posts/{id}", postId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/visowner/posts/{id}", postId)).andExpect(status().isNotFound());
         assertThat(events.stream(PostVisibilityChanged.class))
                 .anyMatch(e -> e.postId() == postId && e.from().equals("PUBLIC") && e.to().equals("PRIVATE"));
 
@@ -72,7 +72,7 @@ class VisibilityChangeIT extends IntegrationTestBase {
             assertThat(after.get(kept)).as(kept).isEqualTo(before.get(kept));
         }
         assertThat(posts.workingCopyRow(postId)).containsEntry("title", "작업본");
-        mockMvc.perform(get("/@visowner/posts/{id}", postId)).andExpect(status().isOk());
+        mockMvc.perform(get("/visowner/posts/{id}", postId)).andExpect(status().isOk());
     }
 
     @Test

@@ -134,7 +134,9 @@ class TrendingIT extends IntegrationTestBase {
         clock.set(NOW);
         post(member("trquiet"), "반응 없음", Duration.ofHours(1), 0, 0);
         String trend = mockMvc.perform(get("/?tab=trending")).andReturn().getResponse().getContentAsString();
-        assertThat(trend).contains("아직 트렌딩 글이 없어요").contains("최신 글 보기").doesNotContain("반응 없음");
+        assertThat(trend).contains("아직 트렌딩 글이 없어요").contains("최신 글 보기");
+        // 077: 오른쪽 칸 추천 글에는 나올 수 있으니 목록 칸만 본다
+        assertThat(trend.substring(trend.indexOf("id=\"card-grid\""), trend.indexOf("class=\"list-more\""))).doesNotContain("반응 없음");
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
         assertThat(home).contains("반응 없음").contains("<a href=\"/\" aria-current=\"page\">최신 글</a>");
     }

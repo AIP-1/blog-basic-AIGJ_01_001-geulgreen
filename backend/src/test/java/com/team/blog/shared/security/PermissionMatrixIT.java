@@ -98,10 +98,10 @@ class PermissionMatrixIT extends IntegrationTestBase {
         for (Map.Entry<Long, int[]> e : expected.entrySet()) {
             int i = 0;
             for (Map.Entry<String, RequestPostProcessor> actor : actors.entrySet()) {
-                MockHttpServletResponse r = run(get("/@mxauthor/posts/" + e.getKey()), actor.getValue());
+                MockHttpServletResponse r = run(get("/mxauthor/posts/" + e.getKey()), actor.getValue());
                 assertThat(r.getStatus()).as("글 %d / %s", e.getKey(), actor.getKey()).isEqualTo(e.getValue()[i++]);
                 if (r.getStatus() == 404) {
-                    assertThat(normalized(r)).isEqualTo(normalized(run(get("/@mxauthor/posts/999999"), actor.getValue())));
+                    assertThat(normalized(r)).isEqualTo(normalized(run(get("/mxauthor/posts/999999"), actor.getValue())));
                 }
                 if (e.getKey() == editing && r.getStatus() == 200) {
                     assertThat(r.getContentAsString()).doesNotContain("작업본 내용");
@@ -112,7 +112,7 @@ class PermissionMatrixIT extends IntegrationTestBase {
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = now() WHERE id = ?", author);
         for (Map.Entry<String, RequestPostProcessor> actor : actors.entrySet()) {
             if (!actor.getKey().equals("작성자")) {
-                assertThat(run(get("/@mxauthor/posts/" + pub), actor.getValue()).getStatus()).as(actor.getKey()).isEqualTo(404);
+                assertThat(run(get("/mxauthor/posts/" + pub), actor.getValue()).getStatus()).as(actor.getKey()).isEqualTo(404);
             }
         }
     }
@@ -256,7 +256,7 @@ class PermissionMatrixIT extends IntegrationTestBase {
                 () -> posts.published(author, "신고 대상", "본문", 1, T), 401, 403, 201, 400, 201);
         long hidden = posts.published(author, "숨긴 글", "본문", 1, T);
         jdbc.update("UPDATE post SET hidden_at = now() WHERE id = ?", hidden);
-        row("숨긴 글 상세", id -> get("/@mxauthor/posts/" + id), () -> hidden, 404, 404, 404, 200, 404);
+        row("숨긴 글 상세", id -> get("/mxauthor/posts/" + id), () -> hidden, 404, 404, 404, 200, 404);
         row("신고 관리 화면", id -> get("/admin/reports"), () -> 0, 303, 404, 404, 404, 200);
         row("회원 관리 화면", id -> get("/admin/members"), () -> 0, 303, 404, 404, 404, 200);
     }
@@ -323,8 +323,8 @@ class PermissionMatrixIT extends IntegrationTestBase {
         assertThat(run(get("/manage/posts"), null).getStatus()).isEqualTo(303);
         assertThat(run(get("/settings"), null).getStatus()).isEqualTo(303);
         // 블로그 보기: 누구나, 탈퇴 유예 주소는 404
-        assertThat(run(get("/@mxother"), null).getStatus()).isEqualTo(200);
+        assertThat(run(get("/mxother"), null).getStatus()).isEqualTo(200);
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = now() WHERE id = ?", other);
-        assertThat(run(get("/@mxother"), null).getStatus()).isEqualTo(404);
+        assertThat(run(get("/mxother"), null).getStatus()).isEqualTo(404);
     }
 }

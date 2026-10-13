@@ -60,7 +60,7 @@ class PostTrashIT extends IntegrationTestBase {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.trashed").value(true)).andExpect(jsonPath("$.purgeAt").exists());
         assertThat(row(id)).containsEntry("status", "PUBLISHED").containsEntry("visibility", "PUBLIC");
         assertThat(row(id).get("deleted_at")).isNotNull();
-        mockMvc.perform(get("/@trasher/posts/{id}", id).with(TestAuth.member(me))).andExpect(status().isNotFound());
+        mockMvc.perform(get("/trasher/posts/{id}", id).with(TestAuth.member(me))).andExpect(status().isNotFound());
         assertThat(listQuery.feed(null).items()).extracting("id").containsExactly(newer, older);
         assertThat(listQuery.publicCount(me)).isEqualTo(2);
         // 휴지통 글은 저장·자동 저장·발행·공개 범위 변경 모두 404
