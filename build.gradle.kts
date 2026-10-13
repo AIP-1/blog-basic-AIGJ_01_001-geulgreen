@@ -2,6 +2,15 @@
 plugins {
     id("org.springframework.boot") version "4.1.1" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
+    // 코드 품질 분석(학교 SonarQube, CI의 sonar job에서만 돈다)
+    id("org.sonarqube") version "7.5.0.8588"
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "geulgreen")
+        property("sonar.projectName", "geulgreen")
+    }
 }
 
 subprojects {

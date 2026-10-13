@@ -1,6 +1,7 @@
 // 서버 모듈: Spring Boot 앱. 화면은 :frontend 모듈 jar에서 읽는다.
 plugins {
     java
+    jacoco // 테스트 커버리지(SonarQube가 build/reports/jacoco/test/jacocoTestReport.xml을 읽는다)
     id("org.springframework.boot")
     id("io.spring.dependency-management")
 }
@@ -63,4 +64,8 @@ tasks.withType<Test> {
 // 로컬 실행은 저장소 맨 위에서 돈다(.env, ./build/local-images 사진 폴더가 예전 자리 그대로)
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
     workingDir = rootProject.projectDir
+}
+
+tasks.jacocoTestReport {
+    reports { xml.required = true }
 }

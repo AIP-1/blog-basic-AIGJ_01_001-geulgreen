@@ -1,0 +1,90 @@
+# 코드 품질 분석: 학교 SonarQube(공통-인프라 안내, http://s4.java21.net:9000)에 테스트 커버리지와 함께 올린다.
+# 배포(deploy.yml)와 따로 돌아서 배포를 늦추거나 막지 않는다. 품질 게이트는 아직 보고만 한다(실패해도 이 job은 성공).
+# 필요한 Repository secret: SONAQUBETOKEN. 없으면(과제 제출 사본 등) 분석을 건너뛴다.
+name: sonar
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  # 매일 06:00 KST에 develop을 분석해 핫스팟·이슈 원본을 아티팩트로 남긴다.
+  # GitHub 예약 실행은 기본 브랜치(main)의 이 파일로만 돌고, 몰리는 시간엔 수십 분 늦을 수 있다.
+  schedule:
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sonar:
+    runs-on: ubuntu-24.04  # ubuntu-latest는 2026-10-19부터 26으로 바뀜, 검증 전까지 고정
+    timeout-minutes: 40
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAQUBETOKEN }}
+      SONAR_HOST_URL: http://s4.java21.net:9000
+    steps:
+      - name: 토큰 없으면 건너뛰기
+        if: ${{ env.SONAR_TOKEN == '' }}
+        run: echo "SONAQUBETOKEN secret이 없어 분석을 건너뜁니다." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v5
+        if: ${{ env.SONAR_TOKEN != '' }}
+        with:
+          ref: ${{ github.event_name == 'schedule' && 'develop' || '' }}
+          fetch-depth: 0  # 줄별 작성자(blame) 정보
+      - uses: actions/setup-java@v5
+        if: ${{ env.SONAR_TOKEN != '' }}
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+      - name: 테스트·커버리지·분석
+        if: ${{ env.SONAR_TOKEN != '' }}
+        run: ./gradlew --no-daemon test jacocoTestReport sonar
+      - name: 품질 게이트 결과를 요약에 적기
+        if: ${{ env.SONAR_TOKEN != '' }}
+        continue-on-error: true
+        run: |
+          task_url=$(grep '^ceTaskUrl=' build/sonar/report-task.txt | cut -d= -f2-)
+          key=$(grep '^projectKey=' build/sonar/report-task.txt | cut -d= -f2-)
+          for i in $(seq 60); do
+            status=$(curl -sf -u "$SONAR_TOKEN:" "$task_url" | jq -r .task.status)
+            [ "$status" = SUCCESS ] || [ "$status" = FAILED ] || [ "$status" = CANCELED ] && break
+            sleep 5
+          done
+          api() { curl -sf -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/$1"; }
+          {
+            echo "## SonarQube ($status)"
+            echo "품질 게이트: $(api "qualitygates/project_status?projectKey=$key" | jq -r .projectStatus.status)"
+            echo
+            echo "| 지표 | 값 |"
+            echo "|---|---|"
+            api "measures/component?component=$key&metricKeys=bugs,vulnerabilities,security_hotspots,code_smells,coverage,duplicated_lines_density,ncloc" \
+              | jq -r '.component.measures[] | "| \(.metric) | \(.value) |"'
+            echo
+            echo "### 심각한 이슈(BLOCKER·CRITICAL, 최대 20개)"
+            api "issues/search?componentKeys=$key&severities=BLOCKER,CRITICAL&issueStatuses=OPEN,CONFIRMED&ps=20" \
+              | jq -r '.issues[] | "- [\(.severity)/\(.type)] \(.component | split(":")[1]):\(.line // "-") \(.message)"'
+            echo
+            echo "대시보드: $SONAR_HOST_URL/dashboard?id=$key"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: 핫스팟·이슈 원본 저장
+        if: ${{ env.SONAR_TOKEN != '' }}
+        continue-on-error: true
+        run: |
+          key=$(grep '^projectKey=' build/sonar/report-task.txt | cut -d= -f2-)
+          mkdir -p sonar-report
+          api() { curl -sf -u "$SONAR_TOKEN:" "$SONAR_HOST_URL/api/$1"; }
+          api "hotspots/search?projectKey=$key&status=TO_REVIEW&ps=500" > sonar-report/hotspots.json
+          for p in 1 2 3 4; do
+            api "issues/search?componentKeys=$key&issueStatuses=OPEN,CONFIRMED&ps=500&p=$p" > sonar-report/issues-$p.json
+          done
+          api "qualitygates/project_status?projectKey=$key" > sonar-report/gate.json
+      - uses: actions/upload-artifact@v4
+        if: ${{ env.SONAR_TOKEN != '' }}
+        with:
+          name: sonar-report
+          path: sonar-report/
+          retention-days: 14
