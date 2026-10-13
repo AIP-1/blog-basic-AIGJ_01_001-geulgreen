@@ -52,7 +52,7 @@ class BlogExtrasIT extends IntegrationTestBase {
         posts.published(me, "새 글", "본문", 1, T);
         String html = mockMvc.perform(get("/@pinme/posts/{id}", first)).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("id=\"read-progress\"").contains("share-row").contains("twitter.com/intent/tweet")
-                .contains("/js/post/reading-extras.js").doesNotContain("블로그 맨 위에 고정");
+                .contains("/js/post/reading-extras-").doesNotContain("블로그 맨 위에 고정");
         assertThat(mockMvc.perform(get("/@pinme/posts/{id}", first).with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).contains("블로그 맨 위에 고정");
         mockMvc.perform(post("/posts/{id}/pin", first).with(csrf()).with(TestAuth.member(other))).andExpect(status().isNotFound());

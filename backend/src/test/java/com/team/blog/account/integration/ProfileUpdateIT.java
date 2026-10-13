@@ -129,7 +129,7 @@ class ProfileUpdateIT extends IntegrationTestBase {
         String html = mockMvc.perform(get("/settings").with(TestAuth.member(id)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("value=\"김민서\"").contains("&lt;b&gt;굵게&lt;/b&gt;").contains("@kim755030")
-                .contains("변경할 수 없어요").contains("/js/profile/settings.js");
+                .contains("변경할 수 없어요").contains("/js/profile/settings-");
     }
 
     @Test

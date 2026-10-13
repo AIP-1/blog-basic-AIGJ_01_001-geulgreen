@@ -64,7 +64,7 @@ class LogoutAndSessionIT extends IntegrationTestBase {
 
         String home = browser.perform(get("/")).getResponse().getContentAsString();
         assertThat(home).contains("id=\"logout-cleanup\"").contains("data-member-id=\"" + memberId + "\"")
-                .contains("/js/auth/auth-logout.js");
+                .contains("/js/auth/auth-logout-");
         // 1회용
         assertThat(browser.perform(get("/")).getResponse().getContentAsString()).doesNotContain("id=\"logout-cleanup\"");
 

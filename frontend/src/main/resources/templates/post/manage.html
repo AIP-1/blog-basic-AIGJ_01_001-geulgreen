@@ -97,7 +97,7 @@
     <p class="list-more"><a th:if="${nextCursor != null}" class="more-button" th:attr="data-cursor=${nextCursor}"
           th:href="@{/manage/posts(tab=${tab},visibility=${visibility},cursor=${nextCursor})}">더 보기</a></p>
     <p id="manage-notice" class="notice" role="status" hidden></p>
-    <script src="/js/post/manage.js" defer></script>
+    <script th:src="@{/js/post/manage.js}" defer></script>
 </main>
 </body>
 </html>

@@ -22,12 +22,12 @@ class EditorPageIT extends IntegrationTestBase {
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).doesNotContain("<script>alert(1)</script>").doesNotContain("<b>본문</b>");
         assertThat(html).contains("data-state=").contains("&quot;version&quot;:3").contains("&lt;b&gt;본문&lt;/b&gt;");
-        assertThat(html).contains("/js/editor/autosave.js").contains("id=\"save-status\"");
+        assertThat(html).contains("/js/editor/autosave-").contains("id=\"save-status\"");
         // 058 강성찬 개인 확장: 글을 드래그하면 뜨는 서식 창
-        assertThat(html).contains("/js/editor/format-toolbar.js").contains("id=\"format-hint\"")
+        assertThat(html).contains("/js/editor/format-toolbar-").contains("id=\"format-hint\"")
                 .contains("data-writing-ai=\"false\"").doesNotContain("J AI에게 부탁"); // 059: Gemini 키가 없으면 AI 칸 없음
         // 060 보이는 대로 쓰기: 변환 도구와 편집 칸 스크립트(Markdown 칸은 그대로 남아 저장·자동 저장에 쓰인다)
-        assertThat(html).contains("/js/editor/visual-editor.js").contains("/webjars/marked/").contains("/webjars/turndown/")
+        assertThat(html).contains("/js/editor/visual-editor-").contains("/webjars/marked/").contains("/webjars/turndown/")
                 .contains("id=\"post-content\"");
         // 임시글에는 [변경 취소]가 없다
         assertThat(html).doesNotContain("discard-working-copy");

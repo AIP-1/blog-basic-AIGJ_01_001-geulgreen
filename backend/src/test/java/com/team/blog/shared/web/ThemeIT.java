@@ -41,11 +41,11 @@ class ThemeIT extends IntegrationTestBase {
         // 061: 설정 화면의 화면 테마(시스템·라이트·다크), 스크립트가 없으면 숨김
         String settings = mockMvc.perform(get("/settings").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(settings).contains("id=\"theme-setting\" hidden").contains("value=\"system\"").contains("value=\"light\"")
-                .contains("value=\"dark\"").contains("/js/theme-toggle.js");
+                .contains("value=\"dark\"").contains("/js/theme-toggle-");
         mockMvc.perform(get("/js/theme-toggle.js")).andExpect(status().isOk());
         // 063: 설정 섹션 메뉴, 화면 테마는 [화면] 섹션 안
         assertThat(settings).contains("class=\"settings-nav\"").contains("href=\"#settings-display\"")
-                .contains("/js/profile/settings-sections.js");
+                .contains("/js/profile/settings-sections-");
         assertThat(settings.indexOf("id=\"settings-display\"")).isLessThan(settings.indexOf("id=\"theme-setting\""));
         mockMvc.perform(get("/js/profile/settings-sections.js")).andExpect(status().isOk());
     }
@@ -53,8 +53,8 @@ class ThemeIT extends IntegrationTestBase {
     private static void assertHead(String path, String html) {
         String head = html.substring(0, html.indexOf("</head>"));
         assertThat(head).as(path).contains("<meta name=\"color-scheme\" content=\"light dark\">")
-                .contains("<script src=\"/js/theme-init.js\"></script>").contains("/css/theme.css");
-        assertThat(head.indexOf("theme-init.js")).as(path).isLessThan(head.indexOf("/css/site.css"));
+                .containsPattern("<script src=\"/js/theme-init-[0-9a-f]{32}\\.js\"></script>").contains("/css/theme-");
+        assertThat(head.indexOf("theme-init-")).as(path).isLessThan(head.indexOf("/css/site-"));
         // 061 강성찬 개인 확장: 테마 버튼은 머리말이 아니라 설정 화면에
         assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"")
                 .doesNotContain("<style>").doesNotContainPattern("<script>(?!</script>)");
@@ -100,10 +100,10 @@ class ThemeIT extends IntegrationTestBase {
         long post = posts.published(author, "코드 글", "본문", 1, java.time.Instant.parse("2026-10-01T00:00:00Z"));
         // 코드 블록이 없는 글은 불러오지 않는다(40 §2)
         String plain = mockMvc.perform(get("/@hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
-        assertThat(plain).doesNotContain("/js/code-highlight.js");
+        assertThat(plain).doesNotContain("/js/code-highlight-");
         jdbc.update("UPDATE post SET content_html = '<pre><code class=\"language-java\">int a;</code></pre>' WHERE id = ?", post);
         String html = mockMvc.perform(get("/@hlauthor/posts/{id}", post)).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js").contains("/js/code-highlight.js");
+        assertThat(html).contains("/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js").contains("/js/code-highlight-");
     }
 
     /** 디자인 시안(10-08): 글꼴은 우리 서버에서(CSP font-src 'self'), 사진 없는 카드에는 빈 사진 칸이 없다. */

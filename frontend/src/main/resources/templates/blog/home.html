@@ -104,8 +104,8 @@
         </th:block>
     </div>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, false, ${!cards.isEmpty()})}"></div>
-    <script src="/js/post/list-more.js" defer></script>
-    <script src="/js/follow/follow.js" defer></script>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>
 </html>
