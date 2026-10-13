@@ -1063,3 +1063,11 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .explore-page .newcomers { margin: 0; }
 .explore-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
 @media (min-width: 760px) { .explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* 강성찬 개인 확장: 닉네임 최대 30자 — 닉네임이 보이는 곳은 한 줄로 자르고 … 표시(사람 목록·프로필·카드·댓글·오른쪽 칸) */
+.author-nickname, .author-name, .person-nickname, .person-handle, .mission-post-author, .reply-to,
+.newcomer-who span:last-child, .comment-author > span:first-child, .side-post-list .help {
+    display: inline-block; max-width: 100%; min-width: 0; vertical-align: bottom;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person-nickname { display: block; }
+.newcomer-who, .comment-author, .card-author { max-width: 100%; min-width: 0; }

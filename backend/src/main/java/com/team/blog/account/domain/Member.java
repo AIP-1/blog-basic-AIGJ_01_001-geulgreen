@@ -29,7 +29,7 @@ public class Member {
     private String handle;
 
     /** NULL은 익명 처리 후만({@code ck_member_nickname_null}). */
-    @Column(name = "nickname", length = 10)
+    @Column(name = "nickname", length = 30)
     private String nickname;
 
     /** 가입 시 NULL(가입 닉네임은 변경으로 세지 않음). */
