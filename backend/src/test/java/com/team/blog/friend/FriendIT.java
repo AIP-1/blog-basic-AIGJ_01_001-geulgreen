@@ -176,14 +176,14 @@ class FriendIT extends IntegrationTestBase {
         member("frsrchnot");
         String page = mockMvc.perform(get("/settings/friends").param("q", "하늘").with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("@frsrch_kim").doesNotContain("@frsrchlee");
+        assertThat(page).contains(">frsrch_kim<").doesNotContain(">frsrchlee<");
         assertThat(mockMvc.perform(get("/settings/friends").param("q", "frsrch").with(TestAuth.member(me))).andReturn()
-                .getResponse().getContentAsString()).contains("@frsrch_kim").contains("@frsrchlee").doesNotContain("@frsrchnot");
+                .getResponse().getContentAsString()).contains(">frsrch_kim<").contains(">frsrchlee<").doesNotContain(">frsrchnot<");
         assertThat(mockMvc.perform(get("/settings/friends").param("q", "없는사람").with(TestAuth.member(me))).andReturn()
                 .getResponse().getContentAsString()).contains("찾는 사람이 없어요");
         // _는 글자 그대로
         assertThat(mockMvc.perform(get("/settings/friends").param("q", "h_k").with(TestAuth.member(me))).andReturn()
-                .getResponse().getContentAsString()).contains("@frsrch_kim").doesNotContain("@frsrchlee");
+                .getResponse().getContentAsString()).contains(">frsrch_kim<").doesNotContain(">frsrchlee<");
     }
 
     @Test
@@ -208,7 +208,7 @@ class FriendIT extends IntegrationTestBase {
         members.addFriend(c, a);
         String page = mockMvc.perform(get("/settings/friends").with(TestAuth.member(a))).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("내 친구 1").contains("내가 팔로우하는 사람 1").contains("@frlistb").contains("@frlistc")
+        assertThat(page).contains("내 친구 1").contains("내가 팔로우하는 사람 1").contains(">frlistb<").contains(">frlistc<")
                 .doesNotContain("받은 친구 요청");
         assertThat(mockMvc.perform(get("/settings/friends")).andReturn().getResponse().getHeader("Location")).contains("/login");
         purgeStep.purge(a);

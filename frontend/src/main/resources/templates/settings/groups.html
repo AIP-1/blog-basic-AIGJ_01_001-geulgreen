@@ -23,8 +23,7 @@
         <ul class="follow-list">
             <li th:each="m : ${g.members()}" class="follow-row">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 32)}"></th:block>
-                <div class="follow-text"><p><span th:text="${m.nickname()}">닉네임</span>
-                    <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a></p></div>
+                <div class="follow-text"><p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p></div>
                 <form method="post" th:action="@{/settings/groups/{g}/members/{m}/remove(g=${g.id()},m=${m.memberId()})}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button type="submit" class="btn-text btn-sm">빼기</button>
@@ -35,7 +34,7 @@
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <label th:for="${'add-' + g.id()}" class="visually-hidden">넣을 친구</label>
             <select th:id="${'add-' + g.id()}" name="memberId">
-                <option th:each="f : ${friends}" th:value="${f.memberId()}" th:text="${f.nickname() + ' @' + f.handle()}">친구</option>
+                <option th:each="f : ${friends}" th:value="${f.memberId()}" th:text="${f.handle() + ' · ' + f.nickname()}">친구</option>
             </select>
             <button type="submit" class="btn btn-sm">친구 넣기</button>
         </form>

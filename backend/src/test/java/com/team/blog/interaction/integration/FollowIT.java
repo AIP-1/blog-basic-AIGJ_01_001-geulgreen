@@ -142,7 +142,7 @@ class FollowIT extends IntegrationTestBase {
         String blog = mockMvc.perform(get("/fwlist")).andReturn().getResponse().getContentAsString();
         assertThat(blog).contains("팔로워 21").contains("팔로잉 1").contains("/login?redirect=/fwlist");
         String page = mockMvc.perform(get("/fwlist/followers")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("님의 팔로워 21").contains("@fwfan21").doesNotContain("@fwfan0<").contains("더 보기");
+        assertThat(page).contains("님의 팔로워 21").contains(">fwfan21<").contains("class=\"person-nickname\"").doesNotContain(">fwfan0<").doesNotContain(">@fwfan21<").contains("더 보기");
         // 복구하면 다시 포함
         jdbc.update("UPDATE member SET status = 'ACTIVE', withdrawn_at = NULL WHERE id = ?", fans.get(0));
         assertThat(mockMvc.perform(get("/fwlist")).andReturn().getResponse().getContentAsString()).contains("팔로워 22");

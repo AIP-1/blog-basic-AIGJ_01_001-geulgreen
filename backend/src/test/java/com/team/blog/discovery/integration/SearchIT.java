@@ -168,7 +168,7 @@ class SearchIT extends IntegrationTestBase {
         assertThat(fallback).contains("&#39;없는태그글&#39;에 대한 글이 없어요");
         assertThat(mockMvc.perform(get("/search?q=a")).andReturn().getResponse().getContentAsString()).contains("두 글자 이상 입력해 주세요");
         assertThat(mockMvc.perform(get("/search?q=개발자&tab=people")).andReturn().getResponse().getContentAsString())
-                .contains("@kimdevlog").doesNotContain("kimdevgone");
+                .contains(">kimdevlog<").doesNotContain("kimdevgone");
         // 같은 방문자 1분 30번
         long me = member("srlimit");
         for (int i = 0; i < 30; i++) {
