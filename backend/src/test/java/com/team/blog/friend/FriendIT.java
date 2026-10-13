@@ -14,19 +14,13 @@ import com.team.blog.friend.application.FriendQuery.Status;
 import com.team.blog.support.IntegrationTestBase;
 import com.team.blog.support.TestAuth;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-/** 025 친구 공개(강성찬 개인 확장, docs/06 §6). */
+/** 025 친구 공개 + 069 친한 친구(강성찬 개인 확장): 나를 팔로우하는 사람 중에서 내가 골라 넣는 한쪽 관계. */
 class FriendIT extends IntegrationTestBase {
 
     private static final Instant T = Instant.parse("2026-10-09T00:00:00Z");
@@ -49,9 +43,8 @@ class FriendIT extends IntegrationTestBase {
         return post("/@" + handle + "/friend").param("action", action).with(csrf());
     }
 
-    private int notifications(long receiver, String type) {
-        return jdbc.queryForObject("SELECT count(*) FROM notification WHERE receiver_id = ? AND type = ?", Integer.class,
-                receiver, type);
+    private void follow(long follower, long followee) {
+        jdbc.update("INSERT INTO follow (follower_id, followee_id, created_at) VALUES (?, ?, now())", follower, followee);
     }
 
     /** 친구 공개 글: 발행한 뒤 공개 범위를 FRIENDS로(친구 공개 글에는 최초 공개 시각이 없다). */
@@ -61,73 +54,46 @@ class FriendIT extends IntegrationTestBase {
         return id;
     }
 
-    private void befriend(long a, String aHandle, long b, String bHandle) throws Exception {
-        mockMvc.perform(friend(bHandle, "request").with(TestAuth.member(a))).andExpect(status().is3xxRedirection());
-        mockMvc.perform(friend(aHandle, "accept").with(TestAuth.member(b))).andExpect(status().is3xxRedirection());
-        assertThat(friendQuery.areFriends(a, b)).isTrue();
-    }
-
     @Test
-    void requestAcceptDeclineCancelAndUnfriendNeverNotifyTheOtherSide() throws Exception {
+    void ownerPicksFollowersOneWayWithoutAskingOrNotifying() throws Exception {
         clock.set(T);
-        long a = member("frasker");
-        long b = member("frtarget");
-        mockMvc.perform(friend("frtarget", "request").with(TestAuth.member(a))).andExpect(status().is3xxRedirection());
-        assertThat(friendQuery.status(a, b)).isEqualTo(Status.SENT);
-        assertThat(friendQuery.status(b, a)).isEqualTo(Status.RECEIVED);
-        assertThat(notifications(b, "FRIEND_REQUEST")).isEqualTo(1);
-        // 같은 요청을 다시 보내도 그대로
-        mockMvc.perform(friend("frtarget", "request").with(TestAuth.member(a)));
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM friendship", Integer.class)).isEqualTo(1);
-        // 거절: 행이 사라지고, 받은 사람의 안 읽은 요청 알림에서도 빠지고, 요청한 사람에게는 아무것도 없다
-        mockMvc.perform(friend("frasker", "remove").with(TestAuth.member(b))).andExpect(status().is3xxRedirection());
-        assertThat(friendQuery.status(a, b)).isEqualTo(Status.NONE);
-        assertThat(notifications(b, "FRIEND_REQUEST")).isZero();
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE receiver_id = ?", Integer.class, a)).isZero();
-        // 다시 요청 → 수락 → 친구, 끊기 → 상대에게 알림 없음
-        befriend(a, "frasker", b, "frtarget");
-        assertThat(friendQuery.status(a, b)).isEqualTo(Status.FRIENDS);
-        mockMvc.perform(friend("frtarget", "remove").with(TestAuth.member(a)));
-        assertThat(friendQuery.status(b, a)).isEqualTo(Status.NONE);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE receiver_id IN (?, ?) AND type <> 'FRIEND_REQUEST'",
-                Integer.class, a, b)).isZero();
-        // 자기 자신 400, 없는 회원 404, 비회원은 로그인
-        mockMvc.perform(friend("frasker", "request").with(TestAuth.member(a))).andExpect(status().isBadRequest());
-        mockMvc.perform(friend("nobody-here", "request").with(TestAuth.member(a))).andExpect(status().isNotFound());
-        assertThat(mockMvc.perform(friend("frtarget", "request")).andReturn().getResponse().getHeader("Location")).contains("/login");
+        long owner = member("frowner");
+        long fan = member("frfan");
+        long stranger = member("frnofan");
+        follow(fan, owner);
+        assertThat(friendQuery.status(owner, fan)).isEqualTo(Status.FOLLOWER);
+        assertThat(friendQuery.status(fan, owner)).isEqualTo(Status.NONE);
+        // 나를 팔로우하는 사람: 바로 친구(수락 없음), 두 번 넣어도 한 줄
+        mockMvc.perform(friend("frfan", "add").with(TestAuth.member(owner))).andExpect(status().is3xxRedirection());
+        mockMvc.perform(friend("frfan", "add").with(TestAuth.member(owner))).andExpect(status().is3xxRedirection());
+        assertThat(friendQuery.hasFriend(owner, fan)).isTrue();
+        assertThat(friendQuery.hasFriend(fan, owner)).as("한쪽 관계").isFalse();
+        assertThat(friendQuery.status(owner, fan)).isEqualTo(Status.FRIENDS);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM close_friend", Integer.class)).isEqualTo(1);
+        // 나를 팔로우하지 않는 사람·나 자신은 넣을 수 없다(아무것도 바뀌지 않음)
+        mockMvc.perform(friend("frnofan", "add").with(TestAuth.member(owner))).andExpect(status().is3xxRedirection());
+        mockMvc.perform(friend("frowner", "add").with(TestAuth.member(owner))).andExpect(status().is3xxRedirection());
+        assertThat(friendQuery.hasFriend(owner, stranger)).isFalse();
+        // 상대가 나를 팔로우만 해서는 내 친구가 아니다(상대가 나를 넣을 수도 없다: 나는 상대를 팔로우하지 않음)
+        mockMvc.perform(friend("frowner", "add").with(TestAuth.member(fan)));
+        assertThat(friendQuery.hasFriend(fan, owner)).isFalse();
+        // 빼기, 누구에게도 알림 없음
+        mockMvc.perform(friend("frfan", "remove").with(TestAuth.member(owner))).andExpect(status().is3xxRedirection());
+        assertThat(friendQuery.status(owner, fan)).isEqualTo(Status.FOLLOWER);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM notification WHERE receiver_id IN (?, ?) AND type <> 'FOLLOW'",
+                Integer.class, owner, fan)).isZero();
+        // 없는 회원 404, 비회원은 로그인
+        mockMvc.perform(friend("nobody-here", "add").with(TestAuth.member(owner))).andExpect(status().isNotFound());
+        assertThat(mockMvc.perform(friend("frfan", "add")).andReturn().getResponse().getHeader("Location")).contains("/login");
     }
 
     @Test
-    void crossRequestsAtTheSameTimeBecomeOneFriendship() throws Exception {
-        long a = member("frcrossa");
-        long b = member("frcrossb");
-        ExecutorService pool = Executors.newFixedThreadPool(20);
-        CountDownLatch start = new CountDownLatch(1);
-        List<Future<Integer>> futures = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            boolean fromA = i % 2 == 0;
-            futures.add(pool.submit(() -> {
-                start.await();
-                return mockMvc.perform(friend(fromA ? "frcrossb" : "frcrossa", "request")
-                        .with(TestAuth.member(fromA ? a : b))).andReturn().getResponse().getStatus();
-            }));
-        }
-        start.countDown();
-        for (Future<Integer> f : futures) {
-            assertThat(f.get()).isEqualTo(303);
-        }
-        pool.shutdown();
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM friendship", Integer.class)).isEqualTo(1);
-        assertThat(friendQuery.areFriends(a, b)).isTrue();
-    }
-
-    @Test
-    void friendsPostsAreReadableOnlyByFriendsAndNeverListedPublicly() throws Exception {
+    void friendsPostsAreReadableOnlyByPickedPeopleAndNeverListedPublicly() throws Exception {
         clock.set(T);
         long author = member("frauthor");
         long friend = member("frfriend");
         long stranger = member("frstranger");
-        befriend(author, "frauthor", friend, "frfriend");
+        members.addFriend(author, friend);
         posts.published(author, "공개 글 하나", "본문", 1, T.minusSeconds(3600));
         long secret = friendsPost(author, "친구만 보는 비밀글", T.minusSeconds(60));
         String url = "/@frauthor/posts/" + secret;
@@ -137,12 +103,15 @@ class FriendIT extends IntegrationTestBase {
                 .andReturn().getResponse().getContentAsString();
         assertThat(strangerPage).contains("볼 수 없는 글이에요").doesNotContain("친구만 보는 비밀글");
         mockMvc.perform(get(url)).andExpect(status().isNotFound());
-        // 권한 표(42) 친구 공개 칸: 요청 중인 사람·관리자도 404(관리자 예외 없음)
-        long pending = member("frpending");
-        mockMvc.perform(friend("frauthor", "request").with(TestAuth.member(pending)));
-        mockMvc.perform(get(url).with(TestAuth.member(pending))).andExpect(status().isNotFound());
+        // 팔로우만 하는 사람·관리자도 404(관리자 예외 없음)
+        long fan = member("frfanonly");
+        follow(fan, author);
+        mockMvc.perform(get(url).with(TestAuth.member(fan))).andExpect(status().isNotFound());
         long admin = member("fradmin");
         mockMvc.perform(get(url).with(TestAuth.admin(admin))).andExpect(status().isNotFound());
+        // 한쪽 관계: 글쓴이는 친구가 넣지 않았으니 친구의 친구 공개 글을 못 본다
+        long back = friendsPost(friend, "거꾸로는 안 보이는 글", T.minusSeconds(30));
+        mockMvc.perform(get("/@frfriend/posts/" + back).with(TestAuth.member(author))).andExpect(status().isNotFound());
         // 친구가 보는 블로그: 공개 + 친구 공개(발행 시각 최신순), 다른 사람에게는 공개만
         String friendBlog = mockMvc.perform(get("/@frauthor").with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString();
         assertThat(friendBlog).contains("친구만 보는 비밀글").contains("공개 글 하나");
@@ -154,7 +123,6 @@ class FriendIT extends IntegrationTestBase {
                     .as(path).contains("공개 글 하나").doesNotContain("친구만 보는 비밀글");
         }
         // 공용 목록(홈·트렌딩·검색·피드)에는 친구에게도 나오지 않는다
-        jdbc.update("INSERT INTO follow (follower_id, followee_id, created_at) VALUES (?, ?, now())", friend, author);
         for (String path : new String[] {"/", "/?tab=trending", "/api/posts", "/feed", "/search?q=" + "비밀글"}) {
             assertThat(mockMvc.perform(get(path).with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString())
                     .as(path).doesNotContain("친구만 보는 비밀글");
@@ -164,11 +132,24 @@ class FriendIT extends IntegrationTestBase {
                 .andExpect(status().isOk());
         mockMvc.perform(put("/api/posts/{id}/like", secret).with(csrf()).with(TestAuth.member(stranger)))
                 .andExpect(status().isNotFound());
-        // 끊으면 즉시 404, 블로그에서도 빠진다
-        mockMvc.perform(friend("frauthor", "remove").with(TestAuth.member(friend)));
+        // 글쓴이가 빼면 즉시 404, 블로그에서도 빠진다
+        mockMvc.perform(friend("frfriend", "remove").with(TestAuth.member(author)));
         mockMvc.perform(get(url).with(TestAuth.member(friend))).andExpect(status().isNotFound());
         assertThat(mockMvc.perform(get("/@frauthor").with(TestAuth.member(friend))).andReturn().getResponse()
                 .getContentAsString()).doesNotContain("친구만 보는 비밀글");
+    }
+
+    @Test
+    void blogHeaderShowsAddButtonOnlyForMyFollowers() throws Exception {
+        long me = member("frbtnme");
+        long fan = member("frbtnfan");
+        member("frbtnother");
+        follow(fan, me);
+        assertThat(mockMvc.perform(get("/@frbtnfan").with(TestAuth.member(me))).andReturn().getResponse()
+                .getContentAsString()).contains("친구로 넣기");
+        assertThat(mockMvc.perform(get("/@frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
+                .getContentAsString()).doesNotContain("친구로 넣기").doesNotContain("친구 요청");
+        assertThat(mockMvc.perform(get("/@frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
     }
 
     @Test
@@ -184,29 +165,20 @@ class FriendIT extends IntegrationTestBase {
     }
 
     @Test
-    void friendListIsOwnerOnlyAndWithdrawalPurgesRelations() throws Exception {
+    void friendPageIsOwnerOnlyAndWithdrawalPurgesRelations() throws Exception {
         long a = member("frlista");
         long b = member("frlistb");
         long c = member("frlistc");
-        befriend(a, "frlista", b, "frlistb");
-        mockMvc.perform(friend("frlista", "request").with(TestAuth.member(c)));
+        members.addFriend(a, b);
+        follow(c, a);
+        members.addFriend(c, a);
         String page = mockMvc.perform(get("/settings/friends").with(TestAuth.member(a))).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("내 친구 1").contains("받은 친구 요청 1").contains("@frlistb").contains("@frlistc");
+        assertThat(page).contains("내 친구 1").contains("나를 팔로우하는 사람 1").contains("@frlistb").contains("@frlistc")
+                .doesNotContain("받은 친구 요청");
         assertThat(mockMvc.perform(get("/settings/friends")).andReturn().getResponse().getHeader("Location")).contains("/login");
         purgeStep.purge(a);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM friendship WHERE ? IN (member_a_id, member_b_id)", Integer.class, a))
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM close_friend WHERE ? IN (owner_id, friend_id)", Integer.class, a))
                 .isZero();
-    }
-
-    @Test
-    void dailyRequestLimit() throws Exception {
-        long a = member("frspammer");
-        for (int i = 0; i < 50; i++) {
-            member("frs" + i);
-            mockMvc.perform(friend("frs" + i, "request").with(TestAuth.member(a))).andExpect(status().is3xxRedirection());
-        }
-        member("frsextra");
-        mockMvc.perform(friend("frsextra", "request").with(TestAuth.member(a))).andExpect(status().isTooManyRequests());
     }
 }

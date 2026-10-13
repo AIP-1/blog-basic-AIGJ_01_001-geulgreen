@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * 친구 그룹과 그룹 공개 대상(030, 강성찬 개인 확장). 그룹에는 수락된 친구만 넣을 수 있고, 친구를 끊으면 서로의 그룹에서 빠진다.
+ * 친구 그룹과 그룹 공개 대상(030, 강성찬 개인 확장). 그룹에는 내가 고른 친구(069)만 넣을 수 있고, 친구에서 빼면 내 그룹에서도 빠진다.
  * 그룹 공개 글은 글쓴이와, 그 글에 고른 그룹 중 하나에 든 사람만 읽는다.
  */
 @Service
@@ -61,7 +61,7 @@ public class GroupService {
     /** 친구만 넣을 수 있다. */
     public void add(long owner, long groupId, long memberId) {
         requireOwn(owner, groupId);
-        if (!friends.areFriends(owner, memberId)) {
+        if (!friends.hasFriend(owner, memberId)) {
             throw new NotFoundException();
         }
         Integer count = jdbc.queryForObject("SELECT count(*) FROM group_member WHERE group_id = ?", Integer.class, groupId);
@@ -103,12 +103,11 @@ public class GroupService {
                 """, Boolean.class, postId, viewer));
     }
 
-    /** 친구를 끊으면 서로의 그룹에서 뺀다. */
-    public void removeBetween(long a, long b) {
+    /** 친구에서 빼면 내 그룹에서도 뺀다(069). */
+    public void removeFromOwnGroups(long owner, long member) {
         jdbc.update("""
-                DELETE FROM group_member gm USING friend_group g
-                WHERE gm.group_id = g.id AND ((g.owner_id = ? AND gm.member_id = ?) OR (g.owner_id = ? AND gm.member_id = ?))
-                """, a, b, b, a);
+                DELETE FROM group_member gm USING friend_group g WHERE gm.group_id = g.id AND g.owner_id = ? AND gm.member_id = ?
+                """, owner, member);
     }
 
     /** 탈퇴 정리: 내 그룹과, 남의 그룹에 든 나를 지운다. */

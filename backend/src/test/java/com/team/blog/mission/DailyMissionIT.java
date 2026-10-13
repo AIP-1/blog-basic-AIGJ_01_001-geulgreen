@@ -36,8 +36,7 @@ class DailyMissionIT extends IntegrationTestBase {
     }
 
     private void befriend(String a, long aId, String b, long bId) throws Exception {
-        mockMvc.perform(post("/@" + a + "/friend").param("action", "request").with(csrf()).with(TestAuth.member(bId)));
-        mockMvc.perform(post("/@" + b + "/friend").param("action", "accept").with(csrf()).with(TestAuth.member(aId)));
+        members.befriend(aId, bId);
     }
 
     private long startWriting(long who, long topicId) throws Exception {
@@ -113,7 +112,6 @@ class DailyMissionIT extends IntegrationTestBase {
         long writer = member("msonce");
         long friend = member("msoncefriend");
         befriend("msonce", writer, "msoncefriend", friend);
-        jdbc.update("INSERT INTO follow (follower_id, followee_id, created_at) VALUES (?, ?, now())", friend, writer);
         long topicId = missions.topics(DAY).get(1).id();
         long postId = startWriting(writer, topicId);
         publish(writer, postId, "PUBLIC");
