@@ -75,11 +75,11 @@ public class NicknameChangeService {
     private Optional<Instant> nextAllowedAt(Member member, Instant now) {
         // 074 강성찬 개인 확장: 인스타처럼 14일에 두 번 — 그 전 변경이 기간 밖이면 바꿀 수 있다
         Instant changedAt = insta.enabled() ? member.getNicknamePrevChangedAt() : member.getNicknameChangedAt();
-        Duration cooldown = insta.enabled() ? insta.changeWindow() : this.cooldown;
+        Duration window = insta.enabled() ? insta.changeWindow() : cooldown;
         if (changedAt == null) {
             return Optional.empty();
         }
-        Instant next = changedAt.plus(cooldown);
+        Instant next = changedAt.plus(window);
         return next.isAfter(now) ? Optional.of(next) : Optional.empty();
     }
 }

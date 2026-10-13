@@ -62,8 +62,8 @@ class ContentRendererSyntaxTest {
     @Test
     void codeBlockIsEscapedWithLanguageClass() {
         String html = html("```java\nList<String> xs = new ArrayList<>();\n```\n\n```evil\" onclick=\"x\nx\n```");
-        assertThat(html).contains("<pre><code class=\"language-java\">List&lt;String&gt; xs");
-        assertThat(html).doesNotContain("onclick");
+        assertThat(html).contains("<pre><code class=\"language-java\">List&lt;String&gt; xs")
+                .doesNotContain("onclick");
     }
 
     @Test
@@ -75,12 +75,12 @@ class ContentRendererSyntaxTest {
     @Test
     void internalLinkSameTabExternalLinkNewTab() {
         String html = html("[내부](/@kim755030/posts/1) [외부](https://spring.io) [우리](https://devlog.example/@a) <https://x.dev>");
-        assertThat(html).containsPattern("<a href=\"/(&#64;|@)kim755030/posts/1\">내부</a>");
-        assertThat(html).contains("href=\"https://spring.io\"").contains("rel=\"noopener noreferrer nofollow ugc\"")
-                .contains("target=\"_blank\"");
-        assertThat(html).containsPattern("<a href=\"https://devlog.example/(&#64;|@)a\">우리</a>");
-        assertThat(html).containsPattern("<a [^>]*href=\"https://x.dev\"[^>]*target=\"_blank\"");
-        assertThat(html).doesNotContain("href=\"//");
+        assertThat(html).containsPattern("<a href=\"/(&#64;|@)kim755030/posts/1\">내부</a>")
+                .contains("href=\"https://spring.io\"").contains("rel=\"noopener noreferrer nofollow ugc\"")
+                .contains("target=\"_blank\"")
+                .containsPattern("<a href=\"https://devlog.example/(&#64;|@)a\">우리</a>")
+                .containsPattern("<a [^>]*href=\"https://x.dev\"[^>]*target=\"_blank\"")
+                .doesNotContain("href=\"//");
     }
 
     @Test

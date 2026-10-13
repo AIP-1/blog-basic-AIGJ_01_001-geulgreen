@@ -25,10 +25,10 @@ public class ViewApiController {
     }
 
     @PostMapping("/api/posts/{postId}/views")
-    public ResponseEntity<Void> record(@PathVariable long postId, HttpServletRequest request) {
+    public ResponseEntity<Void> recordView(@PathVariable long postId, HttpServletRequest request) {
         boolean prefetch = "prefetch".equalsIgnoreCase(request.getHeader("Purpose"))
                 || "prefetch".equalsIgnoreCase(request.getHeader("Sec-Purpose"));
-        recorder.record(postId, new ViewRecorder.Visit(currentUserProvider.current(), VisitorCookie.read(request),
+        recorder.recordView(postId, new ViewRecorder.Visit(currentUserProvider.current(), VisitorCookie.read(request),
                 clientIpResolver.resolve(request), request.getHeader("User-Agent"), prefetch));
         return ResponseEntity.noContent().build();
     }

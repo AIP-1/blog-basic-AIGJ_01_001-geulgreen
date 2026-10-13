@@ -34,8 +34,7 @@ public class SitemapController {
         StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
                 .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         url(xml, "/", null);
-        jdbc.query("""
-                SELECT DISTINCT m.handle FROM post p JOIN member m ON m.id = p.author_id WHERE """ + " "
+        jdbc.query("SELECT DISTINCT m.handle FROM post p JOIN member m ON m.id = p.author_id WHERE "
                 + accessPolicy.publicListingCondition("p", "m") + " ORDER BY m.handle LIMIT 10000",
                 rs -> { url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")), null); });
         jdbc.query("""

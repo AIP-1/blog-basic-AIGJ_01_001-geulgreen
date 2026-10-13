@@ -105,7 +105,7 @@ public class TagSuggestionService {
         for (String t : request.currentTags() == null ? List.<String>of() : request.currentTags()) {
             TagNormalizer.lookupName(t).ifPresent(currentTags::add);
         }
-        int slots = Math.max(0, Math.min(properties.maxSuggestions(), postProperties.maxTags() - currentTags.size()));
+        int slots = Math.clamp(postProperties.maxTags() - currentTags.size(), 0, properties.maxSuggestions());
         int used = usedToday(user.memberId());
 
         Optional<AiSuggestionCache.Entry> hit = cache.exact(input);

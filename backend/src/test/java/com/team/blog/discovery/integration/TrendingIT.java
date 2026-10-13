@@ -79,8 +79,8 @@ class TrendingIT extends IntegrationTestBase {
             many.add(post(prolific, "다작" + i, Duration.ofHours(3 + i), 5, 0));
         }
         List<Long> ranked = trending.rank(100);
-        assertThat(ranked).doesNotContain(outside, viewsOnly, selfComments, hiddenComment, priv, hidden);
-        assertThat(ranked).contains(fresh, old, commented);
+        assertThat(ranked).doesNotContain(outside, viewsOnly, selfComments, hiddenComment, priv, hidden)
+                .contains(fresh, old, commented);
         // 같은 반응이면 최근 글이 높다
         assertThat(ranked.indexOf(fresh)).isLessThan(ranked.indexOf(old));
         // 작성자당 최대 3개(점수 상위 3개)

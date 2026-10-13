@@ -74,7 +74,8 @@ class BannedWordFilterTest {
         assertThatThrownBy(() -> new BannedWordFilter(loader, "classpath:policy/none.txt",
                 "classpath:policy/test-banned-words-exceptions.txt"))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> WordListLoader.load(new ByteArrayResource("# only comment\n\n".getBytes())))
+        ByteArrayResource commentOnly = new ByteArrayResource("# only comment\n\n".getBytes());
+        assertThatThrownBy(() -> WordListLoader.load(commentOnly))
                 .isInstanceOf(IllegalStateException.class);
     }
 

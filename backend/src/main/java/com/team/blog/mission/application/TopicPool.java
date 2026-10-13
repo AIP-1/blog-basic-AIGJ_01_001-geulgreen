@@ -157,8 +157,8 @@ public final class TopicPool {
         int[] offsets = {0, 3, 5, 2, 6};
         List<Topic> out = new ArrayList<>();
         for (int k = 0; k < Math.min(count, offsets.length); k++) {
-            List<Topic> category = CATEGORIES.get((int) Math.floorMod(d + offsets[k], n));
-            out.add(category.get((int) Math.floorMod(d / n + k * 7L, category.size())));
+            List<Topic> category = CATEGORIES.get(Math.floorMod(d + offsets[k], n));
+            out.add(category.get(Math.floorMod(d / n + k * 7L, category.size())));
         }
         return out;
     }

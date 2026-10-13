@@ -100,7 +100,7 @@ class WithdrawalIT extends IntegrationTestBase {
                 .param("confirm", "on").param("verification", "Blog#2026ok"))
                 .andExpect(status().isSeeOther()).andExpect(header().string("Location", "/withdrawn"));
         var row = jdbc.queryForMap("SELECT status, withdrawn_at FROM member WHERE id = ?", me);
-        assertThat(row.get("status")).isEqualTo("WITHDRAWN");
+        assertThat(row).containsEntry("status", "WITHDRAWN");
         assertThat(((Timestamp) row.get("withdrawn_at")).toInstant()).isEqualTo(T);
         assertThat(mailpit.awaitMessagesTo("wdgone@example.com", 1).getFirst().body()).contains("2026년 10월 31일");
         mockMvc.perform(get("/wdgone")).andExpect(status().isNotFound());
@@ -173,7 +173,7 @@ class WithdrawalIT extends IntegrationTestBase {
         clock.set(T.plus(Duration.ofDays(31)));
         assertThat(purgeJob.run()).isEqualTo(1);
         Map<String, Object> m = jdbc.queryForMap("SELECT * FROM member WHERE id = ?", me);
-        assertThat(m.get("handle")).isEqualTo("wdpurge");
+        assertThat(m).containsEntry("handle", "wdpurge");
         assertThat(m.get("nickname")).isNull();
         assertThat(m.get("bio")).isNull();
         assertThat(m.get("deleted_at")).isNotNull();

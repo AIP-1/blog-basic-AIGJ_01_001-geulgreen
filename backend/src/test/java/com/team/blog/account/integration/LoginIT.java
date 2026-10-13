@@ -149,8 +149,8 @@ class LoginIT extends IntegrationTestBase {
             mockMvc.perform(login(EMAIL, "Wrong#2026x"));
         }
         Set<String> keys = redis.keys("auth:*");
-        assertThat(keys).isNotEmpty().allMatch(k -> !k.contains("@") && !k.contains("login@") && !k.contains("x.com"));
-        assertThat(keys).contains("auth:login-lock:" + KeyHashing.emailHash(EMAIL));
+        assertThat(keys).isNotEmpty().allMatch(k -> !k.contains("@") && !k.contains("login@") && !k.contains("x.com"))
+                .contains("auth:login-lock:" + KeyHashing.emailHash(EMAIL));
     }
 
     private static String stripCsrf(String html) {

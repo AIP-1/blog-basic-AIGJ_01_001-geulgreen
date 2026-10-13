@@ -29,8 +29,8 @@ class RedisTokenStoreIT extends IntegrationTestBase {
         assertThat(Base64.getUrlDecoder().decode(raw)).hasSize(32);
 
         Set<String> keys = redis.keys("auth:*");
-        assertThat(keys).containsExactlyInAnyOrder("auth:verify:" + KeyHashing.sha256(raw), "auth:verify-current:7");
-        assertThat(keys).noneMatch(k -> k.contains(raw));
+        assertThat(keys).containsExactlyInAnyOrder("auth:verify:" + KeyHashing.sha256(raw), "auth:verify-current:7")
+                .noneMatch(k -> k.contains(raw));
         assertThat(redis.opsForValue().get("auth:verify:" + KeyHashing.sha256(raw))).isEqualTo("7");
         assertThat(redis.opsForValue().get("auth:verify-current:7")).doesNotContain(raw);
     }

@@ -13,7 +13,8 @@ class RequiredSecretsCheckTest {
     void missingSecretsStopStartupWithoutPrintingValues() {
         MockEnvironment env = new MockEnvironment().withProperty("spring.mail.username", "blog@gmail.com")
                 .withProperty("spring.mail.password", "");
-        assertThatThrownBy(() -> new RequiredSecretsCheck(env).afterPropertiesSet())
+        RequiredSecretsCheck check = new RequiredSecretsCheck(env);
+        assertThatThrownBy(check::afterPropertiesSet)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("spring.mail.password")
                 .hasMessageContaining("spring.security.oauth2.client.registration.google.client-id")

@@ -65,7 +65,7 @@ public class TagNormalizer {
         }
         String s = Normalizer.normalize(raw, Normalizer.Form.NFKC);
         StringBuilder kept = new StringBuilder(s.length());
-        s.codePoints().filter(cp -> !hidden(cp) || Character.isWhitespace(cp) && cp != '​').forEach(kept::appendCodePoint);
+        s.codePoints().filter(cp -> !hidden(cp) || Character.isWhitespace(cp) && cp != '\u200B').forEach(kept::appendCodePoint);
         s = kept.toString().strip();
         int i = 0;
         while (i < s.length() && s.charAt(i) == '#') {

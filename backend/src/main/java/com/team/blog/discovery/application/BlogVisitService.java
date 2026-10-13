@@ -49,7 +49,7 @@ public class BlogVisitService {
         return properties.enabled();
     }
 
-    public void record(long ownerId, Optional<CurrentUser> viewer, Optional<String> cookie, String ip, String userAgent) {
+    public void recordVisit(long ownerId, Optional<CurrentUser> viewer, Optional<String> cookie, String ip, String userAgent) {
         if (!properties.enabled() || viewer.map(v -> v.memberId() == ownerId).orElse(false)) {
             return;
         }
