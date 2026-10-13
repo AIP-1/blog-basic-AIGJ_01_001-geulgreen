@@ -9,3 +9,4 @@ docs
 specs
 db
 *.md
+!CHANGELOG.md
