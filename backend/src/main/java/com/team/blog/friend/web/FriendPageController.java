@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * 친구(025, 강성찬 개인 확장): 블로그 머리·설정 화면의 폼(스크립트 없이 동작)과 설정의 친구 화면.
- * 친구 목록·받은 요청·보낸 요청은 본인만 본다(06 §6-2).
+ * 친한 친구(025·069, 강성찬 개인 확장): 블로그 머리·설정 화면의 폼(스크립트 없이 동작)과 설정의 친구 화면.
+ * 친구 목록과 나를 팔로우하는 사람 목록은 본인만 본다.
  */
 @Controller
 public class FriendPageController {
@@ -35,13 +35,12 @@ public class FriendPageController {
         this.currentUserProvider = currentUserProvider;
     }
 
-    /** {@code action}: request(요청·맞요청 수락) / accept(받은 요청 수락) / remove(거절·요청 취소·친구 끊기). */
+    /** {@code action}: add(나를 팔로우하는 사람을 친구로 넣기) / remove(친구에서 빼기). */
     @PostMapping("/@{handle}/friend")
     public RedirectView form(@PathVariable("handle") String handle, @RequestParam("action") String action,
                              @RequestParam(value = "back", required = false) String back) {
         switch (action) {
-            case "request" -> friendService.request(currentUserProvider.current(), handle);
-            case "accept" -> friendService.accept(currentUserProvider.current(), handle);
+            case "add" -> friendService.add(currentUserProvider.current(), handle);
             case "remove" -> friendService.remove(currentUserProvider.current(), handle);
             default -> throw new com.team.blog.shared.error.NotFoundException();
         }
@@ -54,8 +53,7 @@ public class FriendPageController {
     public String friends(Model model) {
         CurrentUser me = accountGuard.requireLoggedIn(currentUserProvider.current());
         model.addAttribute("friends", friendQuery.friends(me.memberId()));
-        model.addAttribute("received", friendQuery.received(me.memberId()));
-        model.addAttribute("sent", friendQuery.sent(me.memberId()));
+        model.addAttribute("candidates", friendQuery.candidates(me.memberId()));
         return "settings/friends";
     }
 }

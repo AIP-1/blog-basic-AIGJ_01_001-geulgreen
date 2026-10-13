@@ -40,9 +40,9 @@ public class PostListApiController {
                          @RequestParam(value = "cursor", required = false) String cursor,
                          @RequestParam(value = "tag", required = false) String tag) {
         long ownerId = blogOwnerResolver.resolve(handle).orElseThrow(NotFoundException::new).memberId();
-        // 025 강성찬 개인 확장: 친구면 친구 공개 글도(블로그 화면과 같은 규칙)
+        // 025·069 강성찬 개인 확장: 블로그 주인이 나를 친구로 골랐으면 친구 공개 글도(블로그 화면과 같은 규칙)
         Long friendViewer = currentUserProvider.current().map(v -> v.memberId())
-                .filter(v -> friendQuery.areFriends(v, ownerId)).orElse(null);
+                .filter(v -> friendQuery.hasFriend(ownerId, v)).orElse(null);
         if (tag == null || tag.isEmpty()) {
             return friendViewer != null ? listQuery.blogForFriend(ownerId, friendViewer, null, cursor) : listQuery.blog(ownerId, cursor);
         }

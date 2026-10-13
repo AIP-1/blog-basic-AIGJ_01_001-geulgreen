@@ -72,7 +72,7 @@ public class NoteService {
     public List<Note> notes(long authorId, Optional<CurrentUser> viewer, Long beforeId, int limit) {
         long me = viewer.map(CurrentUser::memberId).orElse(-1L);
         boolean owner = me == authorId;
-        boolean friend = !owner && me > 0 && friends.areFriends(me, authorId);
+        boolean friend = !owner && me > 0 && friends.hasFriend(authorId, me);
         String visible = owner ? "TRUE" : friend ? "n.visibility IN ('PUBLIC', 'FRIENDS')" : "n.visibility = 'PUBLIC'";
         return jdbc.query("SELECT n.id, n.content, n.visibility, n.created_at FROM short_note n WHERE n.author_id = ? AND "
                         + visible + (beforeId == null ? "" : " AND n.id < " + beforeId) + " ORDER BY n.id DESC LIMIT " + limit,

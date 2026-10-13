@@ -39,7 +39,7 @@
             </select>
             <button type="submit" class="btn btn-sm">친구 넣기</button>
         </form>
-        <p th:if="${friends.isEmpty()}" class="help">그룹에는 친구만 넣을 수 있어요. 먼저 친구를 맺어 보세요</p>
+        <p th:if="${friends.isEmpty()}" class="help">그룹에는 친구만 넣을 수 있어요. 먼저 <a href="/settings/friends">친구를 넣어</a> 보세요</p>
         <form method="post" th:action="@{/settings/groups/{g}/delete(g=${g.id()})}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <button type="submit" class="btn btn-danger btn-sm">그룹 지우기</button>

@@ -118,9 +118,6 @@ public class NotificationWriter {
 
     public static final String FOLLOW_GROUP = "FOLLOW";
 
-    /** 친구 요청 묶음(025). */
-    public static final String FRIEND_GROUP = "FRIEND_REQUEST";
-
     /**
      * 묶음에 더하기(25 §4-2). 좋아요는 이 글로 들어간 적이 있으면(읽음 무관), 팔로우는 7일 안에 들어간 적이 있으면 넣지 않는다.
      *
@@ -210,7 +207,7 @@ public class NotificationWriter {
     }
 
     /**
-     * 첫 공개 응원(026, 강성찬 개인 확장): 친구 공개였던 글이 처음 전체 공개되면 글쓴이의 친구에게 1건씩. "새 글" 알림을 끈 친구는 받지 않고,
+     * 첫 공개 응원(026, 강성찬 개인 확장): 친구 공개였던 글이 처음 전체 공개되면 글쓴이가 고른 친구(069)에게 1건씩. "새 글" 알림을 끈 친구는 받지 않고,
      * 같은 글의 새 글 알림은 이것이 대신한다({@link #newPost}보다 먼저 부른다).
      */
     public int firstPublicCheer(long postId, long authorId) {
@@ -222,16 +219,16 @@ public class NotificationWriter {
                 INSERT INTO notification (receiver_id, type, post_id, last_actor_id, actor_count, created_at, updated_at)
                 SELECT r.id, 'FIRST_PUBLIC', p.id, ?, 1, ?, ?
                 FROM post p
-                JOIN friendship fr ON fr.status = 'ACCEPTED' AND ? IN (fr.member_a_id, fr.member_b_id)
-                JOIN member r ON r.id = CASE WHEN fr.member_a_id = ? THEN fr.member_b_id ELSE fr.member_a_id END
+                JOIN close_friend cf ON cf.owner_id = p.author_id
+                JOIN member r ON r.id = cf.friend_id
                 WHERE p.id = ? AND p.author_id = ? AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC'
                   AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND r.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = r.id AND nm.type = 'NEW_POST')
-                """, authorId, now, now, authorId, authorId, postId, authorId);
+                """, authorId, now, now, postId, authorId);
     }
 
     /**
-     * 오늘의 미션 글(057, 강성찬 개인 확장): 전체 공개·친구 공개로 처음 발행되면 글쓴이의 친구에게 1건씩. "새 글" 알림을 끈 친구와
+     * 오늘의 미션 글(057, 강성찬 개인 확장): 전체 공개·친구 공개로 처음 발행되면 글쓴이가 고른 친구(069)에게 1건씩. "새 글" 알림을 끈 친구와
      * 같은 글로 새 글 알림을 이미 받은 친구는 받지 않는다(새 글 알림도 이 알림을 받은 사람은 건너뛴다).
      */
     public int missionDone(long postId, long authorId) {
@@ -243,14 +240,14 @@ public class NotificationWriter {
                 INSERT INTO notification (receiver_id, type, post_id, last_actor_id, actor_count, created_at, updated_at)
                 SELECT r.id, 'MISSION_DONE', p.id, ?, 1, ?, ?
                 FROM post p
-                JOIN friendship fr ON fr.status = 'ACCEPTED' AND ? IN (fr.member_a_id, fr.member_b_id)
-                JOIN member r ON r.id = CASE WHEN fr.member_a_id = ? THEN fr.member_b_id ELSE fr.member_a_id END
+                JOIN close_friend cf ON cf.owner_id = p.author_id
+                JOIN member r ON r.id = cf.friend_id
                 WHERE p.id = ? AND p.author_id = ? AND p.status = 'PUBLISHED' AND p.visibility IN ('PUBLIC', 'FRIENDS')
                   AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND r.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = r.id AND nm.type = 'NEW_POST')
                   AND NOT EXISTS (SELECT 1 FROM notification n WHERE n.receiver_id = r.id AND n.post_id = p.id
                                   AND n.type IN ('NEW_POST', 'MISSION_DONE'))
-                """, authorId, now, now, authorId, authorId, postId, authorId);
+                """, authorId, now, now, postId, authorId);
     }
 
     /** 댓글이 지워지거나(자리만 남음 포함) 숨겨지면 그 댓글로 생긴 댓글·답글 알림 삭제(FR-014). */
