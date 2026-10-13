@@ -1,9 +1,12 @@
 package com.team.blog.account.application;
 
+import com.team.blog.account.domain.AuthIdentity;
 import com.team.blog.account.domain.Handle;
 import com.team.blog.account.domain.HandleRules;
 import com.team.blog.account.domain.HandleViolation;
 import com.team.blog.account.domain.Member;
+import com.team.blog.account.domain.Provider;
+import com.team.blog.account.infra.AuthIdentityRepository;
 import com.team.blog.account.infra.MemberRepository;
 import com.team.blog.shared.error.HandleViolationException;
 import com.team.blog.shared.error.NotFoundException;
@@ -20,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * 074 강성찬 개인 확장: 블로그 주소(아이디) 바꾸기(인스타처럼). 공통 규칙(FR-011)에서 주소를 바꾸는 유일한 경로다.
  * <ul>
- *   <li>접두어({@code go-}/{@code gi-})는 그대로, 본문만 바꾼다. 검사는 가입과 같다(형식·예약어·금칙어·중복·남이 잡아 둔 옛 주소).</li>
+ *   <li>소셜 가입의 접두어({@code go-}/{@code gi-}) 없이 아무 주소나 고른다. 검사는 가입과 같다(형식·예약어·금칙어·중복·남이 잡아 둔 옛 주소).
+ *       접두어는 가입 때 이메일·소셜 주소가 겹치지 않게 하려는 것뿐이고 로그인은 주소가 아니라 {@code auth_identity}로 구분한다.</li>
  *   <li>{@code changeWindow} 동안 두 번까지.</li>
  *   <li>예전 주소는 {@code handle_history}에 남겨 {@code handleHold} 동안 본인만 되돌릴 수 있고, 옛 주소로 오면 새 주소로 넘긴다
  *       ({@code OldHandleRedirectFilter}). 다른 사람이 그 주소를 가져가면 기록이 지워져 넘김도 끝난다.</li>
@@ -46,13 +50,15 @@ public class HandleChangeService {
     private static final int CHANGES_PER_WINDOW = 2;
 
     private final MemberRepository memberRepository;
+    private final AuthIdentityRepository identities;
     private final HandleService handleService;
     private final JdbcTemplate jdbc;
     private final InstaAccountProperties properties;
     private final Clock clock;
 
-    public HandleChangeService(MemberRepository memberRepository, HandleService handleService, JdbcTemplate jdbc,
-                               InstaAccountProperties properties, Clock clock) {
+    public HandleChangeService(MemberRepository memberRepository, AuthIdentityRepository identities,
+                               HandleService handleService, JdbcTemplate jdbc, InstaAccountProperties properties, Clock clock) {
+        this.identities = identities;
         this.memberRepository = memberRepository;
         this.handleService = handleService;
         this.jdbc = jdbc;
@@ -83,7 +89,8 @@ public class HandleChangeService {
         if (next.isPresent()) {
             throw new TooSoonException(next.get());
         }
-        Handle handle = handleService.validateForChange(raw, Handle.parse(current).prefix(), memberId);
+        Provider provider = identities.findByMemberId(memberId).map(AuthIdentity::getProvider).orElse(Provider.LOCAL);
+        Handle handle = handleService.validateForChange(raw, provider, memberId);
         // 잡아 둔 기간이 끝난 남의 옛 주소면 그 기록을 지운다(넘김도 끝). 자기 옛 주소로 되돌리면 기록은 남겨 횟수에 센다
         // (지금 주인이 그 주소라 넘기지는 않는다)
         jdbc.update("DELETE FROM handle_history WHERE old_handle = ? AND member_id <> ?", handle.toString(), memberId);
