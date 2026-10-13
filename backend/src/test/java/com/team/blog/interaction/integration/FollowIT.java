@@ -178,7 +178,7 @@ class FollowIT extends IntegrationTestBase {
         for (int i = 0; i < 15; i++) {
             expected.add(posts.published(i % 2 == 0 ? w1 : w2, "피드글" + i, "본문", 1, T.plusSeconds(i)));
         }
-        posts.published(stranger, "모르는 사람", "본문", 1, T);
+        long strangerPost = posts.published(stranger, "모르는 사람", "본문", 1, T);
         long priv = posts.published(w1, "비공개", "본문", 1, T);
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", priv);
         long trashed = posts.published(w1, "휴지통", "본문", 1, T);
@@ -191,13 +191,15 @@ class FollowIT extends IntegrationTestBase {
         body = mockMvc.perform(get("/api/feed?cursor=" + cursor).with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         collect(body, seen);
         assertThat(body).doesNotContain("\"nextCursor\":\"");
+        // 081: 팔로우한 글 4개마다 추천 글(모르는 사람) 1개, 중복 없음, 비공개·휴지통·임시 글 없음
+        expected.add(strangerPost);
         assertThat(seen).isEqualTo(expected);
         String page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("피드글14").contains("?cursor=").doesNotContain("모르는 사람");
+        assertThat(page).contains("피드글14").contains("?cursor=").contains("모르는 사람").contains("feed-rec-badge");
         // 068 추천 블로그: 팔로우 안 한 작가만, 나와 팔로우한 사람은 빼고, 다음 쪽에서는 안 보임
         jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
         page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("class=\"feed-following-heading\""));
+        String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("class=\"feed-following-heading"));
         assertThat(recommended).contains("href=\"/fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
                 .doesNotContain("/fdwriter1\"").doesNotContain("/fdwriter2\"").doesNotContain("/fdreader\"");
         assertThat(mockMvc.perform(get("/feed?cursor=" + cursor).with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
@@ -205,7 +207,8 @@ class FollowIT extends IntegrationTestBase {
         // 언팔로우 직후 다음 요청부터 빠짐, 작성자 탈퇴 유예도 빠짐
         mockMvc.perform(delete("/api/members/fdwriter2/follow").with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = ? WHERE id = ?", Timestamp.from(T), w1);
-        mockMvc.perform(get("/api/feed").with(TestAuth.member(me))).andExpect(jsonPath("$.items.length()").value(0));
+        assertThat(mockMvc.perform(get("/api/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+                .doesNotContain("\"handle\":\"fdwriter1\"");
         String header = mockMvc.perform(get("/").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(header).contains("href=\"/feed\"");
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("href=\"/feed\"");
