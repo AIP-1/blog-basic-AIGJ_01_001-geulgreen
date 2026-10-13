@@ -47,3 +47,46 @@
     if (menu.open && !menu.contains(e.target)) { menu.open = false; }
   });
 })();
+
+/*
+ * 펼침 메뉴(details: 프로필·검색·⋯·정렬·공유): 바깥을 누르거나 Esc를 누르면 닫히고, 한 번에 하나만 열린다(067 후속, 강성찬 개인 확장).
+ * 알림 종과 ☰ 메뉴는 각자 스크립트가 바깥 누르기로 닫는다. 여기서는 펼침 메뉴가 열릴 때 ☰만 닫아 준다.
+ */
+(function () {
+  'use strict';
+  var MENUS = 'details.profile-menu, details.search-menu, details.sort-menu';
+  var closingBurger = false;
+
+  function closeOthers(keep) {
+    Array.prototype.forEach.call(document.querySelectorAll(MENUS), function (d) {
+      if (d.open && d !== keep && !d.contains(keep)) { d.open = false; }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    if (closingBurger) { return; }
+    Array.prototype.forEach.call(document.querySelectorAll(MENUS), function (d) {
+      if (d.open && !d.contains(e.target)) { d.open = false; }
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') { return; }
+    Array.prototype.forEach.call(document.querySelectorAll(MENUS), function (d) {
+      if (!d.open) { return; }
+      d.open = false;
+      if (d.contains(document.activeElement)) { d.querySelector('summary').focus(); }
+    });
+  });
+  // toggle은 올라오지 않으므로 잡는 단계에서 받는다
+  document.addEventListener('toggle', function (e) {
+    var d = e.target;
+    if (!d.open || !d.matches || !d.matches(MENUS)) { return; }
+    closeOthers(d);
+    var burger = document.getElementById('menu-toggle');
+    if (burger && burger.getAttribute('aria-expanded') === 'true' && !d.closest('#site-menu')) {
+      closingBurger = true; // 이 click이 방금 연 메뉴를 다시 닫지 않게
+      burger.click();
+      closingBurger = false;
+    }
+  }, true);
+})();
