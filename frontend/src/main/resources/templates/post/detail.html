@@ -118,12 +118,19 @@
         <p th:if="${postMission != null}" class="post-missions">
             <a class="tag" th:href="@{/missions(date=${postMission.day()})}" th:text="${'🗓 오늘의 미션 · ' + postMission.title()}">🗓 오늘의 미션</a>
         </p>
-        <p th:if="${missionStats != null}" class="notice mission-done-note" role="status">
-            <th:block th:if="${postMission.countedOnDay()}">🎉 미션 완료!</th:block>
-            <th:block th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</th:block>
-            <span th:text="${'연속 ' + missionStats.streak() + '일 · 지금까지 ' + missionStats.total() + '번'}">연속 1일</span>
-            · <a href="/missions">다른 친구들 글 보러 가기</a>
-        </p>
+        <!-- 미션 완료 상자: 축하 한 줄 → 연속·지금까지 → 친구들 글 보러 가기 -->
+        <section th:if="${missionStats != null}" class="mission-done-note" th:classappend="${postMission.countedOnDay()} ? 'is-done'" role="status">
+            <span class="mission-done-emoji" aria-hidden="true" th:text="${postMission.countedOnDay() ? '🎉' : '🗓'}">🎉</span>
+            <div class="mission-done-text">
+                <strong th:if="${postMission.countedOnDay()}">오늘 미션 완료!</strong>
+                <strong th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</strong>
+                <p class="mission-done-stats">
+                    <span class="streak-chip" th:text="${'🔥 ' + missionStats.streak() + '일 연속'}">🔥 1일 연속</span>
+                    <span class="help" th:text="${'지금까지 ' + missionStats.total() + '번'}">지금까지 1번</span>
+                </p>
+            </div>
+            <a class="btn btn-primary btn-sm" href="/missions">다른 친구들 글 보러 가기</a>
+        </section>
         <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 080 아래 "관심 있을 만한 글"로 합쳤다) -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">

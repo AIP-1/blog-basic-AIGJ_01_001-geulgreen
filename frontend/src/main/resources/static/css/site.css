@@ -642,7 +642,6 @@ a.author-byline.author-nickname { color: var(--color-text); text-decoration: non
 a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
 .post-category, .post-missions { margin: 8px 0; font-size: .9em; }
-.mission-done-note { margin: 8px 0; padding: 8px 12px; font-size: .88em; }
 /* 080 강성찬 개인 확장: velog처럼 작성자 줄 오른쪽 팔로우, 태그는 그 아래, 댓글 다음 관심 있을 만한 글 */
 .post-meta-row .follow-form, .post-meta-row > .follow-button { flex: none; }
 .post-head .post-tags { margin: 14px 0 0; }
@@ -935,7 +934,15 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-info .mission-past { margin-top: 0; }
 .mission-past-links a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-size: .9em; }
 .mission-editor-note strong { margin-right: 6px; }
-.mission-done-note a { color: var(--color-brand); }
+/* 글 상세 미션 완료 상자: 이모지 · 축하·기록 · 버튼, 휴대폰은 버튼이 아래 한 줄 */
+.mission-done-note { margin: 20px 0; padding: 18px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
+.mission-done-note.is-done { background: var(--color-brand-soft); border-color: var(--color-brand-soft); }
+.mission-done-emoji { font-size: 2em; line-height: 1; }
+.mission-done-text { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 6px; }
+.mission-done-text strong { font-size: 1.08em; }
+.mission-done-stats { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .9em; }
+@media (max-width: 560px) { .mission-done-note > .btn { flex: 1 1 100%; } }
 
 /* 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 글을 고르면 뜨는 창. 059 AI로 고치기 칸 */
 .format-panel { position: absolute; z-index: 40; width: 256px; max-width: calc(100vw - 16px); padding: 6px;
