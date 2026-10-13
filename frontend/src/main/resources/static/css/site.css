@@ -451,7 +451,30 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
 .editor #post-title { font-size: 1.8em; font-weight: 700; background: transparent; border: 0; border-bottom: 1px solid var(--color-border);
     border-radius: 0; padding: 8px 2px; }
 .editor textarea { border-radius: 16px; padding: 16px 18px; background: var(--color-surface); }
-.editor-bar { background: var(--color-bg); border-top: 1px solid var(--color-border); padding: 12px 0; }
+/* 068 후속(강성찬 개인 확장): 글쓰기 화면은 사이트 머리말을 숨기고 글쓰기 머리말을 위에 붙임(배경은 화면 폭 전체) */
+body:has(main.editor) > .site-header { display: none; }
+main.editor { padding-top: 0; }
+.editor-bar { position: sticky; top: 0; bottom: auto; z-index: 30; margin: 0 0 20px; padding: 10px 0; flex-wrap: nowrap;
+    background: var(--color-surface); border: 0;
+    box-shadow: 0 0 0 100vmax var(--color-surface), 0 1px 0 100vmax var(--color-border); clip-path: inset(0 -100vmax -1px); }
+.editor-exit { flex: none; color: var(--color-text); text-decoration: none; font-weight: 600; }
+.editor-bar .save-status { flex: 1; min-width: 0; text-align: right; font-size: .88em; }
+.editor-bar .editor-actions { flex: none; }
+.editor-tools { flex: none; display: flex; gap: 4px; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--color-border); }
+.editor-tools button { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: .88em; border-color: transparent; background: none; }
+.editor-tools button:hover { background: var(--color-surface-muted); }
+/* 좁은 화면: "저장됨 시각"·"기기에 저장됨"은 숨기고(자동 저장은 그대로), 오프라인·충돌·오류는 버튼 아래 줄에 */
+@media (max-width: 560px) {
+    .editor-bar { flex-wrap: wrap; row-gap: 6px; }
+    .editor-bar .editor-actions { gap: 6px; margin-left: auto; }
+    .editor-bar .editor-actions button { padding: 6px 10px; font-size: .88em; }
+    .editor-bar .save-status { order: 3; flex-basis: 100%; text-align: left; }
+    .editor-tools { padding-left: 6px; gap: 2px; }
+    .editor-tools .tool-label { display: none; }
+    .editor-tools button { padding: 6px 8px; }
+    .editor-exit { font-size: .92em; }
+    .editor-bar .save-status:empty, .editor-bar .save-status[data-kind="saved"], .editor-bar .save-status[data-kind="local"] { display: none; }
+}
 .publish-panel, .preview-panel { border-radius: 18px; background: var(--color-surface); padding: 16px 20px; }
 /* 068 발행 설정 팝업(강성찬 개인 확장) */
 dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; color: var(--color-text); }
