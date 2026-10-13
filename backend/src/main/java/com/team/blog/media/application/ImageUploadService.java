@@ -146,15 +146,15 @@ public class ImageUploadService {
             discard(image);
             throw new ImageInvalidException(failure);
         }
-        ImageHeader header = ImageHeaderInspector.inspect(stored.get().head()).orElseThrow();
+        ImageHeader header = ImageHeaderInspector.inspect(stored.orElseThrow().head()).orElseThrow();
         Integer thumbSize = storedThumb.map(t -> (int) t.size()).orElse(null);
         Image completed = transactionTemplate.execute(status -> {
             Image locked = imageRepository.findByIdForUpdate(imageId).orElseThrow(NotFoundException::new);
             if (!locked.isCompleted()) {
                 if (locked.getPurpose() == ImagePurpose.POST) {
-                    locked.complete(header.width(), header.height(), (int) stored.get().size(), thumbSize);
+                    locked.complete(header.width(), header.height(), (int) stored.orElseThrow().size(), thumbSize);
                 } else {
-                    locked.complete(header.width(), header.height(), (int) stored.get().size());
+                    locked.complete(header.width(), header.height(), (int) stored.orElseThrow().size());
                 }
             }
             return locked;
@@ -166,11 +166,11 @@ public class ImageUploadService {
         if (stored.isEmpty()) {
             return Detail.MISSING;
         }
-        long actual = stored.get().size();
+        long actual = stored.orElseThrow().size();
         if (actual <= 0 || actual > image.getSizeBytes() || actual > properties.profile().maxBytes()) {
             return Detail.SIZE;
         }
-        Optional<ImageHeader> header = ImageHeaderInspector.inspect(stored.get().head());
+        Optional<ImageHeader> header = ImageHeaderInspector.inspect(stored.orElseThrow().head());
         if (header.isEmpty() || !header.get().format().contentType().equals(image.getContentType())) {
             return Detail.CONTENT_MISMATCH;
         }
@@ -190,11 +190,11 @@ public class ImageUploadService {
         if (stored.isEmpty()) {
             return Detail.MISSING;
         }
-        long actual = stored.get().size();
+        long actual = stored.orElseThrow().size();
         if (actual <= 0 || actual > image.getSizeBytes() || actual > rules.maxBytes()) {
             return Detail.SIZE;
         }
-        Optional<ImageHeader> header = ImageHeaderInspector.inspect(stored.get().head());
+        Optional<ImageHeader> header = ImageHeaderInspector.inspect(stored.orElseThrow().head());
         if (header.isEmpty() || !header.get().format().contentType().equals(image.getContentType())) {
             return Detail.CONTENT_MISMATCH;
         }

@@ -56,7 +56,7 @@ public class NotificationWriter {
         if (actorId != null && member(actorId).map(MemberState::withdrawn).orElse(true)) {
             return false;
         }
-        if (type.mutable() && Boolean.TRUE.equals(jdbc.queryForObject(
+        if (type.isMutable() && Boolean.TRUE.equals(jdbc.queryForObject(
                 "SELECT EXISTS (SELECT 1 FROM notification_mute WHERE member_id = ? AND type = ?)", Boolean.class,
                 receiverId, type.name()))) {
             return false;

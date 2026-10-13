@@ -22,8 +22,8 @@ public class GoogleOidcUserService extends OidcUserService {
     }
 
     public static SocialProfile toProfile(OidcUser user) {
-        String email = Boolean.TRUE.equals(user.getEmailVerified()) && user.getEmail() != null
-                ? user.getEmail().strip().toLowerCase(Locale.ROOT) : null;
+        String raw = user.getEmail();
+        String email = Boolean.TRUE.equals(user.getEmailVerified()) && raw != null ? raw.strip().toLowerCase(Locale.ROOT) : null;
         return new SocialProfile(Provider.GOOGLE, user.getSubject(), email, user.getFullName(), user.getPicture());
     }
 }
