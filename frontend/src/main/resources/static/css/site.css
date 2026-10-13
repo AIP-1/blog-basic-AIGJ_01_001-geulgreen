@@ -881,3 +881,11 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 
 /* 061 화면 테마(강성찬 개인 확장): 설정 화면에서 고른다 */
 .theme-choices { display: flex; flex-wrap: wrap; gap: 8px 20px; border: 0; padding: 0; margin: 0 0 8px; }
+
+/* 074 강성찬 개인 확장: 인스타식 블로그 머리말 숫자 줄, 가입 코드 단계 */
+.insta-stats { display: flex; gap: 22px; list-style: none; padding: 0; margin: 10px 0 4px; flex-wrap: wrap; }
+.insta-stats li, .insta-stats a { color: var(--color-text); text-decoration: none; font-weight: 700; }
+.signup-code [data-code-entry] { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.signup-code [data-code-entry][hidden] { display: none; }
+.signup-code [data-code-entry] label { flex-basis: 100%; }
+.signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }

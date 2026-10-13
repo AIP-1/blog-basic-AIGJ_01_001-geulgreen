@@ -1,6 +1,8 @@
 package com.team.blog.account.infra;
 
 import com.team.blog.account.application.EmailRules;
+import com.team.blog.account.application.InstaAccountProperties;
+import com.team.blog.account.domain.Provider;
 import com.team.blog.account.domain.AuthIdentity;
 import com.team.blog.account.domain.Member;
 import com.team.blog.shared.security.MemberPrincipal;
@@ -19,8 +21,11 @@ public class LocalUserDetailsService implements UserDetailsService {
 
     private final AuthIdentityRepository authIdentityRepository;
     private final MemberRepository memberRepository;
+    private final InstaAccountProperties insta;
 
-    public LocalUserDetailsService(AuthIdentityRepository authIdentityRepository, MemberRepository memberRepository) {
+    public LocalUserDetailsService(AuthIdentityRepository authIdentityRepository, MemberRepository memberRepository,
+                                   InstaAccountProperties insta) {
+        this.insta = insta;
         this.authIdentityRepository = authIdentityRepository;
         this.memberRepository = memberRepository;
     }
@@ -28,7 +33,13 @@ public class LocalUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) {
-        AuthIdentity identity = authIdentityRepository.findLocalByEmail(EmailRules.normalize(email))
+        String login = EmailRules.normalize(email);
+        // 074 강성찬 개인 확장: @가 없으면 블로그 주소(아이디)로 찾는다
+        AuthIdentity identity = (login.contains("@") || !insta.enabled()
+                ? authIdentityRepository.findLocalByEmail(login)
+                : memberRepository.findActiveByHandle(login)
+                        .flatMap(m -> authIdentityRepository.findByMemberId(m.getId()))
+                        .filter(a -> a.getProvider() == Provider.LOCAL))
                 .orElseThrow(() -> new UsernameNotFoundException("not found"));
         Member member = memberRepository.findById(identity.getMemberId())
                 .filter(m -> m.getDeletedAt() == null)

@@ -22,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /** 003 T222: 닉네임·소개 한 번에 저장(US1, FR-001~FR-008). */
+// 공통 규칙(닉네임 30일에 한 번)을 본다. 074 인스타식 계정을 켜면 14일에 두 번(InstaAccountIT)
+@org.springframework.test.context.TestPropertySource(properties = "blog.insta-account.enabled=false")
 class ProfileUpdateIT extends IntegrationTestBase {
 
     @Autowired

@@ -66,7 +66,8 @@ class PasswordResetIT extends IntegrationTestBase {
         String registered = forgotBody("reset@x.com");
         String unknown = forgotBody("nobody@x.com");
         assertThat(registered).contains(SENT);
-        assertThat(strip(registered)).isEqualTo(strip(unknown));
+        // 074: 코드 칸에 넣은 이메일만 다르다
+        assertThat(strip(registered.replace("reset@x.com", "E"))).isEqualTo(strip(unknown.replace("nobody@x.com", "E")));
         assertThat(mailpit.awaitMessagesTo("reset@x.com", 1)).hasSize(1);
         assertThat(mailpit.countAfterQuietPeriod("nobody@x.com")).isZero();
     }
