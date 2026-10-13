@@ -2,6 +2,7 @@ package com.team.blog.interaction.application;
 
 import com.team.blog.account.application.BlogOwnerResolver;
 import com.team.blog.account.infra.RedisRateLimiter;
+import com.team.blog.privacy.application.PrivateAccountService;
 import com.team.blog.shared.error.CannotFollowSelfException;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.error.RateLimitedException;
@@ -27,7 +28,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class FollowService {
 
-    public record FollowResult(boolean following, long followerCount) {
+    /** {@code requested}: 비공개 계정(073)이라 팔로우 대신 요청이 대기 중. */
+    public record FollowResult(boolean following, boolean requested, long followerCount) {
     }
 
     private final JdbcTemplate jdbc;
@@ -39,10 +41,12 @@ public class FollowService {
     private final FollowQuery query;
     private final ApplicationEventPublisher events;
     private final Clock clock;
+    private final PrivateAccountService privacy;
 
     public FollowService(JdbcTemplate jdbc, TransactionTemplate tx, AccountGuard accountGuard, BlogOwnerResolver ownerResolver,
                          RedisRateLimiter rateLimiter, FollowProperties properties, FollowQuery query,
-                         ApplicationEventPublisher events, Clock clock) {
+                         ApplicationEventPublisher events, Clock clock, PrivateAccountService privacy) {
+        this.privacy = privacy;
         this.jdbc = jdbc;
         this.tx = tx;
         this.accountGuard = accountGuard;
@@ -60,6 +64,15 @@ public class FollowService {
         long target = ownerResolver.resolve(handle).orElseThrow(NotFoundException::new).memberId();
         if (target == user.memberId()) {
             throw new CannotFollowSelfException();
+        }
+        long me = user.memberId();
+        // 073 강성찬 개인 확장: 아직 팔로우하지 않은 비공개 계정이면 팔로우 대신 요청
+        if (follow && !query.isFollowing(me, target) && privacy.isPrivate(target)) {
+            privacy.request(me, target);
+            return new FollowResult(false, true, query.counts(target).followers());
+        }
+        if (!follow && privacy.cancel(me, target)) {
+            return new FollowResult(false, false, query.counts(target).followers());
         }
         tx.executeWithoutResult(status -> {
             if (follow) {
@@ -80,7 +93,7 @@ public class FollowService {
                 }
             }
         });
-        return new FollowResult(follow, query.counts(target).followers());
+        return new FollowResult(follow, false, query.counts(target).followers());
     }
 
     private void limitIp(String ip) {

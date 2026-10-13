@@ -49,7 +49,7 @@ public class SeriesService {
     public List<Series> list(long memberId, boolean includeEmpty) {
         List<Series> all = jdbc.query("SELECT s.id, s.title, (SELECT count(*) FROM series_post sp JOIN post p ON p.id = sp.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = s.id AND "
-                        + accessPolicy.publicListingCondition("p", "m") + ") AS cnt FROM series s WHERE s.member_id = ?"
+                        + accessPolicy.blogListingCondition("p", "m") + ") AS cnt FROM series s WHERE s.member_id = ?"
                         + " ORDER BY s.id DESC",
                 (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), rs.getLong("cnt")), memberId);
         return includeEmpty ? all : all.stream().filter(s -> s.postCount() > 0).toList();
@@ -63,7 +63,7 @@ public class SeriesService {
     public List<Item> items(long seriesId) {
         return jdbc.query("SELECT p.id, p.title, m.handle FROM series_post sp JOIN post p ON p.id = sp.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = ? AND "
-                        + accessPolicy.publicListingCondition("p", "m") + " ORDER BY sp.position, p.id",
+                        + accessPolicy.blogListingCondition("p", "m") + " ORDER BY sp.position, p.id",
                 (rs, i) -> new Item(rs.getLong("id"), rs.getString("title"), rs.getString("handle")), seriesId);
     }
 

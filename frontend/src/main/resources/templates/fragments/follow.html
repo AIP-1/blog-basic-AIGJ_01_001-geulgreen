@@ -4,15 +4,17 @@
 <!--
   018 팔로우 버튼(FR-007). 비회원: 로그인 링크. 회원: 스크립트 없이도 되는 폼(POST /@주소/follow), follow.js가 낙관적으로 바꾼다.
   팔로우 중은 "팔로잉 ✓"(마우스·초점이면 "언팔로우"), 색만으로 구분하지 않는다. 내 블로그·내 글에서는 부르지 않는다.
+  073: 화면에 followRequested=true가 있으면(비공개 계정 블로그) "요청됨", 누르면 요청 취소.
 -->
 <th:block th:fragment="button(handle, following, loggedIn, loginRedirect, back)">
     <a th:unless="${loggedIn}" class="follow-button" th:href="${loginRedirect}">팔로우</a>
-    <form th:if="${loggedIn}" method="post" th:action="${'/@' + handle + '/follow'}" class="follow-form">
+    <form th:if="${loggedIn}" method="post" th:action="${'/@' + handle + '/follow'}" class="follow-form"
+          th:with="requested=${followRequested == true and !following}">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <input type="hidden" name="following" th:value="${!following}">
+        <input type="hidden" name="following" th:value="${!(following or requested)}">
         <input type="hidden" name="back" th:value="${back}">
-        <button type="submit" class="follow-button" th:attr="data-follow-handle=${handle},data-following=${following},aria-pressed=${following}"
-                th:text="${following ? '팔로잉 ✓' : '팔로우'}">팔로우</button>
+        <button type="submit" class="follow-button" th:attr="data-follow-handle=${handle},data-following=${following},data-requested=${requested},aria-pressed=${following or requested}"
+                th:text="${requested ? '요청됨' : (following ? '팔로잉 ✓' : '팔로우')}">팔로우</button>
     </form>
 </th:block>
 </body>

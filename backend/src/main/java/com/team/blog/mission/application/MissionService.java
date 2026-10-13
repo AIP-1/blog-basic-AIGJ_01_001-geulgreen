@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+import com.team.blog.privacy.application.PrivateAccountService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,9 +64,12 @@ public class MissionService {
     private final ApplicationEventPublisher events;
     private final TransactionTemplate tx;
     private final Clock clock;
+    private final PrivateAccountService privacy;
 
     public MissionService(JdbcTemplate jdbc, AccountGuard accountGuard, PostDraftService drafts, TopicAi topicAi,
-                          MissionProperties properties, ApplicationEventPublisher events, TransactionTemplate tx, Clock clock) {
+                          MissionProperties properties, ApplicationEventPublisher events, TransactionTemplate tx, Clock clock,
+                          PrivateAccountService privacy) {
+        this.privacy = privacy;
         this.jdbc = jdbc;
         this.accountGuard = accountGuard;
         this.drafts = drafts;
@@ -218,7 +222,8 @@ public class MissionService {
                 FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id JOIN post p ON p.id = mp.post_id
                      JOIN member m ON m.id = p.author_id LEFT JOIN post_teaser tz ON tz.post_id = p.id
                 WHERE dt.day = ? AND mp.completed_at IS NOT NULL AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL
-                  AND p.hidden_at IS NULL AND m.withdrawn_at IS NULL
+                  AND p.hidden_at IS NULL AND m.withdrawn_at IS NULL AND """ + privacy.visibleToCondition("m", me) + """
+
                   AND (p.author_id = ? OR p.visibility = 'PUBLIC' OR (p.visibility = 'FRIENDS' AND""" + " " + pickedMe + """
                 ))
                 ORDER BY mp.completed_at DESC, p.id DESC LIMIT ?

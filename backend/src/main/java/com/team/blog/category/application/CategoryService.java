@@ -43,7 +43,7 @@ public class CategoryService {
     public List<Category> list(long memberId) {
         return jdbc.query("SELECT c.id, c.name, c.position, (SELECT count(*) FROM post_category pc JOIN post p ON p.id = pc.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE pc.category_id = c.id AND "
-                        + accessPolicy.publicListingCondition("p", "m") + ") AS cnt FROM category c WHERE c.member_id = ?"
+                        + accessPolicy.blogListingCondition("p", "m") + ") AS cnt FROM category c WHERE c.member_id = ?"
                         + " ORDER BY c.position, c.id",
                 (rs, i) -> new Category(rs.getLong("id"), rs.getString("name"), rs.getInt("position"), rs.getLong("cnt")),
                 memberId);
@@ -145,7 +145,7 @@ public class CategoryService {
     public List<Long> postIds(long categoryId) {
         // ponytail: 이어 보기 없이 최신 N개(list-size)만. 글이 많아지면 커서 이어 보기로 바꾼다.
         return jdbc.queryForList("SELECT p.id FROM post_category pc JOIN post p ON p.id = pc.post_id JOIN member m ON m.id = p.author_id"
-                        + " WHERE pc.category_id = ? AND " + accessPolicy.publicListingCondition("p", "m")
+                        + " WHERE pc.category_id = ? AND " + accessPolicy.blogListingCondition("p", "m")
                         + " ORDER BY p.first_public_at DESC, p.id DESC LIMIT " + properties.listSize(),
                 Long.class, categoryId);
     }
