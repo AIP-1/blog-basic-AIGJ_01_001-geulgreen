@@ -1,6 +1,7 @@
 package com.team.blog.series.application;
 
 import com.team.blog.post.application.PostAccessPolicy;
+import com.team.blog.post.application.PostCard;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.security.AccountGuard;
@@ -65,6 +66,25 @@ public class SeriesService {
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = ? AND "
                         + accessPolicy.blogListingCondition("p", "m") + " ORDER BY sp.position, p.id",
                 (rs, i) -> new Item(rs.getLong("id"), rs.getString("title"), rs.getString("handle")), seriesId);
+    }
+
+    /** 067 후속(강성찬 개인 확장): 시리즈 화면용 — items와 같은 글·순서를 홈과 같은 카드 모양으로. */
+    public List<PostCard> cards(long seriesId) {
+        return jdbc.query("""
+                SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt, COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url,
+                       COALESCE(p.first_public_at, p.published_at) AS first_public_at, p.comment_count, p.like_count,
+                       m.handle, m.nickname, m.profile_image_url,
+                       (SELECT t.name FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                        WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag
+                FROM series_post sp JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id
+                     LEFT JOIN post_teaser tz ON tz.post_id = p.id LEFT JOIN post_cover pcv ON pcv.post_id = p.id
+                WHERE sp.series_id = ?""" + " AND " + accessPolicy.blogListingCondition("p", "m") + " ORDER BY sp.position, p.id",
+                (rs, i) -> new PostCard(rs.getLong("id"), "/@" + rs.getString("handle") + "/posts/" + rs.getLong("id"),
+                        rs.getString("title"), rs.getString("excerpt") == null ? "" : rs.getString("excerpt"),
+                        rs.getString("thumbnail_url"), rs.getTimestamp("first_public_at") == null ? null
+                        : rs.getTimestamp("first_public_at").toInstant(), rs.getInt("comment_count"), rs.getInt("like_count"),
+                        new PostCard.Author(rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url")),
+                        rs.getString("first_tag")), seriesId);
     }
 
     /** 글이 든 시리즈(없으면 빈 값). */

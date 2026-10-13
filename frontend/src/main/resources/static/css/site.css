@@ -163,6 +163,9 @@ main.list-page { max-width: 1120px; }
 .card-likes { color: var(--color-like); font-weight: 600; }
 .card-date { margin-left: auto; }
 .list-more { text-align: center; margin: 24px 0; }
+/* 067 후속(강성찬 개인 확장): 무한 스크롤이면 [더 보기]는 숨기고(화면 낭독용으로만 남김) 불러오는 동안만 작게 알림 */
+.list-more.infinite .more-button { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.list-more.infinite.loading::before { content: "불러오는 중…"; color: var(--color-text-muted); font-size: .9em; }
 .inline-form { display: inline; }
 /* 010 글 상세 */
 .post-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
@@ -178,13 +181,22 @@ main.list-page { max-width: 1120px; }
 .row-main, .row-actions { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .row-actions form { margin: 0; }
 .untitled { color: var(--color-text-muted); }
-/* 067 내 글도 카드로(강성찬 개인 확장): 위에 제목·정보, 아래에 버튼 */
-#post-rows { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 16px 0; }
-#post-rows .post-row { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 18px;
-    gap: 12px; justify-content: space-between; }
-#post-rows .row-main { flex-direction: column; align-items: flex-start; gap: 6px; }
-#post-rows .row-main > a, #post-rows .row-main > span:first-child:not(.visibility-icon) { font-weight: 700; font-size: 1.05em; overflow-wrap: anywhere; }
-#post-rows .row-actions { border-top: 1px solid var(--color-border); padding-top: 10px; align-items: center; }
+/* 067 후속(강성찬 개인 확장): 내 글은 홈과 같은 카드(fragments/post-card), 관리 정보는 배지·⋯ 메뉴 */
+#post-rows { margin: 16px 0; }
+@media (min-width: 1100px) { main.list-page #post-rows.home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+#post-rows > .post-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 0; border: 0; }
+#post-rows > .post-row > .post-card { flex: 1; }
+.manage-badges { margin: 0; padding-right: 36px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .9em; }
+.manage-badges:empty { display: none; }
+.sort-menu.manage-menu { position: absolute; top: 10px; right: 10px; z-index: 2; }
+.sort-menu.manage-menu summary { padding: 2px 10px; font-weight: 700; letter-spacing: .1em; }
+.sort-menu.manage-menu summary::before, .sort-menu.manage-menu summary::after { content: none; }
+.manage-menu .sort-menu-panel form { margin: 0; display: flex; }
+.manage-menu .sort-menu-panel button { all: unset; flex: 1; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+.manage-menu .sort-menu-panel button:hover, .manage-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
+.manage-menu .sort-menu-panel .menu-danger { color: var(--color-danger); }
+/* 메뉴가 열린 카드는 옆 카드 위로, 떠오르는 효과는 끔(메뉴가 가려지지 않게) */
+.post-card:has(.manage-menu[open]) { z-index: 3; transform: none; }
 /* 013 태그 */
 .tag-suggest { list-style: none; margin: 4px 0; padding: 0; border: 1px solid var(--color-border); max-width: 320px; }
 .tag-suggest li { padding: 4px 8px; cursor: pointer; }
@@ -439,7 +451,30 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
 .editor #post-title { font-size: 1.8em; font-weight: 700; background: transparent; border: 0; border-bottom: 1px solid var(--color-border);
     border-radius: 0; padding: 8px 2px; }
 .editor textarea { border-radius: 16px; padding: 16px 18px; background: var(--color-surface); }
-.editor-bar { background: var(--color-bg); border-top: 1px solid var(--color-border); padding: 12px 0; }
+/* 068 후속(강성찬 개인 확장): 글쓰기 화면은 사이트 머리말을 숨기고 글쓰기 머리말을 위에 붙임(배경은 화면 폭 전체) */
+body:has(main.editor) > .site-header { display: none; }
+main.editor { padding-top: 0; }
+.editor-bar { position: sticky; top: 0; bottom: auto; z-index: 30; margin: 0 0 20px; padding: 10px 0; flex-wrap: nowrap;
+    background: var(--color-surface); border: 0;
+    box-shadow: 0 0 0 100vmax var(--color-surface), 0 1px 0 100vmax var(--color-border); clip-path: inset(0 -100vmax -1px); }
+.editor-exit { flex: none; color: var(--color-text); text-decoration: none; font-weight: 600; }
+.editor-bar .save-status { flex: 1; min-width: 0; text-align: right; font-size: .88em; }
+.editor-bar .editor-actions { flex: none; }
+.editor-tools { flex: none; display: flex; gap: 4px; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--color-border); }
+.editor-tools button { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: .88em; border-color: transparent; background: none; }
+.editor-tools button:hover { background: var(--color-surface-muted); }
+/* 좁은 화면: "저장됨 시각"·"기기에 저장됨"은 숨기고(자동 저장은 그대로), 오프라인·충돌·오류는 버튼 아래 줄에 */
+@media (max-width: 560px) {
+    .editor-bar { flex-wrap: wrap; row-gap: 6px; }
+    .editor-bar .editor-actions { gap: 6px; margin-left: auto; }
+    .editor-bar .editor-actions button { padding: 6px 10px; font-size: .88em; }
+    .editor-bar .save-status { order: 3; flex-basis: 100%; text-align: left; }
+    .editor-tools { padding-left: 6px; gap: 2px; }
+    .editor-tools .tool-label { display: none; }
+    .editor-tools button { padding: 6px 8px; }
+    .editor-exit { font-size: .92em; }
+    .editor-bar .save-status:empty, .editor-bar .save-status[data-kind="saved"], .editor-bar .save-status[data-kind="local"] { display: none; }
+}
 .publish-panel, .preview-panel { border-radius: 18px; background: var(--color-surface); padding: 16px 20px; }
 /* 068 발행 설정 팝업(강성찬 개인 확장) */
 dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; color: var(--color-text); }
@@ -480,8 +515,6 @@ body > main + .site-footer, body > div + .site-footer { margin-top: auto; }
 /* 홈 탭 줄: 왼쪽 탭, 오른쪽 더보기 */
 .home-tabs-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--color-border); margin: 8px 0 20px; }
 .home-tabs-row .manage-tabs { border-bottom: 0; margin: 0; }
-.home-more { color: var(--color-text-muted); text-decoration: none; font-size: .92em; padding: 8px 2px; }
-.home-more:hover { color: var(--color-text); }
 html, body { overflow-x: clip; }
 /* 025 친구(강성찬 개인 확장) */
 .friend-form { display: inline-flex; gap: 6px; align-items: center; margin: 0 0 0 6px; }
@@ -602,12 +635,10 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .series-box { border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 16px; margin: 12px 0; background: var(--color-surface); }
 .series-box summary { cursor: pointer; font-weight: 700; }
 .series-items { margin: 8px 0 0; padding-left: 1.4em; }
-/* 067 시리즈 글도 카드로(강성찬 개인 확장), 순서는 번호로 */
-.series-cards { list-style: none; padding: 0; margin: 16px 0; counter-reset: series; display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-.series-cards li { counter-increment: series; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 14px 16px; }
-.series-cards li::before { content: counter(series) "편"; display: block; margin-bottom: 4px; font-size: .82em; color: var(--color-text-muted); }
-.series-cards a { font-weight: 700; overflow-wrap: anywhere; }
+/* 067 시리즈 글도 홈과 같은 카드로(강성찬 개인 확장), 순서는 "N편" 배지 */
+.series-cards { list-style: none; padding: 0; margin: 16px 0; }
+.series-cards > li { display: flex; }
+.series-cards > li > .post-card { flex: 1; }
 .series-nav { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 0; flex-wrap: wrap; }
 .secret-check { display: inline-flex; gap: 6px; align-items: center; margin: 6px 0; font-size: .92em; }
 .schedule-field input[type="datetime-local"] { margin-top: 6px; }
@@ -664,7 +695,6 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .home-section-title { margin: 0 12px 6px 0; font-size: 1.35em; font-weight: 800; }
 .home-tabs-row { align-items: center; }
 .home-tabs-row .home-tabs { flex: 1; }
-.home-more { color: var(--color-brand); text-decoration: none; font-weight: 600; font-size: .92em; }
 /* 가로 카드 2열 */
 main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 @media (min-width: 700px) { main.list-page .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -680,6 +710,25 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .home-cards .card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 /* 오른쪽 */
 .home-side { display: flex; flex-direction: column; gap: 18px; }
+/* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
+@media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
+    overscroll-behavior: contain; scrollbar-width: thin; } }
+.side-rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.side-rec-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.side-rec-list .newcomer-who { min-width: 0; font-weight: 600; font-size: .92em; }
+.side-rec-list .newcomer-who span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-rec-list .follow-form { margin: 0; flex: none; }
+.side-rec-list .follow-button { padding: 4px 12px; font-size: .82em; }
+.side-links { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 4px; font-size: .82em; }
+.side-links a { color: var(--color-text-muted); text-decoration: none; }
+.side-links a:hover { color: var(--color-text); text-decoration: underline; }
+.menu-links { display: none; }
+@media (max-width: 640px) {
+    .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
+    .site-nav .menu-links a { font-size: .82em; color: var(--color-text-muted); padding: 2px 0; }
+}
+.profile-menu-panel .profile-menu-links { margin: 4px 0; padding: 6px 12px 2px; border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.profile-menu-panel .profile-menu-links a { display: inline; width: auto; padding: 2px 0; font-size: .8em; color: var(--color-text-muted); }
 .side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
 .side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
 .side-box h2 .icon { width: 18px; height: 18px; }

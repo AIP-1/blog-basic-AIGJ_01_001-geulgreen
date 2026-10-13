@@ -36,6 +36,7 @@ public class RecommendedBlogQuery {
         this.clock = clock;
     }
 
+    /** {@code memberId}가 -1(비회원)이면 팔로우 제외 없이 같은 순서로(067 후속 홈 오른쪽 칸). */
     public List<Blog> forMember(long memberId) {
         Timestamp since = Timestamp.from(clock.instant().minus(ACTIVE_WINDOW));
         return jdbc.query("""
