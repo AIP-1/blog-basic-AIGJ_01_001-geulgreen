@@ -7,8 +7,8 @@
 <body>
 <main class="list-page">
     <h1 th:text="${owner.handle() + (followers ? '님의 팔로워 ' : '님이 팔로우하는 사람 ') + count}">팔로워 0</h1>
-    <p><a th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
-    <p th:if="${continued}"><a th:href="${base}">처음부터 보기</a></p>
+    <p><a class="link-btn back" th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
+    <p th:if="${continued}"><a class="link-btn" th:href="${base}">처음부터 보기</a></p>
     <p th:if="${page.items().isEmpty() and !continued}" class="empty-state"
        th:text="${followers ? '아직 팔로워가 없어요' : '아직 팔로우한 사람이 없어요'}">아직 팔로워가 없어요</p>
     <ul class="follow-list">
@@ -23,7 +23,7 @@
             </th:block>
         </li>
     </ul>
-    <p th:if="${page.nextCursor() != null}"><a th:href="@{${base}(cursor=${page.nextCursor()})}">더 보기</a></p>
+    <p th:if="${page.nextCursor() != null}"><a class="link-btn" th:href="@{${base}(cursor=${page.nextCursor()})}">더 보기</a></p>
     <p class="follow-message help" role="status" hidden></p>
     <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>

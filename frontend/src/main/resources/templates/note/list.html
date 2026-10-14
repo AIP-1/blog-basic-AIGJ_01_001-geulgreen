@@ -7,7 +7,7 @@
 <body>
 <main class="notes-page">
     <h1 th:text="${owner.handle() + '님의 짧은 기록'}">짧은 기록</h1>
-    <p><a th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
+    <p><a class="link-btn back" th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${paths.blog(owner.handle()) + '/notes'})}"></form></th:block>
     <p th:if="${notes.isEmpty()}" class="empty-state">아직 짧은 기록이 없어요</p>
     <ul class="note-list">
