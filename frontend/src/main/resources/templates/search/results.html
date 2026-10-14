@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${q.isEmpty() ? '검색' : q + ' - 검색'}">검색</title>
+    <title th:text="${q.isEmpty() ? '검색' : q + ' - 검색' + ' · 글그린'}">검색</title>
 </head>
 <body>
 <main class="list-page search-page">

@@ -60,7 +60,7 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .andExpect(header().string("Cache-Control", "private, no-cache"))
                 .andReturn().getResponse().getContentAsString();
         assertThat(html.split("<h1", -1)).hasSize(2);
-        assertThat(html).contains("<title>메타 &quot;제목&quot; &lt;b&gt; - detailmeta</title>")
+        assertThat(html).contains("<title>메타 &quot;제목&quot; &lt;b&gt; · 글그린</title>")
                 .contains("<link rel=\"canonical\" href=\"http://localhost/detailmeta/posts/" + id + "\">")
                 .contains("<meta property=\"og:type\" content=\"article\">")
                 .contains("<meta property=\"og:image\" content=\"http://localhost:9000/blog-images/images/2026/10/a.webp\">")
