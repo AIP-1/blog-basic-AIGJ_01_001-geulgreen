@@ -27,6 +27,14 @@ public class WritingAiClient {
             [글]
             %s""";
 
+    // 085 맞춤법 검사: 고친 글 전체 대신 틀린 곳만 받는다(본문을 통째로 덮어쓰지 않게)
+    static final String SPELL_PROMPT = """
+            아래 [글]에서 맞춤법·띄어쓰기가 틀린 곳만 찾아 줘.
+            규칙: 한 줄에 하나씩 "틀린 부분 => 고친 부분" 형식으로만 답해 줘. 틀린 부분은 [글]에 있는 그대로 몇 낱말만 적어 줘.
+            설명·번호·따옴표는 쓰지 말고, 코드·링크 주소·Markdown 표시는 고치지 마. 틀린 곳이 없으면 "없음"이라고만 답해 줘.
+            [글]
+            %s""";
+
     private final AiTagProperties ai;
     private final JsonMapper jsonMapper;
     private final RestClient gemini;
@@ -46,13 +54,22 @@ public class WritingAiClient {
 
     /** 고친 글. 키가 없거나 실패·빈 답이면 빈 값. */
     public Optional<String> rewrite(String request, String text) {
+        return ask(PROMPT.formatted(request, text), 0.4).map(WritingAiClient::clean).filter(s -> !s.isBlank());
+    }
+
+    /** 085 맞춤법 검사 답(줄마다 "틀린 => 고친"). 키가 없거나 실패하면 빈 값. */
+    public Optional<String> spelling(String text) {
+        return ask(SPELL_PROMPT.formatted(text), 0.1);
+    }
+
+    private Optional<String> ask(String prompt, double temperature) {
         if (!configured()) {
             return Optional.empty();
         }
         try {
             Map<String, Object> body = Map.of(
-                    "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", PROMPT.formatted(request, text))))),
-                    "generationConfig", Map.of("maxOutputTokens", 2048, "temperature", 0.4));
+                    "contents", List.of(Map.of("role", "user", "parts", List.of(Map.of("text", prompt)))),
+                    "generationConfig", Map.of("maxOutputTokens", 2048, "temperature", temperature));
             String res = gemini.post().uri("/v1beta/models/{model}:generateContent", ai.gemini().model())
                     .header("x-goog-api-key", ai.gemini().apiKey()).contentType(MediaType.APPLICATION_JSON).body(body)
                     .retrieve().onStatus(HttpStatusCode::isError, (req, r) -> {
@@ -60,7 +77,7 @@ public class WritingAiClient {
                     }).body(String.class);
             String answer = jsonMapper.readTree(res).path("candidates").path(0).path("content").path("parts").path(0)
                     .path("text").asString("");
-            return Optional.of(clean(answer)).filter(s -> !s.isBlank());
+            return Optional.of(answer);
         } catch (Exception e) {
             return Optional.empty();
         }
