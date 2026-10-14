@@ -1,7 +1,6 @@
 package com.team.blog.discovery.web;
 
 import com.team.blog.account.application.ProfileAvatar;
-import com.team.blog.admin.application.AdminProperties;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,14 +18,16 @@ public class HeaderProfileAdvice {
     private final boolean contactPage;
     private final com.team.blog.post.application.TagListingQuery tagListingQuery;
 
-    public HeaderProfileAdvice(CurrentUserProvider currentUserProvider, JdbcTemplate jdbc, AdminProperties admin,
+    public HeaderProfileAdvice(CurrentUserProvider currentUserProvider, JdbcTemplate jdbc,
                                com.team.blog.post.application.TagListingQuery tagListingQuery,
-                               @org.springframework.beans.factory.annotation.Value("${blog.contact.enabled:true}") boolean contactPage) {
+                               @org.springframework.beans.factory.annotation.Value("${blog.contact.enabled:true}") boolean contactPage,
+                               @org.springframework.beans.factory.annotation.Value("${blog.contact.email:blogeulgreen@gmail.com}") String contactEmail) {
         this.contactPage = contactPage;
         this.currentUserProvider = currentUserProvider;
         this.tagListingQuery = tagListingQuery;
         this.jdbc = jdbc;
-        this.contactEmail = admin.emails().stream().map(String::strip).filter(e -> !e.isEmpty()).findFirst().orElse(null);
+        // 090: 사이트 문의 주소만 쓴다. 관리자 지정 주소(blog.admin.emails)는 개인 주소라 화면에 내보내지 않는다.
+        this.contactEmail = contactEmail.isBlank() ? null : contactEmail.strip();
     }
 
     @ModelAttribute("currentAvatar")

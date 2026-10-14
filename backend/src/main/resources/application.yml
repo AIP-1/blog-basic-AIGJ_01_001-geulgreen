@@ -376,6 +376,8 @@ blog:
   # 090 강성찬 개인 확장: 문의하기 양식·관리자 문의함. 끄면 꼬리말 [문의하기]가 예전 메일 링크로 돌아간다.
   contact:
     enabled: ${CONTACT_ENABLED:true}
+    # 문의 메일 주소(끈 때의 mailto). 사이트 발송 계정. 관리자 지정 주소(ADMIN_EMAILS)는 화면에 쓰지 않는다
+    email: ${CONTACT_EMAIL:blogeulgreen@gmail.com}
     per-hour: 5
 
 # 운영 상태 확인: /actuator/health(전체), /actuator/health/liveness·readiness(컨테이너·로드밸런서용)만 연다.

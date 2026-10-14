@@ -25,6 +25,9 @@ class ContactIT extends IntegrationTestBase {
     @Autowired
     InquiryPurgeStep purge;
 
+    @Autowired
+    com.team.blog.admin.application.AdminProperties adminProperties;
+
     private long member(String handle) {
         return members.localMember(handle, handle, handle + "@example.com", "Blog#2026ok", true);
     }
@@ -96,6 +99,21 @@ class ContactIT extends IntegrationTestBase {
         // 탈퇴 정리: 그 회원의 문의만 지움
         purge.purge(user);
         assertThat(jdbc.queryForList("SELECT title FROM inquiry", String.class)).containsExactly("비회원 문의");
+    }
+
+    /** 관리자 지정 주소(개인 주소)는 어느 화면에도 나오지 않는다. */
+    @Test
+    void adminEmailsNeverRendered() throws Exception {
+        assertThat(adminProperties.emails()).isNotEmpty();
+        long admin = member("inqpriv");
+        jdbc.update("UPDATE member SET role = 'ADMIN' WHERE id = ?", admin);
+        for (String url : java.util.List.of("/", "/contact", "/contact/done", "/terms", "/settings", "/admin", "/admin/inquiries")) {
+            String html = page(url, TestAuth.admin(admin));
+            for (String e : adminProperties.emails()) {
+                assertThat(html).as(url).doesNotContainIgnoringCase(e.strip());
+            }
+        }
+        assertThat(page("/", r -> r)).doesNotContain("mailto:");
     }
 
     @Test
