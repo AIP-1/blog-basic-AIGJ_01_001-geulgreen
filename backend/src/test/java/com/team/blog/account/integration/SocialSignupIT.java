@@ -52,6 +52,16 @@ class SocialSignupIT extends IntegrationTestBase {
         assertThat(page2).contains("닉네임을 입력해 주세요").contains("id=\"nickname\"");
     }
 
+    /** 소셜 가입도 화면 순서(주소 → 닉네임 → 약관)대로: 닉네임이 틀렸으면 약관 안내보다 닉네임 안내가 먼저. */
+    @Test
+    void socialCompletionChecksTermsLast() throws Exception {
+        Browser browser = pendingGoogle("g-order", "order@gmail.com", "Order Kim");
+        String page = browser.perform(post("/signup/social").with(csrf()).param("handle", "orderkim").param("nickname", "!"))
+                .getResponse().getContentAsString();
+        assertThat(page).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(memberCount()).isZero();
+    }
+
     @Test
     void completionCreatesVerifiedGoogleAccountAndLogsIn() throws Exception {
         Browser browser = pendingGoogle("g-sub-77", "Kim@Gmail.com", "Kim Min-seo");

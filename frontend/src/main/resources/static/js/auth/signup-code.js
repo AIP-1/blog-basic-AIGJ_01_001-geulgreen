@@ -49,6 +49,13 @@
         if (res.ok) { done(); document.getElementById('nickname').focus(); } else { status.textContent = res.message || '코드를 확인해 주세요'; }
       }).catch(function () { status.textContent = '잠시 후 다시 시도해 주세요'; });
     });
+    // 코드 확인 전에는 폼을 보내지 않는다: 이메일 칸에서 Enter를 누르면 가입 폼이 제출돼 약관 안내가 먼저 떴다
+    email.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && rest.hidden) { e.preventDefault(); sendButton.click(); }
+    });
+    email.form.addEventListener('submit', function (e) {
+      if (rest.hidden) { e.preventDefault(); status.textContent = '먼저 메일로 받은 코드를 확인해 주세요'; }
+    });
     codeInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); box.querySelector('[data-code-verify]').click(); }
     });
