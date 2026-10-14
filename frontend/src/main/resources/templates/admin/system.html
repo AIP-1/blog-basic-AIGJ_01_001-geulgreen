@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>시스템 · 글그린</title>
+</head>
+<body>
+<main class="list-page admin-page">
+    <h1>시스템</h1>
+    <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
+    <section aria-labelledby="servers-heading" class="admin-panel">
+        <h2 id="servers-heading">앱 서버</h2>
+        <table class="stats-table admin-log-table">
+            <thead><tr><th scope="col">서버</th><th scope="col">상태</th><th scope="col">배포 버전</th><th scope="col">켜진 시각</th><th scope="col">마지막 신호</th></tr></thead>
+            <tbody><tr th:each="s : ${instances}">
+                <td><span th:text="${s.host()}">app</span><span class="help" th:if="${s.self()}"> (지금 답한 서버)</span></td>
+                <td><span th:class="${s.alive()} ? 'admin-ok' : 'admin-bad'" th:text="${s.alive()} ? '켜짐' : '응답 없음'">켜짐</span></td>
+                <td><code th:text="${s.version()}">abc1234</code></td>
+                <td th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(s.startedAt())}">시각</td>
+                <td th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(s.lastSeen())}">시각</td>
+            </tr></tbody>
+        </table>
+        <p class="help">앱마다 30초마다 신호를 남겨요. 90초 넘게 신호가 없으면 응답 없음, 하루가 지나면 목록에서 빠져요. 배포하면 버전과 켜진 시각이 바뀌어요.</p>
+    </section>
+    <section aria-labelledby="integrations-heading" class="admin-panel">
+        <h2 id="integrations-heading">외부 연동</h2>
+        <table class="stats-table admin-log-table">
+            <thead><tr><th scope="col">연동</th><th scope="col">상태</th><th scope="col">참고</th></tr></thead>
+            <tbody><tr th:each="i : ${integrations}">
+                <td th:text="${i.name()}">메일</td>
+                <td><span th:class="${i.configured()} ? 'admin-ok' : 'admin-off'" th:text="${i.configured()} ? '설정됨' : '꺼짐'">설정됨</span></td>
+                <td class="help" th:text="${i.note()}">참고</td>
+            </tr></tbody>
+        </table>
+        <p class="help">키나 계정이 설정돼 있는지만 봐요. 값은 보여 주지 않아요.</p>
+    </section>
+    <section aria-labelledby="features-heading" class="admin-panel">
+        <h2 id="features-heading">기능 스위치</h2>
+        <ul class="admin-features">
+            <li th:each="f : ${features}"><code th:text="${f.name()}">contact</code>
+                <span th:class="${f.on()} ? 'admin-ok' : 'admin-off'" th:text="${f.on()} ? '켬' : '끔'">켬</span></li>
+        </ul>
+        <p class="help">설정 파일(application.yml)의 <code>blog.….enabled</code> 값이에요. 바꾸려면 서버 환경 변수를 고치고 다시 배포해요.</p>
+    </section>
+</main>
+</body>
+</html>
