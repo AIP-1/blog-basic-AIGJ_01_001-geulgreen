@@ -227,7 +227,8 @@ main.list-page { max-width: 1120px; }
 .reply-list { margin-left: 24px; border-left: 2px solid var(--color-border); padding-left: 12px; }
 .comment { padding: 8px 0; border-bottom: 1px solid var(--color-border); }
 .comment-head { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0; }
-.comment-author { display: inline-flex; gap: 6px; align-items: center; color: inherit; }
+.comment-author { display: inline-flex; gap: 8px; align-items: center; color: var(--color-text); text-decoration: none; font-weight: 600; }
+.comment-author:hover > span:last-child { text-decoration: underline; }
 .comment-content { white-space: pre-line; margin: 4px 0; }
 .comment-gone { color: var(--color-text-muted); margin: 0; }
 .reply-to { color: var(--color-brand); margin: 4px 0 0; font-size: .9em; }
@@ -1078,7 +1079,7 @@ main.list-page .home-cards { gap: 18px; }
 
 /* 강성찬 개인 확장: 닉네임 최대 30자 — 닉네임이 보이는 곳은 한 줄로 자르고 … 표시(사람 목록·프로필·카드·댓글·오른쪽 칸) */
 .author-nickname, .author-name, .person-nickname, .person-handle, .mission-post-author, .reply-to,
-.newcomer-who span:last-child, .comment-author > span:first-child, .side-post-list .help {
+.newcomer-who span:last-child, .comment-author > span:last-child, .side-post-list .help {
     display: inline-block; max-width: 100%; min-width: 0; vertical-align: bottom;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-nickname { display: block; }
