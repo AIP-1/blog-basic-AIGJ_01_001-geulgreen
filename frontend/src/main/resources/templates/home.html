@@ -28,7 +28,14 @@
     <div class="home-main">
     <h1 class="visually-hidden">전체 글</h1>
     <!-- 086 강성찬 개인 확장: 트렌딩·새로 온 작가·추천은 탐색으로 옮겨 홈은 최신 글 하나 -->
-    <h2 class="home-section-title">최신 글</h2>
+    <!-- 홈은 한 칸(오른쪽 칸 없음). 목록이 끝없이 이어져 꼬리말에 닿기 어려우니 넓은 화면은 사이트 링크를 제목 줄 오른쪽에(좁은 화면은 ☰ 메뉴) -->
+    <div class="home-title-row">
+        <h2 class="home-section-title">최신 글</h2>
+        <nav class="side-links home-links" aria-label="사이트 정보">
+            <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+            <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
+        </nav>
+    </div>
     <p th:if="${continued}"><a href="/">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued}">
         <div class="empty-state">아직 올라온 글이 없어요. 첫 글의 주인공이 되어 보세요
@@ -48,22 +55,6 @@
     </div>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
     </div>
-    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 탐색 안내, 사이트 링크. 086: 추천 글·추천 블로그·인기 태그는 탐색으로 -->
-    <aside class="home-side" aria-label="둘러보기">
-        <section class="side-box side-explore" aria-labelledby="side-explore-heading">
-            <h2 id="side-explore-heading">둘러보기</h2>
-            <p class="help">추천 글, 추천 블로그, 트렌딩, 새로 온 작가는 탐색에 모여 있어요</p>
-            <p class="side-explore-links"><a href="/explore" class="btn btn-primary btn-sm">탐색에서 더 보기</a> <a href="/tags">태그 전체 보기</a></p>
-        </section>
-        <!-- 067 후속(강성찬 개인 확장): 목록이 끝없이 이어지므로 꼬리말 링크를 여기에도 -->
-        <nav class="side-links" aria-label="사이트 정보">
-            <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
-            <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
-            <!-- 넓은 화면은 맨 아래 꼬리말을 숨기고 문구를 여기에(인스타그램 PC처럼) -->
-            <!-- 링크 넷이 한 줄을 다 써서 GitHub 마크는 이 줄 끝에 -->
-            <p class="side-slogan">좋은 글이 머무는 곳, 글그린 <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a></p>
-        </nav>
-    </aside>
     </div>
     <script th:src="@{/js/post/list-more.js}" defer></script>
 </main>
