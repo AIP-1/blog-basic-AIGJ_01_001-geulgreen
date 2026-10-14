@@ -9,65 +9,76 @@
     <h1>관리 대시보드</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
     <ul class="admin-stats">
-        <li><span class="help">오늘 조회</span><strong th:text="${dash.todayViews()}">0</strong></li>
-        <li><span class="help">새 가입</span><strong th:text="${dash.todayMembers()}">0</strong><span class="help" th:text="${'전체 회원 ' + dash.totalMembers()}">전체</span></li>
-        <li><span class="help">새 글</span><strong th:text="${dash.todayPosts()}">0</strong><span class="help" th:text="${'발행한 글 ' + dash.totalPosts()}">전체</span></li>
-        <li><span class="help">새 댓글</span><strong th:text="${dash.todayComments()}">0</strong><span class="help" th:text="${'전체 댓글 ' + dash.totalComments()}">전체</span></li>
-        <li th:classappend="${dash.pendingReports() + dash.newInquiries() > 0} ? 'admin-alert'"><span class="help">처리할 신고·문의</span>
+        <li><span class="stat-label">오늘 조회</span><strong th:text="${dash.views().now()}">0</strong>
+            <th:block th:replace="~{admin/dashboard :: delta(${dash.views()})}"></th:block></li>
+        <li><span class="stat-label">새 가입</span><strong th:text="${dash.members().now()}">0</strong>
+            <th:block th:replace="~{admin/dashboard :: delta(${dash.members()})}"></th:block>
+            <span class="stat-total" th:text="${'전체 회원 ' + dash.totalMembers()}">전체</span></li>
+        <li><span class="stat-label">새 글</span><strong th:text="${dash.posts().now()}">0</strong>
+            <th:block th:replace="~{admin/dashboard :: delta(${dash.posts()})}"></th:block>
+            <span class="stat-total" th:text="${'발행한 글 ' + dash.totalPosts()}">전체</span></li>
+        <li><span class="stat-label">새 댓글</span><strong th:text="${dash.comments().now()}">0</strong>
+            <th:block th:replace="~{admin/dashboard :: delta(${dash.comments()})}"></th:block>
+            <span class="stat-total" th:text="${'전체 댓글 ' + dash.totalComments()}">전체</span></li>
+        <li th:classappend="${dash.pendingReports() + dash.newInquiries() > 0} ? 'admin-alert'"><span class="stat-label">처리할 신고·문의</span>
             <strong th:text="${dash.pendingReports() + dash.newInquiries()}">0</strong>
-            <span class="help"><a href="/admin/reports" th:text="${'신고 ' + dash.pendingReports()}">신고</a><th:block th:if="${contactPage == true}"> · <a href="/admin/inquiries" th:text="${'문의 ' + dash.newInquiries()}">문의</a></th:block></span></li>
+            <span class="stat-total"><a href="/admin/reports" th:text="${'신고 ' + dash.pendingReports()}">신고</a><th:block th:if="${contactPage == true}"> · <a href="/admin/inquiries" th:text="${'문의 ' + dash.newInquiries()}">문의</a></th:block></span>
+            <span class="stat-total" th:text="${'오늘 새로 ' + dash.incoming().now() + '건 · ' + dash.incoming().basis()}">오늘</span></li>
     </ul>
-    <p class="help admin-today-note">오늘 조회·새 가입·새 글·새 댓글은 오늘(한국 시간) 기준이에요.</p>
+    <p class="help admin-today-note">위 숫자는 오늘 0시(한국 시간)부터 지금까지예요. ▲▼는 어제 같은 시각까지와 비교했고, 조회는 날짜별 합계만 있어서 어제 하루를 지난 시간만큼 나눈 추정과 비교해요.</p>
     <section aria-labelledby="trend-heading" class="admin-panel">
         <h2 id="trend-heading" th:text="${'최근 ' + insights.days().size() + '일 추이'}">최근 30일 추이</h2>
         <ul class="admin-trends">
             <li th:each="t : ${insights.trends()}" th:class="${'admin-trend trend-' + t.key()}">
                 <p class="admin-trend-head"><span th:text="${t.label()}">조회</span>
                     <strong th:text="${t.total()}">0</strong><span class="help" th:text="${'하루 최고 ' + t.max()}">최고</span></p>
-                <svg th:unless="${t.empty()}" class="trend-svg" viewBox="0 0 300 100" preserveAspectRatio="none" role="img"
-                     th:attr="aria-label=${t.label() + ' 최근 ' + insights.days().size() + '일 합계 ' + t.total() + ', 오늘 ' + t.today() + '(아래 표와 같음)'}">
-                    <line class="trend-grid" x1="0" y1="52" x2="300" y2="52"></line>
-                    <polygon class="trend-area" th:attr="points=${t.area()}"></polygon>
-                    <polyline class="trend-line" th:attr="points=${t.line()}"></polyline>
-                </svg>
+                <div class="trend-chart" th:unless="${t.empty()}">
+                    <svg class="trend-svg" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                        <line class="trend-grid" x1="0" y1="52" x2="300" y2="52"></line>
+                        <polygon class="trend-area" th:attr="points=${t.area()}"></polygon>
+                        <polyline class="trend-line" th:attr="points=${t.line()}"></polyline>
+                    </svg>
+                    <!-- 날짜 칸: 마우스를 올리거나 탭·키보드로 고르면 그날 값이 뜬다(스크립트 없이 :hover·:focus) -->
+                    <div class="trend-hits">
+                        <span th:each="p : ${t.points()}" class="trend-hit" tabindex="0" role="img" th:style="${'--y:' + p.y() + '%'}"
+                              th:attr="aria-label=${p.date() + ' ' + t.label() + ' ' + p.value() + t.unit()}"><span class="trend-tip" aria-hidden="true"
+                              th:text="${p.date() + ' · ' + p.value() + t.unit()}">10/14 · 3</span></span>
+                    </div>
+                </div>
                 <p th:if="${t.empty()}" class="help trend-empty">기록이 쌓이는 중이에요.</p>
-                <p class="help trend-axis"><span th:text="${insights.days()[0].date().getMonthValue() + '/' + insights.days()[0].date().getDayOfMonth()}">9/15</span><span>오늘</span></p>
+                <p class="help trend-axis"><span th:text="${t.points()[0].date()}">9/15</span><span>오늘</span></p>
             </li>
         </ul>
-        <details class="admin-trend-table">
-            <summary>표로 보기</summary>
-            <table class="stats-table">
-                <thead><tr><th scope="col">날짜</th><th scope="col">조회</th><th scope="col">가입</th><th scope="col">글</th><th scope="col">댓글</th></tr></thead>
-                <tbody><tr th:each="d : ${insights.days()}"><td th:text="${d.date()}">날짜</td><td th:text="${d.views()}">0</td>
-                    <td th:text="${d.members()}">0</td><td th:text="${d.posts()}">0</td><td th:text="${d.comments()}">0</td></tr></tbody>
-            </table>
-        </details>
     </section>
     <div class="admin-columns" th:if="${insightsEnabled}">
         <section aria-labelledby="popular-heading" class="admin-panel">
-            <h2 id="popular-heading">인기 글 <span class="help">최근 7일 조회</span></h2>
+            <h2 id="popular-heading">인기 글 <span class="panel-sub">최근 7일 조회</span></h2>
             <ol class="admin-rank" th:unless="${insights.popular().isEmpty()}">
-                <li th:each="p : ${insights.popular()}"><a th:href="${p.url()}" th:text="${p.title()}">제목</a>
-                    <span class="help" th:text="${'@' + p.handle() + ' · ' + p.views() + '회'}">조회</span></li>
+                <li th:each="p, s : ${insights.popular()}"><span class="rank-no" th:text="${s.count}">1</span>
+                    <span class="rank-body"><a class="rank-title" th:href="${p.url()}" th:text="${p.title()}">제목</a>
+                        <span class="rank-meta" th:text="${'@' + p.handle()}">@handle</span></span>
+                    <span class="rank-count"><strong th:text="${p.views()}">0</strong>회</span></li>
             </ol>
-            <p class="help" th:if="${insights.popular().isEmpty()}">기록이 쌓이는 중이에요.</p>
+            <p class="panel-empty" th:if="${insights.popular().isEmpty()}">최근 7일 동안 조회된 공개 글이 아직 없어요.</p>
         </section>
         <section aria-labelledby="activity-heading" class="admin-panel">
             <h2 id="activity-heading">최근 활동</h2>
             <ul class="admin-activity" th:unless="${insights.activity().isEmpty()}">
-                <li th:each="a : ${insights.activity()}"><span class="admin-kind" th:text="${a.kind()}">글</span>
-                    <a th:href="${a.url()}" th:text="${a.what()}">내용</a>
-                    <span class="help" th:text="${'@' + a.handle() + ' · ' + T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(a.at())}">시각</span></li>
+                <li th:each="a : ${insights.activity()}"><span th:class="${'admin-kind kind-' + a.kind()}" th:text="${a.kind()}">글</span>
+                    <span class="rank-body"><a class="rank-title" th:href="${a.url()}" th:text="${a.what()}">내용</a>
+                        <span class="rank-meta" th:text="${'@' + a.handle()}">@handle</span></span>
+                    <time class="rank-meta" th:datetime="${a.at()}" th:title="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(a.at())}" th:text="${a.ago()}">3시간 전</time></li>
             </ul>
-            <p class="help" th:if="${insights.activity().isEmpty()}">아직 활동이 없어요.</p>
+            <p class="panel-empty" th:if="${insights.activity().isEmpty()}">아직 가입·글·댓글 활동이 없어요.</p>
         </section>
         <section aria-labelledby="server-heading" class="admin-panel">
             <h2 id="server-heading">서버 상태</h2>
             <dl class="admin-server">
-                <dt>지금 답한 서버</dt><dd th:text="${serverHost}">app</dd>
-                <dt>이 서버가 켜진 시각</dt><dd th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(serverStartedAt)}">시각</dd>
+                <div><dt>배포 버전</dt><dd><code th:text="${serverVersion}">abc1234</code></dd></div>
+                <div><dt>지금 답한 서버</dt><dd th:text="${serverHost}">app</dd></div>
+                <div><dt>켜진 시각</dt><dd th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(serverStartedAt)}">시각</dd></div>
             </dl>
-            <p class="help">새로 배포하면 켜진 시각이 바뀌어요. <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}">서버 두 대 상태 보기</a></p>
+            <a class="panel-link" href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}">서버 두 대 상태 보기</a>
         </section>
     </div>
     <section aria-labelledby="sample-heading" th:if="${samplePostsEnabled}">
@@ -83,5 +94,8 @@
         </form>
     </section>
 </main>
+<!-- 098 후속: 숫자 카드의 어제 대비(▲ 늘어남 초록, ▼ 줄어듦 빨강, 같음 회색). basis = 무엇과 비교했는지 -->
+<th:block th:fragment="delta(d)"><span th:class="${'delta delta-' + d.dir()}"><span aria-hidden="true" th:text="${d.dir() == 'up' ? '▲ ' + d.diff() : d.dir() == 'down' ? '▼ ' + d.diff() : '– 0'}">▲ 1</span><span class="visually-hidden" th:text="${d.dir() == 'up' ? d.diff() + ' 늘었어요' : d.dir() == 'down' ? d.diff() + ' 줄었어요' : '같아요'}">늘었어요</span></span>
+    <span class="stat-basis" th:text="${d.basis()}">어제 이 시각까지 0</span></th:block>
 </body>
 </html>

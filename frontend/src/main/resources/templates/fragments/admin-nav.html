@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
-<!-- 관리자 화면 공통 메뉴(045~050, 098 왼쪽 묶음 메뉴 강성찬 개인 확장). tab = 지금 화면. 좁은 화면에서는 위에 가로로 -->
+<!--
+  관리자 화면 공통 메뉴(045~050, 098 왼쪽 묶음 메뉴 강성찬 개인 확장). tab = 지금 화면. 좁은 화면에서는 위에 가로로.
+  묶음 제목(admin-nav-group)은 누를 수 없는 작은 글씨, 메뉴는 아이콘이 있는 줄. 묶음마다 메뉴가 두 개 이상이 되게 나눈다.
+-->
 <nav th:fragment="nav(tab)" class="admin-nav" aria-label="관리 메뉴">
-    <a href="/admin" th:classappend="${tab == 'dashboard'} ? 'active'" th:attr="aria-current=${tab == 'dashboard'} ? 'page'">대시보드</a>
+    <a href="/admin" th:classappend="${tab == 'dashboard'} ? 'active'" th:attr="aria-current=${tab == 'dashboard'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-chart}"></th:block><span>대시보드</span></a>
     <p class="admin-nav-group">콘텐츠</p>
-    <a href="/admin/content" th:classappend="${tab == 'content'} ? 'active'" th:attr="aria-current=${tab == 'content'} ? 'page'">글·댓글</a>
-    <a href="/admin/guestbook" th:classappend="${tab == 'guestbook'} ? 'active'" th:attr="aria-current=${tab == 'guestbook'} ? 'page'">방명록</a>
-    <p class="admin-nav-group">회원</p>
-    <a href="/admin/members" th:classappend="${tab == 'members'} ? 'active'" th:attr="aria-current=${tab == 'members'} ? 'page'">회원</a>
-    <p class="admin-nav-group">신고·문의</p>
-    <a href="/admin/reports" th:classappend="${tab == 'reports'} ? 'active'" th:attr="aria-current=${tab == 'reports'} ? 'page'">신고</a>
-    <a href="/admin/inquiries" th:if="${contactPage == true}" th:classappend="${tab == 'inquiries'} ? 'active'" th:attr="aria-current=${tab == 'inquiries'} ? 'page'">문의함</a>
-    <p class="admin-nav-group">운영</p>
-    <a href="/admin/notices" th:classappend="${tab == 'notices'} ? 'active'" th:attr="aria-current=${tab == 'notices'} ? 'page'">공지</a>
-    <p class="admin-nav-group">시스템</p>
-    <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}" th:classappend="${tab == 'system'} ? 'active'" th:attr="aria-current=${tab == 'system'} ? 'page'">시스템 상태</a>
-    <a href="/admin/logs" th:classappend="${tab == 'logs'} ? 'active'" th:attr="aria-current=${tab == 'logs'} ? 'page'">관리 기록</a>
+    <a href="/admin/content" th:classappend="${tab == 'content'} ? 'active'" th:attr="aria-current=${tab == 'content'} ? 'page'"><th:block th:replace="~{fragments/icons :: pen}"></th:block><span>글·댓글</span></a>
+    <a href="/admin/guestbook" th:classappend="${tab == 'guestbook'} ? 'active'" th:attr="aria-current=${tab == 'guestbook'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-book}"></th:block><span>방명록</span></a>
+    <p class="admin-nav-group">회원·신고</p>
+    <a href="/admin/members" th:classappend="${tab == 'members'} ? 'active'" th:attr="aria-current=${tab == 'members'} ? 'page'"><th:block th:replace="~{fragments/icons :: people}"></th:block><span>회원</span></a>
+    <a href="/admin/reports" th:classappend="${tab == 'reports'} ? 'active'" th:attr="aria-current=${tab == 'reports'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-flag}"></th:block><span>신고</span></a>
+    <a href="/admin/inquiries" th:if="${contactPage == true}" th:classappend="${tab == 'inquiries'} ? 'active'" th:attr="aria-current=${tab == 'inquiries'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-mail}"></th:block><span>문의함</span></a>
+    <p class="admin-nav-group">운영·시스템</p>
+    <a href="/admin/notices" th:classappend="${tab == 'notices'} ? 'active'" th:attr="aria-current=${tab == 'notices'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-megaphone}"></th:block><span>공지</span></a>
+    <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}" th:classappend="${tab == 'system'} ? 'active'" th:attr="aria-current=${tab == 'system'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-server}"></th:block><span>시스템 상태</span></a>
+    <a href="/admin/logs" th:classappend="${tab == 'logs'} ? 'active'" th:attr="aria-current=${tab == 'logs'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-list}"></th:block><span>관리 기록</span></a>
 </nav>
 </body>
 </html>

@@ -57,8 +57,9 @@ class AdminToolsIT extends IntegrationTestBase {
         jdbc.update("INSERT INTO post_view_daily (post_id, view_date, views) VALUES (?, ?, 7), (?, ?, 3)",
                 postId, java.sql.Date.valueOf(today), postId, java.sql.Date.valueOf(today.minusDays(40)));
         String dash = page("/admin", TestAuth.admin(admin));
-        assertThat(dash).contains("오늘 조회").contains("class=\"trend-line\"").contains("조회 최근 30일 합계 7, 오늘 7")
-                .contains("많이 본 글").contains("@viewwriter · 7회");
+        String day = today.getMonthValue() + "/" + today.getDayOfMonth();
+        assertThat(dash).contains("오늘 조회").contains("class=\"trend-line\"").contains(day + " 조회 7회").contains(day + " · 7회")
+                .contains("많이 본 글").contains("@viewwriter").contains("어제 이 시각 추정").doesNotContain("표로 보기");
     }
 
     @Test
