@@ -4,6 +4,7 @@ import static com.team.blog.shared.web.Redirects.seeOther;
 
 import com.team.blog.friend.application.FriendQuery;
 import com.team.blog.friend.application.FriendService;
+import com.team.blog.friend.application.GroupService;
 import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
@@ -26,9 +27,11 @@ public class FriendPageController {
     private final FriendQuery friendQuery;
     private final AccountGuard accountGuard;
     private final CurrentUserProvider currentUserProvider;
+    private final GroupService groups;
 
-    public FriendPageController(FriendService friendService, FriendQuery friendQuery, AccountGuard accountGuard,
+    public FriendPageController(FriendService friendService, FriendQuery friendQuery, AccountGuard accountGuard, GroupService groups,
                                 CurrentUserProvider currentUserProvider) {
+        this.groups = groups;
         this.friendService = friendService;
         this.friendQuery = friendQuery;
         this.accountGuard = accountGuard;
@@ -55,6 +58,7 @@ public class FriendPageController {
         model.addAttribute("friends", friendQuery.friends(me.memberId()));
         model.addAttribute("candidates", friendQuery.candidates(me.memberId(), q));
         model.addAttribute("q", q == null ? "" : q.strip());
+        model.addAttribute("groups", groups.groups(me.memberId())); // 087: 그룹 화면을 이 아래로 합침
         return "settings/friends";
     }
 }

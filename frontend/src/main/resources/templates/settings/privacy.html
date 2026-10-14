@@ -5,19 +5,15 @@
     <title>비공개 계정</title>
 </head>
 <body>
-<!-- 073 강성찬 개인 확장: 비공개 계정 켜기·끄기와 받은 팔로우 요청 -->
+<!-- 073 강성찬 개인 확장: 받은 팔로우 요청(켜기·끄기 스위치는 087에서 설정 > 계정으로) -->
 <main class="friends-page">
     <h1>비공개 계정</h1>
     <p class="help">비공개 계정은 내가 팔로우 요청을 수락한 사람만 내 글·짧은 기록·방명록·팔로워 목록을 볼 수 있어요.
         다른 사람에게는 프로필 윗부분만 보이고, 홈·트렌딩·태그·검색·RSS에도 내 글이 나오지 않아요. 지금 팔로워는 그대로예요.
         <a href="/settings">설정으로</a></p>
 
-    <form method="post" action="/settings/privacy" class="privacy-form">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <p th:text="${isPrivate ? '지금은 🔒 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</p>
-        <button type="submit" name="private" th:value="${!isPrivate}" class="btn"
-                th:text="${isPrivate ? '공개 계정으로 바꾸기(대기 중 요청은 모두 수락)' : '비공개 계정으로 바꾸기'}">비공개 계정으로 바꾸기</button>
-    </form>
+    <p th:text="${isPrivate ? '지금은 🔒 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</p>
+    <p class="help">켜고 끄기는 <a href="/settings#settings-account">설정 &gt; 계정</a>에서 해요.</p>
 
     <section aria-labelledby="requests-heading">
         <h2 id="requests-heading" th:text="${'받은 팔로우 요청 ' + requests.size()}">받은 팔로우 요청 0</h2>
