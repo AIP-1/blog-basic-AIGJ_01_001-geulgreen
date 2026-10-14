@@ -18,6 +18,7 @@
                 <li th:text="${'게시물 ' + publicCount}">게시물 24</li>
                 <li><a th:href="${paths.blog(owner.handle()) + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a></li>
                 <li><a th:href="${paths.blog(owner.handle()) + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a></li>
+                <li th:if="${friendCount != null}"><a href="/settings/friends" th:text="${'친구 ' + friendCount}">친구 3</a></li>
             </ul>
             <p th:if="${instaAccount and isOwner}"><a class="btn btn-sm" href="/settings#settings-profile">프로필 편집</a></p>
             <p class="help" th:if="${instaAccount and blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</p>
@@ -26,7 +27,8 @@
                 <span th:if="${blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span><span th:if="${blogVisits != null}"> · </span>
                 <span th:text="${'공개 글 ' + publicCount}">공개 글 24</span> ·
                 <a th:href="${paths.blog(owner.handle()) + '/followers'}" th:text="${'팔로워 ' + followCounts.followers()}">팔로워 12</a> ·
-                <a th:href="${paths.blog(owner.handle()) + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a>
+                <a th:href="${paths.blog(owner.handle()) + '/following'}" th:text="${'팔로잉 ' + followCounts.following()}">팔로잉 30</a><th:block th:if="${friendCount != null}"> ·
+                <a href="/settings/friends" th:text="${'친구 ' + friendCount}">친구 3</a></th:block>
             </p>
             <!-- 040·041·044 강성찬 개인 확장: 방명록·시리즈·RSS -->
             <p class="help blog-links">

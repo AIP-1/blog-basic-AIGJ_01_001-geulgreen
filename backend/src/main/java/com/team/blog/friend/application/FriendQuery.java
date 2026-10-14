@@ -44,6 +44,13 @@ public class FriendQuery {
                 ? Status.FOLLOWING : Status.NONE;
     }
 
+    /** 내가 고른 친구 수(탈퇴 유예·익명 회원 제외). */
+    public long count(long me) {
+        Long n = jdbc.queryForObject("SELECT count(*) FROM close_friend cf JOIN member m ON m.id = cf.friend_id "
+                + "WHERE cf.owner_id = ? AND m.withdrawn_at IS NULL", Long.class, me);
+        return n == null ? 0 : n;
+    }
+
     /** 내가 고른 친구(최근에 넣은 순). 탈퇴 유예·익명 회원은 뺀다. */
     public List<Person> friends(long me) {
         return people("""
