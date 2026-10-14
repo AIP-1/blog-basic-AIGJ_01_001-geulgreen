@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 
 const require = createRequire(import.meta.url);
-const { rowFlags } = require('../../main/resources/static/js/post/card-rows.js');
+const { rowFlags, fitLines } = require('../../main/resources/static/js/post/card-rows.js');
 
 let passed = 0;
 function test(name, fn) { fn(); passed++; console.log('ok -', name); }
@@ -25,6 +25,12 @@ test('한 칸짜리 줄(휴대폰)은 빈 칸을 두지 않는다', () => {
 test('무한 스크롤로 붙은 줄·4칸 줄도 같은 규칙', () => {
   const cards = [0, 0, 0, 0, 350, 350, 350, 350].map((top, i) => ({ top, thumb: i === 5 }));
   assert.deepEqual(rowFlags(cards), [false, false, false, false, true, true, true, true]);
+});
+
+test('늘어난 자리에 들어가는 요약 줄 수(최소 3줄)', () => {
+  assert.equal(fitLines(200, 24), 8);
+  assert.equal(fitLines(40, 24), 3);
+  assert.equal(fitLines(200, NaN), 3);
 });
 
 console.log(`${passed} passed`);

@@ -1,5 +1,6 @@
 /*
- * 강성찬 개인 확장(088 후속): 사진 없는 카드의 빈 사진 칸은 "같은 줄"에 사진 카드가 있을 때만(085·088).
+ * 강성찬 개인 확장(088 후속): 사진 없는 카드는 같은 줄의 사진 카드 높이만큼 늘어나고, 늘어난 자리는 요약 줄로 채운다
+ * (빈 사진 칸은 두지 않는다, 10-14 chan). 이 규칙은 "같은 줄"에 사진 카드가 있을 때만.
  * CSS만으로는 줄을 알 수 없어(목록 전체 기준이 되어 사진 없는 줄에도 빈 칸이 생겼다) 카드 위치로 줄을 묶어
  * 그 줄에 사진 카드가 있으면 .row-thumb를 붙인다. 폭이 바뀌거나 무한 스크롤로 카드가 붙으면 다시 계산한다.
  * 스크립트가 없으면 빈 칸 없이 그대로.
@@ -28,6 +29,21 @@
       return { top: n.getBoundingClientRect().top, thumb: !!(cards[i] && cards[i].querySelector('.card-thumb')) };
     }));
     cards.forEach(function (c, i) { if (c) { c.classList.toggle('row-thumb', flags[i]); } });
+    // 사진 없는 카드는 사진 카드 높이만큼 늘어난 자리를 요약 줄로 채운다(CSS가 요약 칸을 남는 높이만큼 늘림)
+    cards.forEach(function (c, i) {
+      var ex = c && !c.querySelector('.card-thumb') && c.querySelector('.card-excerpt');
+      if (!ex) { return; }
+      ex.style.webkitLineClamp = ''; ex.style.lineClamp = '';
+      if (!flags[i]) { return; }
+      var n = fitLines(ex.clientHeight, parseFloat(getComputedStyle(ex).lineHeight));
+      ex.style.webkitLineClamp = String(n); ex.style.lineClamp = String(n);
+    });
+  }
+
+  /** 남은 높이에 들어가는 요약 줄 수(최소 3줄, 088). */
+  function fitLines(height, lineHeight) {
+    if (!(lineHeight > 0)) { return 3; }
+    return Math.max(3, Math.floor(height / lineHeight));
   }
 
   function init() {
@@ -45,7 +61,7 @@
     }
   }
 
-  var api = { rowFlags: rowFlags };
+  var api = { rowFlags: rowFlags, fitLines: fitLines };
   root.blogCardRows = api;
   if (typeof module === 'object' && module.exports) { module.exports = api; }
   if (typeof document !== 'undefined') {
