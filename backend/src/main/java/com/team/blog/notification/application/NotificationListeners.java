@@ -8,6 +8,7 @@ import com.team.blog.shared.event.FollowRequestClosed;
 import com.team.blog.shared.event.CommentLiked;
 import com.team.blog.shared.event.CommentUnliked;
 import com.team.blog.shared.event.FollowRequested;
+import com.team.blog.shared.event.InquiryReceived;
 import com.team.blog.shared.event.MemberFollowed;
 import com.team.blog.shared.event.MemberUnfollowed;
 import com.team.blog.shared.event.PostLiked;
@@ -84,6 +85,14 @@ public class NotificationListeners {
     public void on(CommentUnliked e) {
         dispatcher.submit("comment unlike " + e.commentId(), () -> writer.removeFromGroup(e.authorId(),
                 NotificationWriter.commentLikeGroup(e.commentId()), e.likerId()));
+    }
+
+    /** 090 강성찬 개인 확장: 새 문의 → 관리자 모두에게(운영 알림). */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(InquiryReceived e) {
+        dispatcher.submit("inquiry " + e.inquiryId(), () -> jdbc.queryForList(
+                "SELECT id FROM member WHERE role = 'ADMIN' AND withdrawn_at IS NULL", Long.class)
+                .forEach(admin -> writer.operational(admin, NotificationType.INQUIRY, null, null, null, null)));
     }
 
     /** 057 강성찬 개인 확장: 오늘의 미션 글 → 친구에게. */

@@ -57,7 +57,7 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
 .settings .field { margin: 12px 0; }
 /* 점검(10-08): 글자 칸 이름은 칸 위에 */
 .settings .field > label:not(:has(input[type=checkbox], input[type=radio])), .auth-form .field > label { display: block; margin-bottom: 4px; }
-.settings input[type=text], .settings input[type=password], .settings textarea { width: 100%; max-width: 480px; padding: 8px; font: inherit; }
+.settings input[type=text], .settings input[type=email], .settings input[type=password], .settings textarea { width: 100%; max-width: 480px; padding: 8px; font: inherit; }
 .settings textarea { min-height: 6.5em; resize: vertical; }
 .settings .readonly { color: var(--color-text-muted); }
 /* 063 강성찬 개인 확장: 설정 섹션 메뉴(넓은 화면은 왼쪽 세로 메뉴, 좁은 화면은 위쪽 가로 줄) */
@@ -335,7 +335,7 @@ input::placeholder, textarea::placeholder { color: var(--color-text-muted); }
 input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; border-color: var(--color-focus); }
 select { padding: 6px 12px; }
 .auth-form input[type=email], .auth-form input[type=text], .auth-form input[type=password] { width: 100%; max-width: none; padding: 12px 16px; border-radius: 999px; }
-.settings input[type=text], .settings input[type=password], .settings textarea { padding: 10px 14px; }
+.settings input[type=text], .settings input[type=email], .settings input[type=password], .settings textarea { padding: 10px 14px; }
 fieldset { border: 1px solid var(--color-border); border-radius: 14px; padding: 12px 16px; }
 input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill); width: 1.05em; height: 1.05em; vertical-align: -2px; }
 

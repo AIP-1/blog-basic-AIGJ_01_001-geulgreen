@@ -216,6 +216,10 @@ public class NotificationQuery {
                 url = "/settings/privacy";
                 message = who(actorName, others) + " 팔로우를 요청했어요";
             }
+            case INQUIRY -> {
+                url = "/admin/inquiries";
+                message = "새 문의가 왔어요. 문의함에서 확인해 주세요";
+            }
             case REPORT_RESOLVED -> message = "ACTION_TAKEN".equals(rs.getString("result"))
                     ? "신고하신 내용을 검토해 조치했어요. 알려 주셔서 고마워요"
                     : "신고하신 내용을 검토했지만 운영 정책 위반은 아니었어요";
@@ -233,7 +237,7 @@ public class NotificationQuery {
             }
             default -> message = "";
         }
-        if (type == NotificationType.REPORT_RESOLVED || type == NotificationType.CONTENT_HIDDEN) {
+        if (type == NotificationType.REPORT_RESOLVED || type == NotificationType.CONTENT_HIDDEN || type == NotificationType.INQUIRY) {
             actor = null;
         }
         return new NotificationItem(rs.getLong("id"), type.name(), read, updatedAt, CardDates.label(updatedAt, now), actor,

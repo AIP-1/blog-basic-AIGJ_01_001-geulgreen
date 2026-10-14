@@ -30,7 +30,9 @@ public class DatabaseCleaner {
             // 강성찬 개인 확장(057)
             "daily_topic", "mission_post",
             // 089 강성찬 개인 확장
-            "comment_like");
+            "comment_like",
+            // 강성찬 개인 확장(090)
+            "inquiry");
 
     private final JdbcTemplate jdbc;
     private final StringRedisTemplate redis;

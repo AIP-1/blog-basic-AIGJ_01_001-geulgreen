@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>문의 답장</title>
+</head>
+<body>
+<p>글그린에 보내 주신 문의에 답장드려요.</p>
+<p style="white-space: pre-wrap" th:text="${reply}">답장</p>
+<hr>
+<p>보내 주신 문의: <span th:text="${title}">제목</span></p>
+<p style="white-space: pre-wrap" th:text="${content}">내용</p>
+</body>
+</html>

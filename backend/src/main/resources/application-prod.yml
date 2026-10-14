@@ -26,6 +26,9 @@ blog:
       # 보내는 주소는 Gmail 계정 주소로 고정
       from: ${MAIL_USERNAME:}
       link-base-url: ${APP_BASE_URL:}
+  # 090: 운영에서도 사이트 문의 양식을 쓴다(메일 링크 대신)
+  contact:
+    enabled: ${CONTACT_ENABLED:true}
   # 사진 저장소: 처음에는 서버 디스크(local), 나중에 NHN MinIO(s3)로 확장(DEPLOY.md "사진 저장소 확장").
   # s3일 때 버킷·정책은 미리 만들어 둔다(create-bucket=false)
   storage:
