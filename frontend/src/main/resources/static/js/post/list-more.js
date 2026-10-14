@@ -79,7 +79,7 @@
       article.appendChild(thumb);
     }
     var foot = el('p', 'card-foot');
-    foot.appendChild(el('span', 'card-likes', '♥ ' + item.likeCount));
+    var likes = el('span', 'card-likes', '♡ ' + item.likeCount); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount); foot.appendChild(likes);
     foot.appendChild(el('span', 'card-comments', '💬 ' + item.commentCount));
     var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
     foot.appendChild(time);

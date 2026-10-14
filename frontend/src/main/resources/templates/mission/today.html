@@ -155,7 +155,7 @@
         <p class="card-excerpt" th:if="${!mp.excerpt().isEmpty()}" th:text="${mp.excerpt()}">요약</p>
     </div>
     <p class="card-foot">
-        <span class="card-likes" th:text="${'♥ ' + mp.likeCount()}">♥ 0</span>
+        <span class="card-likes" th:text="${'♡ ' + mp.likeCount()}">♡ 0</span>
         <span class="card-comments" th:text="${'💬 ' + mp.commentCount()}">💬 0</span>
         <a class="mission-post-reply" th:href="${mp.url() + '#comments'}">댓글 달기</a>
     </p>

@@ -30,7 +30,7 @@
         <img th:src="${card.thumbnailUrl()}" th:alt="${card.title()}" loading="lazy">
     </div>
     <p class="card-foot">
-        <span class="card-likes" th:text="${'♥ ' + card.likeCount()}">♥ 12</span>
+        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}" th:text="${'♡ ' + card.likeCount()}">♡ 12</span>
         <span class="card-comments" th:text="${'💬 ' + card.commentCount()}">💬 3</span>
         <time class="card-date" th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2026.10.02</time>
     </p>
