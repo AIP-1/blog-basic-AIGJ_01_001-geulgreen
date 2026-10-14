@@ -2,7 +2,10 @@ package com.team.blog.discovery.web;
 
 import com.team.blog.account.application.BlogOwner;
 import com.team.blog.account.application.BlogOwnerResolver;
+import com.team.blog.discovery.application.FuzzyText;
+import com.team.blog.discovery.application.SearchProperties;
 import com.team.blog.discovery.application.SearchService;
+import com.team.blog.discovery.application.SearchSuggestService;
 import com.team.blog.discovery.application.SearchTerms;
 import com.team.blog.discovery.application.VisitorKeys;
 import com.team.blog.post.application.TagListingQuery;
@@ -39,11 +42,15 @@ public class SearchController {
     private final CurrentUserProvider currentUserProvider;
     private final ClientIpResolver clientIpResolver;
     private final java.time.Clock clock;
+    private final SearchSuggestService suggestService;
+    private final SearchProperties properties;
 
     public SearchController(SearchService searchService, BlogOwnerResolver ownerResolver, TagListingQuery tagListingQuery,
                             VisitorKeys visitorKeys, CurrentUserProvider currentUserProvider, ClientIpResolver clientIpResolver,
-                            java.time.Clock clock) {
+                            java.time.Clock clock, SearchSuggestService suggestService, SearchProperties properties) {
         this.clock = clock;
+        this.suggestService = suggestService;
+        this.properties = properties;
         this.searchService = searchService;
         this.ownerResolver = ownerResolver;
         this.tagListingQuery = tagListingQuery;
@@ -101,8 +108,12 @@ public class SearchController {
         model.addAttribute("searchBase", base);
         String enc = UriUtils.encodeQueryParam(terms.text(), StandardCharsets.UTF_8);
         model.addAttribute("encodedQ", enc);
+        Long ownerId = owner == null ? null : owner.memberId();
         if (people) {
-            model.addAttribute("people", searchService.people(terms));
+            List<SearchService.Person> found = searchService.people(terms);
+            model.addAttribute("people", found);
+            Optional<String> fix = suggestion(terms, found.size(), null, model);
+            model.addAttribute("fixedPeople", fix.isPresent() && found.isEmpty() ? searchService.people(SearchTerms.parse(fix.get())) : List.of());
             return;
         }
         SearchService.SearchPage page;
@@ -113,9 +124,27 @@ public class SearchController {
             page = searchService.posts(terms, latest, owner == null ? null : owner.memberId(), null);
             continued = false;
         }
+        List<SearchService.SearchCard> fixedResults = List.of();
+        List<SearchService.SearchCard> similar = List.of();
+        Optional<String> fix = continued ? Optional.empty() : suggestion(terms, page.items().size(), ownerId, model);
+        if (!continued && properties.suggestEnabled() && page.items().size() < properties.suggestBelow()) {
+            java.util.Set<Long> shown = new java.util.HashSet<>();
+            page.items().forEach(c -> shown.add(c.id()));
+            java.util.List<String> words = new java.util.ArrayList<>(terms.words());
+            if (fix.isPresent()) {
+                SearchTerms fixedTerms = SearchTerms.parse(fix.get());
+                fixedResults = searchService.posts(fixedTerms, latest, ownerId, null).items().stream()
+                        .filter(c -> shown.add(c.id())).toList();
+                words.addAll(fixedTerms.words());
+            }
+            similar = searchService.cards(suggestService.similar(words, ownerId, shown, properties.similarLimit()), terms);
+        }
+        model.addAttribute("fixedResults", fixedResults);
+        model.addAttribute("similarResults", similar);
         java.util.Map<Long, String> dates = new java.util.HashMap<>();
         java.time.Instant now = java.time.Instant.now(clock);
-        page.items().forEach(c -> dates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), now)));
+        java.util.stream.Stream.of(page.items(), fixedResults, similar).flatMap(List::stream)
+                .forEach(c -> dates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), now)));
         model.addAttribute("dates", dates);
         model.addAttribute("results", page.items());
         model.addAttribute("nextCursor", page.nextCursor());
@@ -124,6 +153,16 @@ public class SearchController {
                 + (owner == null ? "" : "&blog=" + owner.handle()));
         model.addAttribute("moreLinkBase", "?q=" + enc + (owner == null ? "&tab=posts" : "") + "&sort="
                 + (latest ? "latest" : "relevance") + "&cursor=");
+    }
+
+    /** 094: 결과가 적으면 고친 검색어를 화면에 넘긴다("혹시 ○○을 찾으셨나요?"). 스위치를 끄면 늘 비어 있다. */
+    private Optional<String> suggestion(SearchTerms terms, int found, Long ownerId, Model model) {
+        Optional<String> fix = properties.suggestEnabled() && found < properties.suggestBelow()
+                ? suggestService.correct(terms, ownerId) : Optional.empty();
+        model.addAttribute("suggestion", fix.orElse(null));
+        model.addAttribute("suggestionParticle", fix.map(FuzzyText::objectParticle).orElse(null));
+        model.addAttribute("encodedSuggestion", fix.map(f -> UriUtils.encodeQueryParam(f, StandardCharsets.UTF_8)).orElse(null));
+        return fix;
     }
 
     @GetMapping("/api/search/posts")

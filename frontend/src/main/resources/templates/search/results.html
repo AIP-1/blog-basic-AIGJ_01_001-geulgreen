@@ -25,6 +25,10 @@
            th:attr="aria-current=${sort == 'latest' ? 'page' : null}">최신순</a>
     </nav>
     <p th:if="${emptyQuery}" class="notice">두 글자 이상 입력해 주세요</p>
+    <!-- 094 강성찬 개인 확장: 결과가 적을 때 자모 편집 거리로 고친 검색어 -->
+    <p th:if="${!emptyQuery and suggestion != null}" class="notice">혹시
+        <a th:href="${searchBase + '?q=' + encodedSuggestion + (owner == null ? '&tab=' + tab : '') + '&sort=' + sort}"
+           th:text="${'''' + suggestion + ''''}">'검색어'</a><span th:text="${suggestionParticle}">을</span> 찾으셨나요?</p>
     <th:block th:if="${!emptyQuery and tab == 'posts'}">
         <p th:if="${twoCharNotice}" class="help">두 글자 단어는 제목·태그에서만 찾았어요</p>
         <p th:if="${results.isEmpty() and !continued}" class="empty-state" th:text="${'''' + q + '''에 대한 글이 없어요'}">'검색어'에 대한 글이 없어요</p>
@@ -37,11 +41,27 @@
         </div>
         <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!results.isEmpty()}, ${moreLinkBase}, null)}"></div>
         <script th:src="@{/js/post/list-more.js}" defer></script>
+        <section th:if="${!fixedResults.isEmpty()}" class="more-posts" aria-labelledby="fixed-heading">
+            <h2 id="fixed-heading" th:text="${'''' + suggestion + ''' 검색 결과'}">'검색어' 검색 결과</h2>
+            <div class="card-grid">
+                <th:block th:each="card : ${fixedResults}" th:with="snippetHtml=${card.snippetHtml()}">
+                    <article th:replace="~{fragments/post-card :: card(${card}, ${dates.get(card.id())}, true)}"></article>
+                </th:block>
+            </div>
+        </section>
+        <section th:if="${!similarResults.isEmpty()}" class="more-posts" aria-labelledby="similar-heading">
+            <h2 id="similar-heading">비슷한 글</h2>
+            <div class="card-grid">
+                <th:block th:each="card : ${similarResults}" th:with="snippetHtml=${card.snippetHtml()}">
+                    <article th:replace="~{fragments/post-card :: card(${card}, ${dates.get(card.id())}, true)}"></article>
+                </th:block>
+            </div>
+        </section>
     </th:block>
     <th:block th:if="${!emptyQuery and tab == 'people'}">
         <p th:if="${people.isEmpty()}" class="empty-state" th:text="${'''' + q + '''에 대한 사람이 없어요'}">없음</p>
         <ul class="follow-list">
-            <li th:each="m : ${people}" class="follow-row">
+            <li th:each="m : ${people.isEmpty() ? fixedPeople : people}" class="follow-row">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
                 <div class="follow-text">
                     <p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p>
