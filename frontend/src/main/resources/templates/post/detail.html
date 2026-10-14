@@ -131,7 +131,7 @@
             </div>
             <a class="btn btn-primary btn-sm" href="/missions">다른 친구들 글 보러 가기</a>
         </section>
-        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 080 아래 "관심 있을 만한 글"로 합쳤다) -->
+        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글") -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
                 <span class="help">이전 글</span><span th:text="${prevPost.title()}">이전 글 제목</span></a>
@@ -226,12 +226,13 @@
             </th:block>
         </section>
     </article>
-    <!-- 080 강성찬 개인 확장: 댓글 다음 "관심 있을 만한 글". 글 화면은 쿼리를 늘리지 않고, list-more.js가 끝에 닿으면 첫 묶음부터(커서 0) 무한 스크롤로 불러온다 -->
-    <section class="more-posts" aria-labelledby="more-heading">
-        <h2 id="more-heading">관심 있을 만한 글</h2>
-        <div class="card-grid" id="card-grid"></div>
-        <div class="list-more" th:attr="data-list-api=${'/api/posts/' + post.id() + '/more'}" data-show-author="true">
-            <a class="more-button" href="/" data-cursor="0">더 많은 글 보기</a>
+    <!-- 095 강성찬 개인 확장: 댓글 다음 "관련 글" 4개(080 무한 스크롤을 대신함). 글 화면 쿼리를 늘리지 않게 list-more.js가
+         목록 끝에 다가가면 /api/posts/{id}/related를 한 번 불러온다(다음 묶음 없음). 넓은 화면 2×2, 휴대폰 한 줄씩 -->
+    <section class="more-posts related-posts" aria-labelledby="related-heading">
+        <h2 id="related-heading">관련 글</h2>
+        <div class="card-grid home-cards related-cards" id="card-grid"></div>
+        <div class="list-more" th:attr="data-list-api=${'/api/posts/' + post.id() + '/related'}" data-show-author="true">
+            <a class="more-button" href="/" data-cursor="0">다른 글 보기</a>
             <p class="list-error" role="alert" hidden>불러오지 못했어요 <button type="button" class="list-retry">다시 시도</button></p>
         </div>
     </section>
@@ -326,9 +327,9 @@
     <script th:if="${tocEnabled}" th:src="@{/js/post/toc.js}" defer></script>
     <script th:if="${readProgressEnabled or shareEnabled}" th:src="@{/js/post/reading-extras.js}" defer></script>
     <script th:src="@{/js/post/comments.js}" defer></script>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
     <script th:src="@{/js/follow/follow.js}" defer></script>
-    <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:if="${recordView}" th:src="@{/js/post/post-view.js}" defer></script>
 </main>
 </body>

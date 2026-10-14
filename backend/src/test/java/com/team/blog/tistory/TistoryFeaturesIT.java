@@ -91,40 +91,49 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         tag(hidden, "spring", 0);
         String html = page("/navme/posts/" + second);
         assertThat(html).contains("이전 글").contains("첫 번째 글").contains("다음 글").contains("세 번째 글")
-                .contains("관심 있을 만한 글").doesNotContain("나만 보는 글").contains("id=\"post-toc\"").contains("/js/post/toc-");
+                .contains("관련 글").doesNotContain("나만 보는 글").contains("id=\"post-toc\"").contains("/js/post/toc-");
         assertThat(page("/navme/posts/" + first)).doesNotContain("이전 글</span>");
     }
 
     @Test
-    void morePostsRankSameTagOrAuthorFirstAndPage() throws Exception {
-        long a = member("morea");
-        long b = member("moreb");
-        long v = member("morev");
+    void relatedPostsAreFourByTagOverlapThenAuthorThenPopular() throws Exception {
+        long a = member("rela");
+        long b = member("relb");
+        long v = member("relv");
         long src = posts.published(a, "지금 글", "본문", 1, T.minusSeconds(500));
-        posts.published(a, "같은 작가 글", "본문", 1, T.minusSeconds(900));
-        long sameTag = posts.published(b, "같은 태그 글", "본문", 1, T.minusSeconds(800));
+        tag(src, "spring", 0);
+        tag(src, "java", 1);
+        long twoTags = posts.published(b, "태그 둘 겹침", "본문", 1, T.minusSeconds(900));
+        tag(twoTags, "spring", 0);
+        tag(twoTags, "java", 1);
+        long oneTag = posts.published(b, "태그 하나 겹침", "본문", 1, T.minusSeconds(800));
+        tag(oneTag, "spring", 0);
+        posts.published(a, "같은 글쓴이 글", "본문", 1, T.minusSeconds(700));
+        long popular = posts.published(b, "인기 글", "본문", 1, T.minusSeconds(600));
+        jdbc.update("UPDATE post SET like_count = 9 WHERE id = ?", popular);
+        posts.published(b, "그냥 최신 글", "본문", 1, T.minusSeconds(10));
         long hidden = posts.published(b, "비공개 같은 태그", "본문", 1, T.minusSeconds(100));
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", hidden);
-        long mine = posts.published(v, "내 글", "본문", 1, T.minusSeconds(50));
-        tag(src, "spring", 0);
-        tag(sameTag, "spring", 0);
         tag(hidden, "spring", 0);
-        tag(mine, "spring", 0);
-        for (int i = 0; i < 11; i++) {
-            posts.published(b, "최신 글 " + i, "본문", 1, T.minusSeconds(10 + i));
-        }
-        String first = mockMvc.perform(get("/api/posts/{id}/more", src).with(TestAuth.member(v)))
+        long friends = posts.published(b, "친구 공개 같은 태그", "본문", 1, T.minusSeconds(100));
+        jdbc.update("UPDATE post SET visibility = 'FRIENDS' WHERE id = ?", friends);
+        tag(friends, "java", 0);
+        String section = mockMvc.perform(get("/api/posts/{id}/related", src).with(TestAuth.member(v)))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        // 같은 태그·같은 작가가 더 오래됐어도 최신 글보다 먼저, 지금 글·내 글·비공개 글은 없음, 13개라 다음 커서 12
-        assertThat(first.indexOf("같은 작가 글")).isLessThan(first.indexOf("최신 글 0")).isPositive();
-        assertThat(first.indexOf("같은 태그 글")).isLessThan(first.indexOf("최신 글 0")).isPositive();
-        assertThat(first).doesNotContain("지금 글").doesNotContain("내 글").doesNotContain("비공개 같은 태그")
-                .contains("\"nextCursor\":\"12\"");
-        assertThat(mockMvc.perform(get("/api/posts/{id}/more", src).param("cursor", "12").with(TestAuth.member(v)))
-                .andReturn().getResponse().getContentAsString()).contains("\"nextCursor\":null").contains("최신 글 10");
-        mockMvc.perform(get("/api/posts/{id}/more", src).param("cursor", "x")).andExpect(status().isBadRequest());
-        assertThat(page("/morea/posts/" + src, v)).contains("관심 있을 만한 글").contains("data-cursor=\"0\"")
-                .contains("data-list-api=\"/api/posts/" + src + "/more\"").contains("/js/post/list-more");
+        // 겹치는 태그 수 → 같은 글쓴이 → 최근 인기 순, 4개까지(그냥 최신 글은 다섯째라 빠짐)
+        assertThat(section.indexOf("태그 둘 겹침")).isPositive().isLessThan(section.indexOf("태그 하나 겹침"));
+        assertThat(section.indexOf("태그 하나 겹침")).isLessThan(section.indexOf("같은 글쓴이 글"));
+        assertThat(section.indexOf("같은 글쓴이 글")).isLessThan(section.indexOf("인기 글"));
+        assertThat(section).doesNotContain("그냥 최신 글").doesNotContain("지금 글").doesNotContain("비공개 같은 태그")
+                .doesNotContain("친구 공개 같은 태그");
+        assertThat(section).contains("\"nextCursor\":null");
+        // 글 화면은 관련 글 칸만 두고 스크립트가 한 번 불러온다(무한 스크롤 API는 없어짐)
+        assertThat(page("/rela/posts/" + src, v)).contains("관련 글").doesNotContain("관심 있을 만한 글")
+                .contains("data-list-api=\"/api/posts/" + src + "/related\"");
+        mockMvc.perform(get("/api/posts/{id}/more", src)).andExpect(status().isNotFound());
+        // 비공개 글 번호로 불러도 그 글의 태그·글쓴이는 쓰지 않는다
+        assertThat(mockMvc.perform(get("/api/posts/{id}/related", hidden)).andReturn().getResponse().getContentAsString())
+                .doesNotContain("비공개 같은 태그");
     }
 
     @Test

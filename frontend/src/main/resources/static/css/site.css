@@ -690,6 +690,12 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 .post-head .post-tags { margin: 14px 0 0; }
 .more-posts { margin: 48px 0 24px; padding-top: 28px; border-top: 1px solid var(--color-border); }
 .more-posts h2 { font-size: 1.2em; margin: 0 0 16px; }
+/* 095 관련 글 4개: 넓은 화면 2×2, 휴대폰 한 줄씩 */
+.related-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+@media (min-width: 640px) { .related-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* 관련 글은 4개로 끝: "모든 글을 다 봤어요" 안내는 안 보인다. 하나도 없으면 칸째 숨긴다 */
+.related-posts .list-end { display: none; }
+.related-posts:has(#card-grid:empty):not(:has(.more-button)) { display: none; }
 /* 037 카테고리·041 시리즈·040 방명록·043 비밀 댓글(강성찬 개인 확장) */
 .blog-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .blog-links a { text-decoration: none; }
