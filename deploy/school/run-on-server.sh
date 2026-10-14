@@ -9,7 +9,7 @@
 # - 비밀값은 Actions가 환경 변수로 넘겨주고, 서버에는 0600 권한 env 파일로만 남긴다(다시 시작할 때 필요)
 # 필요한 환경 변수: APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA
 #   MAIL_USERNAME MAIL_PASSWORD GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
-#   (선택) GEMINI_API_KEY, ADMIN_EMAILS
+#   (선택) GEMINI_API_KEY, ADMIN_EMAILS, TELEGRAM_BOT_TOKEN
 set -euo pipefail
 APP_PORT2="${APP_PORT2:-$((${APP_PORT:-8300} + 1))}"
 
@@ -31,6 +31,9 @@ done
 GEMINI_API_KEY="${GEMINI_API_KEY:-}"
 GEMINI_API_KEY="${GEMINI_API_KEY#"${GEMINI_API_KEY%%[![:space:]]*}"}"
 GEMINI_API_KEY="${GEMINI_API_KEY%"${GEMINI_API_KEY##*[![:space:]]}"}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN#"${TELEGRAM_BOT_TOKEN%%[![:space:]]*}"}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN%"${TELEGRAM_BOT_TOKEN##*[![:space:]]}"}"
 
 DOCKER="docker"
 if ! docker info > /dev/null 2>&1; then DOCKER="sudo -n docker"; fi
@@ -66,6 +69,7 @@ ENV_FILE="${WORK}/app.env"
     echo "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
     echo "GEMINI_API_KEY=${GEMINI_API_KEY:-}"
     echo "BLOG_ADMIN_EMAILS=${ADMIN_EMAILS:-}"
+    echo "TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}"
     echo "STORAGE_TYPE=local"
     echo "STORAGE_LOCAL_DIR=/app/data"
     echo "STORAGE_LOCAL_SECRET=$(cat "${WORK}/storage-secret")"
@@ -138,6 +142,19 @@ check_mail() {
   esac
 }
 
+# 096: 서버에서 api.telegram.org에 닿는지, 봇 토큰이 통하는지 배포 기록에 남긴다(토큰 값은 찍지 않음, 결과와 상관없이 배포는 계속)
+check_telegram() {
+  if [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then echo "텔레그램 토큰 없음: 텔레그램 알림은 꺼진 채로 켜져요"; return 0; fi
+  local code
+  code="$(printf 'url = "https://api.telegram.org/bot%s/getMe"\n' "${TELEGRAM_BOT_TOKEN}" | curl -s -o /dev/null -w '%{http_code}' -m 10 --config - || true)"
+  case "${code}" in
+    200) echo "텔레그램 봇 확인: 통해요(200)" ;;
+    401|404) echo "텔레그램 봇 확인: 토큰이 거절됐어요(${code}). @BotFather가 준 토큰을 다시 넣어 주세요" ;;
+    000) echo "텔레그램 봇 확인: 서버에서 api.telegram.org에 닿지 못했어요(연결 실패 또는 시간 초과)" ;;
+    *) echo "텔레그램 봇 확인: 예상하지 못한 응답이에요(${code})" ;;
+  esac
+}
+
 # 한 대 교체. 실패하면 그 대만 전 버전으로 되돌리고 1을 돌려준다(다른 대는 손대지 않았으니 사이트는 계속 돈다)
 roll() { # $1 = 컨테이너 이름, $2 = 포트
   # 되돌릴 이미지는 이 대가 지금 쓰는 것(지난 배포가 중간에 멈춰 두 대의 이미지가 다를 수 있음). 처음 띄우는 대면 1번 것
@@ -176,4 +193,5 @@ roll "${APP}" "${APP_PORT}" || exit 1
 echo "앱 두 대가 켜졌어요: 127.0.0.1:${APP_PORT}, 127.0.0.1:${APP_PORT2} → https://${APP_DOMAIN}"
 check_gemini
 check_mail
+check_telegram
 ${DOCKER} image prune -f > /dev/null 2>&1 || true

@@ -237,6 +237,16 @@
             <p class="form-status" id="notification-status" aria-live="polite"></p>
         </form>
     </section>
+    <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
+    <section th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
+        <h2 id="telegram-heading">텔레그램 알림</h2>
+        <p class="help" th:text="${telegramLinked ? '연결됐어요. 새 문의·새 가입·새 신고가 텔레그램으로 와요.' : '연결하면 새 문의·새 가입·새 신고를 텔레그램으로 받아요. 누르면 봇이 열리고, [시작]을 누르면 연결돼요.'}">안내</p>
+        <p th:if="${param.telegram != null}" class="field-error" role="alert">봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
+        <form method="post" th:action="${telegramLinked ? '/settings/telegram/unlink' : '/settings/telegram/link'}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" th:text="${telegramLinked ? '연결 끊기' : '텔레그램 연결'}">텔레그램 연결</button>
+        </form>
+    </section>
 
     </div>
     <div class="settings-panel" id="settings-ai">
