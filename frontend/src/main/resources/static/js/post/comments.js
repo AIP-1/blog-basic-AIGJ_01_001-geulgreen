@@ -21,13 +21,20 @@
           var data = {};
           try { data = t ? JSON.parse(t) : {}; } catch (e) { data = {}; }
           if (!res.ok) {
-            var err = new Error(String(res.status));
+            var err = new Error(String(res.status)); err.status = res.status;
             err.message = res.status === 429 ? '잠시 후 다시 시도해 주세요' : (data.message || '처리하지 못했어요');
             throw err;
           }
           return data;
         });
       });
+  }
+
+  function paintLike(button, liked, count) {
+    button.setAttribute('aria-pressed', String(liked));
+    button.setAttribute('aria-label', (liked ? '좋아요 취소 (' : '좋아요 (') + count + ')');
+    button.querySelector('.like-icon').textContent = liked ? '♥' : '♡';
+    button.querySelector('.like-number').textContent = count;
   }
 
   function el(tag, cls, text) {
@@ -86,6 +93,15 @@
     if (c.replyTo) { box.appendChild(el('p', 'reply-to', '@' + (c.replyTo.handle || c.replyTo.nickname) + '에게')); }
     box.appendChild(el('p', 'comment-content', c.content));
     var actions = el('p', 'comment-actions');
+    // 089 강성찬 개인 확장: 댓글 좋아요(내 댓글은 수만)
+    if (c.likeCount != null && !c.mine) {
+      var like = el('button', 'comment-like'); like.dataset.likeCommentId = c.id;
+      like.appendChild(el('span', 'like-icon')); like.appendChild(document.createTextNode(' ')); like.appendChild(el('span', 'like-number'));
+      paintLike(like, !!c.liked, c.likeCount);
+      actions.appendChild(like);
+    } else if (c.likeCount && c.mine) {
+      actions.appendChild(el('span', 'help comment-like-count', '♥ ' + c.likeCount));
+    }
     if (c.canReply) { actions.appendChild(el('button', 'comment-reply', '답글')); }
     if (c.canEdit) { actions.appendChild(el('button', 'comment-edit', '수정')); }
     if (c.canDelete) { actions.appendChild(el('button', 'comment-delete', '삭제')); }
@@ -150,7 +166,21 @@
       var button = e.target.closest('button');
       if (!button) { return; }
       var box = button.closest('.comment');
-      if (button.classList.contains('comment-reply')) {
+      if (button.classList.contains('comment-like')) {
+        // 바로 바꾸고, 실패하면 되돌린다. 비회원은 로그인으로
+        var was = button.getAttribute('aria-pressed') === 'true';
+        var before = Number(button.querySelector('.like-number').textContent);
+        paintLike(button, !was, before + (was ? -1 : 1));
+        button.disabled = true;
+        call(was ? 'DELETE' : 'PUT', '/api/comments/' + button.dataset.likeCommentId + '/like')
+          .then(function (r) { paintLike(button, r.liked, r.likeCount); })
+          .catch(function (err) {
+            paintLike(button, was, before);
+            if (err.status === 401 && section.dataset.login) { window.location.assign(section.dataset.login); return; }
+            showError(box, err.message);
+          })
+          .then(function () { button.disabled = false; });
+      } else if (button.classList.contains('comment-reply')) {
         inlineForm(box, '', '답글 쓰기', function (text, secret) {
           call('POST', '/api/posts/' + postId + '/comments', { content: text, replyToCommentId: Number(box.dataset.commentId), secret: secret })
             .then(function (c) { reopen(c.id); }).catch(function (err) { showError(box, err.message); });

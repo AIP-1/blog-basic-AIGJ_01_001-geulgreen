@@ -26,6 +26,10 @@
         <p th:if="${c.replyTo() != null}" class="reply-to" th:text="${'@' + (c.replyTo().handle() != null ? c.replyTo().handle() : c.replyTo().nickname()) + '에게'}">@아이디에게</p>
         <p class="comment-content" th:text="${c.content()}">내용</p>
         <p class="comment-actions">
+            <!-- 089 강성찬 개인 확장: 댓글 좋아요(내 댓글은 수만) -->
+            <button type="button" th:if="${c.likeCount() != null and !c.mine()}" class="comment-like"
+                    th:attr="aria-pressed=${c.liked()},data-like-comment-id=${c.id()},aria-label=${(c.liked() ? '좋아요 취소 (' : '좋아요 (') + c.likeCount() + ')'}"><span class="like-icon" aria-hidden="true" th:text="${c.liked() ? '♥' : '♡'}">♡</span> <span class="like-number" th:text="${c.likeCount()}">0</span></button>
+            <span th:if="${c.likeCount() != null and c.mine() and c.likeCount() > 0}" class="help comment-like-count" th:text="${'♥ ' + c.likeCount()}">♥ 1</span>
             <button type="button" th:if="${c.canReply()}" class="comment-reply">답글</button>
             <button type="button" th:if="${c.canEdit()}" class="comment-edit">수정</button>
             <button type="button" th:if="${c.canDelete()}" class="comment-delete">삭제</button>

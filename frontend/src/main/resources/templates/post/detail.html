@@ -185,7 +185,7 @@
         </aside>
         <!-- 댓글(014): 첫 20개를 화면과 함께, 스크립트 없이도 더 보기·작성 -->
         <section id="comments" class="comments" aria-label="댓글"
-                 th:attr="data-comment-count=${post.commentCount()},data-post-id=${post.id()},data-comment-target=${commentTarget}">
+                 th:attr="data-comment-count=${post.commentCount()},data-post-id=${post.id()},data-comment-target=${commentTarget},data-login=${loginRedirect}">
             <h2 th:text="${'댓글 ' + post.commentCount()}">댓글 0</h2>
             <th:block th:if="${comments != null}">
                 <p th:if="${comments.prevCursor() != null}"><a class="comments-prev" th:attr="data-before=${comments.prevCursor()}"
