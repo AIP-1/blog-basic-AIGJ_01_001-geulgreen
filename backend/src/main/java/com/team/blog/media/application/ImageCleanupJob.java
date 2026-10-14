@@ -1,5 +1,7 @@
 package com.team.blog.media.application;
 
+import com.team.blog.post.application.JobLock;
+import java.time.Duration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -10,13 +12,15 @@ import org.springframework.stereotype.Component;
 public class ImageCleanupJob {
 
     private final ImageCleanupService cleanupService;
+    private final JobLock jobLock;
 
-    public ImageCleanupJob(ImageCleanupService cleanupService) {
+    public ImageCleanupJob(ImageCleanupService cleanupService, JobLock jobLock) {
         this.cleanupService = cleanupService;
+        this.jobLock = jobLock;
     }
 
     @Scheduled(cron = "${blog.image.cleanup.cron:0 30 4 * * *}", zone = "Asia/Seoul")
     public void run() {
-        cleanupService.runOnce();
+        jobLock.runExclusively("image:cleanup-lock", Duration.ofMinutes(30), cleanupService::runOnce);
     }
 }
