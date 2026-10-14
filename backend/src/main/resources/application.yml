@@ -128,6 +128,7 @@ blog:
         - account
         - actuator
         - auth
+        - contact
         - error
         - explore
         - feed
@@ -372,6 +373,10 @@ blog:
     page-size: 20
     poll-seconds: 30
     preview-length: 50
+  # 090 강성찬 개인 확장: 문의하기 양식·관리자 문의함. 끄면 꼬리말 [문의하기]가 예전 메일 링크로 돌아간다.
+  contact:
+    enabled: ${CONTACT_ENABLED:true}
+    per-hour: 5
 
 # 운영 상태 확인: /actuator/health(전체), /actuator/health/liveness·readiness(컨테이너·로드밸런서용)만 연다.
 # 상세(DB 주소 등)는 보여 주지 않고, 메일 서버는 매번 부르지 않는다.

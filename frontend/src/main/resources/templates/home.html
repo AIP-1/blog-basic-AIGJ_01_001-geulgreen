@@ -58,7 +58,7 @@
         <!-- 067 후속(강성찬 개인 확장): 목록이 끝없이 이어지므로 꼬리말 링크를 여기에도 -->
         <nav class="side-links" aria-label="사이트 정보">
             <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
-            <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
+            <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
             <!-- 넓은 화면은 맨 아래 꼬리말을 숨기고 문구를 여기에(인스타그램 PC처럼) -->
             <!-- 링크 넷이 한 줄을 다 써서 GitHub 마크는 이 줄 끝에 -->
             <p class="side-slogan">좋은 글이 머무는 곳, 글그린 <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a></p>
