@@ -125,7 +125,7 @@ class FriendIT extends IntegrationTestBase {
                     .as(path).contains("공개 글 하나").doesNotContain("친구만 보는 비밀글");
         }
         // 공용 목록(홈·트렌딩·검색·피드)에는 친구에게도 나오지 않는다
-        for (String path : new String[] {"/", "/?tab=trending", "/api/posts", "/feed", "/search?q=" + "비밀글"}) {
+        for (String path : new String[] {"/", "/explore", "/explore?tab=trending", "/api/posts", "/feed", "/search?q=" + "비밀글"}) {
             assertThat(mockMvc.perform(get(path).with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString())
                     .as(path).doesNotContain("친구만 보는 비밀글");
         }

@@ -26,21 +26,11 @@
     </section>
     <div class="home-layout">
     <div class="home-main">
-    <h1 class="visually-hidden" th:text="${tab == 'trending' ? '트렌딩' : '전체 글'}">전체 글</h1>
-    <!-- 019 [최신] [트렌딩] 탭(기본 최신). 인기 태그는 오른쪽 상자 하나로(067 강성찬 개인 확장) -->
-    <div class="home-tabs-row">
-        <nav class="manage-tabs home-tabs" aria-label="목록 탭">
-            <a href="/" th:attr="aria-current=${tab == 'latest' ? 'page' : null}">최신 글</a>
-            <a href="/?tab=trending" th:attr="aria-current=${tab == 'trending' ? 'page' : null}">트렌딩</a>
-        </nav>
-    </div>
-    <p th:if="${tab == 'trending'}" class="help">최근 7일 동안 반응이 많은 글 · 10분마다 갱신</p>
-    <p th:if="${snapshotExpired}" class="notice" role="status">순위가 새로 바뀌었어요</p>
-    <p th:if="${continued}"><a th:href="${tab == 'trending' ? '/?tab=trending' : '/'}">처음부터 보기</a></p>
-    <th:block th:if="${tab == 'trending' and cards.isEmpty() and !continued}">
-        <div class="empty-state">아직 트렌딩 글이 없어요 <a href="/">최신 글 보기</a></div>
-    </th:block>
-    <th:block th:if="${tab == 'latest' and cards.isEmpty() and !continued}">
+    <h1 class="visually-hidden">전체 글</h1>
+    <!-- 086 강성찬 개인 확장: 트렌딩·새로 온 작가·추천은 탐색으로 옮겨 홈은 최신 글 하나 -->
+    <h2 class="home-section-title">최신 글</h2>
+    <p th:if="${continued}"><a href="/">처음부터 보기</a></p>
+    <th:block th:if="${cards.isEmpty() and !continued}">
         <div class="empty-state">아직 올라온 글이 없어요. 첫 글의 주인공이 되어 보세요
             <th:block th:if="${currentMemberId != null}">
                 <form method="post" action="/write" class="inline-form">
@@ -51,55 +41,19 @@
             <a th:unless="${currentMemberId != null}" href="/login">로그인</a>
         </div>
     </th:block>
-    <!-- 036 강성찬 개인 확장: 새로 온 작가와 그 첫 글 -->
-    <section th:if="${newcomers != null and !newcomers.isEmpty()}" class="newcomers" aria-labelledby="newcomers-heading">
-        <h2 id="newcomers-heading">새로 온 작가 <span class="help">첫 글을 반겨 주세요</span></h2>
-        <ul class="newcomer-list">
-            <li th:each="n : ${newcomers}" class="newcomer">
-                <a th:href="${paths.blog(n.handle())}" class="newcomer-who">
-                    <th:block th:replace="~{fragments/avatar :: avatar(${n.avatar()}, 36)}"></th:block>
-                    <span th:text="${n.handle()}">아이디</span></a>
-                <a th:href="${n.url()}" class="newcomer-post" th:text="${'첫 글 · ' + n.title()}">첫 글</a>
-            </li>
-        </ul>
-    </section>
     <div class="card-grid home-cards" id="card-grid">
         <th:block th:each="card : ${cards}">
             <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
         </th:block>
     </div>
-    <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()}, ${moreLinkBase}, ${tab == 'trending' ? '/?tab=trending&expired=1' : null})}"></div>
+    <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
     </div>
-    <!-- 오른쪽: 인기 태그, 고양이 카드 -->
-    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 추천 글, 추천 블로그, 인기 태그, 사이트 링크 -->
+    <!-- 오른쪽(넓은 화면은 화면에 붙어 따라옴, 067 후속): 탐색 안내, 사이트 링크. 086: 추천 글·추천 블로그·인기 태그는 탐색으로 -->
     <aside class="home-side" aria-label="둘러보기">
-        <!-- 077 강성찬 개인 확장: 추천 글(내 태그와 같은 새 사람 글 → 최근 7일 조회수) -->
-        <section th:if="${!recommendedPosts.isEmpty()}" class="side-box side-rec-posts" aria-labelledby="side-posts-heading">
-            <h2 id="side-posts-heading">추천 글</h2>
-            <ol class="side-post-list">
-                <li th:each="p : ${recommendedPosts}">
-                    <a th:href="${p.url()}" th:text="${p.title()}">제목</a>
-                    <span class="help" th:text="${p.author().handle()}">작가</span>
-                </li>
-            </ol>
-        </section>
-        <section th:if="${!recommended.isEmpty()}" class="side-box side-recommended" aria-labelledby="side-rec-heading">
-            <h2 id="side-rec-heading">추천 블로그</h2>
-            <ul class="side-rec-list">
-                <li th:each="b : ${recommended}">
-                    <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
-                        <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 28)}"></th:block>
-                        <span th:text="${b.handle()}">아이디</span></a>
-                    <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, ${currentMemberId != null}, '/login', '/')}"></th:block>
-                </li>
-            </ul>
-            <p class="follow-message help" role="status" hidden></p>
-        </section>
-        <section th:if="${!popularTags.isEmpty()}" class="side-box" aria-labelledby="side-tags-heading">
-            <h2 id="side-tags-heading"><th:block th:replace="~{fragments/icons :: tag}"></th:block> 인기 태그</h2>
-            <ul class="tag-pills side-pills">
-                <li th:each="t : ${popularTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, ${tagStyles.get(t.name())})}"></a></li>
-            </ul>
+        <section class="side-box side-explore" aria-labelledby="side-explore-heading">
+            <h2 id="side-explore-heading">둘러보기</h2>
+            <p class="help">추천 글, 추천 블로그, 트렌딩, 새로 온 작가는 탐색에 모여 있어요</p>
+            <p class="side-explore-links"><a href="/explore" class="btn btn-primary btn-sm">탐색에서 더 보기</a> <a href="/tags">태그 전체 보기</a></p>
         </section>
         <!-- 067 후속(강성찬 개인 확장): 목록이 끝없이 이어지므로 꼬리말 링크를 여기에도 -->
         <nav class="side-links" aria-label="사이트 정보">
@@ -111,9 +65,6 @@
     </aside>
     </div>
     <script th:src="@{/js/post/list-more.js}" defer></script>
-    <script th:src="@{/js/post/drag-scroll.js}" defer></script>
-    <script th:src="@{/js/post/home-tabs.js}" defer></script>
-    <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>
 </html>

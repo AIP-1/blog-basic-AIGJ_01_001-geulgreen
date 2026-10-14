@@ -35,10 +35,15 @@ public class MissionController {
 
     private final MissionService missions;
     private final CurrentUserProvider currentUserProvider;
+    private final com.team.blog.post.application.PostListQuery listQuery;
+    private final java.time.Clock clock;
 
-    public MissionController(MissionService missions, CurrentUserProvider currentUserProvider) {
+    public MissionController(MissionService missions, CurrentUserProvider currentUserProvider,
+                             com.team.blog.post.application.PostListQuery listQuery, java.time.Clock clock) {
         this.missions = missions;
         this.currentUserProvider = currentUserProvider;
+        this.listQuery = listQuery;
+        this.clock = clock;
     }
 
     @GetMapping("/missions")
@@ -65,6 +70,13 @@ public class MissionController {
         model.addAttribute("topics", topics);
         model.addAttribute("friendPosts", feed.stream().filter(p -> p.friend() || p.mine()).toList());
         model.addAttribute("otherPosts", feed.stream().filter(p -> !p.friend() && !p.mine()).toList());
+        // 086 강성찬 개인 확장: 공용 글 카드(사진·아이디·날짜). 공용 목록 카드가 없는 글(비공개 계정 등)은 예전 미션 카드로
+        java.util.Map<Long, com.team.blog.post.application.PostCard> cards = listQuery.cardsByIds(
+                feed.stream().map(MissionService.FeedPost::postId).toList());
+        java.util.Map<Long, String> cardDates = new java.util.HashMap<>();
+        cards.values().forEach(c -> cardDates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), clock.instant())));
+        model.addAttribute("cards", cards);
+        model.addAttribute("cardDates", cardDates);
         model.addAttribute("prevDay", day.minusDays(1).toString());
         model.addAttribute("prevLabel", label(day.minusDays(1)));
         model.addAttribute("nextDay", day.isBefore(today) ? day.plusDays(1).toString() : null);
