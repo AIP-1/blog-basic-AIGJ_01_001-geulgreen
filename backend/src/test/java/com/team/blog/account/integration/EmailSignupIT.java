@@ -66,6 +66,22 @@ class EmailSignupIT extends IntegrationTestBase {
         assertThat(mails.get(0).body()).contains("24");
     }
 
+    /** 화면 순서(이메일 → 닉네임 → 주소 → 비밀번호 → 약관)대로 안내한다. 이메일만 보낸 요청에 약관 안내를 먼저 보이지 않는다. */
+    @Test
+    void errorsFollowTheScreenOrderSoTermsComeLast() throws Exception {
+        String emailOnly = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/signup")
+                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                .param("email", "early@x.com")).andReturn().getResponse().getContentAsString();
+        assertThat(emailOnly).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        String noPassword = mockMvc.perform(signup("early@x.com", "early1", "", "", "가나다", false, false))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(noPassword).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        String onlyTermsMissing = mockMvc.perform(signup("early@x.com", "early1", PASSWORD, PASSWORD, "가나다", false, false))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(onlyTermsMissing).contains("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(count("SELECT count(*) FROM member")).isZero();
+    }
+
     @Test
     void bothAgreementsAreRequired() throws Exception {
         MvcResult onlyTerms = mockMvc.perform(signup("a1@x.com", "aaa111", PASSWORD, PASSWORD, "가나다", true, false)).andReturn();

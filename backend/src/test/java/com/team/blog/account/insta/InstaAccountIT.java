@@ -54,6 +54,7 @@ class InstaAccountIT extends IntegrationTestBase {
         assertThat(browser.perform(post("/api/signup/code").with(csrf()).param("email", "new@example.com"))
                 .getResponse().getStatus()).isEqualTo(200);
         String code = codeFrom("new@example.com");
+        assertThat(mailpit.awaitMessagesTo("new@example.com", 1).get(0).fromName()).isEqualTo("글그린"); // 보내는 이름
         // 1분 안에 다시 요청하면 막힘
         assertThat(browser.perform(post("/api/signup/code").with(csrf()).param("email", "new@example.com"))
                 .getResponse().getStatus()).isEqualTo(429);

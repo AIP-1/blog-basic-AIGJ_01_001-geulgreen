@@ -99,7 +99,7 @@ public class SocialSignupService {
     }
 
     private long doComplete(PendingSocialSignup pending, SocialSignupCommand command, Handle[] submittedHandle) {
-        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
+        // 화면 순서대로 검사한다: 이메일 → 주소 → 닉네임 → 약관
         String email;
         boolean verified;
         if (pending.hasVerifiedEmail()) {
@@ -112,6 +112,7 @@ public class SocialSignupService {
         Handle handle = handleService.validateForSignup(command.handle(), pending.provider());
         submittedHandle[0] = handle;
         Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
+        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
 
         Instant now = clock.instant();
         Member member = memberRepository.saveAndFlush(new Member(handle, nickname, now));
