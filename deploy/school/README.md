@@ -37,7 +37,7 @@
 `~/nginx/<도메인>.conf`를 이 폴더의 `geulgreen.java21.net.conf`로 바꾼다(다른 도메인이면 `server_name`·인증서 경로·로그 경로·upstream 포트를 바꿈). 바꾼 뒤 `nginx -t`로 확인하고 reload한다.
 - upstream에 앱 두 대(8300, 8301)를 묶고, 한 대가 꺼져 있으면 다른 대로 한 번만 다시 보낸다(`proxy_next_upstream_tries 2`, 연결은 3초에 포기).
 - `map`·`upstream` 이름에 `geulgreen_`을 붙인 것은 공용 Nginx에서 다른 팀 설정과 이름이 겹치면 `nginx -t`가 실패하기 때문이다.
-- HTTP/2는 주석으로 둔다. 배포 로그의 `nginx -v`가 1.25.1 이상이면 `http2 on;`의 #을 지운다.
+- HTTP/2를 켠다. 서버 Nginx가 1.18.0(10-14 배포 로그)이라 `listen 443 ssl http2;` 형식으로 쓴다.
 - HSTS·`X-Content-Type-Options`는 앱(Spring Security)이 이미 보내므로 Nginx에서 또 붙이지 않는다.
 
 앱은 `X-Forwarded-Proto`·`X-Forwarded-For`를 믿으므로(https 판단·접속 IP), 설정에 아래 줄이 없으면 `location /` 안에 넣는다.
