@@ -153,6 +153,9 @@ public class BlogPageController {
         model.addAttribute("owner", owner);
         model.addAttribute("author", owner.toAuthorDisplay());
         model.addAttribute("publicCount", listQuery.publicCount(owner.memberId()));
+        // 087 후속(강성찬 개인 확장): 내 블로그면 숫자 줄에서 친구 관리로(인스타의 친한 친구처럼)
+        currentUserProvider.current().map(CurrentUser::memberId).filter(id -> id == owner.memberId())
+                .ifPresent(id -> model.addAttribute("friendCount", friendQuery.count(id)));
         model.addAttribute("isOwner", currentUserProvider.current().map(CurrentUser::memberId)
                 .map(id -> id == owner.memberId()).orElse(false));
         // 018: 팔로워·팔로잉 수와 보는 사람 기준 팔로우 상태
