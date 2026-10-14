@@ -4,13 +4,15 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
        line-height: 1.7; color: var(--color-text); background: var(--color-bg); overflow-wrap: anywhere; word-break: keep-all;
        -webkit-font-smoothing: antialiased; }
+/* 목록 화면·머리말·꼬리말이 함께 쓰는 넓은 폭(넓은 모니터에서 여백만 크지 않게). 읽는 화면(main 기본 760px)은 그대로 */
+:root { --page-wide: 1440px; }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
 img { max-width: 100%; height: auto; }
 a { color: var(--color-brand); text-underline-offset: 3px; }
 h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
-/* 시안(10-08) 머리말: 화면 폭 띠 + 가운데 1120px 안쪽 */
+/* 시안(10-08) 머리말: 화면 폭 띠 + 가운데 --page-wide 안쪽 */
 .site-header { position: sticky; top: 0; z-index: 30; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
-.header-inner { position: relative; max-width: 1120px; margin: 0 auto; padding: 12px 20px; display: flex; gap: 24px; align-items: center; }
+.header-inner { position: relative; max-width: var(--page-wide); margin: 0 auto; padding: 12px 20px; display: flex; gap: 24px; align-items: center; }
 .brand { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.15em; color: var(--color-text); text-decoration: none; flex: none; }
 .brand .icon-paw, .footer-brand .icon-paw, .hero-slogan .icon-paw { color: var(--color-accent); }
 .site-nav { flex: 1; display: flex; gap: 12px; align-items: center; min-width: 0; }
@@ -140,7 +142,7 @@ dialog#compare-dialog { width: min(1100px, 96vw); max-height: 90vh; padding: 12p
 .alt-field { display: flex; gap: 8px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
 .alt-field input { flex: 1 1 200px; min-width: 0; padding: 4px; }
 /* 009 글 카드·목록(10 §2·§3). 썸네일 없음은 색 역할 --color-thumb-empty */
-main.list-page { max-width: 1120px; }
+main.list-page { max-width: var(--page-wide); }
 .card-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
 @media (min-width: 640px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -370,7 +372,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
 /* 본문(카드 줄)과 같은 폭 안에서, 양옆 여백을 두고 둥근 띠로(chan 10-08: 화면 폭 전체는 너무 큼) */
 .hero { position: relative; margin: 0 0 32px; border-radius: 24px; overflow: hidden;
     background: linear-gradient(120deg, var(--color-hero-from), var(--color-hero-to)); }
-.hero-inner { max-width: 1120px; margin: 0 auto; padding: 48px 48px; min-height: 340px; display: grid;
+.hero-inner { max-width: var(--page-wide); margin: 0 auto; padding: 48px 48px; min-height: 340px; display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
 /* 사진 배너(static/images/hero.webp, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
    검색창만 사진의 문구 아래(가로 18.5%, 세로 72%)에 얹는다. 비율을 그대로 지켜 문구 위치가 어긋나지 않게 한다 */
@@ -515,7 +517,7 @@ dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(10
 
 /* 바닥글 */
 .site-footer { margin-top: 48px; border-top: 1px solid var(--color-border); background: var(--color-surface); }
-.footer-inner { max-width: 1120px; margin: 0 auto; padding: 18px 20px; display: flex; gap: 8px 20px; align-items: center; flex-wrap: wrap; }
+.footer-inner { max-width: var(--page-wide); margin: 0 auto; padding: 18px 20px; display: flex; gap: 8px 20px; align-items: center; flex-wrap: wrap; }
 .footer-brand { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 800; }
 .footer-slogan { margin: 0; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.15em; }
 .footer-links { margin: 0 0 0 auto; font-size: .9em; }
@@ -773,6 +775,7 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 088: 홈·미션·내 글·시리즈도 세로 카드. 홈은 오른쪽 칸이 있어 넓은 화면에서 3칸 */
 main.list-page .home-cards { gap: 18px; }
 @media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* 067 후속: 사이트 링크는 한 줄(작은 회색 글씨, 사이에 ·) */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
 .settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
