@@ -62,7 +62,7 @@ public class CategoryService {
             throw new PostContentException("CATEGORY_LIMIT");
         }
         try {
-            return jdbc.queryForObject("INSERT INTO category (member_id, name, position) VALUES (?, ?, "
+            return jdbc.queryForObject("INSERT INTO category (member_id, name, position) VALUES (?, ?, " // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                     + "(SELECT COALESCE(max(position), 0) + 1 FROM category WHERE member_id = ?)) RETURNING id",
                     Long.class, me.memberId(), name, me.memberId());
         } catch (DuplicateKeyException e) {

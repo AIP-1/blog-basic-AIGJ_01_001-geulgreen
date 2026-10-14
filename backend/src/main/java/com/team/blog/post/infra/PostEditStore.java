@@ -57,6 +57,7 @@ public class PostEditStore {
     }
 
     /** 새 임시글({@code edit_version} 0). */
+    @SuppressWarnings("java:S2259") // 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     public long insertDraft(long authorId, String title, String contentMd, String visibility, Instant now) {
         return jdbc.queryForObject("""
                 INSERT INTO post (author_id, title, content_md, status, visibility, edit_version, created_at, updated_at)
@@ -99,7 +100,7 @@ public class PostEditStore {
     public Optional<DirectSave> saveDirect(long postId, long baseVersion, String title, String contentMd, Instant now) {
         List<Long> locked = jdbc.queryForList(
                 "SELECT id FROM post WHERE id = ? AND deleted_at IS NULL FOR UPDATE", Long.class, postId);
-        if (locked.isEmpty()) {
+        if (locked.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return Optional.empty();
         }
         jdbc.queryForList("SELECT post_id FROM post_draft WHERE post_id = ? FOR UPDATE", Long.class, postId);
@@ -126,7 +127,7 @@ public class PostEditStore {
     public boolean discardWorkingCopy(long postId, long currentVersion) {
         List<String> status = jdbc.queryForList(
                 "SELECT status FROM post WHERE id = ? AND deleted_at IS NULL FOR UPDATE", String.class, postId);
-        if (status.isEmpty() || !PostStatus.PUBLISHED.name().equals(status.get(0))) {
+        if (status.isEmpty() || !PostStatus.PUBLISHED.name().equals(status.get(0))) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return false;
         }
         jdbc.update("DELETE FROM post_draft WHERE post_id = ?", postId);
@@ -138,7 +139,7 @@ public class PostEditStore {
     public Optional<PostEditRow> lockForPublish(long postId) {
         List<Long> locked = jdbc.queryForList(
                 "SELECT id FROM post WHERE id = ? AND deleted_at IS NULL FOR UPDATE", Long.class, postId);
-        if (locked.isEmpty()) {
+        if (locked.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return Optional.empty();
         }
         jdbc.queryForList("SELECT post_id FROM post_draft WHERE post_id = ? FOR UPDATE", Long.class, postId);
@@ -186,6 +187,7 @@ public class PostEditStore {
     }
 
     /** 062 강성찬 개인 확장: [새 글]이 다시 열 이 회원의 빈 임시글(제목·본문 공백뿐, 태그 없음) 하나. */
+    @SuppressWarnings("java:S2259") // 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     public java.util.Optional<Long> latestEmptyDraft(long authorId) {
         return jdbc.queryForList("""
                 SELECT id FROM post e

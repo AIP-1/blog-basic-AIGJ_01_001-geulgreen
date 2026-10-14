@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.NavigableSet;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -71,7 +71,7 @@ public class MissionController {
         YearMonth shownMonth = month(month, today);
         LocalDate shownDay = day;
         viewer.ifPresent(v -> {
-            TreeSet<LocalDate> done = missions.doneDays(v.memberId());
+            NavigableSet<LocalDate> done = missions.doneDays(v.memberId());
             MissionService.Stats stats = MissionService.stats(done, today);
             model.addAttribute("calendar", Calendar.of(shownMonth, done, today, shownDay));
             List<MissionService.Badge> badges = MissionService.badges(stats);

@@ -40,7 +40,7 @@ public class OldHandleRedirectFilter extends OncePerRequestFilter {
                     SELECT m.handle FROM handle_history h JOIN member m ON m.id = h.member_id
                     WHERE h.old_handle = ? AND m.status <> 'WITHDRAWN'
                       AND NOT EXISTS (SELECT 1 FROM member o WHERE o.handle = h.old_handle)""", String.class, old);
-            if (!current.isEmpty()) {
+            if (!current.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 String query = request.getQueryString();
                 response.sendRedirect(com.team.blog.shared.web.BlogPaths.of(current.get(0)) + (slash < 0 ? "" : uri.substring(slash))
                         + (query == null ? "" : "?" + query));

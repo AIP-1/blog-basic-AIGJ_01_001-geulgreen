@@ -52,7 +52,7 @@ public class NotificationCleanup {
     @Transactional
     public void purgeWithdrawn(long memberId) {
         jdbc.update("DELETE FROM notification WHERE receiver_id = ?", memberId);
-        jdbc.queryForList("DELETE FROM notification_actor WHERE actor_id = ? RETURNING notification_id", Long.class, memberId)
+        jdbc.queryForList("DELETE FROM notification_actor WHERE actor_id = ? RETURNING notification_id", Long.class, memberId) // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 .stream().distinct().forEach(writer::recount);
         jdbc.update("DELETE FROM notification WHERE last_actor_id = ? AND group_key IS NULL", memberId);
     }

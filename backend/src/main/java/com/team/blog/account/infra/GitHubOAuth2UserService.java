@@ -46,7 +46,7 @@ public class GitHubOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
         OAuth2User user = delegate.loadUser(userRequest);
-        SocialProfile profile = toProfile(user.getAttributes(), emailsFetcher.apply(userRequest));
+        SocialProfile profile = toProfile(user.getAttributes(), emailsFetcher.apply(userRequest)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
         return new SocialOAuth2User(user.getAuthorities(), user.getAttributes(), "id", profile);
     }
 
