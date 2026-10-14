@@ -4,6 +4,7 @@ import static com.team.blog.shared.web.Redirects.seeOther;
 
 import com.team.blog.admin.application.AdminToolsService;
 import com.team.blog.admin.application.SamplePostsService;
+import com.team.blog.admin.application.SystemStatusService;
 import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.shared.security.CurrentUserProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,9 +27,11 @@ public class AdminToolsController {
     private final CurrentUserProvider currentUserProvider;
     private final SamplePostsService samplePosts;
     private final boolean insightsEnabled;
+    private final SystemStatusService systemStatus;
 
     public AdminToolsController(AdminToolsService tools, CurrentUserProvider currentUserProvider, SamplePostsService samplePosts,
-                                @Value("${blog.admin.insights.enabled:true}") boolean insightsEnabled) {
+                                @Value("${blog.admin.insights.enabled:true}") boolean insightsEnabled, SystemStatusService systemStatus) {
+        this.systemStatus = systemStatus;
         this.tools = tools;
         this.currentUserProvider = currentUserProvider;
         this.samplePosts = samplePosts;
@@ -44,6 +47,7 @@ public class AdminToolsController {
         model.addAttribute("insightsEnabled", insightsEnabled);
         if (insightsEnabled) {
             model.addAttribute("serverHost", SERVER_HOST);
+            model.addAttribute("serverVersion", systemStatus.version());
             model.addAttribute("serverStartedAt", Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime()));
         }
         model.addAttribute("adminTab", "dashboard");
