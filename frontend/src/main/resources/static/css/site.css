@@ -145,7 +145,11 @@ main.list-page { max-width: 1120px; }
     box-shadow: 0 2px 10px var(--color-shadow); transition: transform .15s ease, box-shadow .15s ease; }
 .post-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px var(--color-shadow); }
 .card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1; }
-.card-top { margin: 0 0 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-top { margin: 0 0 4px; display: flex; align-items: center; gap: 8px; min-height: 26px; }
+/* 084 강성찬 개인 확장: 카드 줄 맞춤. 머리 줄이 빈 카드는 숨기되, 같은 목록에 머리 줄이 있는 카드가 있으면 같은 높이로 자리를 둔다 */
+.card-top:not(:has(*)) { display: none; }
+:is(.card-grid, .home-cards) .card-top { display: flex; }
+:is(.card-grid, .home-cards):not(:has(.card-top > *)) .card-top { display: none; }
 .card-author { position: relative; z-index: 1; display: inline-flex; gap: 8px; align-items: center; min-width: 0;
     color: var(--color-text); text-decoration: none; font-size: .92em; font-weight: 600; }
 .card-author span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -157,6 +161,9 @@ main.list-page { max-width: 1120px; }
 .post-card:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .card-excerpt { margin: 0; color: var(--color-text-muted); font-size: .93em; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3;
                 -webkit-box-orient: vertical; overflow: hidden; }
+/* 084: 두 칸 이상 나란할 때는 제목 2줄 자리를 늘 잡아 요약·사진·반응 줄의 높이를 옆 카드와 맞춘다 */
+@media (min-width: 640px) { .card-grid .card-title { min-height: calc(2em * 1.45); } }
+@media (min-width: 700px) { .home-cards .card-title { min-height: calc(2em * 1.45); } }
 .card-thumb { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: var(--color-thumb-empty); }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
@@ -604,6 +611,8 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .recommended-blog { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 12px 14px;
     display: flex; flex-direction: column; gap: 6px; align-items: flex-start; min-width: 0; }
 .recommended-bio { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+/* 084: 소개가 없는 칸도 팔로우 버튼이 옆 칸과 같은 높이(맨 아래)에 */
+.recommended-blog > :last-child { margin-top: auto; }
 
 /* 039 목차·038 이전/다음 글·관련 글(강성찬 개인 확장) */
 .post-toc { border: 1px solid var(--color-border); border-radius: 12px; padding: 12px 16px; margin: 16px 0; background: var(--color-surface); }
@@ -740,7 +749,7 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 @media (min-width: 700px) { main.list-page .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.home-cards .post-card { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "body" "foot"; gap: 10px; }
+.home-cards .post-card { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: "body" "foot"; gap: 10px; }
 .home-cards .post-card:has(.card-thumb) { grid-template-columns: 120px minmax(0, 1fr); grid-template-areas: "thumb body" "thumb foot"; column-gap: 14px; }
 .home-cards .card-thumb { grid-area: thumb; aspect-ratio: auto; height: 100%; min-height: 120px; max-height: 190px; }
 .home-cards .card-foot { flex-wrap: nowrap; white-space: nowrap; gap: 10px; font-size: .85em; }
@@ -900,6 +909,9 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .topic-no { align-self: flex-start; margin: 0; padding: 3px 12px; border-radius: 999px; background: var(--color-surface);
     color: var(--tone-fg); font-weight: 700; font-size: .82em; }
 .topic-title { margin: 4px 0 0; font-size: 1.3em; line-height: 1.4; }
+/* 084: 세 칸으로 나란할 때 주제 제목은 2줄 자리를 잡아 안내 글 시작 줄을 맞춘다 */
+@media (min-width: 800px) { .topic-title { min-height: calc(2em * 1.4); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; } }
 .topic-hint { margin: 0; color: var(--color-text-muted); font-size: .93em; line-height: 1.65; flex: 1; }
 .topic-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
 .topic-foot form { margin: 0; }
@@ -1054,8 +1066,8 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .signup-code [data-code-entry] label { flex-basis: 100%; }
 .signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }
 /* 081 강성찬 개인 확장: 피드에 섞인 추천 글 표시와 "팔로우한 글을 모두 봤어요" 줄 */
-.feed-rec-badge { margin: 0 0 6px; font-size: .8em; color: var(--color-text-muted); }
-.feed-rec-label { font-weight: 700; color: var(--color-brand); }
+.card-rec { position: relative; z-index: 1; flex: none; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--color-brand);
+    color: var(--color-brand); font-size: .74em; font-weight: 700; cursor: help; }
 .feed-divider { grid-column: 1 / -1; margin: 8px 0; text-align: center; padding: 10px 0; border-top: 1px solid var(--color-border); }
 /* 079 강성찬 개인 확장: 탐색 화면(홈 오른쪽 칸 상자를 그대로, 넓으면 추천 글·블로그 두 칸) */
 .explore-page { display: flex; flex-direction: column; gap: 18px; }

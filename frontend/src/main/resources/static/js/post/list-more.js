@@ -47,7 +47,7 @@
     var article = el('article', 'post-card');
     article.dataset.postId = item.id;
     var body = el('div', 'card-body');
-    if (showAuthor || item.firstTag) {
+    { // 084: 머리 줄은 늘 둔다(비면 CSS가 숨김)
       var top = el('p', 'card-top');
       if (showAuthor) {
         var a = el('a', 'card-author'); a.href = '/@' + item.author.handle;
@@ -128,9 +128,9 @@
         if (item.feedDivider) { grid.appendChild(el('p', 'help feed-divider', '팔로우한 글을 모두 봤어요')); }
         var node = card(item, showAuthor);
         if (item.recReason) {
-          var badge = el('p', 'feed-rec-badge'); badge.appendChild(el('span', 'feed-rec-label', '추천'));
-          badge.appendChild(document.createTextNode(' ')); badge.appendChild(el('span', null, item.recReason));
-          var body = node.querySelector('.card-body'); body.insertBefore(badge, body.firstChild);
+          var rec = el('span', 'card-rec', '추천'); rec.title = item.recReason; rec.setAttribute('aria-label', '추천: ' + item.recReason);
+          var author = node.querySelector('.card-author'), top = node.querySelector('.card-top');
+          top.insertBefore(rec, author ? author.nextSibling : top.firstChild);
         }
         grid.appendChild(node);
         appended.push(item);

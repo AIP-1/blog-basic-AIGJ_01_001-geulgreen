@@ -195,7 +195,7 @@ class FollowIT extends IntegrationTestBase {
         expected.add(strangerPost);
         assertThat(seen).isEqualTo(expected);
         String page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("피드글14").contains("?cursor=").contains("모르는 사람").contains("feed-rec-badge");
+        assertThat(page).contains("피드글14").contains("?cursor=").contains("모르는 사람").contains("class=\"card-rec\"");
         // 068 추천 블로그: 팔로우 안 한 작가만, 나와 팔로우한 사람은 빼고, 다음 쪽에서는 안 보임
         jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
         page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();

@@ -29,11 +29,10 @@
         <div class="empty-state" th:if="${followsAnyone}">팔로우한 사람의 공개 글이 아직 없어요</div>
     </th:block>
     <div class="card-grid" id="card-grid">
-        <th:block th:each="card : ${cards}">
+        <!-- 084: th:replace가 th:if보다 먼저라 카드를 두 번 그리던 것 고침. 추천 이유(recReason)는 카드 머리 줄의 "추천" 칩으로 -->
+        <th:block th:each="card : ${cards}" th:with="recReason=${reasons.get(card.id())}">
             <p th:if="${dividerBefore == card.id()}" class="help feed-divider">팔로우한 글을 모두 봤어요</p>
-            <article th:if="${reasons.containsKey(card.id())}" th:replace="~{fragments/post-card :: cardWith(${card}, ${cardDates.get(card.id())}, true, ~{::recBadge})}"></article>
-            <article th:unless="${reasons.containsKey(card.id())}" th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
-            <th:block th:if="false"><p th:fragment="recBadge" class="feed-rec-badge"><span class="feed-rec-label">추천</span> <span th:text="${reasons.get(card.id())}">이유</span></p></th:block>
+            <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
         </th:block>
     </div>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
