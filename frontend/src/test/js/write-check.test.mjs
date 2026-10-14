@@ -8,16 +8,29 @@ const w = require('../../main/resources/static/js/editor/write-check.js');
 let passed = 0;
 function test(name, fn) { fn(); passed++; console.log('ok -', name); }
 const fixed = (md, h) => md.slice(0, h.fix.from) + h.fix.text + md.slice(h.fix.to);
-const kinds = (md) => w.hints(md).map((h) => h.kind);
+const kinds = (md, title) => w.hints(md, title).map((h) => h.kind);
 
 test('짧고 정돈된 글은 추천이 없다', () => {
   assert.deepEqual(w.hints('## 소개\n\n안녕하세요.\n\n- 하나\n- 둘'), []);
 });
 
-test('긴 글에 소제목이 없으면 알려 주고, 너무 긴 문단도 알려 준다', () => {
-  const md = '가'.repeat(600) + '\n\n' + '나'.repeat(300);
-  assert.deepEqual(kinds(md), ['heading', 'paragraph']);
-  assert.deepEqual(kinds('## 제목\n\n' + md), ['paragraph']);
+test('긴 글에 소제목이 없으면 알려 주고, 너무 긴 문단·문장도 알려 준다', () => {
+  const md = '가'.repeat(400) + '\n\n' + '나'.repeat(250);
+  assert.deepEqual(kinds(md), ['heading', 'paragraph', 'sentence', 'sentence']);
+  assert.deepEqual(kinds('## 제목\n\n' + md), ['paragraph', 'sentence', 'sentence']);
+  // 소제목 아래가 1000자를 넘으면
+  const long = '## 들어가며\n\n' + ('짧은 문장이에요. '.repeat(12) + '\n\n').repeat(10);
+  assert.deepEqual(kinds(long), ['section']);
+});
+
+test('겹친 낱말은 하나만 남기고, 같은 말로 시작하는 문장·설명 없는 사진·긴 제목을 알려 준다', () => {
+  const md = '정말 정말 좋아요.';
+  assert.equal(fixed(md, w.hints(md)[0]), '정말 좋아요.');
+  assert.deepEqual(kinds('밥을 먹었다. 그리고 잤다. 그리고 일어났다. 그리고 또 잤다.'), ['starter']);
+  assert.deepEqual(kinds('![](/a.png)\n\n![고양이](/b.png)'), ['image']);
+  assert.deepEqual(kinds('본문', '가'.repeat(41)), ['title']);
+  assert.deepEqual(kinds('본문', '가'.repeat(40)), []);
+  assert.match(w.CHECKED, /문장 길이/);
 });
 
 test('목록처럼 쓴 줄은 빈 줄을 건너 하나의 목록으로 바꾼다', () => {
