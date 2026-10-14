@@ -779,6 +779,10 @@ main.list-page .home-cards { gap: 18px; }
 /* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
 .side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; font-size: 1.1em; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
 @media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; } }
+/* 약관 옆 GitHub(조직 AIPKANG) 링크: 작은 마크 + 글자, 옆 링크와 같은 모양 */
+.github-link { display: inline-flex; align-items: center; gap: 3px; }
+.github-link .icon { width: 1em; height: 1em; flex: none; }
+.side-slogan .github-link { margin-left: 6px; font-family: "Pretendard Variable", sans-serif; font-size: .82em; vertical-align: .1em; }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }

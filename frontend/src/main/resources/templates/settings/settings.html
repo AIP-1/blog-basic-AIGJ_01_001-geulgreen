@@ -252,7 +252,7 @@
     </div>
     <!-- 프로필 메뉴에서 뺀 사이트 링크는 설정 맨 아래에(휴대폰은 오른쪽 칸이 없음) -->
     <nav class="side-links settings-links" aria-label="사이트 정보">
-        <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+        <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
         <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
     </nav>
     <script th:src="@{/js/auth/password-rules.js}" defer></script>
