@@ -19,10 +19,20 @@ class ExploreIT extends IntegrationTestBase {
         long author = members.localMember("exwriter", "탐색작가", "exwriter@example.com", "Blog#2026ok", true);
         posts.published(author, "탐색에서 보일 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
         String page = mockMvc.perform(get("/explore")).andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("<h1>탐색</h1>").contains("새로 온 작가").contains("추천 글").contains("탐색에서 보일 글")
+        // 086: 피드 형식(추천 블로그 줄 + 추천 글 카드), 비회원은 팔로우 대신 로그인 링크, 아이디가 주 이름(082)
+        assertThat(page).contains("<h1>탐색</h1>").contains("추천 블로그").contains("추천 글").contains("탐색에서 보일 글")
+                .contains("class=\"post-card\"").contains("href=\"/login\"")
                 .contains("href=\"/explore\" aria-current=\"page\"")
-                // 082 규칙: 아이디가 주 이름(닉네임은 보이지 않음)
                 .contains("<span>exwriter</span>").doesNotContain("탐색작가");
+        // 추천 글은 12개씩 이어 보기(커서 = 추천 위치), 잘못된 커서는 처음부터
+        for (int i = 0; i < 13; i++) {
+            posts.published(author, "더 많은 글" + i, "본문", 1, NOW.minus(Duration.ofHours(i + 1)));
+        }
+        String api = mockMvc.perform(get("/api/explore")).andReturn().getResponse().getContentAsString();
+        assertThat(api).contains("\"nextCursor\":\"12\"");
+        assertThat(mockMvc.perform(get("/api/explore?cursor=12")).andReturn().getResponse().getContentAsString())
+                .contains("\"nextCursor\":null");
+        assertThat(mockMvc.perform(get("/explore?cursor=abc")).andReturn().getResponse().getStatus()).isEqualTo(200);
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("href=\"/explore\"");
     }
 }
