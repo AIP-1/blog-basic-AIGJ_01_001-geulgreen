@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${owner.handle() + (followers ? '님의 팔로워' : '님의 팔로잉')}">팔로워</title>
+    <title th:text="${owner.handle() + (followers ? '님의 팔로워' : '님의 팔로잉') + ' · 글그린'}">팔로워</title>
 </head>
 <body>
 <main class="list-page">

@@ -47,6 +47,21 @@
     return k.getUTCFullYear() + '.' + p(k.getUTCMonth() + 1) + '.' + p(k.getUTCDate());
   }
 
+  function hash(s) { var h = 0; for (var i = 0; i < s.length; i++) { h = (31 * h + s.charCodeAt(i)) | 0; } return h; }
+
+  /* fragments/avatar.html과 같은 24px 아이콘(이미지가 없으면 닉네임 첫 글자, 색은 아이디 해시로 avatar-c0~c7) */
+  function avatar(author) {
+    if (author.profileImageUrl) {
+      var img = el('img', 'avatar'); img.src = author.profileImageUrl; img.alt = ''; img.width = 24; img.height = 24;
+      return img;
+    }
+    var first = author.nickname ? String.fromCodePoint(author.nickname.codePointAt(0)).toUpperCase() : '?';
+    var span = el('span', 'avatar avatar-default avatar-c' + (((hash(author.handle || '') % 8) + 8) % 8), first);
+    span.setAttribute('aria-hidden', 'true');
+    span.style.width = '24px'; span.style.height = '24px'; span.style.fontSize = '12px';
+    return span;
+  }
+
   /* fragments/comment.html과 같은 모양 */
   function render(c) {
     var box = el('div', 'comment');
@@ -59,6 +74,7 @@
     if (c.state === 'SECRET') { box.appendChild(el('p', 'comment-gone', '🔒 비밀 댓글이에요')); return box; }
     var head = el('p', 'comment-head');
     var a = el('a', 'comment-author'); a.href = '/@' + c.author.handle;
+    a.appendChild(avatar(c.author));
     a.appendChild(el('span', null, c.author.handle));
     head.appendChild(a);
     if (c.author.isPostAuthor) { head.appendChild(el('span', 'badge', '작성자')); }

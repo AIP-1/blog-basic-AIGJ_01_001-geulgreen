@@ -11,6 +11,10 @@
     <meta name="_csrf_parameter" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:replace="${title}">글그린</title>
+    <!-- 탭 아이콘: 발바닥 로고(svg), 옛 브라우저는 32px png, iOS 홈 화면은 180px. /images/ 아래라 지문·1년 보관 -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}">
+    <link rel="apple-touch-icon" th:href="@{/images/apple-touch-icon.png}">
     <th:block th:if="${pageMeta != null}">
         <meta name="description" th:content="${pageMeta.description()}">
         <link rel="canonical" th:href="${pageMeta.canonicalUrl()}">
@@ -66,7 +70,7 @@
             </div>
             <!-- 067 후속(강성찬 개인 확장): 좁은 화면 ☰ 메뉴 안 사이트 링크(목록이 끝없이 이어져 꼬리말에 닿기 어려움, 비회원도) -->
             <div class="menu-links">
-                <a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+                <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
                 <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
             </div>
         </div>
@@ -130,7 +134,7 @@
   <div class="footer-inner">
     <p class="footer-brand"><th:block th:replace="~{fragments/icons :: paw}"></th:block><span>글그린</span></p>
     <p class="footer-slogan">좋은 글이 머무는 곳, 글그린</p>
-    <p class="footer-links"><a href="/terms">이용약관</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+    <p class="footer-links"><a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
         <a th:if="${contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a></p>
   </div>
 </footer>

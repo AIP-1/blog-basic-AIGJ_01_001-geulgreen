@@ -35,6 +35,8 @@ class SettingsPageIT extends IntegrationTestBase {
                 .contains("id=\"profile-image-pick\"").doesNotContain("이메일 인증 후 사진을 올릴 수 있어요")
                 // 프로필 메뉴에서 뺀 사이트 링크는 설정 맨 아래에, 프로필 메뉴에는 계정 항목만
                 .contains("class=\"side-links settings-links\"").doesNotContain("profile-menu-links");
+        // 약관 옆 GitHub(조직) 링크: 새 탭
+        assertThat(html).contains("href=\"https://github.com/AIPKANG\" class=\"github-link\" target=\"_blank\" rel=\"noopener\"");
     }
 
     @Test
