@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 097 AI 연결 키. 원문은 발급할 때 한 번만 돌려주고 DB에는 SHA-256만 둔다. 키는 그 회원으로 MCP 도구를 부른다.
@@ -61,8 +62,10 @@ public class AiKeyService {
     }
 
     /** 새 키를 만들고 원문을 돌려준다. 키가 이미 {@code maxKeys}개면 빈 값. 글을 쓸 수 있는 회원만(인증 전·탈퇴 유예는 403). */
+    @Transactional
     public Optional<String> issue(Optional<CurrentUser> current, String rawName) {
         long me = accountGuard.requireWritable(current).memberId();
+        jdbc.queryForObject("SELECT id FROM member WHERE id = ? FOR UPDATE", Long.class, me); // 동시 발급이 개수 제한을 넘지 않게
         Integer count = jdbc.queryForObject("SELECT count(*) FROM ai_key WHERE member_id = ?", Integer.class, me);
         if (count != null && count >= properties.maxKeys()) {
             return Optional.empty();
