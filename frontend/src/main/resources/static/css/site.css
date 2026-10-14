@@ -766,7 +766,6 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 }
 /* 본문 2단 */
 .home-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
-@media (min-width: 1000px) { .home-layout { grid-template-columns: minmax(0, 1fr) 280px; } }
 .home-section-title { margin: 0 12px 6px 0; font-size: 1.35em; font-weight: 800; }
 .home-tabs-row { align-items: center; }
 .home-tabs-row .home-tabs { flex: 1; }
@@ -774,24 +773,19 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 088: 홈·미션·내 글·시리즈도 세로 카드. 홈은 오른쪽 칸이 있어 넓은 화면에서 3칸 */
 main.list-page .home-cards { gap: 18px; }
 @media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-/* 오른쪽 */
-.home-side { display: flex; flex-direction: column; gap: 18px; }
-/* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
-@media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
-    scrollbar-width: thin; } } /* 휠이 칸 끝에서 페이지로 넘어가게 overscroll-behavior는 두지 않음 */
-/* 067 후속: 링크 넷은 한 줄(작은 회색 글씨, 사이에 ·), 슬로건만 다음 줄 */
+/* 067 후속: 사이트 링크는 한 줄(작은 회색 글씨, 사이에 ·) */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
 .settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .side-links a { color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
 .side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
-/* 067 후속: 오른쪽 칸 링크가 보이는 넓은 화면은 맨 아래 꼬리말(같은 링크)을 숨김, 좁은 화면은 꼬리말 그대로 */
-.side-slogan { display: none; flex-basis: 100%; margin: 4px 0 0; font-size: 1.1em; color: var(--color-text-muted); font-family: Gaegu, "Pretendard Variable", cursive; }
-@media (min-width: 1000px) { body:has(.home-side .side-links) > .site-footer { display: none; } .side-slogan { display: block; } }
+/* 홈 제목 줄 오른쪽 사이트 링크: 넓은 화면만, 이때 맨 아래 꼬리말(같은 링크)은 숨김 */
+.home-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.home-links { display: none; }
+@media (min-width: 1000px) { .home-links { display: flex; flex-wrap: nowrap; } body:has(.home-links) > .site-footer { display: none; } }
 /* 약관 옆 GitHub(조직 AIPKANG) 링크: 작은 마크 + 글자, 옆 링크와 같은 모양 */
 .github-link { display: inline-flex; align-items: center; gap: 3px; }
 .github-link .icon { width: 1em; height: 1em; flex: none; }
-.side-slogan .github-link { margin-left: 6px; font-family: "Pretendard Variable", sans-serif; font-size: .82em; vertical-align: .1em; }
 .menu-links { display: none; }
 @media (max-width: 640px) {
     .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
@@ -1080,8 +1074,6 @@ main.list-page .home-cards { gap: 18px; }
 .explore-page .feed-recommended { margin: 0; }
 .explore-page .newcomers { margin: 0; }
 .explore-tags-link { margin-left: auto; font-size: .9em; }
-.side-explore .help { margin: 0 0 12px; }
-.side-explore-links { margin: 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: .9em; }
 /* 086: 피드는 목록 끝에 탐색으로 가는 한 줄 */
 .feed-end { margin: 8px 0 24px; text-align: center; color: var(--color-text-muted); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 

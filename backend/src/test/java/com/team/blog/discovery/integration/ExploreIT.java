@@ -27,7 +27,8 @@ class ExploreIT extends IntegrationTestBase {
                 // 086: 새로 온 작가도 여기로, 인기 태그는 링크만, 홈에는 추천·새로 온 작가 없이 탐색 링크
                 .contains("새로 온 작가").contains("href=\"/tags\"").doesNotContain("side-pills");
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
-        assertThat(home).contains("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")
+        // 홈 오른쪽 "둘러보기" 칸은 뺌(탐색은 머리말 메뉴로)
+        assertThat(home).contains("href=\"/explore\"").doesNotContain("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")
                 .doesNotContain("side-rec-posts");
         // 추천 글은 12개씩 이어 보기(커서 = 추천 위치), 잘못된 커서는 처음부터
         for (int i = 0; i < 13; i++) {
