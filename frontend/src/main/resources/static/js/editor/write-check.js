@@ -1,7 +1,8 @@
 /*
  * 085 글 점검(강성찬 개인 확장): 보이는 대로 쓰기로 쓰면서 바로 보이니 미리보기 대신 [글 점검]을 둔다.
  * 서식 추천은 이 기기에서 규칙으로만 본다(AI 없음): 소제목 없음·소제목 아래가 김, 긴 문단·문장, 겹친 낱말, 같은 말로 시작하는 문장,
- * 목록처럼 쓴 줄, 굵은 한 줄 소제목, 설명 없는 사진, 긴 제목(085 후속).
+ * 목록처럼 쓴 줄, 굵은 한 줄 소제목, 설명 없는 사진, 긴 제목(085 후속). 추천마다 [적용] 버튼이 있다(085 후속 2): 바로 바꾸거나,
+ * 소제목·사진 설명처럼 글쓴이만 아는 것은 물어보고 넣고, 긴 문장·긴 제목은 AI로 고친다(AI가 있을 때만).
  * 맞춤법 검사는 059 AI로 고치기와 같은 동의·전체 공개 규칙으로 본문을 보내고, 틀린 곳만 받아 [바꾸기]를 눌러야 바뀐다.
  * 바꾸면 숨은 Markdown 칸(#post-content)을 고치고 입력 이벤트를 보내므로 보이는 대로 쓰기 칸·자동 저장이 그대로 따라온다.
  * 브라우저에서는 window.blogWriteCheck, Node에서는 module.exports(src/test/js/write-check.test.mjs).
@@ -21,6 +22,7 @@
   var NUMBERED = /^\s*(?:\d{1,2}\)\s*|[①-⑳]\s*)/;
   var BOLD_LINE = /^\*\*([^*\n]{1,40})\*\*\s*$/;
   var SPECIAL = /^\s*(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\||!\[|<)/;
+  var SENTENCE_END = /[.!?。…]+["'”’)]*(\s+)/g;
 
   function excerpt(s) { s = s.replace(/\s+/g, ' ').trim(); return s.length > 20 ? s.slice(0, 20) + '…' : s; }
 
@@ -63,20 +65,68 @@
 
   function sentencesOf(text) { return plain(text).match(/[^.!?。…\n]+[.!?。…]*/g) || []; }
 
-  /** 서식 추천 목록. fix가 있으면 value[from, to)를 text로 바꾸자는 제안이다. title을 주면 제목 길이도 본다. */
+  // 소제목 넣기: 문단이 둘 이상이면 가운데 문단 앞에, 아니면 맨 앞에 "## (물어본 소제목)"을 넣는다
+  function headingFix(paras) {
+    var at = paras ? paras[Math.floor(paras.length / 2)].from : 0;
+    return { label: '소제목 넣기', ask: '넣을 소제목을 적어 주세요', edits: [{ from: at, to: at, wrap: ['## ', '\n\n'] }] };
+  }
+
+  // 문단 나누기: 가운데에 가장 가까운 문장 끝의 띄어쓰기를 빈 줄로
+  function splitFix(md, p) {
+    var raw = md.slice(p.from, p.to), mid = raw.length / 2, best = null, m;
+    SENTENCE_END.lastIndex = 0;
+    while ((m = SENTENCE_END.exec(raw))) {
+      var gap = m.index + m[0].length - m[1].length;
+      if (gap + m[1].length < raw.length && (!best || Math.abs(gap - mid) < Math.abs(best.at - mid))) { best = { at: gap, len: m[1].length }; }
+    }
+    return best ? { label: '둘로 나누기', edits: [{ from: p.from + best.at, to: p.from + best.at + best.len, text: '\n\n' }] } : null;
+  }
+
+  // 같은 말로 시작하는 문장: 첫 문장만 두고 나머지 앞의 그 말을 뺀다
+  function starterFix(md, paras, word) {
+    var edits = [], re = new RegExp('(^|[.!?。…]["\'”’)]*\\s+)' + word + '[\\s,]+', 'g');
+    paras.forEach(function (p) {
+      var raw = md.slice(p.from, p.to), m;
+      while ((m = re.exec(raw))) {
+        var from = p.from + m.index + m[1].length;
+        edits.push({ from: from, to: p.from + m.index + m[0].length, text: '' });
+        re.lastIndex = m.index + m[0].length;
+      }
+    });
+    edits.shift();
+    return edits.length ? { label: '「' + word + '」 빼기', edits: edits } : null;
+  }
+
+  /** 추천 하나를 글에 적용한 결과. answer는 물어본 답(소제목·사진 설명). 고칠 곳이 없으면 그대로. */
+  function applyHint(value, fix, answer) {
+    var edits = (fix.edits || [{ from: fix.from, to: fix.to, text: fix.text }]).slice().sort(function (a, b) { return b.from - a.from; });
+    edits.forEach(function (e) {
+      var text = e.wrap ? e.wrap[0] + String(answer || '').replace(/[\[\]\s]+/g, ' ').trim() + e.wrap[1] : e.text;
+      value = value.slice(0, e.from) + text + value.slice(e.to);
+    });
+    return value;
+  }
+
+  /**
+   * 서식 추천 목록. title을 주면 제목 길이도 본다. fix: {label, edits:[{from, to, text}]}(바로 바꿈, from·to·text 하나짜리도 같음),
+   * ask가 있으면 물어본 답을 wrap 사이에 넣고, ai가 있으면 {target: 'title'|'body', text, ask}를 AI로 고친다.
+   */
   function hints(md, title) {
     var lines = linesOf(md || ''), out = [];
     var prose = lines.filter(function (l) { return !l.code; });
     var chars = prose.reduce(function (n, l) { return n + plain(l.text).trim().length; }, 0);
     var t = (title || '').trim();
     if (t.length > LONG_TITLE) {
-      out.push({ kind: 'title', text: '제목이 길어요(' + t.length + '자). 목록 카드에서 잘리지 않게 ' + LONG_TITLE + '자 안으로 줄여 보세요' });
+      out.push({ kind: 'title', text: '제목이 길어요(' + t.length + '자). 목록 카드에서 잘리지 않게 ' + LONG_TITLE + '자 안으로 줄여 보세요',
+        fix: { label: 'AI로 줄이기', ai: { target: 'title', text: t, ask: '블로그 글 제목이야. 뜻은 그대로 두고 ' + LONG_TITLE + '자 안으로 줄여 줘. 제목만 답해 줘.' } } });
     }
 
     // 문단: 빈 줄·제목·목록·인용·표·사진 줄로 나뉜 글 덩어리
     var paras = [], para = [];
     function closePara() {
-      if (para.length) { paras.push({ text: para.map(function (l) { return l.text; }).join(' '), first: para[0] }); }
+      if (para.length) {
+        paras.push({ text: para.map(function (l) { return l.text; }).join(' '), first: para[0], from: para[0].from, to: para[para.length - 1].to });
+      }
       para = [];
     }
     lines.forEach(function (l) {
@@ -86,22 +136,25 @@
 
     var headings = prose.filter(function (l) { return HEADING.test(l.text); });
     if (!headings.length && (chars > LONG_POST || (paras.length >= 4 && chars > 300))) {
-      out.push({ kind: 'heading', text: '소제목이 없어요(' + chars + '자, 문단 ' + paras.length + '개). ## 소제목으로 나누면 훑어 읽기 쉬워요' });
+      out.push({ kind: 'heading', text: '소제목이 없어요(' + chars + '자, 문단 ' + paras.length + '개). ## 소제목으로 나누면 훑어 읽기 쉬워요',
+        fix: headingFix(paras.length ? paras : null) });
     }
     // 소제목 아래가 너무 긴 곳
     var section = null, sections = 0;
-    function closeSection() {
+    function closeSection(end) {
       if (section && section.chars > LONG_SECTION && sections < MAX_EACH) {
         sections++;
-        out.push({ kind: 'section', text: '「' + excerpt(section.title) + '」 아래가 길어요(' + section.chars + '자). 소제목을 하나 더 넣어 보세요' });
+        var inside = paras.filter(function (p) { return p.from > section.from && p.from < end; });
+        out.push({ kind: 'section', text: '「' + excerpt(section.title) + '」 아래가 길어요(' + section.chars + '자). 소제목을 하나 더 넣어 보세요',
+          fix: headingFix(inside.length >= 2 ? inside : null) });
       }
     }
     if (headings.length) {
       prose.forEach(function (l) {
-        if (HEADING.test(l.text)) { closeSection(); section = { title: l.text.replace(/^#+\s*/, ''), chars: 0 }; }
+        if (HEADING.test(l.text)) { closeSection(l.from); section = { title: l.text.replace(/^#+\s*/, ''), chars: 0, from: l.from }; }
         else if (section) { section.chars += plain(l.text).trim().length; }
       });
-      closeSection();
+      closeSection(Infinity);
     }
 
     var longParas = 0, longSentences = 0, starters = {};
@@ -109,20 +162,25 @@
       var text = plain(p.text);
       if (text.length > LONG_PARAGRAPH && longParas < MAX_EACH) {
         longParas++;
-        out.push({ kind: 'paragraph', text: '문단이 길어요(' + text.length + '자): 「' + excerpt(text) + '」 중간에 빈 줄을 넣어 나눠 보세요' });
+        out.push({ kind: 'paragraph', text: '문단이 길어요(' + text.length + '자): 「' + excerpt(text) + '」 중간에 빈 줄을 넣어 나눠 보세요',
+          fix: splitFix(md, p) });
       }
       sentencesOf(p.text).forEach(function (sn) {
         sn = sn.trim();
         if (sn.length > LONG_SENTENCE && longSentences < MAX_EACH) {
           longSentences++;
-          out.push({ kind: 'sentence', text: '문장이 길어요(' + sn.length + '자): 「' + excerpt(sn) + '」 두 문장으로 나눠 보세요' });
+          out.push({ kind: 'sentence', text: '문장이 길어요(' + sn.length + '자): 「' + excerpt(sn) + '」 두 문장으로 나눠 보세요',
+            fix: { label: 'AI로 나누기', ai: { target: 'body', text: sn, ask: '뜻과 말투는 그대로 두고 짧은 문장 두세 개로 나눠 줘. 나눈 문장만 답해 줘.' } } });
         }
         var m = STARTERS.exec(sn);
         if (m) { starters[m[1]] = (starters[m[1]] || 0) + 1; }
       });
     });
     Object.keys(starters).forEach(function (w) {
-      if (starters[w] >= 3) { out.push({ kind: 'starter', text: '「' + w + '」로 시작하는 문장이 ' + starters[w] + '개예요. 몇 개는 빼거나 다른 말로 바꿔 보세요' }); }
+      if (starters[w] >= 3) {
+        out.push({ kind: 'starter', text: '「' + w + '」로 시작하는 문장이 ' + starters[w] + '개예요. 몇 개는 빼거나 다른 말로 바꿔 보세요',
+          fix: starterFix(md, paras, w) });
+      }
     });
 
     var repeats = 0;
@@ -137,12 +195,18 @@
       }
     });
 
-    var bare = prose.reduce(function (n, l) {
-      return n + (l.text.match(IMAGE) || []).filter(function (img) { return /^!\[\s*\]/.test(img); }).length;
-    }, 0);
-    if (bare) {
-      out.push({ kind: 'image', text: '설명(대체글)이 없는 사진이 ' + bare + '장 있어요. 발행 설정에서 설명을 넣으면 화면 낭독기와 검색에서도 보여요' });
-    }
+    var images = 0;
+    prose.forEach(function (l) {
+      var m;
+      IMAGE.lastIndex = 0;
+      while ((m = IMAGE.exec(l.text)) && images < MAX_EACH) {
+        if (m[1].trim()) { continue; }
+        images++;
+        var at = l.from + m.index + 2;
+        out.push({ kind: 'image', text: '설명(대체글)이 없는 사진이 있어요(' + images + '번째). 설명을 넣으면 화면 낭독기와 검색에서도 보여요',
+          fix: { label: '설명 넣기', ask: '이 사진을 한 줄로 설명해 주세요', edits: [{ from: at, to: l.from + m.index + 2 + m[1].length, wrap: ['', ''] }] } });
+      }
+    });
 
     lines.forEach(function (l, i) {
       var m = !l.code && BOLD_LINE.exec(l.text.trim());
@@ -163,7 +227,7 @@
     return i < 0 ? null : value.slice(0, i) + after + value.slice(i + before.length);
   }
 
-  var api = { hints: hints, applyFix: applyFix, CHECKED: CHECKED };
+  var api = { hints: hints, applyFix: applyFix, applyHint: applyHint, CHECKED: CHECKED };
   if (typeof module === 'object' && module.exports) { module.exports = api; return; }
   root.blogWriteCheck = api;
 
@@ -189,7 +253,7 @@
     if (!toggle || !panel || !ta) { return; }
     var hintList = document.getElementById('check-hints'), spellRun = document.getElementById('spell-run');
     var spellStatus = document.getElementById('spell-status'), fixList = document.getElementById('spell-fixes');
-    var consentBox = document.getElementById('spell-consent'), consented = null, timer = null;
+    var consentBox = document.getElementById('spell-consent'), consented = null, timer = null, afterConsent = null;
 
     function current() { if (window.blogVisual) { window.blogVisual.flush(); } return ta.value; }
 
@@ -198,20 +262,57 @@
       ta.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
+    // 추천 [적용]: 그 사이 글이 바뀌었으면 다시 보고, 물어볼 것은 묻고, AI 추천은 AI로 고친다
+    function applyOne(h, md, li) {
+      var note = function (msg) { li.appendChild(el('span', ' ' + msg, 'help')); };
+      if (current() !== md) { renderHints(); return; }
+      if (h.fix.ai) { aiFix(h.fix.ai, note); return; }
+      var answer = null;
+      if (h.fix.ask) {
+        answer = window.prompt(h.fix.ask, '');
+        if (!answer || !answer.trim()) { return; }
+      }
+      setValue(applyHint(md, h.fix, answer));
+      renderHints();
+    }
+
+    function aiFix(ai, note) {
+      if (!consented) { afterConsent = function () { aiFix(ai, note); }; consentBox.hidden = false; consentBox.scrollIntoView({ block: 'nearest' }); return; }
+      var editor = window.blogEditor, tagsApi = window.blogEditorTags;
+      if (!editor) { return; }
+      note('AI가 고치는 중…');
+      fetch('/api/posts/' + editor.state.postId + '/writing-ai', { method: 'POST', credentials: 'same-origin', headers: headers(),
+        body: JSON.stringify({ text: ai.text, action: 'ask', ask: ai.ask, visibility: tagsApi ? tagsApi.visibility() : 'PUBLIC' }) })
+        .then(function (r) { return r.json().catch(function () { return {}; }).then(function (b) { return { ok: r.ok, body: b }; }); })
+        .then(function (res) {
+          if (!res.ok || !res.body.text) {
+            if (res.body.code === 'WRITING_AI_CONSENT_REQUIRED') { consented = false; }
+            note(res.body.message || '지금은 AI가 답하지 않아요');
+            return;
+          }
+          if (ai.target === 'title') {
+            title.value = res.body.text.replace(/\s*\n\s*/g, ' ');
+            title.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            var next = applyFix(current(), ai.text, res.body.text);
+            if (next === null) { note('그 사이 글이 바뀌어서 넣지 못했어요'); return; }
+            setValue(next);
+          }
+          renderHints();
+        }, function () { note('연결되지 않아 AI가 고치지 못했어요'); });
+    }
+
     function renderHints() {
-      var list = hints(current(), title ? title.value : '');
+      var md = current(), list = hints(md, title ? title.value : '');
       hintList.textContent = '';
       if (!list.length) { hintList.appendChild(el('li', '살펴본 것(' + CHECKED + ')에서 고칠 곳을 찾지 못했어요 👍')); }
       list.forEach(function (h) {
         var li = el('li', h.text + ' ');
-        if (h.fix) {
+        // AI 추천(긴 문장·긴 제목)은 AI가 연결돼 있을 때만 버튼을 보인다
+        if (h.fix && (!h.fix.ai || spellRun)) {
           var b = el('button', h.fix.label, 'btn btn-sm');
           b.type = 'button';
-          b.addEventListener('click', function () {
-            var v = current();
-            setValue(v.slice(0, h.fix.from) + h.fix.text + v.slice(h.fix.to));
-            renderHints();
-          });
+          b.addEventListener('click', function () { applyOne(h, md, li); });
           li.appendChild(b);
         }
         hintList.appendChild(li);
@@ -243,7 +344,7 @@
     }
 
     function runSpell() {
-      if (!consented) { consentBox.hidden = false; return; }
+      if (!consented) { afterConsent = runSpell; consentBox.hidden = false; return; }
       var editor = window.blogEditor, tagsApi = window.blogEditorTags, text = current();
       if (!editor) { return; }
       spellRun.disabled = true;
@@ -280,7 +381,8 @@
           if (!r.ok) { spellStatus.textContent = '지금은 동의를 저장하지 못했어요'; return; }
           consented = true;
           consentBox.hidden = true;
-          runSpell();
+          (afterConsent || runSpell)();
+          afterConsent = null;
         });
       });
     }
