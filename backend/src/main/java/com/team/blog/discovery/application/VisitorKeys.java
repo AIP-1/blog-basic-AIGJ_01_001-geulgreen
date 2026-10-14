@@ -30,7 +30,7 @@ public class VisitorKeys {
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof DailySecret d && day.equals(d.day) && Arrays.equals(value, d.value);
+            return o instanceof DailySecret(LocalDate otherDay, byte[] otherValue) && day.equals(otherDay) && Arrays.equals(value, otherValue);
         }
 
         @Override

@@ -116,7 +116,7 @@ public class SeriesService {
             }
             jdbc.update("INSERT INTO series (member_id, title) VALUES (?, ?) ON CONFLICT (member_id, title) DO NOTHING",
                     me.memberId(), title);
-            target = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ? AND title = ?", Long.class,
+            target = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ? AND title = ?", Long.class, // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                     me.memberId(), title);
         }
         Optional<Series> before = ofPost(postId);

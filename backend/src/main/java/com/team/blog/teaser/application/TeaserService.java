@@ -41,7 +41,7 @@ public class TeaserService {
     }
 
     public Optional<String> current(long postId) {
-        return jdbc.queryForList("SELECT teaser FROM post_teaser WHERE post_id = ?", String.class, postId).stream().findFirst();
+        return jdbc.queryForList("SELECT teaser FROM post_teaser WHERE post_id = ?", String.class, postId).stream().findFirst(); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     /** AI 제안 한 줄(저장하지 않음). 동의가 없으면 {@code TEASER_CONSENT_REQUIRED}, 안 되면 {@code TEASER_UNAVAILABLE}. */

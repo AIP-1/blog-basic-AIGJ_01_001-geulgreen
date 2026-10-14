@@ -20,7 +20,9 @@ class ExploreIT extends IntegrationTestBase {
         posts.published(author, "탐색에서 보일 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
         String page = mockMvc.perform(get("/explore")).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("<h1>탐색</h1>").contains("새로 온 작가").contains("추천 글").contains("탐색에서 보일 글")
-                .contains("href=\"/explore\" aria-current=\"page\"");
+                .contains("href=\"/explore\" aria-current=\"page\"")
+                // 082 규칙: 아이디가 주 이름(닉네임은 보이지 않음)
+                .contains("<span>exwriter</span>").doesNotContain("탐색작가");
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("href=\"/explore\"");
     }
 }

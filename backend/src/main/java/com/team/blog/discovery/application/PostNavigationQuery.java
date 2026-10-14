@@ -72,7 +72,7 @@ public class PostNavigationQuery {
                          p.first_public_at DESC, p.id DESC
                 LIMIT ? OFFSET ?""", Long.class, postId, viewerId, sourceId, sourceId, viewerId, viewerId, viewerId,
                 PostListQuery.PAGE_SIZE + 1, offset);
-        boolean hasNext = ids.size() > PostListQuery.PAGE_SIZE;
+        boolean hasNext = ids.size() > PostListQuery.PAGE_SIZE; // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
         List<Long> page = hasNext ? ids.subList(0, PostListQuery.PAGE_SIZE) : ids;
         Map<Long, PostCard> cards = listQuery.cardsByIds(page);
         return new CardPage(page.stream().map(cards::get).filter(Objects::nonNull).toList(),

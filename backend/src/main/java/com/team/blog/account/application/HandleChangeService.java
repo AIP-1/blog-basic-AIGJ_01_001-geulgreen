@@ -119,7 +119,7 @@ public class HandleChangeService {
         List<Timestamp> recent = jdbc.queryForList("""
                 SELECT changed_at FROM handle_history WHERE member_id = ? AND changed_at > ?
                 ORDER BY changed_at DESC""", Timestamp.class, memberId, Timestamp.from(now.minus(properties.changeWindow())));
-        if (recent.size() < CHANGES_PER_WINDOW) {
+        if (recent.size() < CHANGES_PER_WINDOW) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return Optional.empty();
         }
         return Optional.of(recent.get(CHANGES_PER_WINDOW - 1).toInstant().plus(properties.changeWindow()));

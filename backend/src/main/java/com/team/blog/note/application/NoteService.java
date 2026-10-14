@@ -57,7 +57,7 @@ public class NoteService {
         if (!r.allowed()) {
             throw new RateLimitedException(r.retryAfterSeconds());
         }
-        return jdbc.queryForObject("INSERT INTO short_note (author_id, content, visibility) VALUES (?, ?, ?) RETURNING id",
+        return jdbc.queryForObject("INSERT INTO short_note (author_id, content, visibility) VALUES (?, ?, ?) RETURNING id", // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 Long.class, me.memberId(), content, v);
     }
 

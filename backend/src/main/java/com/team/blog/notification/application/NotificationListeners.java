@@ -36,7 +36,7 @@ public class NotificationListeners {
     }
 
     private long postAuthor(long postId) {
-        return jdbc.queryForObject("SELECT author_id FROM post WHERE id = ?", Long.class, postId);
+        return jdbc.queryForObject("SELECT author_id FROM post WHERE id = ?", Long.class, postId); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     /** 글 작성자에게 댓글, 답한 댓글의 작성자에게 답글. 둘이 같으면 답글만(FR-005). */
