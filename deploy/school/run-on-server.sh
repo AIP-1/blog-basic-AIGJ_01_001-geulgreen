@@ -102,7 +102,7 @@ run_app() { # $1 = 컨테이너 이름, $2 = 포트, $3 = 이미지
   # rm -f는 바로 죽이므로 먼저 stop: 받던 요청을 끝낼 시간(Spring 우아한 종료)을 준다. 새 요청은 Nginx가 다른 대로 보낸다
   ${DOCKER} stop -t 30 "$1" > /dev/null 2>&1 || true
   ${DOCKER} rm -f "$1" > /dev/null 2>&1 || true
-  ${DOCKER} run -d --name "$1" --network "${NET}" --restart unless-stopped \
+  ${DOCKER} run -d --name "$1" --hostname "$1" --network "${NET}" --restart unless-stopped \
     -p "127.0.0.1:$2:8080" --memory "${APP_MEMORY}" --env-file "${ENV_FILE}" \
     -v "${APP_NAME}-data:/app/data" --log-opt max-size=20m --log-opt max-file=5 \
     "$3" > /dev/null

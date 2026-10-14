@@ -772,6 +772,13 @@ main.admin-page { max-width: 1280px; }
 .admin-server { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0 0 8px; }
 .admin-server dt { color: var(--color-text-muted); }
 .admin-server dd { margin: 0; overflow-wrap: anywhere; }
+.admin-ok, .admin-bad, .admin-off { font-size: .85em; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.admin-ok { background: var(--color-success-soft); color: var(--color-success); }
+.admin-bad { background: var(--color-danger-soft); color: var(--color-danger); }
+.admin-off { background: var(--color-surface-muted); color: var(--color-text-muted); }
+.admin-features { list-style: none; padding: 0; margin: 0 0 8px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }
+.admin-features li { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.admin-features code { overflow-wrap: anywhere; }
 .admin-log-table td, .admin-log-table th { text-align: left; }
 .site-notice { background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); padding: 8px 16px;
     text-align: center; font-size: .92em; }

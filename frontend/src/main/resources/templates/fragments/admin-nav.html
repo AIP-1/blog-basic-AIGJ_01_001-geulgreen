@@ -15,6 +15,7 @@
     <p class="admin-nav-group">운영</p>
     <a href="/admin/notices" th:classappend="${tab == 'notices'} ? 'active'" th:attr="aria-current=${tab == 'notices'} ? 'page'">공지</a>
     <p class="admin-nav-group">시스템</p>
+    <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}" th:classappend="${tab == 'system'} ? 'active'" th:attr="aria-current=${tab == 'system'} ? 'page'">시스템 상태</a>
     <a href="/admin/logs" th:classappend="${tab == 'logs'} ? 'active'" th:attr="aria-current=${tab == 'logs'} ? 'page'">관리 기록</a>
 </nav>
 </body>

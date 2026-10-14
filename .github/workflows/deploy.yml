@@ -57,7 +57,7 @@ jobs:
 
       - name: 도커 이미지 만들기
         run: |
-          docker build -t team-blog:latest .
+          docker build --build-arg APP_VERSION=${{ github.sha }} -t team-blog:latest .
           docker save team-blog:latest | gzip > image.tar.gz
           ls -lh image.tar.gz
 
