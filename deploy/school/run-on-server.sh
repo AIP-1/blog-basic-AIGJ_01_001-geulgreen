@@ -96,12 +96,27 @@ wait_healthy() { # 5초마다, 최대 3분
   return 1
 }
 
+# Gemini 키가 실제로 통하는지 배포 기록에 남긴다(키 값은 찍지 않음, 결과와 상관없이 배포는 계속). 모델 정보만 묻는 요청이라 하루 횟수를 쓰지 않는다
+check_gemini() {
+  if [ -z "${GEMINI_API_KEY:-}" ]; then echo "Gemini 키 없음: AI 기능은 꺼진 채로 켜져요"; return 0; fi
+  local code
+  code="$(curl -s -o /dev/null -w '%{http_code}' -m 10 -H "x-goog-api-key: ${GEMINI_API_KEY}" \
+    "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL:-gemini-flash-lite-latest}" || true)"
+  case "${code}" in
+    200) echo "Gemini 키 확인: 통해요(200)" ;;
+    400|401|403) echo "Gemini 키 확인: 거절됐어요(${code}). 키 값, API 사용 설정, 키의 API 제한을 확인하세요" ;;
+    404) echo "Gemini 키 확인: 모델(${GEMINI_MODEL:-gemini-flash-lite-latest})을 찾지 못했어요(404)" ;;
+    *) echo "Gemini 키 확인: 서버에서 Google에 닿지 못했어요(${code})" ;;
+  esac
+}
+
 echo "== 앱 교체"
 run_app "${APP_NAME}:latest"
 
 echo "== 상태 확인(최대 3분)"
 if wait_healthy; then
   echo "앱이 켜졌어요: http://127.0.0.1:${APP_PORT} → https://${APP_DOMAIN}"
+  check_gemini
   ${DOCKER} image prune -f > /dev/null 2>&1 || true
   exit 0
 fi

@@ -2,9 +2,12 @@ package com.team.blog.writing.application;
 
 import com.team.blog.tag.application.suggest.AiTagProperties;
 import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
@@ -34,6 +37,8 @@ public class WritingAiClient {
             설명·번호·따옴표는 쓰지 말고, 코드·링크 주소·Markdown 표시는 고치지 마. 틀린 곳이 없으면 "없음"이라고만 답해 줘.
             [글]
             %s""";
+
+    private static final Logger log = LoggerFactory.getLogger(WritingAiClient.class);
 
     private final AiTagProperties ai;
     private final JsonMapper jsonMapper;
@@ -73,12 +78,16 @@ public class WritingAiClient {
             String res = gemini.post().uri("/v1beta/models/{model}:generateContent", ai.gemini().model())
                     .header("x-goog-api-key", ai.gemini().apiKey()).contentType(MediaType.APPLICATION_JSON).body(body)
                     .retrieve().onStatus(HttpStatusCode::isError, (req, r) -> {
-                        throw new RestClientException("gemini " + r.getStatusCode());
+                        // Google 오류 본문(이유 코드·설명)만 붙인다. 보낸 글은 오류 본문에 들어 있지 않다
+                        String why = new String(r.getBody().readNBytes(400), StandardCharsets.UTF_8);
+                        throw new RestClientException("gemini " + r.getStatusCode() + " " + why.replaceAll("\\s+", " "));
                     }).body(String.class);
             String answer = jsonMapper.readTree(res).path("candidates").path(0).path("content").path("parts").path(0)
                     .path("text").asString("");
             return Optional.of(answer);
         } catch (Exception e) {
+            // 왜 안 되는지 운영 로그로 알 수 있게(키·글 내용은 남기지 않음)
+            log.warn("Gemini 요청 실패: {}", e.getMessage());
             return Optional.empty();
         }
     }
