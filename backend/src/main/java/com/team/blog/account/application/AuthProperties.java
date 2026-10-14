@@ -70,9 +70,11 @@ public record AuthProperties(
     /**
      * @param from        보내는 주소(운영은 Gmail 계정 주소로 고정 — research R-13)
      * @param linkBaseUrl 메일 링크 앞부분(예: {@code https://devlog.com})
+     * @param fromName    받는 사람에게 보이는 보내는 이름(주소 앞)
      */
     public record Mail(
             @DefaultValue("no-reply@localhost") String from,
-            @DefaultValue("http://localhost:8080") String linkBaseUrl) {
+            @DefaultValue("http://localhost:8080") String linkBaseUrl,
+            @DefaultValue("글그린") String fromName) {
     }
 }
