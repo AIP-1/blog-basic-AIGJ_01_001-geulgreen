@@ -112,7 +112,7 @@ dialog#compare-dialog { width: min(1100px, 96vw); max-height: 90vh; padding: 12p
 .preview-panel { border: 1px dashed var(--color-border); padding: 8px 12px; margin: 8px 0; }
 .post-body img { max-width: 100%; height: auto; }
 .post-body pre { overflow-x: auto; background: var(--color-code-bg); padding: 12px; }
-.post-body table { border-collapse: collapse; display: block; overflow-x: auto; }
+.post-body table { border-collapse: collapse; display: block; overflow-x: auto; margin: 0 0 1.3em; } /* 표 아래 문단이 붙지 않게 */
 .post-body th, .post-body td { border: 1px solid var(--color-border); padding: 4px 8px; }
 .post-body blockquote { margin: 0; padding-left: 12px; border-left: 4px solid var(--color-border); color: var(--color-text-muted); }
 /* 005 글 상세·발행 설정 */
@@ -906,7 +906,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-today-state { margin: 14px 0 0; font-weight: 600; font-size: .92em; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .mission-today-state.is-done { align-self: flex-start; background: var(--color-brand-soft); padding: 8px 14px; border-radius: 12px; }
 .mission-today-state a { color: var(--color-brand); }
-.streak-chip { padding: 2px 10px; border-radius: 999px; background: var(--tone-orange-bg); color: var(--tone-orange-fg); font-size: .9em; }
+.streak-chip { padding: 2px 10px; border-radius: 999px; background: var(--tone-orange-bg); color: var(--color-text); font-size: .9em; }
 .mission-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mission-tile { background: var(--tone-bg); border-radius: 16px; padding: 14px 12px; min-width: 104px; text-align: center;
     display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -929,7 +929,8 @@ main.list-page .home-cards { gap: 18px; }
 @media (min-width: 800px) { .topic-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .topic-card { background: var(--tone-bg); border-radius: 18px; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
 .topic-no { align-self: flex-start; margin: 0; padding: 3px 12px; border-radius: 999px; background: var(--color-surface);
-    color: var(--tone-fg); font-weight: 700; font-size: .82em; }
+    color: var(--color-text); font-weight: 700; font-size: .82em; display: inline-flex; align-items: center; gap: 6px; }
+.topic-no::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tone-fg); } /* 카드 색은 점으로, 글자는 대비 맞는 기본색 */
 .topic-title { margin: 4px 0 0; font-size: 1.3em; line-height: 1.4; }
 /* 084: 세 칸으로 나란할 때 주제 제목은 2줄 자리를 잡아 안내 글 시작 줄을 맞춘다 */
 @media (min-width: 800px) { .topic-title { min-height: calc(2em * 1.4); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
@@ -938,8 +939,9 @@ main.list-page .home-cards { gap: 18px; }
 .topic-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; margin-top: 12px; }
 .topic-foot form { margin: 0; }
 .topic-foot .help { font-size: .85em; }
-.btn.topic-write { background: var(--tone-fg); border-color: var(--tone-fg); color: var(--color-surface); }
-.btn.topic-write:hover { background: var(--tone-fg); filter: brightness(1.08); }
+/* 대비(4.5:1): 카드 색 글자 대신 사이트 기본 버튼 색(흰 글자와 대비가 맞는 brand-fill) */
+.btn.topic-write { background: var(--color-brand-fill); border-color: var(--color-brand-fill); color: var(--color-on-fill); }
+.btn.topic-write:hover { background: var(--color-brand); border-color: var(--color-brand); color: var(--color-surface); }
 /* 나의 성장 기록(달력) · 배지: 넓은 화면은 나란히 */
 .mission-record-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
 @media (min-width: 960px) { .mission-record-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
@@ -947,7 +949,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-month a, .mission-month-off { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;
     border-radius: 999px; color: var(--color-text); text-decoration: none; font-size: 1.2em; }
 .mission-month a:hover { background: var(--color-surface-muted); }
-.mission-month-off { color: var(--color-border); }
+.mission-month-off { color: var(--color-text-muted); cursor: default; }
 .mission-month strong { padding: 2px 14px; border: 1px solid var(--color-border); border-radius: 999px; font-size: .9em; }
 .mission-growth-body { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (min-width: 560px) { .mission-growth-body { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: center; } }
@@ -956,9 +958,9 @@ main.list-page .home-cards { gap: 18px; }
 .cal-week { font-size: .78em; color: var(--color-text-muted); padding-bottom: 4px; }
 .cal-day { justify-self: center; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
     border-radius: 999px; font-size: .85em; color: var(--color-text); text-decoration: none; }
-.cal-day.is-done { background: var(--tone-green-bg); color: var(--tone-green-fg); font-weight: 700; }
+.cal-day.is-done { background: var(--tone-green-bg); color: var(--color-text); font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--tone-green-fg); }
 .cal-day.is-done:hover { outline: 2px solid var(--tone-green-fg); }
-.cal-day.is-future { color: var(--color-text-muted); opacity: .5; }
+.cal-day.is-future { color: var(--color-text-muted); }
 .cal-day.is-selected { outline: 2px solid var(--color-brand); }
 .mission-growth-side { display: flex; flex-direction: column; gap: 14px; }
 .mission-growth-note { margin: 0; font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.1em; line-height: 1.4; color: var(--color-text-muted); }
@@ -970,8 +972,8 @@ main.list-page .home-cards { gap: 18px; }
 /* 066 미션 배지: 받은 것은 색 카드, 아직인 것은 흐리게 받는 법과 함께 */
 .badge-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
 .badge-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 8px; text-align: center;
-    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; opacity: .6; }
-.badge-item.is-earned { opacity: 1; background: var(--tone-bg); border-color: var(--tone-bg); }
+    background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: 16px; color: var(--color-text-muted); }
+.badge-item.is-earned { color: var(--color-text); border-style: solid; background: var(--tone-bg); border-color: var(--tone-bg); }
 .badge-item strong { font-size: .9em; }
 .badge-item .help { font-size: .78em; }
 .badge-emoji { font-size: 2em; line-height: 1.3; }
@@ -985,6 +987,8 @@ main.list-page .home-cards { gap: 18px; }
 .mission-card { display: flex; min-width: 0; }
 .mission-card > .post-card { flex: 1; }
 .mission-extra { padding-right: 0; }
+/* 공용 카드를 감싼 li에는 옛 미션(034) .mission-card 상자 모양이 붙지 않게(카드가 두 겹으로 보이던 것) */
+.mission-posts > li.mission-card { background: none; border: 0; border-radius: 0; padding: 0; }
 .mission-post .card-author .badge { font-weight: 500; }
 .mission-post .card-tag { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mission-post-reply { position: relative; z-index: 1; margin-left: auto; color: var(--color-brand); font-weight: 600; text-decoration: none; }
