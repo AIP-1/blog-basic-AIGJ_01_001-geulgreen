@@ -232,6 +232,19 @@ public class SearchService {
         return sql.toString();
     }
 
+    /** 094: 고른 글 id의 카드를 그 순서대로. 그새 비공개·숨김이 된 글은 공용 조건에서 빠진다. */
+    public List<SearchCard> cards(List<Long> ids, SearchTerms terms) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        List<Object> args = new ArrayList<>();
+        String sql = base(null, null, 0, args, false) + " AND p.id IN (" + String.join(",", java.util.Collections.nCopies(ids.size(), "?")) + ")";
+        args.addAll(ids);
+        java.util.Map<Long, SearchCard> byId = new java.util.HashMap<>();
+        jdbc.query(sql, (rs, n) -> card(rs, terms), args.toArray()).forEach(c -> byId.put(c.id(), c));
+        return ids.stream().map(byId::get).filter(java.util.Objects::nonNull).toList();
+    }
+
     private int windowCount(Long authorId, Instant afterAt, long afterId) {
         List<Object> args = new ArrayList<>();
         String sql = "SELECT count(*) FROM (" + base(authorId, afterAt, afterId, args, true) + ") w";

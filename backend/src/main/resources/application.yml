@@ -345,6 +345,11 @@ blog:
     page-size: 12  # 강성찬 개인 확장: 카드 한 줄 4개(공통 9)
     people-limit: 20
     per-minute: 30
+    # 094 강성찬 개인 확장: 결과가 적으면 "혹시 ○○을 찾으셨나요?"·"비슷한 글". 끄면 예전 검색 그대로
+    suggest-enabled: ${SEARCH_SUGGEST_ENABLED:true}
+    suggest-below: 3
+    similar-limit: 4
+    suggest-cache-ttl: 5m
   # 019-trending: 32 §2~§4
   trending:
     window: 7d
