@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>문의함</title>
+</head>
+<body>
+<!-- 090 강성찬 개인 확장: 관리자 문의함(새 문의 먼저) -->
+<main class="list-page admin-page">
+    <h1>문의함</h1>
+    <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
+    <p class="help">문의하기 양식으로 온 문의예요. 열어서 답장하면 처리 완료가 돼요.</p>
+    <p th:if="${inquiries.isEmpty()}" class="empty-state">아직 문의가 없어요</p>
+    <ul class="post-rows" th:unless="${inquiries.isEmpty()}">
+        <li th:each="i : ${inquiries}" class="post-row">
+            <div class="row-main">
+                <span class="badge" th:text="${i.done()} ? '처리 완료' : '새 문의'">새 문의</span>
+                <span class="badge" th:text="${i.kindLabel()}">종류</span>
+                <a th:href="@{/admin/inquiries/{id}(id=${i.id()})}" th:text="${i.title()}">제목</a>
+                <span class="help" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(i.createdAt())}">시각</span>
+            </div>
+        </li>
+    </ul>
+</main>
+</body>
+</html>

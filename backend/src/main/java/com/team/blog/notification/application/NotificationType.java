@@ -12,7 +12,9 @@ public enum NotificationType {
     /** 친구가 오늘의 미션 글을 올림(057, 강성찬 개인 확장). "새 글" 설정을 따른다. */
     MISSION_DONE,
     /** 비공개 계정에 팔로우 요청(073, 강성찬 개인 확장): 처리해야 하는 요청이라 끌 수 없다. */
-    FOLLOW_REQUEST;
+    FOLLOW_REQUEST,
+    /** 새 문의(090, 강성찬 개인 확장): 관리자에게. 처리해야 하는 일이라 끌 수 없다. */
+    INQUIRY;
 
     public static final List<NotificationType> MUTABLE = List.of(COMMENT, REPLY, LIKE, FOLLOW, NEW_POST);
 

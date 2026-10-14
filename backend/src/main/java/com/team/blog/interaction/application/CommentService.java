@@ -211,6 +211,7 @@ public class CommentService {
             // 아래 답글이 있으면 자리만, 없으면 행 삭제(답글 깊이와 상관없이 같은 규칙, 028)
             if (hasChildren(t.id())) {
                 jdbc.update("UPDATE comment SET content = '', deleted_at = ? WHERE id = ?", Timestamp.from(clock.instant()), t.id());
+                jdbc.update("DELETE FROM comment_like WHERE comment_id = ?", t.id()); // 089: 자리만 남아도 좋아요는 지운다
             } else {
                 jdbc.update("DELETE FROM comment WHERE id = ?", t.id());
                 // 자리만 남은 위쪽 댓글에 답글이 없어지면 위로 올라가며 자리도 정리(댓글 수 변화 없음)

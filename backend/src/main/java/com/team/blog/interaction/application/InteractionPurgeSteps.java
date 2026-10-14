@@ -83,6 +83,7 @@ public final class InteractionPurgeSteps {
 
         @Override
         public void purge(long memberId) {
+            jdbc.update("DELETE FROM comment_like WHERE member_id = ?", memberId); // 089
             List<Long> posts = jdbc.queryForList("DELETE FROM post_like WHERE member_id = ? RETURNING post_id", Long.class, memberId);
             if (!posts.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 jdbc.update("""

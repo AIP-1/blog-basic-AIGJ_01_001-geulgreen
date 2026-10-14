@@ -11,12 +11,13 @@ import java.util.List;
  * @param replyTo  "@닉네임에게" 대상(답글의 답글일 때만, 탈퇴했으면 nickname이 "탈퇴한 사용자")
  * @param replies  최상위일 때 처음 답글 3개(또는 around로 펼친 만큼)
  * @param secret   043 비밀 댓글(강성찬 개인 확장). 볼 수 없는 사람에게는 state가 SECRET이고 내용·글쓴이가 없다
+ * @param likeCount 089 댓글 좋아요 수(강성찬 개인 확장). 정상 댓글이 아니거나 기능이 꺼져 있으면 null
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommentView(long id, Long parentId, String state, String content, Author author, ReplyTo replyTo,
                           Instant createdAt, boolean edited, boolean mine, boolean canReply, boolean canEdit,
                           boolean canDelete, boolean canReport, Integer replyCount, List<CommentView> replies,
-                          String repliesNextCursor, boolean secret) {
+                          String repliesNextCursor, boolean secret, Integer likeCount, boolean liked) {
 
     public record Author(String handle, String nickname, String profileImageUrl, boolean isPostAuthor) {
 

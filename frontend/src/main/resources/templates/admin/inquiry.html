@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${inquiry.title()}">문의</title>
+</head>
+<body>
+<main class="list-page admin-page">
+    <h1 th:text="${inquiry.title()}">문의</h1>
+    <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
+    <p>
+        <span class="badge" th:text="${inquiry.done()} ? '처리 완료' : '새 문의'">새 문의</span>
+        <span class="badge" th:text="${inquiry.kindLabel()}">종류</span>
+        <span class="help" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.createdAt())}">시각</span>
+    </p>
+    <p class="help">
+        <th:block th:if="${inquiry.memberHandle() != null}">보낸 회원 <a th:href="@{/{h}(h=${inquiry.memberHandle()})}" th:text="${'@' + inquiry.memberHandle()}">@회원</a> · </th:block>
+        <th:block th:unless="${inquiry.memberHandle() != null}">비회원 · </th:block>
+        답장 주소 <span th:text="${inquiry.email()}">메일</span>
+    </p>
+    <p class="snapshot" th:text="${inquiry.content()}">내용</p>
+    <section th:if="${inquiry.done()}">
+        <h2>보낸 답장</h2>
+        <p class="help" th:if="${inquiry.repliedAt() != null}" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.repliedAt())}">시각</p>
+        <p class="snapshot" th:text="${inquiry.reply()}">답장</p>
+    </section>
+    <form th:unless="${inquiry.done()}" method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="note-form">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <p th:if="${error != null}" class="form-error" role="alert" th:text="${error}">오류</p>
+        <label for="inquiry-reply">답장하기</label>
+        <textarea id="inquiry-reply" name="reply" required maxlength="3000" th:text="${replyDraft}"></textarea>
+        <div class="note-form-bar"><button type="submit" class="btn btn-primary btn-sm">답장 보내고 처리 완료</button></div>
+    </form>
+    <p><a href="/admin/inquiries">문의함으로</a></p>
+</main>
+</body>
+</html>
