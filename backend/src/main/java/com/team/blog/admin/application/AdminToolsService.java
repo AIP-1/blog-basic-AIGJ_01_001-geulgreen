@@ -36,14 +36,35 @@ public class AdminToolsService {
     public record Day(LocalDate date, long members, long posts, long comments, long views) {
     }
 
-    public record Dashboard(long totalMembers, long totalPosts, long totalComments, long pendingReports, long newInquiries,
-                            long todayMembers, long todayPosts, long todayComments, long todayViews) {
+    /** 오늘 숫자와 비교 값(before). basis는 무엇과 비교했는지(화면 작은 글씨). */
+    public record Delta(long now, long before, String basis) {
+
+        public long diff() {
+            return Math.abs(now - before);
+        }
+
+        public String dir() {
+            return now > before ? "up" : now < before ? "down" : "same";
+        }
     }
 
-    /** 한 줄 추이. 그래프는 viewBox 0 0 300 100 안의 꺾은선(line)과 그 아래 면(area), 값이 0뿐이면 그리지 않는다. */
-    public record Trend(String label, String key, long total, long today, long max, String line, String area) {
+    /** 098 후속: 오늘 숫자 카드는 어제 같은 시각까지와 비교. 조회는 날짜별 합계뿐이라 어제 하루를 지난 시간 비율로 나눈 추정과 비교. */
+    public record Dashboard(long totalMembers, long totalPosts, long totalComments, long pendingReports, long newInquiries,
+                            Delta members, Delta posts, Delta comments, Delta views, Delta incoming) {
+    }
 
-        static Trend of(String label, String key, List<Day> days, java.util.function.ToLongFunction<Day> f) {
+    /** 그래프 한 점: 날짜 이름, 값, 위에서부터의 위치(0~100, viewBox와 툴팁 점이 같이 쓴다). */
+    public record Point(String date, long value, double y) {
+    }
+
+    /**
+     * 한 줄 추이. 그래프는 viewBox 0 0 300 100 안의 꺾은선(line)과 그 아래 면(area), 값이 0뿐이면 그리지 않는다.
+     * 점은 날짜 칸의 가운데(x = (i + 0.5) / n)에 둬서 마우스·탭으로 여는 칸(trend-hit)과 맞춘다.
+     */
+    public record Trend(String label, String key, String unit, long total, long today, long max, String line, String area,
+                        List<Point> points) {
+
+        static Trend of(String label, String key, String unit, List<Day> days, java.util.function.ToLongFunction<Day> f) {
             long max = 0;
             long total = 0;
             for (Day d : days) {
@@ -51,14 +72,26 @@ public class AdminToolsService {
                 total += f.applyAsLong(d);
             }
             StringBuilder pts = new StringBuilder();
-            double step = days.size() > 1 ? 300.0 / (days.size() - 1) : 0;
-            for (int i = 0; i < days.size(); i++) {
-                double y = 100 - (max == 0 ? 0 : f.applyAsLong(days.get(i)) * 96.0 / max);
-                pts.append(i == 0 ? "" : " ").append(Math.round(i * step * 10) / 10.0).append(',').append(Math.round(y * 10) / 10.0);
+            List<Point> points = new ArrayList<>();
+            int n = days.size();
+            for (int i = 0; i < n; i++) {
+                long v = f.applyAsLong(days.get(i));
+                double y = round1(100 - (max == 0 ? 0 : v * 96.0 / max));
+                pts.append(i == 0 ? "" : " ").append(x(i, n)).append(',').append(y);
+                LocalDate d = days.get(i).date();
+                points.add(new Point(d.getMonthValue() + "/" + d.getDayOfMonth(), v, y));
             }
             String line = pts.toString();
-            return new Trend(label, key, total, f.applyAsLong(days.get(days.size() - 1)), max, line,
-                    "0,100 " + line + " 300,100");
+            return new Trend(label, key, unit, total, f.applyAsLong(days.get(n - 1)), max, line,
+                    x(0, n) + ",100 " + line + " " + x(n - 1, n) + ",100", points);
+        }
+
+        private static double x(int i, int n) {
+            return round1((i + 0.5) * 300.0 / n);
+        }
+
+        private static double round1(double v) {
+            return Math.round(v * 10) / 10.0;
         }
 
         public boolean empty() {
@@ -76,7 +109,8 @@ public class AdminToolsService {
         }
     }
 
-    public record Activity(Instant at, String kind, String handle, String what, String postHandle, Long postId, Long commentId) {
+    public record Activity(Instant at, String ago, String kind, String handle, String what, String postHandle, Long postId,
+                           Long commentId) {
 
         public String url() {
             if (postId == null) {
@@ -132,16 +166,51 @@ public class AdminToolsService {
 
     // ----- 045 대시보드, 098 30일 추이 -----
 
-    /** 오늘 숫자 카드. 조회는 016의 날짜별 조회수(post_view_daily)에서 온다. */
+    /** 오늘 숫자 카드(한국 시간 자정부터 지금까지)와 어제 같은 시각까지의 비교. 조회는 016의 날짜별 조회수(post_view_daily)에서 온다. */
     public Dashboard dashboard(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
-        Trends t = trends(LocalDate.ofInstant(clock.instant(), SEOUL), 1);
+        Instant now = clock.instant();
+        LocalDate today = LocalDate.ofInstant(now, SEOUL);
+        Instant[] range = {today.atStartOfDay(SEOUL).toInstant(), now, today.minusDays(1).atStartOfDay(SEOUL).toInstant(), null};
+        java.time.Duration elapsed = java.time.Duration.between(range[0], now);
+        range[3] = range[2].plus(elapsed);
+        Delta members = same("SELECT count(*) FROM member WHERE withdrawn_at IS NULL AND created_at >= ? AND created_at < ?", range);
+        Delta posts = same("SELECT count(*) FROM post WHERE deleted_at IS NULL AND first_public_at >= ? AND first_public_at < ?", range);
+        Delta comments = same("SELECT count(*) FROM comment WHERE deleted_at IS NULL AND created_at >= ? AND created_at < ?", range);
+        Delta reports = same("SELECT count(*) FROM report_case WHERE created_at >= ? AND created_at < ?", range);
+        Delta inquiries = same("SELECT count(*) FROM inquiry WHERE created_at >= ? AND created_at < ?", range);
+        long incomingBefore = reports.before() + inquiries.before();
+        long viewsToday = views(today);
+        long viewsYesterday = views(today.minusDays(1));
+        long estimate = Math.round(viewsYesterday * (elapsed.toSeconds() / 86400.0));
         return new Dashboard(one("SELECT count(*) FROM member WHERE withdrawn_at IS NULL"),
                 one("SELECT count(*) FROM post WHERE status = 'PUBLISHED' AND deleted_at IS NULL"),
                 one("SELECT count(*) FROM comment WHERE deleted_at IS NULL"),
                 one("SELECT count(*) FROM report_case WHERE status = 'PENDING'"),
                 one("SELECT count(*) FROM inquiry WHERE status = 'NEW'"),
-                t.members().today(), t.posts().today(), t.comments().today(), t.views().today());
+                members, posts, comments,
+                new Delta(viewsToday, estimate, "어제 이 시각 추정 " + estimate + " · 어제 하루 " + viewsYesterday),
+                new Delta(reports.now() + inquiries.now(), incomingBefore, SAME_TIME + incomingBefore));
+    }
+
+    private static final String SAME_TIME = "어제 이 시각까지 ";
+
+    /** range = {오늘 0시, 지금, 어제 0시, 어제 이 시각}. */
+    private Delta same(String sql, Instant[] range) {
+        long now = count(sql, range[0], range[1]);
+        long before = count(sql, range[2], range[3]);
+        return new Delta(now, before, SAME_TIME + before);
+    }
+
+    private long count(String sql, Instant from, Instant to) {
+        Long n = jdbc.queryForObject(sql, Long.class, Timestamp.from(from), Timestamp.from(to));
+        return n == null ? 0 : n;
+    }
+
+    private long views(LocalDate day) {
+        Long n = jdbc.queryForObject("SELECT coalesce(sum(views), 0) FROM post_view_daily WHERE view_date = ?", Long.class,
+                java.sql.Date.valueOf(day));
+        return n == null ? 0 : n;
     }
 
     /** 098: 최근 30일 추이와 인기 글(7일)·최근 활동(지금 공개된 글만). {@code full}이 아니면(스위치 끔) 예전처럼 7일 추이만 센다. */
@@ -172,7 +241,9 @@ public class AdminToolsService {
                    FROM comment c JOIN member m ON m.id = c.author_id JOIN post p ON p.id = c.post_id JOIN member pm ON pm.id = p.author_id
                    WHERE c.deleted_at IS NULL AND c.hidden_at IS NULL AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL ORDER BY c.created_at DESC LIMIT 8)
                 ) x ORDER BY at DESC LIMIT 8
-                """, (rs, i) -> new Activity(rs.getTimestamp("at").toInstant(), rs.getString("kind"), rs.getString("who"),
+                """, (rs, i) -> new Activity(rs.getTimestamp("at").toInstant(),
+                com.team.blog.post.application.CardDates.label(rs.getTimestamp("at").toInstant(), clock.instant()),
+                rs.getString("kind"), rs.getString("who"),
                 rs.getString("what"), rs.getString("ph"), (Long) rs.getObject("pid"), (Long) rs.getObject("cid")));
         return new Insights(List.of(t.views(), t.members(), t.posts(), t.comments()), t.days(), popular, activity);
     }
@@ -197,8 +268,8 @@ public class AdminToolsService {
         }, java.sql.Date.valueOf(today.minusDays(n - 1L)));
         List<Day> list = new ArrayList<>();
         days.forEach((d, v) -> list.add(new Day(d, v[0], v[1], v[2], v[3])));
-        return new Trends(Trend.of("조회", "views", list, Day::views), Trend.of("가입", "members", list, Day::members),
-                Trend.of("새 글", "posts", list, Day::posts), Trend.of("댓글", "comments", list, Day::comments), list);
+        return new Trends(Trend.of("조회", "views", "회", list, Day::views), Trend.of("가입", "members", "명", list, Day::members),
+                Trend.of("새 글", "posts", "편", list, Day::posts), Trend.of("댓글", "comments", "개", list, Day::comments), list);
     }
 
     private void count(Map<LocalDate, long[]> days, String sql, Instant from, int slot) {
