@@ -12,7 +12,7 @@
         다른 사람에게는 프로필 윗부분만 보이고, 홈·트렌딩·태그·검색·RSS에도 내 글이 나오지 않아요. 지금 팔로워는 그대로예요.
         <a href="/settings">설정으로</a></p>
 
-    <p th:text="${isPrivate ? '지금은 🔒 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</p>
+    <p><th:block th:if="${isPrivate}"><svg th:replace="~{fragments/icons :: lock}"></svg> </th:block><span th:text="${isPrivate ? '지금은 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</span></p>
     <p class="help">켜고 끄기는 <a href="/settings#settings-account">설정 &gt; 계정</a>에서 해요.</p>
 
     <section aria-labelledby="requests-heading">

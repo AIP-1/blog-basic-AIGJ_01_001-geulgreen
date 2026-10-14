@@ -57,8 +57,7 @@
                   th:text="${'⏰ 예약 · ' + scheduleLabels.get(row.id())}">예약</span>
         </th:block>
         <th:block th:if="${tab == 'published'}">
-            <span class="visibility-icon" data-visibility-badge th:attr="data-visibility=${row.visibility()}">
-                <span aria-hidden="true" th:text="${row.visibility() == 'PRIVATE' ? '🔒' : (row.visibility() == 'FRIENDS' ? '👥' : (row.visibility() == 'LINK' ? '🔗' : (row.visibility() == 'GROUP' ? '🧑‍🤝‍🧑' : '🌐')))}">🌐</span><span class="visually-hidden" th:text="${row.visibility() == 'PRIVATE' ? '비공개' : (row.visibility() == 'FRIENDS' ? '친구 공개' : (row.visibility() == 'LINK' ? '링크 공개' : (row.visibility() == 'GROUP' ? '그룹 공개' : '공개')))}">공개</span></span>
+            <span th:replace="~{fragments/visibility :: badge(${row.visibility()})}"></span>
             <span class="badge badge-editing" th:if="${row.editing()}">수정 중</span>
             <span class="badge" th:if="${row.hidden()}" title="운영 정책에 따라 숨겨졌어요">숨김</span>
             <span class="badge" th:text="${'조회 ' + views.get(row.id())}">조회</span>

@@ -232,7 +232,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         mockMvc.perform(post("/api/posts/{id}/comments", postId).with(csrf()).with(TestAuth.member(writer))
                 .contentType(MediaType.APPLICATION_JSON).content("{\"content\":\"모두 보는 댓글\"}"))
                 .andExpect(status().isCreated());
-        assertThat(page("/scauthor/posts/" + postId, stranger)).contains("🔒 비밀 댓글이에요").doesNotContain("글쓴이만 보세요")
+        assertThat(page("/scauthor/posts/" + postId, stranger)).contains(" 비밀 댓글이에요").doesNotContain("🔒").doesNotContain("글쓴이만 보세요")
                 .contains("모두 보는 댓글");
         assertThat(page("/scauthor/posts/" + postId)).doesNotContain("글쓴이만 보세요");
         assertThat(page("/scauthor/posts/" + postId, author)).contains("글쓴이만 보세요");

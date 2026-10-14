@@ -1137,3 +1137,12 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .connections-page .notice code, .connections-page .help code { background: var(--color-code-bg); border-radius: 6px; padding: .1em .4em; word-break: break-all; }
 .connections-page .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
 .connections-page .inline-form input[type=text] { flex: 1 1 220px; }
+/* 강성찬 개인 확장: 이모지 대신 선 아이콘(공개 범위·댓글·비밀). 글자 크기를 따라가고 글자색으로 그린다 */
+.icon-inline { width: 1em; height: 1em; vertical-align: -0.14em; flex: none; }
+.card-comments { display: inline-flex; align-items: center; gap: 4px; }
+/* 공개 범위: 아이콘은 모두 들어 있고 data-visibility로 하나만(전체 공개는 없음, fragments/visibility.html) */
+.visibility-icon { display: inline-flex; align-items: center; color: var(--color-text-muted); }
+.visibility-icon .vis { display: none; }
+.visibility-icon[data-visibility="PRIVATE"] .vis-PRIVATE, .visibility-icon[data-visibility="FRIENDS"] .vis-FRIENDS,
+.visibility-icon[data-visibility="GROUP"] .vis-GROUP, .visibility-icon[data-visibility="LINK"] .vis-LINK { display: inline-flex; }
+.visibility-icon[data-visibility="PUBLIC"] { display: none; }
