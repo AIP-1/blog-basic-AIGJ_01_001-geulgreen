@@ -56,6 +56,9 @@ server:
   forward-headers-strategy: native
 
 blog:
+  # 092 후속 카카오톡 공유: 카카오 개발자 앱의 JavaScript 키(환경 변수로만). 비우면 공유 메뉴에 카카오톡이 안 보인다
+  reading:
+    kakao-js-key: ${KAKAO_JS_KEY:}
   # 001-auth 정책 수치(헌법 II). AuthProperties 참고
   auth:
     verify-token-ttl: 24h

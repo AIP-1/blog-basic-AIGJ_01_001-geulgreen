@@ -9,7 +9,7 @@
 # - 비밀값은 Actions가 환경 변수로 넘겨주고, 서버에는 0600 권한 env 파일로만 남긴다(다시 시작할 때 필요)
 # 필요한 환경 변수: APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA
 #   MAIL_USERNAME MAIL_PASSWORD GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
-#   (선택) GEMINI_API_KEY, ADMIN_EMAILS
+#   (선택) GEMINI_API_KEY, KAKAO_JS_KEY, ADMIN_EMAILS
 set -euo pipefail
 APP_PORT2="${APP_PORT2:-$((${APP_PORT:-8300} + 1))}"
 
@@ -31,6 +31,9 @@ done
 GEMINI_API_KEY="${GEMINI_API_KEY:-}"
 GEMINI_API_KEY="${GEMINI_API_KEY#"${GEMINI_API_KEY%%[![:space:]]*}"}"
 GEMINI_API_KEY="${GEMINI_API_KEY%"${GEMINI_API_KEY##*[![:space:]]}"}"
+KAKAO_JS_KEY="${KAKAO_JS_KEY:-}"
+KAKAO_JS_KEY="${KAKAO_JS_KEY#"${KAKAO_JS_KEY%%[![:space:]]*}"}"
+KAKAO_JS_KEY="${KAKAO_JS_KEY%"${KAKAO_JS_KEY##*[![:space:]]}"}"
 
 DOCKER="docker"
 if ! docker info > /dev/null 2>&1; then DOCKER="sudo -n docker"; fi
@@ -65,6 +68,7 @@ ENV_FILE="${WORK}/app.env"
     echo "GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}"
     echo "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
     echo "GEMINI_API_KEY=${GEMINI_API_KEY:-}"
+    echo "KAKAO_JS_KEY=${KAKAO_JS_KEY:-}"
     echo "BLOG_ADMIN_EMAILS=${ADMIN_EMAILS:-}"
     echo "STORAGE_TYPE=local"
     echo "STORAGE_LOCAL_DIR=/app/data"

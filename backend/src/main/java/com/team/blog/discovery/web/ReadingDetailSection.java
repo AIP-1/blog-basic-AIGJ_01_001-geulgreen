@@ -31,6 +31,9 @@ public class ReadingDetailSection implements PostDetailSection {
         // 052 읽기 진행 막대, 054 글쓴이에게 고정·해제
         model.addAttribute("readProgressEnabled", properties.progressEnabled());
         model.addAttribute("shareEnabled", properties.shareEnabled() && post.isPublic() && !post.hidden());
+        if (properties.kakaoEnabled()) {
+            model.addAttribute("kakaoJsKey", properties.kakaoJsKey().strip());
+        }
         if (viewer.map(v -> v.memberId() == post.authorId()).orElse(false) && post.status().name().equals("PUBLISHED")) {
             model.addAttribute("pinnedHere", pins.pinnedPostId(post.authorId()).map(id -> id == post.id()).orElse(false));
         }

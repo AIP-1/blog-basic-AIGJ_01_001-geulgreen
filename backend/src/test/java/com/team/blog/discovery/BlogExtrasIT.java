@@ -51,7 +51,7 @@ class BlogExtrasIT extends IntegrationTestBase {
         long first = posts.published(me, "고정할 글", "본문", 1, T.minusSeconds(100));
         posts.published(me, "새 글", "본문", 1, T);
         String html = mockMvc.perform(get("/pinme/posts/{id}", first)).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("id=\"read-progress\"").contains("share-row").contains("twitter.com/intent/tweet")
+        assertThat(html).contains("id=\"read-progress\"").contains("share-row").contains("twitter.com/intent/tweet").contains("share.naver.com/web/shareView")
                 .contains("/js/post/reading-extras-").doesNotContain("블로그 맨 위에 고정");
         assertThat(mockMvc.perform(get("/pinme/posts/{id}", first).with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).contains("블로그 맨 위에 고정");

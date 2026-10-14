@@ -3,7 +3,7 @@
 # 이 저장소(practicech/blog)에서만 돈다. 과제 제출 사본(AIP-1)에서는 아래 if로 건너뛴다.
 # 필요한 Repository secrets: SSH_ADDRESS SSH_PORT SSH_ID SSH_PASSWORD, DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA,
 #   APP_PORT APP_DOMAIN, MAIL_USERNAME MAIL_PASSWORD, GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET, GH_CLIENT_ID GH_CLIENT_SECRET,
-#   (선택) GEMINI_API_KEY, ADMIN_EMAILS(관리자로 지정할 이메일, 쉼표로 여러 개)
+#   (선택) GEMINI_API_KEY, KAKAO_JS_KEY(카카오톡 공유), ADMIN_EMAILS(관리자로 지정할 이메일, 쉼표로 여러 개)
 name: deploy
 
 on:
@@ -90,6 +90,7 @@ jobs:
           GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GITHUB_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          KAKAO_JS_KEY: ${{ secrets.KAKAO_JS_KEY }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
         with:
           host: ${{ secrets.SSH_ADDRESS }}
@@ -97,7 +98,7 @@ jobs:
           username: ${{ secrets.SSH_ID }}
           password: ${{ secrets.SSH_PASSWORD }}
           command_timeout: 15m
-          envs: APP_PORT,APP_DOMAIN,DB_ADDRESS,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,DB_SCHEMA,MAIL_USERNAME,MAIL_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GEMINI_API_KEY,ADMIN_EMAILS
+          envs: APP_PORT,APP_DOMAIN,DB_ADDRESS,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,DB_SCHEMA,MAIL_USERNAME,MAIL_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GEMINI_API_KEY,KAKAO_JS_KEY,ADMIN_EMAILS
           script: |
             mv ~/team-blog/deploy/school/run-on-server.sh ~/team-blog/run-on-server.sh
             chmod 700 ~/team-blog/run-on-server.sh

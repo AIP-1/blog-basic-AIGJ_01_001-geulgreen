@@ -153,14 +153,19 @@
             </form>
             <!-- 053 강성찬 개인 확장: 공유하기(공개 글만). 좋아요 옆 메뉴 하나로 접었다 -->
             <details th:if="${shareEnabled and pageMeta != null}" class="sort-menu share-menu share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
-                <summary>📤 공유하기</summary>
+                <summary><th:block th:replace="~{fragments/icons :: share}"></th:block> 공유하기</summary>
                 <div class="sort-menu-panel">
-                    <button type="button" class="share-copy">🔗 링크 복사</button>
+                    <button type="button" class="share-copy"><th:block th:replace="~{fragments/icons :: link}"></th:block> 링크 복사</button>
                     <a target="_blank" rel="noopener noreferrer"
-                       th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}">X</a>
+                       th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}"><th:block th:replace="~{fragments/icons :: x-logo}"></th:block> X</a>
                     <a target="_blank" rel="noopener noreferrer"
-                       th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}">페이스북</a>
-                    <button type="button" class="share-native" hidden>📤 다른 앱으로</button>
+                       th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}"><th:block th:replace="~{fragments/icons :: facebook}"></th:block> 페이스북</a>
+                    <!-- 카카오톡: 서버에 KAKAO_JS_KEY가 있을 때만. 글 화면의 OG 제목·설명·사진으로 공유(sendScrap) -->
+                    <button type="button" th:if="${kakaoJsKey != null}" class="share-kakao" th:attr="data-kakao-key=${kakaoJsKey}"><th:block th:replace="~{fragments/icons :: kakao}"></th:block> 카카오톡</button>
+                    <a target="_blank" rel="noopener noreferrer" class="share-naver"
+                       th:href="${'https://share.naver.com/web/shareView?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&title=' + #uris.escapeQueryParam(post.title())}"><th:block th:replace="~{fragments/icons :: naver}"></th:block> 네이버</a>
+                    <!-- 브라우저가 공유 기능을 지원할 때만(주로 휴대폰) 스크립트가 보인다 -->
+                    <button type="button" class="share-native" hidden><th:block th:replace="~{fragments/icons :: apps}"></th:block> 다른 앱으로</button>
                 </div>
             </details>
             <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status"></span>
@@ -324,6 +329,8 @@
     <script th:src="@{/js/gif-play.js}" defer></script>
     <script th:src="@{/js/post/post-detail.js}" defer></script>
     <script th:if="${tocEnabled}" th:src="@{/js/post/toc.js}" defer></script>
+    <script th:if="${shareEnabled and kakaoJsKey != null}" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+            integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous" defer></script>
     <script th:if="${readProgressEnabled or shareEnabled}" th:src="@{/js/post/reading-extras.js}" defer></script>
     <script th:src="@{/js/post/comments.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
