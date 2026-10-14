@@ -43,9 +43,10 @@
             </div>
 
             <div id="cropper" class="cropper field" hidden>
-                <p class="help">끌어서 위치를 맞추고, 아래 막대로 확대·축소하세요.</p>
-                <canvas id="cropper-canvas" width="320" height="320" aria-label="자르기 미리보기"></canvas>
-                <div>
+                <p class="help">끌어서 위치를 맞추고, 아래 막대로 확대·축소하세요. 원 안이 프로필에 보여요.</p>
+                <!-- 프로필 사진은 어디서나 원으로 보여서, 원 밖은 어둡게 덮어 잘리는 부분을 미리 보여 준다(저장은 정사각형 그대로) -->
+                <div class="cropper-frame"><canvas id="cropper-canvas" width="320" height="320" aria-label="자르기 미리보기(원 안이 프로필에 보여요)"></canvas></div>
+                <div class="cropper-zoom-row">
                     <label for="cropper-zoom">확대</label>
                     <input type="range" id="cropper-zoom" min="1" max="4" step="0.01" value="1">
                 </div>

@@ -73,7 +73,13 @@ main.settings { max-width: 960px; }
 }
 .profile-image-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .cropper { max-width: 100%; }
-.cropper canvas { max-width: 100%; height: auto; touch-action: none; border-radius: 4px; background: var(--color-border); cursor: grab; }
+.cropper canvas { display: block; max-width: 100%; height: auto; touch-action: none; background: var(--color-border); cursor: grab; }
+/* 원형 안내: 캔버스에 꼭 맞는 원(아바타와 같은 모양) 밖을 반투명하게 덮는다. 끌기는 캔버스가 받는다 */
+.cropper-frame { position: relative; display: inline-block; max-width: 100%; overflow: hidden; border-radius: 4px; line-height: 0; }
+.cropper-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    box-shadow: 0 0 0 999px var(--color-overlay); outline: 2px solid var(--color-surface); outline-offset: -2px; }
+.cropper-zoom-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+.cropper-zoom-row input[type=range] { flex: 1 1 auto; max-width: 260px; margin: 0; accent-color: var(--color-brand-fill); }
 .status-ok { color: var(--color-success); }
 /* 004 편집 화면·비교 창. hidden 속성은 display를 지정한 클래스보다 우선한다 */
 [hidden] { display: none !important; }
