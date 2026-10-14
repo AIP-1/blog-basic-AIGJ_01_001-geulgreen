@@ -152,6 +152,12 @@ class FriendIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
                 .getContentAsString()).doesNotContain("친구로 넣기").doesNotContain("친구 요청");
         assertThat(mockMvc.perform(get("/frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
+        // 087 후속: 내 블로그 숫자 줄에만 "친구 N" → 친구 관리
+        members.addFriend(me, followed);
+        assertThat(mockMvc.perform(get("/frbtnme").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+                .contains("href=\"/settings/friends\"").contains("친구 1");
+        assertThat(mockMvc.perform(get("/frbtnme").with(TestAuth.member(followed))).andReturn().getResponse().getContentAsString())
+                .doesNotContain("href=\"/settings/friends\"");
     }
 
     @Test
