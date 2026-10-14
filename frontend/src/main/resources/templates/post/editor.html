@@ -18,7 +18,9 @@
         </div>
         <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         <div class="editor-actions">
-            <button type="button" id="preview-toggle" aria-controls="preview-panel" aria-expanded="false">미리보기</button>
+            <!-- 085 강성찬 개인 확장: 쓰는 대로 보이니 미리보기 대신 글 점검(서식 추천·맞춤법 검사). 끄면 예전 미리보기 -->
+            <button type="button" id="check-toggle" aria-controls="check-panel" aria-expanded="false" th:if="${writeCheck}">글 점검</button>
+            <button type="button" id="preview-toggle" aria-controls="preview-panel" aria-expanded="false" th:unless="${writeCheck}">미리보기</button>
             <button type="button" id="discard-working-copy" th:if="${published}">변경 취소</button>
             <button type="button" id="manual-save">저장</button>
             <button type="button" id="publish-open" aria-controls="publish-panel" aria-expanded="false">발행</button>
@@ -57,7 +59,23 @@
             단축키 Ctrl/⌘+B 굵게, I 기울임, U 밑줄, K 링크, E 코드<th:block th:if="${writingAi}">, J AI에게 부탁</th:block></p>
     </div>
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
-    <section id="preview-panel" class="preview-panel" aria-label="미리보기" hidden>
+    <section id="check-panel" class="preview-panel check-panel" aria-labelledby="check-heading" hidden th:if="${writeCheck}">
+        <h2 id="check-heading" class="field-label">서식 추천</h2>
+        <ul id="check-hints" role="status"></ul>
+        <h2 class="field-label">맞춤법 검사</h2>
+        <th:block th:if="${writingAi}">
+            <button type="button" id="spell-run" class="btn btn-sm">맞춤법 검사하기</button>
+            <p id="spell-status" class="help" role="status"></p>
+            <div id="spell-consent" hidden>
+                <p class="help">본문이 외부 AI 서비스(Google Gemini, 무료 등급)로 전송돼요. 무료 등급에서는 Google이 보낸 내용을 서비스 개선에 쓰고
+                    사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요. <a href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a></p>
+                <button type="button" id="spell-agree" class="btn btn-primary btn-sm">동의하고 검사하기</button>
+            </div>
+            <ul id="spell-fixes"></ul>
+        </th:block>
+        <p class="help" th:unless="${writingAi}">맞춤법 검사는 AI가 연결되면 쓸 수 있어요.</p>
+    </section>
+    <section id="preview-panel" class="preview-panel" aria-label="미리보기" hidden th:unless="${writeCheck}">
         <p id="preview-status" class="help" role="status"></p>
         <div id="preview-body" class="post-body"></div>
     </section>
@@ -177,7 +195,8 @@
     <script th:src="@{/js/editor/empty-draft.js}" defer></script>
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
     <script th:src="@{/js/code-highlight.js}" defer></script>
-    <script th:src="@{/js/editor/preview.js}" defer></script>
+    <script th:src="@{/js/editor/preview.js}" defer th:unless="${writeCheck}"></script>
+    <script th:src="@{/js/editor/write-check.js}" defer th:if="${writeCheck}"></script>
     <script th:src="@{/js/editor/publish.js}" defer></script>
     <script th:src="@{/js/editor/ai-tags.js}" defer></script>
     <script th:src="@{/js/editor/image-upload.js}" defer></script>

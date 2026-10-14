@@ -34,6 +34,9 @@ class EditorPageIT extends IntegrationTestBase {
                 .contains("id=\"post-content\"")
                 // 064·065 강성찬 개인 확장: / 명령 안내와 [표] 버튼
                 .contains("줄 처음에 / 를 쓰면").contains("id=\"table-insert\"")
+                // 085 강성찬 개인 확장: 미리보기 대신 글 점검(키가 없으면 맞춤법 검사 대신 안내)
+                .contains("id=\"check-toggle\"").contains("/js/editor/write-check-").contains("맞춤법 검사는 AI가 연결되면")
+                .doesNotContain("id=\"preview-toggle\"").doesNotContain("/js/editor/preview-").doesNotContain("id=\"spell-run\"")
                 // 임시글에는 [변경 취소]가 없다
                 .doesNotContain("discard-working-copy");
     }
