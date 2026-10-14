@@ -2,7 +2,8 @@
 # 학교 공용 서버 배포(서버 배포 설명서 10-08): main에 올리면 테스트 → 이미지 생성 → SSH로 서버에 보내 실행.
 # 필요한 Repository secrets: SSH_ADDRESS SSH_PORT SSH_ID SSH_PASSWORD, DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA,
 #   APP_PORT APP_DOMAIN, MAIL_USERNAME MAIL_PASSWORD, GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET, GH_CLIENT_ID GH_CLIENT_SECRET,
-#   (선택) GEMINI_API_KEY, KAKAO_JS_KEY(카카오톡 공유), ADMIN_EMAILS(관리자로 지정할 이메일, 쉼표로 여러 개)
+#   (선택) GEMINI_API_KEY, KAKAO_JS_KEY(카카오톡 공유), ADMIN_EMAILS(관리자로 지정할 이메일, 쉼표로 여러 개),
+#   TELEGRAM_BOT_TOKEN(096 텔레그램 알림), TELEGRAM_CHAT_ID(배포 결과를 받을 채팅 번호, 봇 연결 메시지에 나옴)
 name: deploy
 
 on:
@@ -91,14 +92,33 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KAKAO_JS_KEY: ${{ secrets.KAKAO_JS_KEY }}
           ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         with:
           host: ${{ secrets.SSH_ADDRESS }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_ID }}
           password: ${{ secrets.SSH_PASSWORD }}
           command_timeout: 15m
-          envs: APP_PORT,APP_DOMAIN,DB_ADDRESS,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,DB_SCHEMA,MAIL_USERNAME,MAIL_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GEMINI_API_KEY,KAKAO_JS_KEY,ADMIN_EMAILS
+          envs: APP_PORT,APP_DOMAIN,DB_ADDRESS,DB_PORT,DB_NAME,DB_USERNAME,DB_PASSWORD,DB_SCHEMA,MAIL_USERNAME,MAIL_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GEMINI_API_KEY,KAKAO_JS_KEY,ADMIN_EMAILS,TELEGRAM_BOT_TOKEN
           script: |
             mv ~/team-blog/deploy/school/run-on-server.sh ~/team-blog/run-on-server.sh
             chmod 700 ~/team-blog/run-on-server.sh
             ~/team-blog/run-on-server.sh
+
+      # 096 강성찬 개인 확장: 앱이 아니라 여기서 보낸다(배포가 실패해 앱이 꺼져 있어도 알림이 가게). 비밀값이 없으면 건너뛴다
+      - name: 배포 결과 텔레그램 알림
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RESULT: ${{ job.status }}
+          TITLE: ${{ github.event.head_commit.message || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then echo "텔레그램 비밀값 없음: 알림 건너뜀"; exit 0; fi
+          if [ "${RESULT}" = "success" ]; then head="✅ 배포 성공"; else head="❌ 배포 실패(${RESULT})"; fi
+          text="$(printf '%s: %s\n%s' "${head}" "${TITLE%%$'\n'*}" "${RUN_URL}")"
+          # 토큰은 curl 인자가 아니라 표준 입력 설정으로 넘긴다(run-on-server.sh의 점검 줄과 같은 방식)
+          printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "${TELEGRAM_BOT_TOKEN}" \
+            | curl -s -o /dev/null -w '텔레그램 응답: %{http_code}\n' -m 10 --config - \
+              --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" --data-urlencode "text=${text}" || true

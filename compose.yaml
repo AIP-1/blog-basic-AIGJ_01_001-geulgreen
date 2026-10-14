@@ -62,6 +62,7 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       KAKAO_JS_KEY: ${KAKAO_JS_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       # 사진: 기본은 앱 서버 디스크(app-data 볼륨). STORAGE_TYPE=s3로 바꾸면 아래 MinIO 값을 쓴다(DEPLOY.md)
       STORAGE_TYPE: ${STORAGE_TYPE:-local}
