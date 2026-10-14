@@ -199,10 +199,10 @@ class FollowIT extends IntegrationTestBase {
         // 068 추천 블로그(086부터 탐색): 팔로우 안 한 작가만, 나와 팔로우한 사람은 빼고. 추천 글에도 팔로우한 사람 글은 없음
         jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
         page = mockMvc.perform(get("/explore").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("class=\"explore-posts-heading\""));
+        String recommended = page.substring(page.indexOf("class=\"feed-recommended\""), page.indexOf("</section>", page.indexOf("class=\"feed-recommended\"")));
         assertThat(recommended).contains("href=\"/fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
                 .doesNotContain("/fdwriter1\"").doesNotContain("/fdwriter2\"").doesNotContain("/fdreader\"");
-        assertThat(page).contains("모르는 사람").doesNotContain("피드글");
+        assertThat(page.substring(page.indexOf("id=\"card-grid\""))).contains("모르는 사람").doesNotContain("피드글");
         assertThat(strangerPost).isPositive();
         // 언팔로우 직후 다음 요청부터 빠짐, 작성자 탈퇴 유예도 빠짐
         mockMvc.perform(delete("/api/members/fdwriter2/follow").with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());

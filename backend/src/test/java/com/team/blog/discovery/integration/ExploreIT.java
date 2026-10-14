@@ -23,7 +23,12 @@ class ExploreIT extends IntegrationTestBase {
         assertThat(page).contains("<h1>탐색</h1>").contains("추천 블로그").contains("추천 글").contains("탐색에서 보일 글")
                 .contains("class=\"post-card\"").contains("href=\"/login\"")
                 .contains("href=\"/explore\" aria-current=\"page\"")
-                .contains("<span>exwriter</span>").doesNotContain("탐색작가");
+                .contains("<span>exwriter</span>").doesNotContain("탐색작가")
+                // 086: 새로 온 작가도 여기로, 인기 태그는 링크만, 홈에는 추천·새로 온 작가 없이 탐색 링크
+                .contains("새로 온 작가").contains("href=\"/tags\"").doesNotContain("side-pills");
+        String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
+        assertThat(home).contains("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")
+                .doesNotContain("side-rec-posts");
         // 추천 글은 12개씩 이어 보기(커서 = 추천 위치), 잘못된 커서는 처음부터
         for (int i = 0; i < 13; i++) {
             posts.published(author, "더 많은 글" + i, "본문", 1, NOW.minus(Duration.ofHours(i + 1)));

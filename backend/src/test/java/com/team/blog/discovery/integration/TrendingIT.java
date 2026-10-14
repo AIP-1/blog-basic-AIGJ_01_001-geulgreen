@@ -3,6 +3,7 @@ package com.team.blog.discovery.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.team.blog.discovery.application.TrendingService;
@@ -123,22 +124,25 @@ class TrendingIT extends IntegrationTestBase {
         mockMvc.perform(get("/api/posts/trending?cursor=" + cursor)).andExpect(status().isGone())
                 .andExpect(jsonPath("$.code").value("SNAPSHOT_EXPIRED"));
         mockMvc.perform(get("/api/posts/trending?cursor=abc")).andExpect(status().isBadRequest());
-        String page = mockMvc.perform(get("/?tab=trending&cursor=" + cursor)).andExpect(status().isOk())
+        String page = mockMvc.perform(get("/explore?tab=trending&cursor=" + cursor)).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         assertThat(page).contains("순위가 새로 바뀌었어요").contains("최근 7일 동안 반응이 많은 글 · 10분마다 갱신")
-                .contains("?tab=trending&amp;cursor=").contains("data-expired-url=\"/?tab=trending&amp;expired=1\"");
+                .contains("?tab=trending&amp;cursor=").contains("data-expired-url=\"/explore?tab=trending&amp;expired=1\"");
     }
 
     @Test
     void emptyStateAndDefaultTab() throws Exception {
         clock.set(NOW);
         post(member("trquiet"), "반응 없음", Duration.ofHours(1), 0, 0);
-        String trend = mockMvc.perform(get("/?tab=trending")).andReturn().getResponse().getContentAsString();
+        // 086: 트렌딩은 탐색으로(예전 주소는 넘김)
+        mockMvc.perform(get("/?tab=trending")).andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", "/explore?tab=trending"));
+        String trend = mockMvc.perform(get("/explore?tab=trending")).andReturn().getResponse().getContentAsString();
         assertThat(trend).contains("아직 트렌딩 글이 없어요").contains("최신 글 보기");
         // 077: 오른쪽 칸 추천 글에는 나올 수 있으니 목록 칸만 본다
         assertThat(trend.substring(trend.indexOf("id=\"card-grid\""), trend.indexOf("class=\"list-more\""))).doesNotContain("반응 없음");
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
-        assertThat(home).contains("반응 없음").contains("<a href=\"/\" aria-current=\"page\">최신 글</a>");
+        assertThat(home).contains("반응 없음").contains("최신 글").doesNotContain("tab=trending");
     }
 
     private static void collect(String body, Set<Long> seen) {

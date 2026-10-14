@@ -21,7 +21,9 @@
                th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
         </p>
         <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${card.title()}">제목</a></h2>
-        <p class="card-excerpt" th:text="${card.excerpt()}">요약</p>
+        <p class="card-excerpt" th:if="${snippetHtml == null}" th:text="${card.excerpt()}">요약</p>
+        <!-- 검색(086): 서버가 이스케이프하고 검색어에만 <mark>를 붙인 미리보기 -->
+        <p class="card-excerpt" th:if="${snippetHtml != null}" th:utext="${snippetHtml}">미리보기</p>
     </div>
     <!-- 시안(10-08): 사진이 없으면 빈 칸을 두지 않는다 -->
     <div class="card-thumb" th:if="${card.thumbnailUrl() != null}">
