@@ -1105,3 +1105,9 @@ a.link-btn.back { padding: 5px 14px 5px 12px; }
 a.link-btn.back::after { content: none; }
 a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
 .empty-state a:not([class]) { margin-left: 6px; }
+
+/* 097 강성찬 개인 확장: 설정 > 연결(설정 붙여넣기 칸, 새 키) */
+.connections-page .connect-snippet { overflow-x: auto; background: var(--color-code-bg); border-radius: 14px; padding: 12px 16px; font-size: .85em; margin: 6px 0; }
+.connections-page .notice code, .connections-page .help code { background: var(--color-code-bg); border-radius: 6px; padding: .1em .4em; word-break: break-all; }
+.connections-page .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+.connections-page .inline-form input[type=text] { flex: 1 1 220px; }

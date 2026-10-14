@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>연결 · 글그린</title>
+</head>
+<body>
+<!-- 097 강성찬 개인 확장: 연결. 지금은 AI 연결(MCP) 카드 하나, 다른 연결도 카드로 더한다 -->
+<main class="connections-page">
+    <h1>연결</h1>
+    <p class="help">다른 도구를 글그린에 연결해요. <a href="/settings" class="link-btn back">설정으로</a></p>
+
+    <section class="group-card" aria-labelledby="ai-connect-heading">
+        <h2 id="ai-connect-heading">AI와 함께 쓰기</h2>
+        <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요.
+            AI는 임시글을 만들고 고치기만 하고, 발행은 내가 글쓰기 화면에서 직접 해요. 남의 글이나 지우기는 할 수 없어요.</p>
+
+        <div th:if="${newKey != null}" class="notice" role="status">
+            <p><strong>새 연결 키예요. 이 화면을 떠나면 다시 볼 수 없으니 지금 복사해 두세요.</strong></p>
+            <p><code id="new-key" th:text="${newKey}">ggk_…</code>
+                <button type="button" class="btn btn-sm" data-copy="#new-key">복사</button></p>
+        </div>
+        <p th:if="${tooMany}" class="field-error" role="alert"
+           th:text="${'키는 ' + maxKeys + '개까지 만들 수 있어요. 안 쓰는 키를 끊고 다시 해 주세요.'}">키가 너무 많아요</p>
+
+        <form method="post" action="/settings/connections/ai" class="inline-form">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <label for="ai-key-name" class="visually-hidden">키 이름</label>
+            <input id="ai-key-name" name="name" type="text" maxlength="40" placeholder="키 이름(예: 회사 노트북 Claude Code)">
+            <button type="submit" class="btn btn-primary">AI에 연결하기</button>
+        </form>
+
+        <h3>내 연결 키</h3>
+        <p th:if="${keys.isEmpty()}" class="help">아직 연결한 키가 없어요</p>
+        <ul class="follow-list">
+            <li th:each="k : ${keys}" class="follow-row">
+                <div class="follow-text">
+                    <p><strong th:text="${k.name()}">키 이름</strong></p>
+                    <p class="help" th:text="${'만든 날 ' + k.createdAt() + ' · ' + (k.lastUsedAt() == null ? '아직 안 썼어요' : '마지막 사용 ' + k.lastUsedAt())}">만든 날</p>
+                </div>
+                <form method="post" th:action="@{/settings/connections/ai/{id}/revoke(id=${k.id()})}" class="friend-form">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-danger btn-sm">끊기</button>
+                </form>
+            </li>
+        </ul>
+
+        <h3>붙이는 법</h3>
+        <p class="help">서버 주소는 <code th:text="${mcpUrl}">/mcp</code>예요.
+            <th:block th:if="${newKey == null}">아래 <code>&lt;연결 키&gt;</code> 자리에 발급받은 키를 넣어 주세요.</th:block>
+            <th:block th:if="${newKey != null}">아래 설정에는 방금 만든 키가 들어 있어요.</th:block></p>
+        <h4>Claude Code</h4>
+        <p class="help">터미널에서 한 번 실행해요.</p>
+        <pre class="connect-snippet"><code id="snippet-claude-code" th:text="${claudeCode}">claude mcp add</code></pre>
+        <button type="button" class="btn btn-sm" data-copy="#snippet-claude-code">복사</button>
+        <h4>Cursor</h4>
+        <p class="help"><code>~/.cursor/mcp.json</code>에 넣어요.</p>
+        <pre class="connect-snippet"><code id="snippet-cursor" th:text="${cursor}">{}</code></pre>
+        <button type="button" class="btn btn-sm" data-copy="#snippet-cursor">복사</button>
+        <h4>Claude Desktop</h4>
+        <p class="help">설정 &gt; 개발자 &gt; 설정 편집에서 <code>claude_desktop_config.json</code>에 넣어요. Node.js가 있어야 해요.</p>
+        <pre class="connect-snippet"><code id="snippet-claude-desktop" th:text="${claudeDesktop}">{}</code></pre>
+        <button type="button" class="btn btn-sm" data-copy="#snippet-claude-desktop">복사</button>
+        <p class="help">연결한 뒤 AI에게 "지금까지 이야기한 내용을 글그린 임시글로 정리해 줘"라고 해 보세요. 새 임시글은
+            <a href="/manage/posts?tab=drafts">글 관리 &gt; 임시글</a>에서 볼 수 있어요.</p>
+    </section>
+    <script th:src="@{/js/settings/connections.js}" defer></script>
+</main>
+</body>
+</html>
