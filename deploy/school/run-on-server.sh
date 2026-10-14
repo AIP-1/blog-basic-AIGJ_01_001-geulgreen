@@ -117,6 +117,20 @@ check_gemini() {
   esac
 }
 
+# 메일 계정 로그인이 되는지 배포 기록에 남긴다(로그인만 하고 메일은 보내지 않음, 결과와 상관없이 배포는 계속).
+# 계정·비밀번호는 curl 인자가 아니라 표준 입력 설정으로 넘긴다(공용 서버에서 ps로 보이지 않게). -v는 로그인 정보를 찍으므로 쓰지 않는다
+check_mail() {
+  local esc rc=0
+  esc="$(printf %s "${MAIL_USERNAME}:${MAIL_PASSWORD}" | sed 's/[\\"]/\\&/g')"
+  printf 'user = "%s"\n' "${esc}" | curl -s -o /dev/null -m 15 --ssl-reqd --config - "smtp://smtp.gmail.com:587" || rc=$?
+  case "${rc}" in
+    0) echo "메일 로그인 확인: 통해요(${MAIL_USERNAME})" ;;
+    67) echo "메일 로그인 확인: 실패(로그인 거절, 535). MAIL_USERNAME과 Google 앱 비밀번호(MAIL_PASSWORD)를 확인하세요" ;;
+    6|7|28) echo "메일 로그인 확인: 서버에서 smtp.gmail.com에 닿지 못했어요(curl ${rc})" ;;
+    *) echo "메일 로그인 확인: 예상하지 못한 결과예요(curl ${rc})" ;;
+  esac
+}
+
 echo "== 앱 교체"
 run_app "${APP_NAME}:latest"
 
@@ -124,6 +138,7 @@ echo "== 상태 확인(최대 3분)"
 if wait_healthy; then
   echo "앱이 켜졌어요: http://127.0.0.1:${APP_PORT} → https://${APP_DOMAIN}"
   check_gemini
+  check_mail
   ${DOCKER} image prune -f > /dev/null 2>&1 || true
   exit 0
 fi
