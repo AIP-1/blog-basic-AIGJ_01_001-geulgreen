@@ -16,7 +16,7 @@ public class TagStore {
 
     public long ensure(String name) {
         jdbc.update("INSERT INTO tag (name) VALUES (?) ON CONFLICT (name) DO NOTHING", name);
-        return jdbc.queryForObject("SELECT id FROM tag WHERE name = ?", Long.class, name);
+        return jdbc.queryForObject("SELECT id FROM tag WHERE name = ?", Long.class, name); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     public void replacePostTags(long postId, List<Long> tagIds) {

@@ -65,6 +65,7 @@ class BannedWordFilterTest {
             }
         }
         assertThat(Arrays.stream(BannedWordFilter.class.getMethods()).map(Method::getReturnType))
+                .isNotEmpty()
                 .doesNotContain((Class) String.class.arrayType());
     }
 

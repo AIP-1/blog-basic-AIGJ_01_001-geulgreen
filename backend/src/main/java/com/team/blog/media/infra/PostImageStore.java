@@ -44,7 +44,7 @@ public class PostImageStore {
 
     /** 이 회원이 올린, 올리기를 마친(크기 확인됨) 글 용도 사진의 번호(055 카드 대표 사진, 강성찬 개인 확장). */
     public java.util.Optional<Long> ownedCompletedImageId(long uploaderId, String key) {
-        return jdbc.queryForList("SELECT id FROM image WHERE uploader_id = ? AND purpose = 'POST' AND storage_key = ? AND width IS NOT NULL",
+        return jdbc.queryForList("SELECT id FROM image WHERE uploader_id = ? AND purpose = 'POST' AND storage_key = ? AND width IS NOT NULL", // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 Long.class, uploaderId, key).stream().findFirst();
     }
 

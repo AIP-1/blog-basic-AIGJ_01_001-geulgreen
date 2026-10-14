@@ -38,6 +38,6 @@ public class PinService {
     }
 
     public Optional<Long> pinnedPostId(long memberId) {
-        return jdbc.queryForList("SELECT post_id FROM post_pin WHERE member_id = ?", Long.class, memberId).stream().findFirst();
+        return jdbc.queryForList("SELECT post_id FROM post_pin WHERE member_id = ?", Long.class, memberId).stream().findFirst(); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 }
