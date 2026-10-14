@@ -32,11 +32,62 @@ public class AdminToolsService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
-    public record Day(LocalDate date, long members, long posts, long comments) {
+    static final int TREND_DAYS = 30;
+
+    public record Day(LocalDate date, long members, long posts, long comments, long views) {
     }
 
-    public record Dashboard(long totalMembers, long totalPosts, long totalComments, long pendingReports, long todayMembers,
-                            long todayPosts, long todayComments, List<Day> week, long maxDaily) {
+    public record Dashboard(long totalMembers, long totalPosts, long totalComments, long pendingReports, long newInquiries,
+                            long todayMembers, long todayPosts, long todayComments, long todayViews) {
+    }
+
+    /** 한 줄 추이. 그래프는 viewBox 0 0 300 100 안의 꺾은선(line)과 그 아래 면(area), 값이 0뿐이면 그리지 않는다. */
+    public record Trend(String label, String key, long total, long today, long max, String line, String area) {
+
+        static Trend of(String label, String key, List<Day> days, java.util.function.ToLongFunction<Day> f) {
+            long max = 0;
+            long total = 0;
+            for (Day d : days) {
+                max = Math.max(max, f.applyAsLong(d));
+                total += f.applyAsLong(d);
+            }
+            StringBuilder pts = new StringBuilder();
+            double step = days.size() > 1 ? 300.0 / (days.size() - 1) : 0;
+            for (int i = 0; i < days.size(); i++) {
+                double y = 100 - (max == 0 ? 0 : f.applyAsLong(days.get(i)) * 96.0 / max);
+                pts.append(i == 0 ? "" : " ").append(Math.round(i * step * 10) / 10.0).append(',').append(Math.round(y * 10) / 10.0);
+            }
+            String line = pts.toString();
+            return new Trend(label, key, total, f.applyAsLong(days.get(days.size() - 1)), max, line,
+                    "0,100 " + line + " 300,100");
+        }
+
+        public boolean empty() {
+            return total == 0;
+        }
+    }
+
+    record Trends(Trend views, Trend members, Trend posts, Trend comments, List<Day> days) {
+    }
+
+    public record PopularPost(long id, String title, String handle, long views) {
+
+        public String url() {
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id;
+        }
+    }
+
+    public record Activity(Instant at, String kind, String handle, String what, String postHandle, Long postId, Long commentId) {
+
+        public String url() {
+            if (postId == null) {
+                return com.team.blog.shared.web.BlogPaths.of(handle);
+            }
+            return com.team.blog.shared.web.BlogPaths.of(postHandle) + "/posts/" + postId + (commentId == null ? "" : "?comment=" + commentId + "#comment-" + commentId);
+        }
+    }
+
+    public record Insights(List<Trend> trends, List<Day> days, List<PopularPost> popular, List<Activity> activity) {
     }
 
     public record PostRow(long id, String title, String handle, String nickname, String visibility, Instant publishedAt,
@@ -80,34 +131,72 @@ public class AdminToolsService {
         this.clock = clock;
     }
 
-    // ----- 045 대시보드 -----
+    // ----- 045 대시보드, 098 30일 추이 -----
 
+    /** 오늘 숫자 카드. 조회는 016의 날짜별 조회수(post_view_daily)에서 온다. */
     public Dashboard dashboard(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
+        Trends t = trends(LocalDate.ofInstant(clock.instant(), SEOUL), 1);
+        return new Dashboard(one("SELECT count(*) FROM member WHERE withdrawn_at IS NULL"),
+                one("SELECT count(*) FROM post WHERE status = 'PUBLISHED' AND deleted_at IS NULL"),
+                one("SELECT count(*) FROM comment WHERE deleted_at IS NULL"),
+                one("SELECT count(*) FROM report_case WHERE status = 'PENDING'"),
+                one("SELECT count(*) FROM inquiry WHERE status = 'NEW'"),
+                t.members().today(), t.posts().today(), t.comments().today(), t.views().today());
+    }
+
+    /** 098: 최근 30일 가입·글·댓글·조회 추이와 인기 글(7일)·최근 활동. */
+    public Insights insights(Optional<CurrentUser> current) {
+        adminGuard.requireAdmin(current);
         LocalDate today = LocalDate.ofInstant(clock.instant(), SEOUL);
-        Instant from = today.minusDays(6).atStartOfDay(SEOUL).toInstant();
+        Trends t = trends(today, TREND_DAYS);
+        List<PopularPost> popular = jdbc.query("""
+                SELECT p.id, p.title, m.handle, sum(d.views) AS views FROM post_view_daily d
+                JOIN post p ON p.id = d.post_id JOIN member m ON m.id = p.author_id
+                WHERE d.view_date > ? AND p.deleted_at IS NULL AND p.hidden_at IS NULL
+                GROUP BY p.id, p.title, m.handle ORDER BY views DESC, p.id DESC LIMIT 5
+                """, (rs, i) -> new PopularPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("views")),
+                java.sql.Date.valueOf(today.minusDays(7)));
+        List<Activity> activity = jdbc.query("""
+                SELECT at, kind, who, what, ph, pid, cid FROM (
+                  (SELECT created_at AS at, '가입' AS kind, handle AS who, nickname AS what, NULL AS ph, NULL::bigint AS pid,
+                          NULL::bigint AS cid FROM member WHERE withdrawn_at IS NULL ORDER BY created_at DESC LIMIT 8)
+                  UNION ALL
+                  (SELECT p.first_public_at, '글', m.handle, p.title, m.handle, p.id, NULL
+                   FROM post p JOIN member m ON m.id = p.author_id
+                   WHERE p.first_public_at IS NOT NULL AND p.deleted_at IS NULL ORDER BY p.first_public_at DESC LIMIT 8)
+                  UNION ALL
+                  (SELECT c.created_at, '댓글', m.handle, p.title, pm.handle, p.id, c.id
+                   FROM comment c JOIN member m ON m.id = c.author_id JOIN post p ON p.id = c.post_id JOIN member pm ON pm.id = p.author_id
+                   WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL ORDER BY c.created_at DESC LIMIT 8)
+                ) x ORDER BY at DESC LIMIT 8
+                """, (rs, i) -> new Activity(rs.getTimestamp("at").toInstant(), rs.getString("kind"), rs.getString("who"),
+                rs.getString("what"), rs.getString("ph"), (Long) rs.getObject("pid"), (Long) rs.getObject("cid")));
+        return new Insights(List.of(t.views(), t.members(), t.posts(), t.comments()), t.days(), popular, activity);
+    }
+
+    private Trends trends(LocalDate today, int n) {
         Map<LocalDate, long[]> days = new LinkedHashMap<>();
-        for (int i = 6; i >= 0; i--) {
-            days.put(today.minusDays(i), new long[3]);
+        for (int i = n - 1; i >= 0; i--) {
+            days.put(today.minusDays(i), new long[4]);
         }
+        Instant from = today.minusDays(n - 1L).atStartOfDay(SEOUL).toInstant();
         count(days, "SELECT (created_at AT TIME ZONE 'Asia/Seoul')::date AS d, count(*) FROM member WHERE created_at >= ?"
                 + " AND withdrawn_at IS NULL GROUP BY 1", from, 0);
         count(days, "SELECT (first_public_at AT TIME ZONE 'Asia/Seoul')::date AS d, count(*) FROM post WHERE first_public_at >= ?"
                 + " AND deleted_at IS NULL GROUP BY 1", from, 1);
         count(days, "SELECT (created_at AT TIME ZONE 'Asia/Seoul')::date AS d, count(*) FROM comment WHERE created_at >= ?"
                 + " AND deleted_at IS NULL GROUP BY 1", from, 2);
-        List<Day> week = new ArrayList<>();
-        long max = 1;
-        for (Map.Entry<LocalDate, long[]> e : days.entrySet()) {
-            long[] v = e.getValue();
-            week.add(new Day(e.getKey(), v[0], v[1], v[2]));
-            max = Math.max(max, Math.max(v[0], Math.max(v[1], v[2])));
-        }
-        long[] t = days.get(today);
-        return new Dashboard(one("SELECT count(*) FROM member WHERE withdrawn_at IS NULL"),
-                one("SELECT count(*) FROM post WHERE status = 'PUBLISHED' AND deleted_at IS NULL"),
-                one("SELECT count(*) FROM comment WHERE deleted_at IS NULL"),
-                one("SELECT count(*) FROM report_case WHERE status = 'PENDING'"), t[0], t[1], t[2], week, max);
+        jdbc.query("SELECT view_date, sum(views) FROM post_view_daily WHERE view_date >= ? GROUP BY 1", rs -> {
+            long[] v = days.get(rs.getDate(1).toLocalDate());
+            if (v != null) {
+                v[3] = rs.getLong(2);
+            }
+        }, java.sql.Date.valueOf(today.minusDays(n - 1L)));
+        List<Day> list = new ArrayList<>();
+        days.forEach((d, v) -> list.add(new Day(d, v[0], v[1], v[2], v[3])));
+        return new Trends(Trend.of("조회", "views", list, Day::views), Trend.of("가입", "members", list, Day::members),
+                Trend.of("새 글", "posts", list, Day::posts), Trend.of("댓글", "comments", list, Day::comments), list);
     }
 
     private void count(Map<LocalDate, long[]> days, String sql, Instant from, int slot) {

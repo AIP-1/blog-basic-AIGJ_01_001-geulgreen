@@ -392,6 +392,10 @@ blog:
     # 문의 메일 주소(끈 때의 mailto). 사이트 발송 계정. 관리자 지정 주소(ADMIN_EMAILS)는 화면에 쓰지 않는다
     email: ${CONTACT_EMAIL:blogeulgreen@gmail.com}
     per-hour: 5
+  # 098 강성찬 개인 확장: 관리 대시보드의 30일 추이 그래프·인기 글·최근 활동·서버 상태. 끄면 숫자 카드만 보인다.
+  admin:
+    insights:
+      enabled: ${ADMIN_INSIGHTS_ENABLED:true}
   # 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 비어 있으면 조용히 꺼진다
   telegram:
     enabled: ${TELEGRAM_ENABLED:true}
