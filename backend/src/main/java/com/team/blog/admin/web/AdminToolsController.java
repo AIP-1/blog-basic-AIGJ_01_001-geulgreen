@@ -7,6 +7,9 @@ import com.team.blog.admin.application.SamplePostsService;
 import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.shared.security.CurrentUserProvider;
 import jakarta.servlet.http.HttpServletResponse;
+import java.lang.management.ManagementFactory;
+import java.time.Instant;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,17 +25,25 @@ public class AdminToolsController {
     private final AdminToolsService tools;
     private final CurrentUserProvider currentUserProvider;
     private final SamplePostsService samplePosts;
+    private final boolean insightsEnabled;
 
-    public AdminToolsController(AdminToolsService tools, CurrentUserProvider currentUserProvider, SamplePostsService samplePosts) {
+    public AdminToolsController(AdminToolsService tools, CurrentUserProvider currentUserProvider, SamplePostsService samplePosts,
+                                @Value("${blog.admin.insights.enabled:true}") boolean insightsEnabled) {
         this.tools = tools;
         this.currentUserProvider = currentUserProvider;
         this.samplePosts = samplePosts;
+        this.insightsEnabled = insightsEnabled;
     }
 
     @GetMapping("/admin")
     public String dashboard(Model model, HttpServletResponse response) {
         noStore(response, model);
         model.addAttribute("dash", tools.dashboard(currentUserProvider.current()));
+        if (insightsEnabled) { // 098 30일 추이·인기 글·최근 활동(강성찬 개인 확장, 끄면 숫자 카드만)
+            model.addAttribute("insights", tools.insights(currentUserProvider.current()));
+            model.addAttribute("serverHost", SERVER_HOST);
+            model.addAttribute("serverStartedAt", Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime()));
+        }
         model.addAttribute("adminTab", "dashboard");
         model.addAttribute("samplePostsEnabled", samplePosts.enabled());
         model.addAttribute("samplePostCount", samplePosts.count());
@@ -131,6 +142,16 @@ public class AdminToolsController {
         model.addAttribute("logs", tools.logs(currentUserProvider.current()));
         model.addAttribute("adminTab", "logs");
         return "admin/logs";
+    }
+
+    private static final String SERVER_HOST = hostName();
+
+    private static String hostName() {
+        try {
+            return java.net.InetAddress.getLocalHost().getHostName();
+        } catch (java.io.IOException e) {
+            return "알 수 없음";
+        }
     }
 
     private static void noStore(HttpServletResponse response, Model model) {

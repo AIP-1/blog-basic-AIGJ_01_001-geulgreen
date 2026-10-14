@@ -44,7 +44,21 @@ class AdminToolsIT extends IntegrationTestBase {
                 .andExpect(status().isNotFound());
         posts.published(user, "대시보드 글", "본문", 1, clock.instant().minusSeconds(60));
         String dash = page("/admin", TestAuth.admin(admin));
-        assertThat(dash).contains("관리 대시보드").contains("전체 회원").contains("처리할 신고").contains("최근 7일");
+        assertThat(dash).contains("관리 대시보드").contains("전체 회원").contains("처리할 신고·문의").contains("최근 30일 추이")
+                .contains("기록이 쌓이는 중이에요").contains("대시보드 글");
+    }
+
+    @Test
+    void insightsDrawThirtyDayTrendsAndPopularPosts() throws Exception {
+        long user = member("viewwriter");
+        long admin = member("boss9");
+        long postId = posts.published(user, "많이 본 글", "본문", 1, clock.instant().minusSeconds(60));
+        java.time.LocalDate today = java.time.LocalDate.ofInstant(clock.instant(), java.time.ZoneId.of("Asia/Seoul"));
+        jdbc.update("INSERT INTO post_view_daily (post_id, view_date, views) VALUES (?, ?, 7), (?, ?, 3)",
+                postId, java.sql.Date.valueOf(today), postId, java.sql.Date.valueOf(today.minusDays(40)));
+        String dash = page("/admin", TestAuth.admin(admin));
+        assertThat(dash).contains("오늘 조회").contains("class=\"trend-line\"").contains("조회 최근 30일 합계 7, 오늘 7")
+                .contains("많이 본 글").contains("@viewwriter · 7회");
     }
 
     @Test
