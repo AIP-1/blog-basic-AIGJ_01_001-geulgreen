@@ -2,13 +2,16 @@
 # 학교 공용 서버 배포(서버 배포 설명서 10-08): GitHub Actions가 이미지 파일과 함께 이 스크립트를 서버로 보내 실행한다.
 # - DB는 Crowfoot PostgreSQL(밖), Nginx는 서버 공용 Nginx(~/nginx/<도메인>.conf → APP_PORT)
 # - 이 스크립트는 우리 것만 띄운다: Redis 컨테이너 + 앱 컨테이너(APP_PORT로만 열림), 사진은 Docker 볼륨
-# - 자동 되돌리기(1.15.0): 새 버전이 3분 안에 안 켜지면 바로 전 이미지(team-blog:previous)로 다시 켠다.
-#   앱은 한 개만 쓰므로 교체하는 동안 잠깐 끊기는 것은 그대로다. 마이그레이션은 "추가만" 하므로 전 버전도 새 DB에서 켜진다.
+# - 무중단 배포(093): 앱을 두 대(APP_PORT, APP_PORT2=APP_PORT+1) 띄우고 Nginx upstream이 둘에 나눠 보낸다.
+#   한 대씩 갈아끼우고, 새 컨테이너가 건강 확인을 통과해야 다음 대로 넘어간다. 그동안 다른 한 대가 요청을 받는다.
+# - 자동 되돌리기(1.15.0): 새 버전이 3분 안에 안 켜지면 그 대만 전 이미지(team-blog:previous)로 다시 켠다.
+#   마이그레이션은 "추가만" 하므로 새 버전이 DB를 바꾼 뒤에도 옛 버전이 같이 돈다(093 롤링 중에도 마찬가지).
 # - 비밀값은 Actions가 환경 변수로 넘겨주고, 서버에는 0600 권한 env 파일로만 남긴다(다시 시작할 때 필요)
 # 필요한 환경 변수: APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA
 #   MAIL_USERNAME MAIL_PASSWORD GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
 #   (선택) GEMINI_API_KEY, ADMIN_EMAILS
 set -euo pipefail
+APP_PORT2="${APP_PORT2:-$((${APP_PORT:-8300} + 1))}"
 
 APP_NAME="${APP_NAME:-team-blog}"
 WORK="${HOME}/${APP_NAME}"
@@ -16,6 +19,8 @@ IMAGE_TAR="${WORK}/image.tar.gz"
 NET="${APP_NAME}-net"
 REDIS="${APP_NAME}-redis"
 APP="${APP_NAME}-app"
+APP2="${APP_NAME}-app-2"
+APP_MEMORY="${APP_MEMORY:-1g}" # 공용 서버: 한 대당 메모리 상한(JVM은 이것의 75%를 힙으로 씀)
 
 for v in APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA \
          MAIL_USERNAME MAIL_PASSWORD GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET; do
@@ -85,17 +90,19 @@ if ! ${DOCKER} ps --format '{{.Names}}' | grep -qx "${REDIS}"; then
     redis:8 redis-server --appendonly yes > /dev/null
 fi
 
-run_app() { # $1 = 이미지
-  ${DOCKER} rm -f "${APP}" > /dev/null 2>&1 || true
-  ${DOCKER} run -d --name "${APP}" --network "${NET}" --restart unless-stopped \
-    -p "${APP_PORT}:8080" --env-file "${ENV_FILE}" \
+run_app() { # $1 = 컨테이너 이름, $2 = 포트, $3 = 이미지
+  # rm -f는 바로 죽이므로 먼저 stop: 받던 요청을 끝낼 시간(Spring 우아한 종료)을 준다. 새 요청은 Nginx가 다른 대로 보낸다
+  ${DOCKER} stop -t 30 "$1" > /dev/null 2>&1 || true
+  ${DOCKER} rm -f "$1" > /dev/null 2>&1 || true
+  ${DOCKER} run -d --name "$1" --network "${NET}" --restart unless-stopped \
+    -p "127.0.0.1:$2:8080" --memory "${APP_MEMORY}" --env-file "${ENV_FILE}" \
     -v "${APP_NAME}-data:/app/data" --log-opt max-size=20m --log-opt max-file=5 \
-    "$1" > /dev/null
+    "$3" > /dev/null
 }
 
-wait_healthy() { # 5초마다, 최대 3분
+wait_healthy() { # $1 = 포트. 5초마다, 최대 3분
   for i in $(seq 1 36); do
-    if curl -fsS "http://127.0.0.1:${APP_PORT}/actuator/health" > /dev/null 2>&1; then return 0; fi
+    if curl -fsS "http://127.0.0.1:$1/actuator/health" > /dev/null 2>&1; then return 0; fi
     sleep 5
   done
   return 1
@@ -131,27 +138,38 @@ check_mail() {
   esac
 }
 
-echo "== 앱 교체"
-run_app "${APP_NAME}:latest"
+# 한 대 교체. 실패하면 그 대만 전 버전으로 되돌리고 1을 돌려준다(다른 대는 손대지 않았으니 사이트는 계속 돈다)
+roll() { # $1 = 컨테이너 이름, $2 = 포트
+  echo "== ${1}(${2}) 교체, 상태 확인(최대 3분)"
+  run_app "$1" "$2" "${APP_NAME}:latest"
+  if wait_healthy "$2"; then echo "${1} 켜졌어요"; return 0; fi
+  echo "새 버전이 3분 안에 켜지지 않았어요(${1}). 마지막 로그:" >&2
+  ${DOCKER} logs --tail 80 "$1" >&2 || true
+  if [ -z "${PREV_ID}" ]; then return 1; fi # 처음 배포라 되돌릴 버전이 없음
+  echo "== ${1}을 전 버전으로 되돌리기" >&2
+  run_app "$1" "$2" "${APP_NAME}:previous"
+  if wait_healthy "$2"; then
+    echo "${1}을 전 버전으로 다시 켰어요. 새 버전은 위 로그를 보고 고쳐서 다시 배포해요." >&2
+  else
+    echo "전 버전도 켜지지 않았어요(DB·Redis 같은 서버 쪽 문제일 수 있어요). 마지막 로그:" >&2
+    ${DOCKER} logs --tail 80 "$1" >&2 || true
+  fi
+  return 1
+}
 
-echo "== 상태 확인(최대 3분)"
-if wait_healthy; then
-  echo "앱이 켜졌어요: http://127.0.0.1:${APP_PORT} → https://${APP_DOMAIN}"
-  check_gemini
-  check_mail
-  ${DOCKER} image prune -f > /dev/null 2>&1 || true
-  exit 0
-fi
-echo "새 버전이 3분 안에 켜지지 않았어요. 마지막 로그:" >&2
-${DOCKER} logs --tail 80 "${APP}" >&2 || true
-if [ -z "${PREV_ID}" ]; then exit 1; fi # 처음 배포라 되돌릴 버전이 없음
+echo "== 지금 메모리(공용 서버 확인용)"
+free -m 2>/dev/null | head -2 || true
+nginx -v 2>&1 || true # 1.25.1 이상이면 Nginx 설정의 http2 on;을 켤 수 있다
+${DOCKER} stats --no-stream --format '{{.Name}} {{.MemUsage}}' "${APP}" "${APP2}" 2>/dev/null || true
 
-echo "== 전 버전으로 되돌리기" >&2
-run_app "${APP_NAME}:previous"
-if wait_healthy; then
-  echo "전 버전으로 다시 켰어요. 사이트는 전 버전으로 동작해요. 새 버전은 위 로그를 보고 고쳐서 다시 배포해요." >&2
-else
-  echo "전 버전도 켜지지 않았어요(DB·Redis 같은 서버 쪽 문제일 수 있어요). 마지막 로그:" >&2
-  ${DOCKER} logs --tail 80 "${APP}" >&2 || true
-fi
-exit 1 # 되돌렸어도 새 버전은 실패했으니 Actions에 빨간 X로 알린다
+# 2번 대부터: 처음 093을 배포할 때 2번은 아직 Nginx에 없으니 안전하게 먼저 확인된다.
+# 실패하면 1번은 건드리지 않고 멈춘다(빨간 X)
+roll "${APP2}" "${APP_PORT2}" || exit 1
+# Nginx는 실패한 대를 10초(fail_timeout) 동안 빼 두므로, 2번이 다시 받기 시작한 뒤에 1번을 내린다
+sleep 15
+roll "${APP}" "${APP_PORT}" || exit 1
+
+echo "앱 두 대가 켜졌어요: 127.0.0.1:${APP_PORT}, 127.0.0.1:${APP_PORT2} → https://${APP_DOMAIN}"
+check_gemini
+check_mail
+${DOCKER} image prune -f > /dev/null 2>&1 || true

@@ -1,5 +1,7 @@
 package com.team.blog.tag.application.icon;
 
+import com.team.blog.post.application.JobLock;
+import java.time.Duration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -10,13 +12,15 @@ import org.springframework.stereotype.Component;
 public class TagIconAiJob {
 
     private final TagIconService icons;
+    private final JobLock jobLock;
 
-    public TagIconAiJob(TagIconService icons) {
+    public TagIconAiJob(TagIconService icons, JobLock jobLock) {
         this.icons = icons;
+        this.jobLock = jobLock;
     }
 
     @Scheduled(fixedDelayString = "${blog.tag-icons.ai-delay:30m}", initialDelayString = "2m")
     public void run() {
-        icons.refineWithAi();
+        jobLock.runExclusively("tag-icons:ai-lock", Duration.ofMinutes(20), icons::refineWithAi);
     }
 }
