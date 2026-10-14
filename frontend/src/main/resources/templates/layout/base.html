@@ -11,6 +11,10 @@
     <meta name="_csrf_parameter" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:replace="${title}">글그린</title>
+    <!-- 탭 아이콘: 발바닥 로고(svg), 옛 브라우저는 32px png, iOS 홈 화면은 180px. /images/ 아래라 지문·1년 보관 -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}">
+    <link rel="apple-touch-icon" th:href="@{/images/apple-touch-icon.png}">
     <th:block th:if="${pageMeta != null}">
         <meta name="description" th:content="${pageMeta.description()}">
         <link rel="canonical" th:href="${pageMeta.canonicalUrl()}">

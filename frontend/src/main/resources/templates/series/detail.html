@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${series.title()}">시리즈</title>
+    <title th:text="${series.title() + ' · 글그린'}">시리즈</title>
 </head>
 <body>
 <main class="notes-page list-page">
