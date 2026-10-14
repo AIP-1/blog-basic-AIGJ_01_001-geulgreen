@@ -396,6 +396,9 @@ blog:
   admin:
     insights:
       enabled: ${ADMIN_INSIGHTS_ENABLED:true}
+    # 098 강성찬 개인 확장: 관리자 시스템 화면(기능 스위치·외부 연동·앱 서버 상태와 배포 버전). 끄면 /admin/system이 404
+    system:
+      enabled: ${ADMIN_SYSTEM_ENABLED:true}
   # 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 비어 있으면 조용히 꺼진다
   telegram:
     enabled: ${TELEGRAM_ENABLED:true}

@@ -62,6 +62,16 @@ class AdminToolsIT extends IntegrationTestBase {
     }
 
     @Test
+    void systemPageShowsServersIntegrationsAndSwitchesToAdminsOnly() throws Exception {
+        long user = member("plainuser2");
+        long admin = member("boss10");
+        mockMvc.perform(get("/admin/system").with(TestAuth.member(user))).andExpect(status().isNotFound());
+        String page = page("/admin/system", TestAuth.admin(admin));
+        assertThat(page).contains("앱 서버").contains("지금 답한 서버").contains("외부 연동").contains("Gemini 태그 추천")
+                .contains("기능 스위치").contains("admin.system").contains("contact");
+    }
+
+    @Test
     void hideAndUnhideWithoutReportIsLogged() throws Exception {
         long user = member("writer1");
         long admin = member("boss2");

@@ -12,6 +12,8 @@ COPY CHANGELOG.md ./
 RUN ./gradlew --no-daemon -q :backend:bootJar -x test && cp backend/build/libs/backend-*-SNAPSHOT.jar /app.jar
 
 FROM eclipse-temurin:21-jre
+# 098: 관리자 시스템 화면의 배포 버전(배포 워크플로가 커밋 해시를 넘긴다)
+ARG APP_VERSION=dev
 RUN groupadd --system blog && useradd --system --gid blog --home /app blog
 WORKDIR /app
 COPY --from=build /app.jar /app/app.jar
@@ -20,6 +22,7 @@ RUN mkdir -p /app/data && chown -R blog:blog /app/data \
     && apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 USER blog
 ENV SPRING_PROFILES_ACTIVE=prod \
+    APP_VERSION=${APP_VERSION} \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -Duser.timezone=UTC"
 EXPOSE 8080
 # 살아 있는지(liveness) 30초마다 확인. 3번 연속 실패하면 unhealthy
