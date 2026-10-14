@@ -13,7 +13,7 @@
         <label for="guestbook-content" class="visually-hidden">방명록 남기기</label>
         <textarea id="guestbook-content" name="content" maxlength="300" rows="3" required placeholder="반가운 인사를 남겨 주세요 (300자)"></textarea>
         <div class="note-form-bar">
-            <label><input type="checkbox" name="secret" value="on"> 🔒 비밀글 (블로그 주인과 나만 보기)</label>
+            <label><input type="checkbox" name="secret" value="on"> <svg th:replace="~{fragments/icons :: lock}"></svg> 비밀글 (블로그 주인과 나만 보기)</label>
             <button type="submit" class="btn btn-primary btn-sm">남기기</button>
         </div>
     </form>
@@ -23,7 +23,7 @@
         <li th:each="e : ${entries}" class="note">
             <p class="note-meta"><a th:href="${paths.blog(e.handle())}" th:text="${e.handle()}">아이디</a>
                 · <span th:text="${entryDates.get(e.id())}">방금</span>
-                <span th:if="${e.secret()}"> · 🔒 비밀글</span></p>
+                <span th:if="${e.secret()}"> · <svg th:replace="~{fragments/icons :: lock}"></svg> 비밀글</span></p>
             <p th:if="${e.visible()}" class="note-content" th:text="${e.content()}">인사</p>
             <p th:unless="${e.visible()}" class="note-content help">비밀글이에요</p>
             <form th:if="${e.deletable()}" method="post" th:action="${paths.blog(owner.handle()) + '/guestbook/' + e.id() + '/delete'}" class="inline-form">

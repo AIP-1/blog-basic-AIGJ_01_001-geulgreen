@@ -37,6 +37,18 @@
     button.querySelector('.like-number').textContent = count;
   }
 
+  // 선 아이콘(fragments/icons.html과 같은 그림). 그림은 고정 문자열이라 innerHTML로 넣어도 안전
+  function lineIcon(paths) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
+    svg.setAttribute('class', 'icon icon-inline'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+    svg.innerHTML = paths;
+    return svg;
+  }
+  var LOCK = '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) { n.className = cls; }
@@ -78,14 +90,14 @@
     if (c.state === 'WITHDRAWN_AUTHOR') { box.appendChild(el('p', 'comment-gone', '탈퇴한 사용자 · 탈퇴한 사용자의 댓글이에요')); return box; }
     if (c.state === 'DELETED') { box.appendChild(el('p', 'comment-gone', '삭제된 댓글이에요')); return box; }
     if (c.state === 'HIDDEN' && !c.mine) { box.appendChild(el('p', 'comment-gone', '운영 정책에 따라 숨겨진 댓글이에요')); return box; }
-    if (c.state === 'SECRET') { box.appendChild(el('p', 'comment-gone', '🔒 비밀 댓글이에요')); return box; }
+    if (c.state === 'SECRET') { var gone = el('p', 'comment-gone', ' 비밀 댓글이에요'); gone.insertBefore(lineIcon(LOCK), gone.firstChild); box.appendChild(gone); return box; }
     var head = el('p', 'comment-head');
     var a = el('a', 'comment-author'); a.href = c.author.blogUrl || '/' + c.author.handle; // 076: 새 주소(서버가 정함)
     a.appendChild(avatar(c.author));
     a.appendChild(el('span', null, c.author.handle));
     head.appendChild(a);
     if (c.author.isPostAuthor) { head.appendChild(el('span', 'badge', '작성자')); }
-    if (c.secret) { head.appendChild(el('span', 'help secret-mark', '🔒 비밀')); }
+    if (c.secret) { var mark = el('span', 'help secret-mark', ' 비밀'); mark.insertBefore(lineIcon(LOCK), mark.firstChild); head.appendChild(mark); }
     var t = el('time', 'help', dateLabel(c.createdAt)); t.setAttribute('datetime', c.createdAt); head.appendChild(t);
     if (c.edited) { head.appendChild(el('span', 'help', ' · 수정됨')); }
     box.appendChild(head);
@@ -153,7 +165,7 @@
         var parentSecret = !!box.querySelector(':scope > .comment-head .secret-mark');
         var lab = el('label', 'secret-check'); secret = el('input'); secret.type = 'checkbox';
         secret.checked = parentSecret; secret.disabled = parentSecret;
-        lab.appendChild(secret); lab.appendChild(document.createTextNode(' 🔒 비밀 답글 (글쓴이·이 댓글 쓴 사람과 나만 보기)'));
+        lab.appendChild(secret); lab.appendChild(document.createTextNode(' ')); lab.appendChild(lineIcon(LOCK)); lab.appendChild(document.createTextNode(' 비밀 답글 (글쓴이·이 댓글 쓴 사람과 나만 보기)'));
         f.appendChild(lab);
       }
       f.appendChild(ok); f.appendChild(cancel);

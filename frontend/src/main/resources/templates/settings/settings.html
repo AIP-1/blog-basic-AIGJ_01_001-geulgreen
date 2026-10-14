@@ -170,7 +170,7 @@
             <button type="submit" name="private" th:value="${!isPrivateAccount}" class="switch" role="switch"
                     th:attr="aria-checked=${isPrivateAccount}" aria-describedby="private-help">
                 <span class="switch-track" aria-hidden="true"></span>
-                <span th:text="${isPrivateAccount ? '🔒 비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span>
+                <span><th:block th:if="${isPrivateAccount}"><svg th:replace="~{fragments/icons :: lock}"></svg> </th:block><span th:text="${isPrivateAccount ? '비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span></span>
             </button>
         </form>
         <p class="help" id="private-help">켜면 내가 팔로우 요청을 수락한 사람만 내 글을 봐요. 지금 팔로워는 그대로이고, 끄면 대기 중 요청은 모두 수락돼요.
