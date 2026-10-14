@@ -68,7 +68,7 @@
                 <dt>지금 답한 서버</dt><dd th:text="${serverHost}">app</dd>
                 <dt>이 서버가 켜진 시각</dt><dd th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(serverStartedAt)}">시각</dd>
             </dl>
-            <p class="help">새로 배포하면 켜진 시각이 바뀌어요. <a href="/admin/system">서버 두 대 상태 보기</a></p>
+            <p class="help">새로 배포하면 켜진 시각이 바뀌어요. <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}">서버 두 대 상태 보기</a></p>
         </section>
     </div>
     </th:block>

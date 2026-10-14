@@ -48,10 +48,12 @@ public class SystemStatusService {
     private final Clock clock;
     private final String host;
     private final String version;
+    private final boolean enabled;
     private final Instant startedAt = Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime());
 
     public SystemStatusService(ConfigurableEnvironment env, StringRedisTemplate redis, AdminGuard adminGuard, Clock clock,
-                               @Value("${APP_VERSION:dev}") String version) {
+                               @Value("${APP_VERSION:dev}") String version, @Value("${blog.admin.system.enabled:true}") boolean enabled) {
+        this.enabled = enabled;
         this.env = env;
         this.redis = redis;
         this.adminGuard = adminGuard;
@@ -66,6 +68,9 @@ public class SystemStatusService {
 
     @Scheduled(fixedDelayString = "30s", initialDelayString = "2s")
     public void heartbeat() {
+        if (!enabled) {
+            return;
+        }
         try {
             redis.opsForHash().put(INSTANCES_KEY, host, clock.millis() + "|" + startedAt.toEpochMilli() + "|" + version);
         } catch (DataAccessException e) {
@@ -106,20 +111,27 @@ public class SystemStatusService {
         adminGuard.requireAdmin(current);
         Instant now = clock.instant();
         List<Instance> list = new ArrayList<>();
+        Map<Object, Object> entries;
         try {
-            for (Map.Entry<Object, Object> e : redis.opsForHash().entries(INSTANCES_KEY).entrySet()) {
+            entries = redis.opsForHash().entries(INSTANCES_KEY);
+        } catch (DataAccessException e) {
+            log.warn("instance list failed: {}", e.getClass().getSimpleName());
+            entries = Map.of();
+        }
+        for (Map.Entry<Object, Object> e : entries.entrySet()) {
+            String name = String.valueOf(e.getKey());
+            try {
                 String[] v = String.valueOf(e.getValue()).split("\\|", 3);
                 Instant seen = Instant.ofEpochMilli(Long.parseLong(v[0]));
                 if (seen.isBefore(now.minus(FORGET))) {
                     redis.opsForHash().delete(INSTANCES_KEY, e.getKey());
                     continue;
                 }
-                String name = String.valueOf(e.getKey());
                 list.add(new Instance(name, Instant.ofEpochMilli(Long.parseLong(v[1])), v.length > 2 ? v[2] : "?", seen,
                         !seen.isBefore(now.minus(ALIVE)), name.equals(host)));
+            } catch (RuntimeException ex) { // 형식이 다른 값 하나는 건너뛴다
+                log.warn("instance entry skipped: {}", ex.getClass().getSimpleName());
             }
-        } catch (RuntimeException e) { // Redis 실패·예전 형식 값
-            log.warn("instance list failed: {}", e.getClass().getSimpleName());
         }
         if (list.stream().noneMatch(Instance::self)) { // Redis가 안 되거나 첫 신호 전이어도 지금 답한 서버는 보인다
             list.add(new Instance(host, startedAt, version, now, true, true));
