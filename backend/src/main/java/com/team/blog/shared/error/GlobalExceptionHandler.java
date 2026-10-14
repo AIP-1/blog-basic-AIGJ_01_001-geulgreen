@@ -23,9 +23,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
+    private final LayoutModelForErrors layoutModel;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
+    public GlobalExceptionHandler(MessageSource messageSource, LayoutModelForErrors layoutModel) {
         this.messageSource = messageSource;
+        this.layoutModel = layoutModel;
     }
 
     @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})
@@ -37,6 +39,7 @@ public class GlobalExceptionHandler {
         // 006: 없는 글과 볼 수 없는 글의 링크 미리보기·검색 비수집을 똑같이(06 §3-1)
         view.addObject("notFoundPage", true);
         view.setStatus(HttpStatus.NOT_FOUND);
+        layoutModel.fill(view, request); // 로그인한 사람에게는 로그인한 머리말
         return view;
     }
 
@@ -63,6 +66,7 @@ public class GlobalExceptionHandler {
                 ModelAndView view = new ModelAndView("auth/forbidden-unverified");
                 view.addObject("message", message(code));
                 view.setStatus(HttpStatus.FORBIDDEN);
+                layoutModel.fill(view, request);
                 yield view;
             }
             case ACCOUNT_WITHDRAWN -> seeOther("/account/restore");

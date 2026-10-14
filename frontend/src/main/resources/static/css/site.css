@@ -398,10 +398,15 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
 .cat-art { width: 100%; max-width: 420px; height: auto; border-radius: 16px; }
 @media (max-width: 720px) {
     .hero-inner { grid-template-columns: 1fr; padding: 32px 20px 8px; min-height: 0; }
-    /* 좁은 화면: 사진은 그대로 비율 유지, 검색창은 사진 아래로 */
-    .hero-photo { aspect-ratio: auto; background-size: 100% auto; background-position: top center; padding-top: 33.33%; padding-bottom: 16px; }
-    .hero-photo .hero-inner { position: static; }
-    .hero-photo .hero-search { position: static; width: auto; margin: 12px 20px 0; transform: translateY(0); }
+    /* 좁은 화면: 사진 속 문구는 너무 작아 읽을 수 없으니 사진은 고양이 쪽(오른쪽)만 위에 보이고,
+       문구는 실제 글자로 사진 아래에 보여 준다. 검색창은 그 아래 */
+    .hero-photo { aspect-ratio: auto; background-size: auto 200px; background-position: 100% 0; padding-top: 200px; padding-bottom: 16px;
+        background-color: var(--color-hero-from); }
+    .hero-photo .hero-inner { position: static; padding: 20px 20px 0; }
+    .hero-photo .hero-slogan, .hero-photo .hero-sub { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
+    .hero-photo .hero-slogan { font-size: 2em; margin-bottom: 8px; }
+    .hero-photo .hero-sub { margin-bottom: 0; }
+    .hero-photo .hero-search { position: static; width: auto; min-width: 0; margin: 14px 0 0; transform: translateY(0); }
     .hero-art { order: 2; }
     .cat-art { max-width: 280px; }
 }
@@ -765,6 +770,9 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
     padding: 14px; box-shadow: 0 8px 22px var(--color-shadow); }
 .search-menu-panel .search-form { display: flex; gap: 8px; margin: 0; }
 .search-menu-panel .search-form input { flex: 1; min-width: 0; }
+/* 머리말 🔍 버튼과 검색칸도 키보드 초점이 보이게 */
+.icon-btn:focus-visible, .notif-bell:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.search-menu-panel .search-form input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-color: var(--color-focus); }
 .search-menu-title { margin: 0; font-size: .85em; font-weight: 700; color: var(--color-text-muted); }
 .search-menu-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .search-menu-tags .tag-pill { padding: 6px 12px; gap: 6px; font-size: .88em; }
