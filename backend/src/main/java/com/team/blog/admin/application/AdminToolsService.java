@@ -144,11 +144,14 @@ public class AdminToolsService {
                 t.members().today(), t.posts().today(), t.comments().today(), t.views().today());
     }
 
-    /** 098: 최근 {@code days}일 가입·글·댓글·조회 추이와 인기 글(7일)·최근 활동. 인기 글·활동은 지금 공개된 글만. */
-    public Insights insights(Optional<CurrentUser> current, int days) {
+    /** 098: 최근 30일 추이와 인기 글(7일)·최근 활동(지금 공개된 글만). {@code full}이 아니면(스위치 끔) 예전처럼 7일 추이만 센다. */
+    public Insights insights(Optional<CurrentUser> current, boolean full) {
         adminGuard.requireAdmin(current);
         LocalDate today = LocalDate.ofInstant(clock.instant(), SEOUL);
-        Trends t = trends(today, days);
+        Trends t = trends(today, full ? 30 : 7);
+        if (!full) {
+            return new Insights(List.of(t.views(), t.members(), t.posts(), t.comments()), t.days(), List.of(), List.of());
+        }
         List<PopularPost> popular = jdbc.query("""
                 SELECT p.id, p.title, m.handle, sum(d.views) AS views FROM post_view_daily d
                 JOIN post p ON p.id = d.post_id JOIN member m ON m.id = p.author_id

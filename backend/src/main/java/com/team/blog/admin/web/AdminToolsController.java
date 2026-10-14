@@ -40,7 +40,7 @@ public class AdminToolsController {
         noStore(response, model);
         model.addAttribute("dash", tools.dashboard(currentUserProvider.current()));
         // 098 30일 추이·인기 글·최근 활동·서버 상태(강성찬 개인 확장). 끄면 예전(045)처럼 최근 7일 추이만
-        model.addAttribute("insights", tools.insights(currentUserProvider.current(), insightsEnabled ? 30 : 7));
+        model.addAttribute("insights", tools.insights(currentUserProvider.current(), insightsEnabled));
         model.addAttribute("insightsEnabled", insightsEnabled);
         if (insightsEnabled) {
             model.addAttribute("serverHost", SERVER_HOST);
