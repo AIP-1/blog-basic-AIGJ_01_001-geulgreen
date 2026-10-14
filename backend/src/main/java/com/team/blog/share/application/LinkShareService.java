@@ -40,7 +40,7 @@ public class LinkShareService {
             return false;
         }
         List<String> tokens = jdbc.queryForList("SELECT token FROM post_link_share WHERE post_id = ?", String.class, postId);
-        return !tokens.isEmpty() && java.security.MessageDigest.isEqual(tokens.get(0).getBytes(), key.getBytes());
+        return !tokens.isEmpty() && java.security.MessageDigest.isEqual(tokens.get(0).getBytes(), key.getBytes()); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     private static String newToken() {

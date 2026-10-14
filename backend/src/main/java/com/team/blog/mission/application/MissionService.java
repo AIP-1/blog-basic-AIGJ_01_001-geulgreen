@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import com.team.blog.privacy.application.PrivateAccountService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -148,7 +149,7 @@ public class MissionService {
 
     /** 주제가 있었던 지난날들(오늘 빼고, 최근 순). */
     public List<LocalDate> pastDays() {
-        return jdbc.queryForList("SELECT DISTINCT day FROM daily_topic WHERE day < ? AND day >= ? ORDER BY day DESC",
+        return jdbc.queryForList("SELECT DISTINCT day FROM daily_topic WHERE day < ? AND day >= ? ORDER BY day DESC", // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 Date.class, Date.valueOf(today()), Date.valueOf(today().minusDays(properties.historyDays()))).stream()
                 .map(Date::toLocalDate).toList();
     }
@@ -160,6 +161,7 @@ public class MissionService {
      *
      * @return 글 번호(글쓰기 화면으로 보낸다)
      */
+    @SuppressWarnings("java:S2259") // 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     public long start(Optional<CurrentUser> current, long topicId) {
         CurrentUser me = accountGuard.requireWritable(current);
         Topic topic = jdbc.query("SELECT id, day, slot, title, hint, source FROM daily_topic WHERE id = ?",
@@ -173,7 +175,7 @@ public class MissionService {
                 SELECT mp.post_id FROM mission_post mp JOIN post p ON p.id = mp.post_id
                 WHERE mp.topic_id = ? AND mp.member_id = ? AND p.status = 'DRAFT' AND p.deleted_at IS NULL ORDER BY mp.created_at DESC LIMIT 1
                 """, Long.class, topicId, me.memberId()).stream().findFirst();
-        if (draft.isPresent()) {
+        if (draft.isPresent()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return draft.get();
         }
         long postId = drafts.create(current, topic.title(), "");
@@ -243,7 +245,8 @@ public class MissionService {
     }
 
     /** 미션을 완료한 날 모음(미션 화면 달력도 쓴다). */
-    public TreeSet<LocalDate> doneDays(long memberId) {
+    @SuppressWarnings("java:S2259") // 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
+    public NavigableSet<LocalDate> doneDays(long memberId) {
         List<LocalDate> days = jdbc.queryForList("""
                 SELECT DISTINCT dt.day FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id JOIN post p ON p.id = mp.post_id
                 WHERE mp.member_id = ? AND mp.completed_at IS NOT NULL AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL

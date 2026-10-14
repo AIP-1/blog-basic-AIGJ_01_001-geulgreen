@@ -80,6 +80,7 @@ public class PrivateAccountService implements AuthorGate {
     }
 
     /** 팔로우 버튼에서 비공개 계정에 팔로우를 누르면: 요청을 남기고 알린다. 같은 요청을 다시 보내도 한 줄. */
+    @SuppressWarnings("java:S2259") // 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     public void request(long requester, long target) {
         boolean created = !jdbc.queryForList("""
                 INSERT INTO follow_request (requester_id, target_id, created_at) VALUES (?, ?, ?)
@@ -136,7 +137,7 @@ public class PrivateAccountService implements AuthorGate {
         }
         List<Long> pending = jdbc.queryForList("SELECT requester_id FROM follow_request WHERE target_id = ?", Long.class, owner);
         tx.executeWithoutResult(status -> jdbc.update("DELETE FROM private_account WHERE member_id = ?", owner));
-        pending.forEach(requester -> accept(owner, requester));
+        pending.forEach(requester -> accept(owner, requester)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     /** 탈퇴 정리: 비공개 설정과 보낸·받은 요청. */

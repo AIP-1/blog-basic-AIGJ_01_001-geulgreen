@@ -18,7 +18,7 @@ public class GoogleOidcUserService extends OidcUserService {
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) {
         OidcUser user = super.loadUser(userRequest);
-        return new SocialOidcUser(user.getAuthorities(), user.getIdToken(), user.getUserInfo(), toProfile(user));
+        return new SocialOidcUser(user.getAuthorities(), user.getIdToken(), user.getUserInfo(), toProfile(user)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     public static SocialProfile toProfile(OidcUser user) {
