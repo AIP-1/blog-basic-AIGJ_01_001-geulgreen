@@ -32,7 +32,6 @@ public class AdminToolsService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
-    static final int TREND_DAYS = 30;
 
     public record Day(LocalDate date, long members, long posts, long comments, long views) {
     }
@@ -145,15 +144,15 @@ public class AdminToolsService {
                 t.members().today(), t.posts().today(), t.comments().today(), t.views().today());
     }
 
-    /** 098: 최근 30일 가입·글·댓글·조회 추이와 인기 글(7일)·최근 활동. */
-    public Insights insights(Optional<CurrentUser> current) {
+    /** 098: 최근 {@code days}일 가입·글·댓글·조회 추이와 인기 글(7일)·최근 활동. 인기 글·활동은 지금 공개된 글만. */
+    public Insights insights(Optional<CurrentUser> current, int days) {
         adminGuard.requireAdmin(current);
         LocalDate today = LocalDate.ofInstant(clock.instant(), SEOUL);
-        Trends t = trends(today, TREND_DAYS);
+        Trends t = trends(today, days);
         List<PopularPost> popular = jdbc.query("""
                 SELECT p.id, p.title, m.handle, sum(d.views) AS views FROM post_view_daily d
                 JOIN post p ON p.id = d.post_id JOIN member m ON m.id = p.author_id
-                WHERE d.view_date > ? AND p.deleted_at IS NULL AND p.hidden_at IS NULL
+                WHERE d.view_date > ? AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL
                 GROUP BY p.id, p.title, m.handle ORDER BY views DESC, p.id DESC LIMIT 5
                 """, (rs, i) -> new PopularPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("views")),
                 java.sql.Date.valueOf(today.minusDays(7)));
@@ -164,11 +163,11 @@ public class AdminToolsService {
                   UNION ALL
                   (SELECT p.first_public_at, '글', m.handle, p.title, m.handle, p.id, NULL
                    FROM post p JOIN member m ON m.id = p.author_id
-                   WHERE p.first_public_at IS NOT NULL AND p.deleted_at IS NULL ORDER BY p.first_public_at DESC LIMIT 8)
+                   WHERE p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL ORDER BY p.first_public_at DESC LIMIT 8)
                   UNION ALL
                   (SELECT c.created_at, '댓글', m.handle, p.title, pm.handle, p.id, c.id
                    FROM comment c JOIN member m ON m.id = c.author_id JOIN post p ON p.id = c.post_id JOIN member pm ON pm.id = p.author_id
-                   WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL ORDER BY c.created_at DESC LIMIT 8)
+                   WHERE c.deleted_at IS NULL AND c.hidden_at IS NULL AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL ORDER BY c.created_at DESC LIMIT 8)
                 ) x ORDER BY at DESC LIMIT 8
                 """, (rs, i) -> new Activity(rs.getTimestamp("at").toInstant(), rs.getString("kind"), rs.getString("who"),
                 rs.getString("what"), rs.getString("ph"), (Long) rs.getObject("pid"), (Long) rs.getObject("cid")));

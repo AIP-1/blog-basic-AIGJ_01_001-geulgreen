@@ -39,8 +39,10 @@ public class AdminToolsController {
     public String dashboard(Model model, HttpServletResponse response) {
         noStore(response, model);
         model.addAttribute("dash", tools.dashboard(currentUserProvider.current()));
-        if (insightsEnabled) { // 098 30일 추이·인기 글·최근 활동(강성찬 개인 확장, 끄면 숫자 카드만)
-            model.addAttribute("insights", tools.insights(currentUserProvider.current()));
+        // 098 30일 추이·인기 글·최근 활동·서버 상태(강성찬 개인 확장). 끄면 예전(045)처럼 최근 7일 추이만
+        model.addAttribute("insights", tools.insights(currentUserProvider.current(), insightsEnabled ? 30 : 7));
+        model.addAttribute("insightsEnabled", insightsEnabled);
+        if (insightsEnabled) {
             model.addAttribute("serverHost", SERVER_HOST);
             model.addAttribute("serverStartedAt", Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime()));
         }
