@@ -73,6 +73,10 @@ public class CommentLikeService {
             throw new RateLimitedException(limit.retryAfterSeconds());
         }
         return transactionTemplate.execute(status -> {
+            // 댓글을 잠가 두고 넣는다: 그사이 지워졌으면 FK 오류(500) 대신 404
+            if (jdbc.queryForList("SELECT id FROM comment WHERE id = ? AND deleted_at IS NULL FOR SHARE", Long.class, commentId).isEmpty()) {
+                throw new NotFoundException();
+            }
             int changed = like
                     ? jdbc.update("INSERT INTO comment_like (comment_id, member_id, created_at) VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
                             commentId, user.memberId(), Timestamp.from(clock.instant()))
