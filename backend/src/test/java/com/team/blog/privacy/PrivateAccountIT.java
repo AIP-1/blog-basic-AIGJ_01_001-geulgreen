@@ -148,6 +148,16 @@ class PrivateAccountIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/settings/privacy")).andReturn().getResponse().getHeader("Location")).contains("/login");
         makePrivate(owner);
         mockMvc.perform(put("/api/members/pvpurge/follow").with(csrf()).with(TestAuth.member(fan)));
+        // 087: 스위치는 설정 > 계정에, 누르면 그 자리로 돌아온다
+        assertThat(mockMvc.perform(get("/settings").with(TestAuth.member(owner))).andReturn().getResponse().getContentAsString())
+                .contains("role=\"switch\"").contains("aria-checked=\"true\"").contains("비공개 계정 켜짐");
+        assertThat(mockMvc.perform(post("/settings/privacy").param("private", "false").param("back", "/settings#settings-account")
+                .with(csrf()).with(TestAuth.member(owner))).andReturn().getResponse().getHeader("Location"))
+                .isEqualTo("/settings#settings-account");
+        assertThat(mockMvc.perform(post("/settings/privacy").param("private", "true").param("back", "//evil.example")
+                .with(csrf()).with(TestAuth.member(owner))).andReturn().getResponse().getHeader("Location")).isEqualTo("/settings/privacy");
+        assertThat(mockMvc.perform(get("/settings").with(TestAuth.member(fan))).andReturn().getResponse().getContentAsString())
+                .contains("aria-checked=\"false\"");
         purgeStep.purge(owner);
         assertThat(count("SELECT count(*) FROM private_account")).isZero();
         assertThat(count("SELECT count(*) FROM follow_request")).isZero();

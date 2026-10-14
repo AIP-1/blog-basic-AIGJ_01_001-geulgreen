@@ -537,9 +537,15 @@ html, body { overflow-x: clip; }
 .share-link input { width: 100%; font-size: .9em; }
 .share-link p { margin: 6px 0; }
 /* 030 친구 그룹(강성찬 개인 확장) */
+/* 073·087 비공개 계정 스위치(설정 > 계정) */
+.switch { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; font: inherit; color: inherit; cursor: pointer; }
+.switch-track { position: relative; width: 40px; height: 22px; border-radius: 11px; background: var(--color-border); transition: background .15s; }
+.switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--color-surface); transition: left .15s; }
+.switch[aria-checked="true"] .switch-track { background: var(--color-brand); }
+.switch[aria-checked="true"] .switch-track::after { left: 21px; }
 .group-create, .group-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
 .group-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; margin: 16px 0; }
-.group-card h2 { margin: 0 0 8px; font-size: 1.1em; }
+.group-card h3 { margin: 0 0 8px; font-size: 1.1em; }
 .group-choice { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
 /* 031 잔디·스트릭(강성찬 개인 확장): 주 53개 × 7일, 좁은 화면에서는 가로로 밀어 본다 */
 .grass { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; }
