@@ -21,6 +21,12 @@ public record CommentView(long id, Long parentId, String state, String content, 
 
     public record Author(String handle, String nickname, String profileImageUrl, boolean isPostAuthor) {
 
+        /** 076 후속(강성찬 개인 확장): 블로그 주소(스크립트가 그리는 링크용, 예약어와 같은 옛 아이디는 /@). */
+        @com.fasterxml.jackson.annotation.JsonProperty("blogUrl")
+        public String blogUrl() {
+            return com.team.blog.shared.web.BlogPaths.of(handle);
+        }
+
         public ProfileAvatar avatar() {
             return new ProfileAvatar(handle, nickname, profileImageUrl);
         }

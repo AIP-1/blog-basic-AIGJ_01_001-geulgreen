@@ -91,7 +91,7 @@
                             <li th:each="t : ${headerTags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, null)}"></a></li>
                         </ul>
                     </th:block>
-                    <a href="/tags" class="search-menu-all">태그 전체 보기</a>
+                    <a href="/tags" class="link-btn search-menu-all">태그 전체 보기</a>
                 </div>
             </details>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">

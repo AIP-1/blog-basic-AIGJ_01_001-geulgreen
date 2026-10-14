@@ -9,7 +9,7 @@
     <th:block th:if="${verified}">
         <h1>인증이 완료됐어요</h1>
         <p>이제 글을 쓰고 댓글을 남길 수 있어요.</p>
-        <p><a href="/">처음으로</a></p>
+        <p><a class="link-btn" href="/">처음으로</a></p>
     </th:block>
     <th:block th:unless="${verified}">
         <h1>링크가 만료됐어요</h1>

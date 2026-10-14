@@ -131,7 +131,7 @@
             </div>
             <a class="btn btn-primary btn-sm" href="/missions">다른 친구들 글 보러 가기</a>
         </section>
-        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 080 아래 "관심 있을 만한 글"로 합쳤다) -->
+        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글") -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
                 <span class="help">이전 글</span><span th:text="${prevPost.title()}">이전 글 제목</span></a>
@@ -153,14 +153,19 @@
             </form>
             <!-- 053 강성찬 개인 확장: 공유하기(공개 글만). 좋아요 옆 메뉴 하나로 접었다 -->
             <details th:if="${shareEnabled and pageMeta != null}" class="sort-menu share-menu share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
-                <summary>📤 공유하기</summary>
+                <summary><th:block th:replace="~{fragments/icons :: share}"></th:block> 공유하기</summary>
                 <div class="sort-menu-panel">
-                    <button type="button" class="share-copy">🔗 링크 복사</button>
+                    <button type="button" class="share-copy"><th:block th:replace="~{fragments/icons :: link}"></th:block> 링크 복사</button>
                     <a target="_blank" rel="noopener noreferrer"
-                       th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}">X</a>
+                       th:href="${'https://twitter.com/intent/tweet?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&text=' + #uris.escapeQueryParam(post.title())}"><th:block th:replace="~{fragments/icons :: x-logo}"></th:block> X</a>
                     <a target="_blank" rel="noopener noreferrer"
-                       th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}">페이스북</a>
-                    <button type="button" class="share-native" hidden>📤 다른 앱으로</button>
+                       th:href="${'https://www.facebook.com/sharer/sharer.php?u=' + #uris.escapeQueryParam(pageMeta.canonicalUrl())}"><th:block th:replace="~{fragments/icons :: facebook}"></th:block> 페이스북</a>
+                    <!-- 카카오톡: 서버에 KAKAO_JS_KEY가 있을 때만. 글 화면의 OG 제목·설명·사진으로 공유(sendScrap) -->
+                    <button type="button" th:if="${kakaoJsKey != null}" class="share-kakao" th:attr="data-kakao-key=${kakaoJsKey}"><th:block th:replace="~{fragments/icons :: kakao}"></th:block> 카카오톡</button>
+                    <a target="_blank" rel="noopener noreferrer" class="share-naver"
+                       th:href="${'https://share.naver.com/web/shareView?url=' + #uris.escapeQueryParam(pageMeta.canonicalUrl()) + '&title=' + #uris.escapeQueryParam(post.title())}"><th:block th:replace="~{fragments/icons :: naver}"></th:block> 네이버</a>
+                    <!-- 브라우저가 공유 기능을 지원할 때만(주로 휴대폰) 스크립트가 보인다 -->
+                    <button type="button" class="share-native" hidden><th:block th:replace="~{fragments/icons :: apps}"></th:block> 다른 앱으로</button>
                 </div>
             </details>
             <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status"></span>
@@ -175,7 +180,7 @@
                 <p><th:block th:replace="~{fragments/author :: byline(${author})}"></th:block></p>
                 <p class="profile-bio" th:if="${post.author().bio() != null}" th:text="${post.author().bio()}">소개</p>
                 <p>
-                    <a th:href="${paths.blog(post.author().handle())}">블로그 가기</a>
+                    <a class="link-btn" th:href="${paths.blog(post.author().handle())}">블로그 가기</a>
                     <th:block th:unless="${viewerIsAuthor}"><th:block
                               th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
                 </p>
@@ -221,17 +226,18 @@
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     이메일 인증을 마치면 댓글을 쓸 수 있어요. <button type="submit" class="btn-text btn-sm">인증 메일 다시 보내기</button>
                 </form>
-                <p th:if="${commentWriteState == 'GUEST'}"><a th:href="${loginRedirect}">로그인하고 댓글 쓰기</a></p>
+                <p th:if="${commentWriteState == 'GUEST'}"><a class="link-btn" th:href="${loginRedirect}">로그인하고 댓글 쓰기</a></p>
                 <p th:if="${commentWriteState == 'HIDDEN_POST'}" class="help">숨겨진 글에는 댓글을 쓸 수 없어요.</p>
             </th:block>
         </section>
     </article>
-    <!-- 080 강성찬 개인 확장: 댓글 다음 "관심 있을 만한 글". 글 화면은 쿼리를 늘리지 않고, list-more.js가 끝에 닿으면 첫 묶음부터(커서 0) 무한 스크롤로 불러온다 -->
-    <section class="more-posts" aria-labelledby="more-heading">
-        <h2 id="more-heading">관심 있을 만한 글</h2>
-        <div class="card-grid" id="card-grid"></div>
-        <div class="list-more" th:attr="data-list-api=${'/api/posts/' + post.id() + '/more'}" data-show-author="true">
-            <a class="more-button" href="/" data-cursor="0">더 많은 글 보기</a>
+    <!-- 095 강성찬 개인 확장: 댓글 다음 "관련 글" 4개(080 무한 스크롤을 대신함). 글 화면 쿼리를 늘리지 않게 list-more.js가
+         목록 끝에 다가가면 /api/posts/{id}/related를 한 번 불러온다(다음 묶음 없음). 넓은 화면 2×2, 휴대폰 한 줄씩 -->
+    <section class="more-posts related-posts" aria-labelledby="related-heading">
+        <h2 id="related-heading">관련 글</h2>
+        <div class="card-grid home-cards related-cards" id="card-grid"></div>
+        <div class="list-more" th:attr="data-list-api=${'/api/posts/' + post.id() + '/related'}" data-show-author="true">
+            <a class="more-button" href="/" data-cursor="0">다른 글 보기</a>
             <p class="list-error" role="alert" hidden>불러오지 못했어요 <button type="button" class="list-retry">다시 시도</button></p>
         </div>
     </section>
@@ -324,11 +330,13 @@
     <script th:src="@{/js/gif-play.js}" defer></script>
     <script th:src="@{/js/post/post-detail.js}" defer></script>
     <script th:if="${tocEnabled}" th:src="@{/js/post/toc.js}" defer></script>
+    <script th:if="${shareEnabled and kakaoJsKey != null}" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
+            integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous" defer></script>
     <script th:if="${readProgressEnabled or shareEnabled}" th:src="@{/js/post/reading-extras.js}" defer></script>
     <script th:src="@{/js/post/comments.js}" defer></script>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
     <script th:src="@{/js/follow/follow.js}" defer></script>
-    <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:if="${recordView}" th:src="@{/js/post/post-view.js}" defer></script>
 </main>
 </body>

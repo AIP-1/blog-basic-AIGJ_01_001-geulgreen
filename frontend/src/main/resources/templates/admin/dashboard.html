@@ -13,7 +13,7 @@
         <li><span class="help">발행한 글</span><strong th:text="${dash.totalPosts()}">0</strong><span class="help" th:text="${'오늘 +' + dash.todayPosts()}">오늘</span></li>
         <li><span class="help">댓글</span><strong th:text="${dash.totalComments()}">0</strong><span class="help" th:text="${'오늘 +' + dash.todayComments()}">오늘</span></li>
         <li th:classappend="${dash.pendingReports() > 0} ? 'admin-alert'"><span class="help">처리할 신고</span>
-            <strong th:text="${dash.pendingReports()}">0</strong><a class="help" href="/admin/reports">신고 보기</a></li>
+            <strong th:text="${dash.pendingReports()}">0</strong><a class="link-btn" href="/admin/reports">신고 보기</a></li>
     </ul>
     <section aria-labelledby="week-heading" class="admin-week">
         <h2 id="week-heading">최근 7일</h2>

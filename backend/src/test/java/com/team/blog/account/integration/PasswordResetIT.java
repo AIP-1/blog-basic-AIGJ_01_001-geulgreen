@@ -161,7 +161,7 @@ class PasswordResetIT extends IntegrationTestBase {
         // 같은 링크 재사용 → 만료
         assertThat(submit(token, "Another#2026").getResponse().getContentAsString()).contains("링크가 만료됐어요");
         assertThat(mockMvc.perform(get("/password/reset").param("token", token)).andReturn().getResponse().getContentAsString())
-                .contains("링크가 만료됐어요").contains("[비밀번호 찾기]");
+                .contains("링크가 만료됐어요").contains("class=\"link-btn\" href=\"/password/forgot\">비밀번호 찾기<");
     }
 
     @Test

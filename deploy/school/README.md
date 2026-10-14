@@ -28,6 +28,7 @@
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | `.env` 값 |
 | `GH_CLIENT_ID`, `GH_CLIENT_SECRET` | `.env`의 GITHUB_CLIENT_ID·SECRET 값 (GitHub는 GITHUB_로 시작하는 Secret 이름을 막아서 GH_로 넣는다) |
 | `GEMINI_API_KEY` | (선택) AI 태그 추천 |
+| `KAKAO_JS_KEY` | (선택) 카카오톡 공유. 카카오 개발자 앱의 JavaScript 키(앱 설정 > 플랫폼 > Web에 사이트 주소 등록). 비우면 공유 메뉴에 카카오톡이 안 보인다 |
 | `ADMIN_EMAILS` | (선택) 이 이메일로 가입·인증한 계정을 관리자로(쉼표로 여러 개). 지정된 뒤 다시 로그인해야 [관리]가 보인다 |
 
 사진 주소 서명용 비밀값(`STORAGE_LOCAL_SECRET`)은 서버가 처음 배포할 때 스스로 만들어 `~/team-blog/storage-secret`에 보관한다.
@@ -37,7 +38,7 @@
 `~/nginx/<도메인>.conf`를 이 폴더의 `geulgreen.java21.net.conf`로 바꾼다(다른 도메인이면 `server_name`·인증서 경로·로그 경로·upstream 포트를 바꿈). 바꾼 뒤 `nginx -t`로 확인하고 reload한다.
 - upstream에 앱 두 대(8300, 8301)를 묶고, 한 대가 꺼져 있으면 다른 대로 한 번만 다시 보낸다(`proxy_next_upstream_tries 2`, 연결은 3초에 포기).
 - `map`·`upstream` 이름에 `geulgreen_`을 붙인 것은 공용 Nginx에서 다른 팀 설정과 이름이 겹치면 `nginx -t`가 실패하기 때문이다.
-- HTTP/2는 주석으로 둔다. 배포 로그의 `nginx -v`가 1.25.1 이상이면 `http2 on;`의 #을 지운다.
+- HTTP/2를 켠다. 서버 Nginx가 1.18.0(10-14 배포 로그)이라 `listen 443 ssl http2;` 형식으로 쓴다.
 - HSTS·`X-Content-Type-Options`는 앱(Spring Security)이 이미 보내므로 Nginx에서 또 붙이지 않는다.
 
 앱은 `X-Forwarded-Proto`·`X-Forwarded-For`를 믿으므로(https 판단·접속 IP), 설정에 아래 줄이 없으면 `location /` 안에 넣는다.

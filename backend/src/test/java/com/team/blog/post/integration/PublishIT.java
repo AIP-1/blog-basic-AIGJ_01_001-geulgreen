@@ -121,7 +121,8 @@ class PublishIT extends IntegrationTestBase {
         mockMvc.perform(publish(postId, UUID.randomUUID().toString(), body).with(TestAuth.member(me))).andExpect(status().isOk());
         String html = mockMvc.perform(get("/xsspub/posts/{id}", postId)).andReturn().getResponse().getContentAsString();
         String article = html.substring(html.indexOf("<article"), html.indexOf("</article>"));
-        assertThat(article).doesNotContain("<script").doesNotContain("<svg").doesNotContain("<img")
+        // 공유 메뉴 아이콘(fragments/icons의 svg class="icon")은 빼고 본문에서 온 svg는 없어야 한다
+        assertThat(article).doesNotContain("<script").doesNotContainPattern("<svg(?! th:fragment| class=\"icon)").doesNotContain("<img")
                 .doesNotContain("href=\"javascript").contains("&lt;script&gt;alert(1)&lt;/script&gt;");
     }
 

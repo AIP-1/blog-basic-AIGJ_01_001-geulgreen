@@ -18,14 +18,14 @@ public class PostListApiController {
     private final com.team.blog.post.application.TagListingQuery tagListingQuery;
     private final com.team.blog.shared.security.CurrentUserProvider currentUserProvider;
     private final com.team.blog.friend.application.FriendQuery friendQuery;
-    private final com.team.blog.discovery.application.PostNavigationQuery navigation;
+    private final com.team.blog.discovery.application.RelatedPostsQuery related;
 
     public PostListApiController(PostListQuery listQuery, BlogOwnerResolver blogOwnerResolver,
                                  com.team.blog.post.application.TagListingQuery tagListingQuery,
                                  com.team.blog.shared.security.CurrentUserProvider currentUserProvider,
                                  com.team.blog.friend.application.FriendQuery friendQuery,
-                                 com.team.blog.discovery.application.PostNavigationQuery navigation) {
-        this.navigation = navigation;
+                                 com.team.blog.discovery.application.RelatedPostsQuery related) {
+        this.related = related;
         this.currentUserProvider = currentUserProvider;
         this.friendQuery = friendQuery;
         this.listQuery = listQuery;
@@ -55,10 +55,10 @@ public class PostListApiController {
                 .orElse(new CardPage(java.util.List.of(), null));
     }
 
-    /** 080 강성찬 개인 확장: 글 아래 "관심 있을 만한 글" 다음 묶음(커서 = 건너뛸 개수). */
-    @GetMapping("/api/posts/{id}/more")
-    public CardPage more(@PathVariable("id") long id, @RequestParam(value = "cursor", required = false) String cursor) {
-        return navigation.more(id, currentUserProvider.current().map(v -> v.memberId()).orElse(-1L), cursor);
+    /** 095 강성찬 개인 확장: 글 아래 "관련 글" 4개(다음 묶음 없음). */
+    @GetMapping("/api/posts/{id}/related")
+    public CardPage related(@PathVariable("id") long id) {
+        return new CardPage(related.related(id), null);
     }
 
     /** 013 FR-025: 블로그 태그 줄. */
