@@ -5,7 +5,7 @@
  * 글자는 모두 textContent로 넣는다.
  * 067 강성찬 개인 확장: 목록 끝이 화면에 가까워지면 저절로 다음 묶음을 불러온다(무한 스크롤).
  * 067 후속: 무한 스크롤이 되면 [더 보기] 버튼은 화면에서 숨기고(.infinite, 스크립트 없을 때만 보임) 실패할 때만 [다시 시도].
- * 089 강성찬 개인 확장: 사람이 스크롤해서 목록 끝이 화면 반 장(innerHeight의 절반) 거리 안에 들어올 때만 한 묶음씩 부른다.
+ * 091 강성찬 개인 확장: 사람이 스크롤해서 목록 끝이 화면 반 장(innerHeight의 절반) 거리 안에 들어올 때만 한 묶음씩 부른다.
  * 열자마자 연달아 부르지 않고, 첫 묶음이 화면보다 짧아 목록 끝이 이미 보일 때만 화면을 채울 만큼 부른다.
  */
 (function () {
@@ -155,7 +155,7 @@
     var first = box.querySelector('.more-button');
     if (first) { first.addEventListener('click', load); }
 
-    // 089: 목록 끝(.list-more)이 화면 아래로 반 장 거리 안에 들어오면 부른다(스크롤할 때만, 한 번에 하나)
+    // 091: 목록 끝(.list-more)이 화면 아래로 반 장 거리 안에 들어오면 부른다(스크롤할 때만, 한 번에 하나)
     function near(screens) { return box.getBoundingClientRect().top < window.innerHeight * screens; }
     function canLoad() { return next && !loading && errorBox.hidden; }
     // 첫 묶음이 화면보다 짧아 목록 끝이 이미 보이면 화면을 채울 만큼만
