@@ -77,6 +77,17 @@ public class LikeService {
         });
     }
 
+    /** 088 후속(강성찬 개인 확장): 카드 목록 한 화면의 글 중 내가 좋아요 한 글 번호(조회 1번, 최대 {@code MAX_IDS}개). */
+    public java.util.List<Long> likedAmong(long memberId, java.util.Collection<Long> postIds) {
+        if (postIds.isEmpty()) {
+            return java.util.List.of();
+        }
+        Long[] ids = postIds.stream().distinct().limit(MAX_IDS).toArray(Long[]::new);
+        return jdbc.queryForList("SELECT post_id FROM post_like WHERE member_id = ? AND post_id = ANY (?)", Long.class, memberId, ids);
+    }
+
+    static final int MAX_IDS = 200;
+
     /** 글 상세 처음 화면: 내가 눌렀는지(PK 조회 1번). */
     public boolean likedBy(long postId, long memberId) {
         Integer n = jdbc.queryForObject("SELECT count(*) FROM post_like WHERE post_id = ? AND member_id = ?",
