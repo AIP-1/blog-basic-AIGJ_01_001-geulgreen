@@ -5,6 +5,7 @@ import com.team.blog.shared.security.CurrentUserProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,6 +35,15 @@ public class LikeController {
     @ResponseBody
     public LikeService.LikeResult unlike(@PathVariable long postId) {
         return likeService.set(currentUserProvider.current(), postId, false);
+    }
+
+    /** 088 후속(강성찬 개인 확장): 카드 하트를 칠할 글 번호. 비회원은 빈 목록. */
+    @GetMapping("/api/likes/mine")
+    @ResponseBody
+    public java.util.List<Long> mine(@RequestParam(value = "ids", required = false) java.util.List<Long> ids) {
+        return currentUserProvider.current()
+                .map(u -> likeService.likedAmong(u.memberId(), ids == null ? java.util.List.of() : ids))
+                .orElse(java.util.List.of());
     }
 
     @PostMapping("/@{handle}/posts/{postId}/like")
