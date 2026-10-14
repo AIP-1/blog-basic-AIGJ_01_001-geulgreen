@@ -55,4 +55,19 @@ test('맞춤법 바꾸기는 처음 나온 곳만, 없으면 null', () => {
   assert.equal(w.applyFix('바뀐 글', '안되요', '안 돼요'), null);
 });
 
+test('추천마다 적용: 문단 나누기·말 빼기·소제목·사진 설명은 바로 바꾸고, 긴 문장·제목은 AI로', () => {
+  const by = (md, kind, title) => w.hints(md, title).find((h) => h.kind === kind);
+  const para = '가'.repeat(200) + '다. ' + '나'.repeat(150) + '다.';
+  assert.equal(w.applyHint(para, by(para, 'paragraph').fix), '가'.repeat(200) + '다.\n\n' + '나'.repeat(150) + '다.');
+  const st = '밥을 먹었다. 그리고 잤다. 그리고, 일어났다.\n\n그리고 또 잤다.';
+  assert.equal(w.applyHint(st, by(st, 'starter').fix), '밥을 먹었다. 그리고 잤다. 일어났다.\n\n또 잤다.');
+  assert.equal(w.applyHint('글\n\n![](/a.png)', by('글\n\n![](/a.png)', 'image').fix, '자는 [고양이]'), '글\n\n![자는 고양이](/a.png)');
+  const long = ('문단이에요. '.repeat(15) + '\n\n').repeat(4);
+  const h = by(long, 'heading');
+  assert.equal(h.fix.ask, '넣을 소제목을 적어 주세요');
+  assert.match(w.applyHint(long, h.fix, '중간'), /\n\n## 중간\n\n문단이에요/);
+  assert.equal(by('짧아요', 'title', '가'.repeat(41)).fix.ai.target, 'title');
+  assert.equal(by('가'.repeat(130) + '.', 'sentence').fix.ai.text, '가'.repeat(130) + '.');
+});
+
 console.log(`${passed} passed`);
