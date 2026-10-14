@@ -16,7 +16,7 @@
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <p><span class="badge">🧑‍🤝‍🧑 그룹 공개</span> 고른 그룹에 든 친구와 나만 볼 수 있어요.
                     <span th:if="${postGroupIds.isEmpty()}">아직 고른 그룹이 없어 나만 볼 수 있어요.</span></p>
-                <p th:if="${myGroups.isEmpty()}" class="help">그룹이 없어요. <a href="/settings/groups">친구 그룹 만들기</a></p>
+                <p th:if="${myGroups.isEmpty()}" class="help">그룹이 없어요. <a href="/settings/friends#groups">친구 그룹 만들기</a></p>
                 <p th:unless="${myGroups.isEmpty()}">
                     <label th:each="g : ${myGroups}" class="group-choice"><input type="checkbox" name="groupId" th:value="${g.id()}"
                            th:checked="${postGroupIds.contains(g.id())}"> <span th:text="${g.name() + ' (' + g.members().size() + '명)'}">그룹</span></label>
