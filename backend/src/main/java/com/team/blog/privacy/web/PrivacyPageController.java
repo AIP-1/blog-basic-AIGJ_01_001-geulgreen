@@ -41,9 +41,10 @@ public class PrivacyPageController {
     }
 
     @PostMapping("/settings/privacy")
-    public RedirectView set(@RequestParam("private") boolean on) {
+    public RedirectView set(@RequestParam("private") boolean on, @RequestParam(value = "back", required = false) String back) {
         privacy.setPrivate(me(), on);
-        return seeOther("/settings/privacy");
+        // 087: 스위치는 설정 > 계정에 있다. 같은 사이트 경로만 돌아간다
+        return seeOther(back != null && back.startsWith("/") && !back.startsWith("//") && !back.contains("\\") ? back : "/settings/privacy");
     }
 
     /** {@code action}: accept / decline. */

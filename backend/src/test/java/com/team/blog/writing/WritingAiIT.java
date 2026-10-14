@@ -36,7 +36,10 @@ class WritingAiIT extends IntegrationTestBase {
         }
         SERVER.createContext("/v1beta/", ex -> {
             lastRequest = new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            byte[] body = "{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"```\\n**다듬은** 글이에요\\n```\"}]}}]}"
+            String answer = lastRequest.contains("틀린 곳만 찾아")
+                    ? "1. 안되요 => 안 돼요\\n- \\\"할께요\\\" → 할게요\\n지어낸말 => 다른말\\n설명 줄\\n안되요 => 안 돼요"
+                    : "```\\n**다듬은** 글이에요\\n```";
+            byte[] body = ("{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"" + answer + "\"}]}}]}")
                     .getBytes(StandardCharsets.UTF_8);
             ex.getResponseHeaders().add("Content-Type", "application/json");
             ex.sendResponseHeaders(200, body.length);
@@ -94,5 +97,28 @@ class WritingAiIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT content_md FROM post WHERE id = ?", String.class, postId)).isEqualTo("본문");
         // 하루 2번(테스트 설정)을 넘으면 429
         ask(me, postId, improve).andExpect(status().isTooManyRequests());
+    }
+
+    /** 085 맞춤법 검사: 같은 동의·공개 규칙, 본문에 있는 틀린 곳만 돌려주고(지어낸 곳·겹침은 버림) 긴 글은 앞부분만 보낸다. */
+    @Test
+    void spellingReturnsOnlyFixesFoundInTheText() throws Exception {
+        long me = members.localMember("spellme", "spellme", "spellme@example.com", "Blog#2026ok", true);
+        long postId = posts.draft(me, "제목", "본문", 1);
+        String json = "{\"text\":\"그건 안되요. 내일 할께요.\",\"visibility\":\"PUBLIC\"}";
+        spell(me, postId, json).andExpect(jsonPath("$.code").value("WRITING_AI_CONSENT_REQUIRED"));
+        jdbc.update("INSERT INTO member_agreement (member_id, type) VALUES (?, 'AI')", me);
+        spell(me, postId, json.replace("PUBLIC", "PRIVATE")).andExpect(jsonPath("$.code").value("WRITING_AI_PUBLIC_ONLY"));
+        spell(me, postId, "{\"text\":\" \",\"visibility\":\"PUBLIC\"}").andExpect(jsonPath("$.code").value("WRITING_CHECK_EMPTY"));
+        spell(me, postId, json).andExpect(status().isOk())
+                .andExpect(jsonPath("$.fixes.length()").value(2))
+                .andExpect(jsonPath("$.fixes[0].before").value("안되요")).andExpect(jsonPath("$.fixes[0].after").value("안 돼요"))
+                .andExpect(jsonPath("$.fixes[1].before").value("할께요")).andExpect(jsonPath("$.fixes[1].after").value("할게요"))
+                .andExpect(jsonPath("$.truncated").value(false));
+        assertThat(jdbc.queryForObject("SELECT content_md FROM post WHERE id = ?", String.class, postId)).isEqualTo("본문");
+    }
+
+    private ResultActions spell(long who, long postId, String json) throws Exception {
+        return mockMvc.perform(post("/api/posts/{id}/writing-ai/spelling", postId).with(csrf()).with(TestAuth.member(who))
+                .contentType(MediaType.APPLICATION_JSON).content(json));
     }
 }

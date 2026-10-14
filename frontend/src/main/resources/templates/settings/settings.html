@@ -160,6 +160,21 @@
             <p class="form-status" id="visibility-status" aria-live="polite"></p>
         </form>
     </section>
+    <!-- 073·087 강성찬 개인 확장: 비공개 계정 스위치(받은 요청 목록은 /settings/privacy) -->
+    <section th:if="${privateAccountsEnabled}" aria-labelledby="private-heading">
+        <h2 id="private-heading">비공개 계정</h2>
+        <form method="post" action="/settings/privacy" class="privacy-form">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="back" value="/settings#settings-account">
+            <button type="submit" name="private" th:value="${!isPrivateAccount}" class="switch" role="switch"
+                    th:attr="aria-checked=${isPrivateAccount}" aria-describedby="private-help">
+                <span class="switch-track" aria-hidden="true"></span>
+                <span th:text="${isPrivateAccount ? '🔒 비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span>
+            </button>
+        </form>
+        <p class="help" id="private-help">켜면 내가 팔로우 요청을 수락한 사람만 내 글을 봐요. 지금 팔로워는 그대로이고, 끄면 대기 중 요청은 모두 수락돼요.
+            <a href="/settings/privacy">받은 팔로우 요청</a></p>
+    </section>
     <!-- 회원 탈퇴 진입점(FR-029, 처리는 023) -->
     <section aria-labelledby="withdraw-heading">
         <h2 id="withdraw-heading">회원 탈퇴</h2>
@@ -186,8 +201,8 @@
     <div class="settings-panel" id="settings-friends">
     <section aria-labelledby="friends-heading">
         <h2 id="friends-heading">친구</h2>
-        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구 관리</a> · <a href="/settings/groups">친구 그룹</a>
-            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">🔒 비공개 계정·팔로우 요청</a></th:block></p>
+        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구·그룹 관리</a>
+            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">받은 팔로우 요청</a></th:block></p>
     </section>
     </div>
     <div class="settings-panel" id="settings-display">
