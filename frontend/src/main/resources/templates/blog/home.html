@@ -60,7 +60,7 @@
     <section th:if="${recentNotes != null and (!recentNotes.isEmpty() or isOwner)}" class="notes-box" aria-labelledby="notes-heading">
         <h2 id="notes-heading" class="grass-title">짧은 기록 <a class="link-btn" th:href="${paths.blog(owner.handle()) + '/notes'}">모두 보기</a></h2>
         <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${paths.blog(owner.handle())})}"></form></th:block>
-        <ul class="note-list">
+        <ul class="note-list" th:unless="${recentNotes.isEmpty()}">
             <th:block th:each="n : ${recentNotes}"><li th:replace="~{fragments/note :: item(${n}, ${noteDates.get(n.id())}, ${paths.blog(owner.handle())})}"></li></th:block>
         </ul>
     </section>

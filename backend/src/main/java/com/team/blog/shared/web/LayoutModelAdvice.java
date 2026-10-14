@@ -12,17 +12,25 @@ public class LayoutModelAdvice {
     private final CurrentUserProvider currentUserProvider;
 
     private final String siteHost;
+    private final String siteOrigin;
 
     public LayoutModelAdvice(CurrentUserProvider currentUserProvider,
                              @org.springframework.beans.factory.annotation.Value("${blog.auth.mail.link-base-url:}") String siteUrl) {
         this.currentUserProvider = currentUserProvider;
         this.siteHost = hostOf(siteUrl);
+        this.siteOrigin = siteUrl == null ? "" : siteUrl.strip().replaceAll("/+$", "");
     }
 
     /** 가입 화면의 "주소/@" 앞부분 등에 쓰는 사이트 호스트(APP_BASE_URL 기준, 예: {@code blog.example.com}). */
     @ModelAttribute("siteHost")
     public String siteHost() {
         return siteHost;
+    }
+
+    /** 글 화면이 아닌 화면의 기본 SEO 메타(canonical·og:url·og:image)에 쓰는 사이트 주소(끝 / 없음, 비어 있을 수 있음). */
+    @ModelAttribute("siteOrigin")
+    public String siteOrigin() {
+        return siteOrigin;
     }
 
     static String hostOf(String url) {

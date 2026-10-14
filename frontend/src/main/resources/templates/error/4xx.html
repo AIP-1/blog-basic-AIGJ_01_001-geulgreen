@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>요청을 처리할 수 없어요 · 글그린</title>
+</head>
+<body>
+<!-- 404·403 말고 다른 4xx(예: 주소창으로 연 POST 전용 주소의 405)도 하얀 기본 오류 화면 대신 이 화면 -->
+<main class="error-page">
+    <div class="error-art"><th:block th:replace="~{fragments/icons :: cat}"></th:block></div>
+    <h1>요청을 처리할 수 없어요</h1>
+    <p>주소를 직접 열 수 없는 기능이거나 잘못된 요청이에요.</p>
+    <p><a href="/" class="btn btn-primary">처음으로</a></p>
+</main>
+</body>
+</html>

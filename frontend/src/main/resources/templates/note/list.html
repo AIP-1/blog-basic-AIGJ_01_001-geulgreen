@@ -10,7 +10,7 @@
     <p><a class="link-btn back" th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${paths.blog(owner.handle()) + '/notes'})}"></form></th:block>
     <p th:if="${notes.isEmpty()}" class="empty-state">아직 짧은 기록이 없어요</p>
-    <ul class="note-list">
+    <ul class="note-list" th:unless="${notes.isEmpty()}">
         <th:block th:each="n : ${notes}"><li th:replace="~{fragments/note :: item(${n}, ${noteDates.get(n.id())}, ${paths.blog(owner.handle()) + '/notes'})}"></li></th:block>
     </ul>
     <p th:if="${nextBefore != null}"><a class="more-button" th:href="@{${paths.blog(owner.handle()) + '/notes'}(before=${nextBefore})}">더 보기</a></p>

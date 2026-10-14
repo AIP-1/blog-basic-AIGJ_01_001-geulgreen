@@ -27,6 +27,19 @@
         <meta property="article:modified_time" th:if="${pageMeta.modifiedTime() != null}" th:content="${pageMeta.modifiedTime()}">
     </th:block>
     <meta name="robots" content="noindex" th:if="${pageNoindex != null and pageNoindex}">
+    <!-- 글 화면(pageMeta)·볼 수 없는 글(notFoundPage)·검색 제외 화면(pageNoindex, 예: 비공개 글)이 아닌 화면의 기본 SEO 메타 -->
+    <th:block th:if="${pageMeta == null and (notFoundPage == null or !notFoundPage) and (pageNoindex == null or !pageNoindex)}">
+        <meta name="description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="글그린">
+        <meta property="og:title" content="글그린">
+        <meta property="og:description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
+        <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
+            <link rel="canonical" th:href="${siteOrigin + currentPath}">
+            <meta property="og:url" th:content="${siteOrigin + currentPath}">
+            <meta property="og:image" th:content="${siteOrigin + '/images/og-default.png'}">
+        </th:block>
+    </th:block>
     <th:block th:if="${notFoundPage != null and notFoundPage}">
         <meta property="og:title" content="볼 수 없는 글이에요">
         <meta property="og:description" content="친구 공개·비공개 글이거나 삭제된 글입니다.">
