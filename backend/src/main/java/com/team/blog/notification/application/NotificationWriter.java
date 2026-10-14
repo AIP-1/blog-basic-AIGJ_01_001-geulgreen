@@ -116,6 +116,10 @@ public class NotificationWriter {
         return "LIKE:post:" + postId;
     }
 
+    public static String commentLikeGroup(long commentId) {
+        return "LIKE:comment:" + commentId;
+    }
+
     public static final String FOLLOW_GROUP = "FOLLOW";
 
     /** 팔로우 요청 묶음(073). */
@@ -127,6 +131,12 @@ public class NotificationWriter {
      * @return 사람이 새로 더해졌으면 true
      */
     public boolean addToGroup(long receiverId, NotificationType type, String groupKey, Long postId, long actorId) {
+        return addToGroup(receiverId, type, groupKey, postId, null, actorId);
+    }
+
+    /** {@code commentId}: 089 댓글 좋아요 묶음이면 그 댓글. */
+    public boolean addToGroup(long receiverId, NotificationType type, String groupKey, Long postId, Long commentId,
+                              long actorId) {
         if (!eligible(receiverId, actorId, type, postId)) {
             return false;
         }
@@ -141,12 +151,12 @@ public class NotificationWriter {
                 return false;
             }
             Long id = jdbc.queryForObject("""
-                    INSERT INTO notification (receiver_id, type, post_id, group_key, actor_count, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, 0, ?, ?)
+                    INSERT INTO notification (receiver_id, type, post_id, comment_id, group_key, actor_count, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, 0, ?, ?)
                     ON CONFLICT (receiver_id, group_key) WHERE read_at IS NULL AND group_key IS NOT NULL
                     DO UPDATE SET updated_at = notification.updated_at
                     RETURNING id
-                    """, Long.class, receiverId, type.name(), postId, groupKey, Timestamp.from(now), Timestamp.from(now));
+                    """, Long.class, receiverId, type.name(), postId, commentId, groupKey, Timestamp.from(now), Timestamp.from(now));
             int added = jdbc.update("""
                     INSERT INTO notification_actor (notification_id, actor_id, created_at) VALUES (?, ?, ?)
                     ON CONFLICT DO NOTHING
