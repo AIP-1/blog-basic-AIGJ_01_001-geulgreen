@@ -54,6 +54,10 @@ spring:
 
 server:
   forward-headers-strategy: native
+  # 093: CSS·JS·JSON·HTML을 gzip으로(기본 형식 목록에 이미 들어 있음), 1KB 미만은 그대로
+  compression:
+    enabled: true
+    min-response-size: 1KB
 
 blog:
   # 001-auth 정책 수치(헌법 II). AuthProperties 참고
