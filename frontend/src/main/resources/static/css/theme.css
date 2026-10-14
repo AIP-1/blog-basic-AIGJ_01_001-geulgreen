@@ -48,6 +48,9 @@
     --tone-sand-fg: #8A6A45;
     --tone-blue-bg: #E7F0FA;
     --tone-blue-fg: #3F78B5;
+    /* 098 관리 추이 그래프 선 색(톤 색을 따라 다크에서도 바뀐다) */
+    --color-chart-members: var(--tone-blue-fg);
+    --color-chart-comments: var(--tone-purple-fg);
     --tone-indigo-bg: #ECEBFA;
     --tone-indigo-fg: #5B5BB0;
     --tone-orange-bg: #FCEDE2;
