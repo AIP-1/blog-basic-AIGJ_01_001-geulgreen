@@ -140,14 +140,18 @@ check_mail() {
 
 # 한 대 교체. 실패하면 그 대만 전 버전으로 되돌리고 1을 돌려준다(다른 대는 손대지 않았으니 사이트는 계속 돈다)
 roll() { # $1 = 컨테이너 이름, $2 = 포트
+  # 되돌릴 이미지는 이 대가 지금 쓰는 것(지난 배포가 중간에 멈춰 두 대의 이미지가 다를 수 있음). 처음 띄우는 대면 1번 것
+  local prev
+  prev="$(${DOCKER} inspect -f '{{.Image}}' "$1" 2>/dev/null || true)"
+  prev="${prev:-${PREV_ID}}"
   echo "== ${1}(${2}) 교체, 상태 확인(최대 3분)"
   run_app "$1" "$2" "${APP_NAME}:latest"
   if wait_healthy "$2"; then echo "${1} 켜졌어요"; return 0; fi
   echo "새 버전이 3분 안에 켜지지 않았어요(${1}). 마지막 로그:" >&2
   ${DOCKER} logs --tail 80 "$1" >&2 || true
-  if [ -z "${PREV_ID}" ]; then return 1; fi # 처음 배포라 되돌릴 버전이 없음
+  if [ -z "${prev}" ]; then return 1; fi # 처음 배포라 되돌릴 버전이 없음
   echo "== ${1}을 전 버전으로 되돌리기" >&2
-  run_app "$1" "$2" "${APP_NAME}:previous"
+  run_app "$1" "$2" "${prev}"
   if wait_healthy "$2"; then
     echo "${1}을 전 버전으로 다시 켰어요. 새 버전은 위 로그를 보고 고쳐서 다시 배포해요." >&2
   else
