@@ -50,7 +50,7 @@ class ManagePostsIT extends IntegrationTestBase {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(drafts).contains("임시글 2").contains("발행 글 2").contains("휴지통 1")
                 .contains("(제목 없음)").contains("&lt;i&gt;임시&lt;/i&gt;").contains("마지막 저장").contains("이어 쓰기")
-                .doesNotContain("공개 발행").doesNotContain("남의 임시글").doesNotContain("🌐");
+                .doesNotContain("공개 발행").doesNotContain("남의 임시글").doesNotContain("data-visibility-badge");
         assertThat(drafts.indexOf("&lt;i&gt;임시")).isLessThan(drafts.indexOf("(제목 없음)"));
 
         String published = mockMvc.perform(get("/manage/posts").param("tab", "published").with(TestAuth.member(me)))

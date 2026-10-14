@@ -89,7 +89,7 @@ public class SecurityConfig {
         http
                 // 008: 대체 저장소 업로드는 서명 주소로만 허가한다(저장소 사전 서명 PUT과 같은 모양, CSRF 토큰 없음)
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository)
-                        .ignoringRequestMatchers("/api/images/local-upload"))
+                        .ignoringRequestMatchers("/api/images/local-upload", "/api/telegram/webhook")) // 096: 텔레그램 웹훅은 확인값 헤더로 막는다
                 .securityContext(context -> context.securityContextRepository(securityContextRepository))
                 .sessionManagement(session -> session.sessionFixation(fixation -> fixation.changeSessionId()))
                 .headers(headers -> headers

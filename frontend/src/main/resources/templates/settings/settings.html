@@ -19,6 +19,7 @@
         <a href="#settings-display">화면</a>
         <a href="#settings-notifications">알림</a>
         <a href="#settings-ai">AI</a>
+        <a th:if="${aiConnectEnabled}" href="#settings-connections">연결</a>
     </nav>
     <div class="settings-panels">
     <div class="settings-panel" id="settings-profile">
@@ -170,7 +171,7 @@
             <button type="submit" name="private" th:value="${!isPrivateAccount}" class="switch" role="switch"
                     th:attr="aria-checked=${isPrivateAccount}" aria-describedby="private-help">
                 <span class="switch-track" aria-hidden="true"></span>
-                <span th:text="${isPrivateAccount ? '🔒 비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span>
+                <span><th:block th:if="${isPrivateAccount}"><svg th:replace="~{fragments/icons :: lock}"></svg> </th:block><span th:text="${isPrivateAccount ? '비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span></span>
             </button>
         </form>
         <p class="help" id="private-help">켜면 내가 팔로우 요청을 수락한 사람만 내 글을 봐요. 지금 팔로워는 그대로이고, 끄면 대기 중 요청은 모두 수락돼요.
@@ -237,6 +238,16 @@
             <p class="form-status" id="notification-status" aria-live="polite"></p>
         </form>
     </section>
+    <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
+    <section th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
+        <h2 id="telegram-heading">텔레그램 알림</h2>
+        <p class="help" th:text="${telegramLinked ? '연결됐어요. 새 문의·새 가입·새 신고가 텔레그램으로 와요.' : '연결하면 새 문의·새 가입·새 신고를 텔레그램으로 받아요. 누르면 봇이 열리고, [시작]을 누르면 연결돼요.'}">안내</p>
+        <p th:if="${param.telegram != null}" class="field-error" role="alert">봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
+        <form method="post" th:action="${telegramLinked ? '/settings/telegram/unlink' : '/settings/telegram/link'}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" th:text="${telegramLinked ? '연결 끊기' : '텔레그램 연결'}">텔레그램 연결</button>
+        </form>
+    </section>
 
     </div>
     <div class="settings-panel" id="settings-ai">
@@ -245,6 +256,14 @@
         <h2 id="ai-heading">AI 태그 추천</h2>
         <p class="help" id="ai-consent-state" aria-live="polite">불러오는 중…</p>
         <button type="button" id="ai-consent-withdraw" hidden>동의 철회</button>
+    </section>
+    </div>
+    <!-- 097 강성찬 개인 확장: 연결(AI 연결 등은 연결 화면에서) -->
+    <div class="settings-panel" id="settings-connections" th:if="${aiConnectEnabled}">
+    <section aria-labelledby="connections-heading">
+        <h2 id="connections-heading">연결</h2>
+        <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요. 발행은 내가 직접 해요.</p>
+        <a href="/settings/connections" class="link-btn">AI에 연결하기</a>
     </section>
 
 

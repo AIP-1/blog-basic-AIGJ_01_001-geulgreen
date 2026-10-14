@@ -31,7 +31,7 @@ public class ContentSecurityPolicy {
         this.value = "default-src 'self'; script-src 'self'" + (kakao ? " " + KAKAO_SDK_ORIGIN : "") + "; "
                 + "img-src 'self' data: blob:" + join(storageOrigins) + join(socialHosts) + "; "
                 + "connect-src 'self'" + join(connectOrigins) + join(socialHosts) + (kakao ? " https://sharer.kakao.com https://kapi.kakao.com" : "") + "; "
-                + "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
+                + "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://t.me"; // 096: [텔레그램 연결] 폼이 봇 링크로 303
     }
 
     public String value() {

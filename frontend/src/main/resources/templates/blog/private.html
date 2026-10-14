@@ -24,7 +24,7 @@
         </div>
     </header>
     <section class="private-account" aria-labelledby="private-heading">
-        <h2 id="private-heading">🔒 비공개 계정이에요</h2>
+        <h2 id="private-heading"><svg th:replace="~{fragments/icons :: lock}"></svg> 비공개 계정이에요</h2>
         <p class="help" th:text="${followRequested ? '팔로우 요청을 보냈어요. 수락되면 글을 볼 수 있어요' : '팔로우 요청이 수락되면 글을 볼 수 있어요'}">팔로우 요청이 수락되면 글을 볼 수 있어요</p>
     </section>
     <script th:src="@{/js/follow/follow.js}" defer></script>

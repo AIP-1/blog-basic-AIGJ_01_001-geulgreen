@@ -2,6 +2,8 @@ package com.team.blog.notification.web;
 
 import com.team.blog.account.web.SettingsController;
 import com.team.blog.notification.application.NotificationService;
+import com.team.blog.notification.application.TelegramService;
+import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,8 +16,11 @@ public class NotificationSettingsAdvice {
 
     private final NotificationService service;
     private final CurrentUserProvider currentUserProvider;
+    private final TelegramService telegram;
 
-    public NotificationSettingsAdvice(NotificationService service, CurrentUserProvider currentUserProvider) {
+    public NotificationSettingsAdvice(NotificationService service, CurrentUserProvider currentUserProvider,
+                                      TelegramService telegram) {
+        this.telegram = telegram;
         this.service = service;
         this.currentUserProvider = currentUserProvider;
     }
@@ -40,5 +45,12 @@ public class NotificationSettingsAdvice {
     @ModelAttribute("notificationSettings")
     public Map<String, Boolean> notificationSettings() {
         return currentUserProvider.current().isPresent() ? service.settings(currentUserProvider.current()) : Map.of();
+    }
+
+    /** 096 강성찬 개인 확장: 텔레그램 칸. 지금은 관리자에게만 보내므로 관리자 화면에만 보인다. null이면 칸을 숨긴다. */
+    @ModelAttribute("telegramLinked")
+    public Boolean telegramLinked() {
+        return currentUserProvider.current().filter(u -> telegram.active() && "ADMIN".equals(u.role()))
+                .map(CurrentUser::memberId).map(telegram::linked).orElse(null);
     }
 }

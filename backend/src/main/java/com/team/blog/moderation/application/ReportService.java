@@ -7,12 +7,14 @@ import com.team.blog.shared.error.FieldError;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.error.ProfileValidationException;
 import com.team.blog.shared.error.RateLimitedException;
+import com.team.blog.shared.event.ReportReceived;
 import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUser;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -39,9 +41,12 @@ public class ReportService {
     private final RedisRateLimiter rateLimiter;
     private final ModerationProperties properties;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     public ReportService(JdbcTemplate jdbc, TransactionTemplate tx, AccountGuard accountGuard, PostReadAccess postReadAccess,
-                         RedisRateLimiter rateLimiter, ModerationProperties properties, Clock clock) {
+                         RedisRateLimiter rateLimiter, ModerationProperties properties, Clock clock,
+                         ApplicationEventPublisher events) {
+        this.events = events;
         this.jdbc = jdbc;
         this.tx = tx;
         this.accountGuard = accountGuard;
@@ -95,6 +100,9 @@ public class ReportService {
                     ON CONFLICT (case_id, reporter_id) DO NOTHING
                     """, caseId, user.memberId(), reason.name(), d, now) == 1;
         });
+        if (Boolean.TRUE.equals(created)) {
+            events.publishEvent(new ReportReceived(target.type(), reason.label())); // 096 강성찬 개인 확장
+        }
         return new ReportResult(Boolean.TRUE.equals(created));
     }
 
