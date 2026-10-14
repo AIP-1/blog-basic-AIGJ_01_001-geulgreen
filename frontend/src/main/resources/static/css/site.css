@@ -187,6 +187,7 @@ main.list-page { max-width: var(--page-wide); }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
 /* 088: 하트는 기본 회색 빈 하트(카드 목록은 내가 좋아요했는지 모른다) */
 .card-likes, .card-comments { font-weight: 600; } /* 088 후속: 좋아요·댓글 숫자 굵기 같게 */
+.card-likes.is-liked { color: var(--color-like); } /* 088 후속: 내가 좋아요 한 글은 빨간 ♥(js/post/liked-hearts.js) */
 .card-date { margin-left: auto; }
 .list-more { text-align: center; margin: 24px 0; }
 /* 067 후속(강성찬 개인 확장): 무한 스크롤이면 [더 보기]는 숨기고(화면 낭독용으로만 남김) 불러오는 동안만 작게 알림 */
