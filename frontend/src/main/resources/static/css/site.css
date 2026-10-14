@@ -738,7 +738,14 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
     transition: width .08s linear; }
 .sort-menu.share-menu summary::before, .sort-menu.share-menu summary::after { content: none; }
 .share-menu .sort-menu-panel { left: 0; right: auto; }
+.share-menu .sort-menu-panel { min-width: 180px; gap: 2px; }
 .share-menu .sort-menu-panel button { all: unset; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+/* 공유 메뉴 항목: 아이콘 18px + 글자, 버튼과 링크가 같은 줄 모양 */
+.share-menu summary, .share-menu .sort-menu-panel a, .share-menu .sort-menu-panel button { display: flex; align-items: center; gap: 10px; }
+.share-menu summary { display: inline-flex; gap: 6px; }
+.share-menu .sort-menu-panel button[hidden] { display: none; }
+.share-menu .sort-menu-panel .icon { flex: none; color: var(--color-text-muted); }
+.share-status:not(:empty) { padding: 4px 12px; border-radius: 999px; background: var(--color-brand-soft); color: var(--color-text); font-size: .85em; }
 .share-menu .sort-menu-panel button:hover, .share-menu .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
 .pin-form { margin: 8px 0; }
 .pinned-post { margin: 0 0 18px; }

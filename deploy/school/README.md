@@ -28,6 +28,7 @@
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | `.env` 값 |
 | `GH_CLIENT_ID`, `GH_CLIENT_SECRET` | `.env`의 GITHUB_CLIENT_ID·SECRET 값 (GitHub는 GITHUB_로 시작하는 Secret 이름을 막아서 GH_로 넣는다) |
 | `GEMINI_API_KEY` | (선택) AI 태그 추천 |
+| `KAKAO_JS_KEY` | (선택) 카카오톡 공유. 카카오 개발자 앱의 JavaScript 키(앱 설정 > 플랫폼 > Web에 사이트 주소 등록). 비우면 공유 메뉴에 카카오톡이 안 보인다 |
 | `ADMIN_EMAILS` | (선택) 이 이메일로 가입·인증한 계정을 관리자로(쉼표로 여러 개). 지정된 뒤 다시 로그인해야 [관리]가 보인다 |
 
 사진 주소 서명용 비밀값(`STORAGE_LOCAL_SECRET`)은 서버가 처음 배포할 때 스스로 만들어 `~/team-blog/storage-secret`에 보관한다.
