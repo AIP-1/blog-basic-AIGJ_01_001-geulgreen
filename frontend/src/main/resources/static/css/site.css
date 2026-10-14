@@ -153,6 +153,8 @@ main.list-page { max-width: 1120px; }
 .card-author { position: relative; z-index: 1; display: inline-flex; gap: 8px; align-items: center; min-width: 0;
     color: var(--color-text); text-decoration: none; font-size: .92em; font-weight: 600; }
 .card-author span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 085 강성찬 개인 확장: 칸이 모자라면 태그가 먼저 줄어든다(아이디가 주 이름이라 마지막에 자름) */
+.card-author { flex: 0 1 auto; }
 .card-title { font-size: 1.08em; font-weight: 700; margin: 0; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden; }
 .card-link { color: inherit; text-decoration: none; }
@@ -165,6 +167,12 @@ main.list-page { max-width: 1120px; }
 @media (min-width: 640px) { .card-grid .card-title { min-height: calc(2em * 1.45); } }
 @media (min-width: 700px) { .home-cards .card-title { min-height: calc(2em * 1.45); } }
 .card-thumb { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: var(--color-thumb-empty); }
+/* 085 강성찬 개인 확장: 세로 카드 사진은 맨 위 같은 비율(벨로그처럼). 두 칸 이상이고 같은 목록에 사진 카드가 있으면
+   사진 없는 카드도 같은 자리에 빈 사진 칸(색 역할)을 둬 빈 공간 없이 줄을 맞춘다(요약은 최대 160자라 글로는 못 채움).
+   가로 카드(.home-cards)는 사진이 왼쪽이라 그대로 */
+.card-grid:not(.home-cards) .card-thumb { order: -1; }
+@media (min-width: 640px) { .card-grid:not(.home-cards):has(.card-thumb) .post-card:not(:has(.card-thumb))::before {
+    content: ""; order: -1; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--color-thumb-empty); } }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
 .card-likes { color: var(--color-like); font-weight: 600; }
@@ -512,7 +520,7 @@ body > main { width: 100%; }
 .site-footer { margin-top: auto; }
 body > main + .site-footer, body > div + .site-footer { margin-top: auto; }
 /* 카드 머리 태그(시안 10-08) */
-.card-tag { position: relative; z-index: 1; margin-left: auto; flex: none; border-radius: 999px; padding: 2px 10px; font-size: .78em;
+.card-tag { position: relative; z-index: 1; margin-left: auto; flex: 0 1000 auto; min-width: 0; border-radius: 999px; padding: 2px 10px; font-size: .78em;
     font-weight: 600; text-decoration: none; max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-tag:hover { text-decoration: underline; }
 .chip0 { background: var(--color-chip0-bg); color: var(--color-chip0-text); }
@@ -612,7 +620,7 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .newcomer-post { color: var(--color-text-muted); font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 068 피드 추천 블로그(강성찬 개인 확장): 새로 온 작가 카드 모양을 따른다 */
 .feed-recommended { margin: 0 0 24px; }
-.feed-recommended h2, .feed-following-heading { font-size: 1.05em; margin: 0 0 10px; display: flex; gap: 8px; align-items: baseline; }
+.feed-recommended h2 { font-size: 1.05em; margin: 0 0 10px; display: flex; gap: 8px; align-items: baseline; }
 .recommended-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .recommended-blog { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 12px 14px;
     display: flex; flex-direction: column; gap: 6px; align-items: flex-start; min-width: 0; }
@@ -769,18 +777,6 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 /* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
 @media (min-width: 1000px) { .home-side { position: sticky; top: 76px; align-self: start; max-height: calc(100vh - 92px); overflow-y: auto;
     scrollbar-width: thin; } } /* 휠이 칸 끝에서 페이지로 넘어가게 overscroll-behavior는 두지 않음 */
-.side-post-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.side-post-list li { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.side-post-list a { color: var(--color-text); text-decoration: none; font-weight: 600; font-size: .92em; line-height: 1.4;
-    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.side-post-list a:hover { text-decoration: underline; }
-.side-post-list .help { font-size: .8em; }
-.side-rec-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.side-rec-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
-.side-rec-list .newcomer-who { min-width: 0; font-weight: 600; font-size: .92em; }
-.side-rec-list .newcomer-who span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.side-rec-list .follow-form { margin: 0; flex: none; }
-.side-rec-list .follow-button { padding: 4px 12px; font-size: .82em; }
 /* 067 후속: 링크 넷은 한 줄(작은 회색 글씨, 사이에 ·), 슬로건만 다음 줄 */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
 .settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
@@ -865,10 +861,6 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .sort-menu-panel a { padding: 8px 12px; border-radius: 8px; color: var(--color-text); text-decoration: none; font-size: .92em; }
 .sort-menu-panel a:hover, .sort-menu-panel a[aria-current] { background: var(--color-surface-muted); }
 /* 홈 오른쪽 인기 태그는 작게 */
-.side-pills { gap: 8px; }
-.side-pills .tag-pill { padding: 6px 12px; gap: 6px; font-size: .88em; }
-.side-pills .tag-ic { width: 16px; height: 16px; }
-.side-pills .tag-pill-arrow { display: none; }
 /* 057 오늘의 미션(강성찬 개인 확장). 시안(10-13): 흰 판(panel) 여러 장, 소개+기록 3칸 → 주제 3칸 → 달력·배지 → 글 */
 .mission-page { display: flex; flex-direction: column; gap: 20px; }
 .mission-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 22px; padding: 24px 26px;
@@ -965,6 +957,10 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .mission-feed h2 { font-size: 1.15em; margin: 0 0 12px; }
 .mission-feed .empty-state { padding: 28px 16px; }
 .mission-posts { list-style: none; margin: 0; padding: 0; }
+/* 086: 미션 글도 공용 카드(li 안에 article), 칸 높이를 채운다 */
+.mission-card { display: flex; min-width: 0; }
+.mission-card > .post-card { flex: 1; }
+.mission-extra { padding-right: 0; }
 .mission-post .card-author .badge { font-weight: 500; }
 .mission-post .card-tag { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mission-post-reply { position: relative; z-index: 1; margin-left: auto; color: var(--color-brand); font-weight: 600; text-decoration: none; }
@@ -1071,16 +1067,17 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 .signup-code [data-code-entry][hidden] { display: none; }
 .signup-code [data-code-entry] label { flex-basis: 100%; }
 .signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }
-/* 081 강성찬 개인 확장: 피드에 섞인 추천 글 표시와 "팔로우한 글을 모두 봤어요" 줄 */
-.card-rec { position: relative; z-index: 1; flex: none; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--color-brand);
-    color: var(--color-brand); font-size: .74em; font-weight: 700; cursor: help; }
-.feed-divider { grid-column: 1 / -1; margin: 8px 0; text-align: center; padding: 10px 0; border-top: 1px solid var(--color-border); }
 /* 079 강성찬 개인 확장: 탐색 화면(홈 오른쪽 칸 상자를 그대로, 넓으면 추천 글·블로그 두 칸) */
 .explore-page { display: flex; flex-direction: column; gap: 18px; }
 .explore-page h1 { margin: 0; }
+.explore-page h2 { margin: 0; font-size: 1.05em; }
+.explore-page .feed-recommended { margin: 0; }
 .explore-page .newcomers { margin: 0; }
-.explore-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
-@media (min-width: 760px) { .explore-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.explore-tags-link { margin-left: auto; font-size: .9em; }
+.side-explore .help { margin: 0 0 12px; }
+.side-explore-links { margin: 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: .9em; }
+/* 086: 피드는 목록 끝에 탐색으로 가는 한 줄 */
+.feed-end { margin: 8px 0 24px; text-align: center; color: var(--color-text-muted); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 
 /* 강성찬 개인 확장: 닉네임 최대 30자 — 닉네임이 보이는 곳은 한 줄로 자르고 … 표시(사람 목록·프로필·카드·댓글·오른쪽 칸) */
 .author-nickname, .author-name, .person-nickname, .person-handle, .mission-post-author, .reply-to,

@@ -120,19 +120,30 @@
     <section th:if="${!friendPosts.isEmpty()}" class="mission-feed" aria-labelledby="friend-feed-heading">
         <h2 id="friend-feed-heading" th:text="${'👥 친구들의 ' + (isToday ? '오늘' : '그날') + ' 글'}">👥 친구들의 오늘 글</h2>
         <ul class="card-grid home-cards mission-posts">
-            <th:block th:each="p : ${friendPosts}"><li th:replace="~{mission/today :: missionPost(${p})}"></li></th:block>
+            <th:block th:each="p : ${friendPosts}">
+                <li th:if="${cards.containsKey(p.postId())}" class="mission-card"><article th:replace="~{fragments/post-card :: cardWith(${cards.get(p.postId())}, ${cardDates.get(p.postId())}, true, ~{mission/today :: missionExtra(${p})})}"></article></li>
+                <th:block th:unless="${cards.containsKey(p.postId())}"><li th:replace="~{mission/today :: missionPost(${p})}"></li></th:block>
+            </th:block>
         </ul>
     </section>
     <section class="mission-feed" aria-labelledby="all-feed-heading">
         <h2 id="all-feed-heading" th:text="${'✨ 모두의 ' + (isToday ? '오늘' : '그날') + ' 글'}">✨ 모두의 오늘 글</h2>
         <p th:if="${otherPosts.isEmpty()}" class="empty-state" th:text="${isToday ? '아직 올라온 글이 없어요. 첫 글의 주인공이 되어 보세요' : '이날 올라온 다른 글이 없어요'}">아직 없어요</p>
         <ul class="card-grid home-cards mission-posts">
-            <th:block th:each="p : ${otherPosts}"><li th:replace="~{mission/today :: missionPost(${p})}"></li></th:block>
+            <th:block th:each="p : ${otherPosts}">
+                <li th:if="${cards.containsKey(p.postId())}" class="mission-card"><article th:replace="~{fragments/post-card :: cardWith(${cards.get(p.postId())}, ${cardDates.get(p.postId())}, true, ~{mission/today :: missionExtra(${p})})}"></article></li>
+                <th:block th:unless="${cards.containsKey(p.postId())}"><li th:replace="~{mission/today :: missionPost(${p})}"></li></th:block>
+            </th:block>
         </ul>
     </section>
 </main>
 <!-- 미션 글 한 줄: 제목·요약·주제·글쓴이, 댓글 달러 가기(파라미터 이름은 부르는 쪽 반복 변수와 다르게) -->
 <!-- 홈 글 카드(fragments/post-card)와 같은 모양: 글쓴이·주제 → 제목 → 요약 → 반응·댓글 달기 -->
+<!-- 086: 공용 카드 위에 붙는 미션 줄(주제·친구/내 글·댓글 달기). 모든 미션 카드에 있어 줄이 맞는다 -->
+<p th:fragment="missionExtra(mp)" class="manage-badges mission-extra">
+    <span class="badge" th:text="${mp.topicTitle()}">주제</span><span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span>
+    <a class="mission-post-reply" th:href="${mp.url() + '#comments'}">댓글 달기</a>
+</p>
 <li th:fragment="missionPost(mp)" class="post-card mission-post">
     <div class="card-body">
         <p class="card-top">

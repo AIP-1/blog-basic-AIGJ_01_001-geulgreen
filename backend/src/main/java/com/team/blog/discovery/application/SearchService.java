@@ -33,6 +33,11 @@ public class SearchService {
     public record SearchCard(long id, String url, String title, String excerpt, String snippetHtml,
                              List<SearchSnippet.Part> snippetParts, String thumbnailUrl, Instant firstPublicAt,
                              int commentCount, int likeCount, PostCard.Author author) {
+
+        /** 086: 공용 글 카드 조각(fragments/post-card)이 부르는 첫 태그 자리. 검색 카드는 태그를 보여 주지 않는다. */
+        public String firstTag() {
+            return null;
+        }
     }
 
     public record SearchPage(List<SearchCard> items, String nextCursor, String notice) {

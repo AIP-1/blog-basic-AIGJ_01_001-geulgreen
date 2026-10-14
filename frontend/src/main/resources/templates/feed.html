@@ -5,39 +5,23 @@
     <title>피드</title>
 </head>
 <body>
+<!-- 086 강성찬 개인 확장: 피드는 팔로우한 사람 글만. 추천 블로그·추천 글은 탐색으로 옮겼다 -->
 <main class="list-page">
     <h1>피드</h1>
-    <!-- 068 강성찬 개인 확장: 추천 블로그와 팔로잉 블로그 글을 나눠 보여 준다 -->
-    <section th:if="${!recommended.isEmpty()}" class="feed-recommended" aria-labelledby="feed-recommended-heading">
-        <h2 id="feed-recommended-heading">추천 블로그 <span class="help">아직 팔로우하지 않은 블로그예요</span></h2>
-        <ul class="recommended-list">
-            <li th:each="b : ${recommended}" class="recommended-blog">
-                <a th:href="${paths.blog(b.handle())}" class="newcomer-who">
-                    <th:block th:replace="~{fragments/avatar :: avatar(${b.avatar()}, 36)}"></th:block>
-                    <span th:text="${b.handle()}">아이디</span></a>
-                <p class="help recommended-bio" th:if="${b.bio() != null}" th:text="${b.bio()}">소개</p>
-                <th:block th:replace="~{fragments/follow :: button(${b.handle()}, false, true, null, '/feed')}"></th:block>
-            </li>
-        </ul>
-        <p class="follow-message help" role="status" hidden></p>
-    </section>
-    <!-- 081 강성찬 개인 확장: 팔로우한 글 사이에 추천 글, 팔로우한 글이 끝나면 추천 글이 이어진다 -->
-    <h2 class="feed-following-heading visually-hidden">글</h2>
     <p th:if="${continued}"><a href="/feed">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued}">
-        <div class="empty-state" th:unless="${followsAnyone}">팔로우한 사람이 없어요. 홈에서 읽고 싶은 블로그를 찾아보세요 <a href="/">홈</a></div>
-        <div class="empty-state" th:if="${followsAnyone}">팔로우한 사람의 공개 글이 아직 없어요</div>
+        <div class="empty-state" th:unless="${followsAnyone}">팔로우한 사람이 없어요. 탐색에서 읽고 싶은 블로그를 찾아보세요 <a href="/explore">탐색</a></div>
+        <div class="empty-state" th:if="${followsAnyone}">팔로우한 사람의 공개 글이 아직 없어요 <a href="/explore">탐색</a></div>
     </th:block>
     <div class="card-grid" id="card-grid">
-        <!-- 084: th:replace가 th:if보다 먼저라 카드를 두 번 그리던 것 고침. 추천 이유(recReason)는 카드 머리 줄의 "추천" 칩으로 -->
-        <th:block th:each="card : ${cards}" th:with="recReason=${reasons.get(card.id())}">
-            <p th:if="${dividerBefore == card.id()}" class="help feed-divider">팔로우한 글을 모두 봤어요</p>
+        <th:block th:each="card : ${cards}">
             <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
         </th:block>
     </div>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
+    <!-- 목록 끝(무한 스크롤이라 다 본 뒤에야 닿는다) -->
+    <p th:if="${!cards.isEmpty()}" class="feed-end">팔로우한 글을 모두 보면 탐색에서 새 글을 찾아보세요 <a href="/explore" class="btn btn-sm">탐색</a></p>
     <script th:src="@{/js/post/list-more.js}" defer></script>
-    <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>
 </html>

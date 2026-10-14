@@ -22,10 +22,12 @@ class NewcomerIT extends IntegrationTestBase {
         posts.published(fresh, "두 번째 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
         posts.published(old, "한 달 전 첫 글", "본문", 1, NOW.minus(Duration.ofDays(30)));
         posts.published(old, "어제 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
-        String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
+        String home = mockMvc.perform(get("/explore")).andReturn().getResponse().getContentAsString();
         assertThat(home).contains("새로 온 작가").contains("첫 글 · 반가워요 첫 글").doesNotContain("첫 글 · 두 번째 글")
                 .doesNotContain("첫 글 · 한 달 전 첫 글").doesNotContain("첫 글 · 어제 글");
-        assertThat(mockMvc.perform(get("/").param("tab", "trending")).andReturn().getResponse().getContentAsString())
+        // 086: 새로 온 작가는 탐색 [추천] 첫 화면에만(홈·트렌딩 탭에는 없음)
+        assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("newcomers-heading");
+        assertThat(mockMvc.perform(get("/explore").param("tab", "trending")).andReturn().getResponse().getContentAsString())
                 .doesNotContain("newcomers-heading");
     }
 }

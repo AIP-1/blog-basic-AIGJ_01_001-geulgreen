@@ -117,21 +117,11 @@
       if (io) { io.unobserve(box); if (next) { io.observe(box); } }
     }
 
-    // 081 피드: reasons(추천 글 → 이유)면 "추천" 표시, dividerBefore 글 앞에 "팔로우한 글을 모두 봤어요"
-    function append(items, reasons, dividerBefore) {
+    function append(items) {
       var ids = seen();
       items.forEach(function (item) {
         if (ids[item.id]) { return; }
-        // 돌아와 복원할 때도 보이게 카드 자료에 함께 적어 둔다
-        item.recReason = (reasons && reasons[item.id]) || item.recReason;
-        item.feedDivider = item.id === dividerBefore || item.feedDivider;
-        if (item.feedDivider) { grid.appendChild(el('p', 'help feed-divider', '팔로우한 글을 모두 봤어요')); }
         var node = card(item, showAuthor);
-        if (item.recReason) {
-          var rec = el('span', 'card-rec', '추천'); rec.title = item.recReason; rec.setAttribute('aria-label', '추천: ' + item.recReason);
-          var author = node.querySelector('.card-author'), top = node.querySelector('.card-top');
-          top.insertBefore(rec, author ? author.nextSibling : top.firstChild);
-        }
         grid.appendChild(node);
         appended.push(item);
       });
@@ -152,7 +142,7 @@
           if (!res.ok) { throw new Error(String(res.status)); }
           return res.json();
         })
-        .then(function (page) { loading = false; box.classList.remove('loading'); append(page.items || [], page.reasons, page.dividerBefore); next = page.nextCursor; render(); })
+        .then(function (page) { loading = false; box.classList.remove('loading'); append(page.items || []); next = page.nextCursor; render(); })
         .catch(function () {
           loading = false; box.classList.remove('loading');
           if (button) { button.textContent = '더 보기'; button.removeAttribute('aria-disabled'); button.style.pointerEvents = ''; }

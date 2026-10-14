@@ -54,26 +54,21 @@ public class RecommendedPostQuery {
         return cards(ids, LIMIT);
     }
 
-    /** 081 피드에 끼울 추천: 같은 태그(새 사람) 먼저, 그다음 조회수 순. 내 글·팔로우한 사람 글은 빼고(팔로우 글은 따로 나온다). */
-    public record Pick(long postId, boolean sameTag) {
-    }
+    // ponytail: 탐색 추천 글은 앞 100개까지만(그 뒤는 "모든 글을 다 봤어요"). 글이 아주 많아지면 커서 방식으로.
+    static final int POOL = 100;
 
-    // ponytail: 피드 추천은 앞 100개까지만(그 뒤는 "모든 글을 다 봤어요"). 글이 아주 많아지면 커서 방식으로.
-    static final int FEED_POOL = 100;
-
-    public List<Pick> forFeed(long memberId) {
+    /** 086 탐색 추천 글 순서: 같은 태그(새 사람) 먼저, 그다음 조회수 순. 내 글·팔로우한 사람 글(피드에 나옴)은 뺀다. */
+    public List<Long> pool(long memberId) {
         String visible = accessPolicy.publicListingCondition("p", "m");
-        List<Long> sameTag = jdbc.queryForList(tagSql(visible) + " " + FEED_POOL,
-                Long.class, memberId, Timestamp.from(clock.instant().minus(TAG_WINDOW)), memberId, memberId, memberId);
-        Set<Long> ids = new LinkedHashSet<>(sameTag);
+        Set<Long> ids = new LinkedHashSet<>(jdbc.queryForList(tagSql(visible) + " " + POOL,
+                Long.class, memberId, Timestamp.from(clock.instant().minus(TAG_WINDOW)), memberId, memberId, memberId));
         ids.addAll(jdbc.queryForList("""
                 SELECT p.id FROM post p JOIN member m ON m.id = p.author_id
                 WHERE""" + " " + visible + """
                  AND p.author_id <> ? AND p.author_id NOT IN (SELECT f.followee_id FROM follow f WHERE f.follower_id = ?)
-                ORDER BY p.first_public_at >= ? DESC, p.view_count DESC, p.first_public_at DESC, p.id DESC LIMIT""" + " " + FEED_POOL,
+                ORDER BY p.first_public_at >= ? DESC, p.view_count DESC, p.first_public_at DESC, p.id DESC LIMIT""" + " " + POOL,
                 Long.class, memberId, memberId, Timestamp.from(clock.instant().minus(VIEW_WINDOW))));
-        Set<Long> tagged = new java.util.HashSet<>(sameTag);
-        return ids.stream().limit(FEED_POOL).map(id -> new Pick(id, tagged.contains(id))).toList();
+        return ids.stream().limit(POOL).toList();
     }
 
     private static String tagSql(String visible) {
