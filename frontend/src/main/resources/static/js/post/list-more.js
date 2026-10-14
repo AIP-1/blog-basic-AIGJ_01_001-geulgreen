@@ -52,7 +52,7 @@
     { // 084: 머리 줄은 늘 둔다(비면 CSS가 숨김)
       var top = el('p', 'card-top');
       if (showAuthor) {
-        var a = el('a', 'card-author'); a.href = '/@' + item.author.handle;
+        var a = el('a', 'card-author'); a.href = item.author.blogUrl || '/' + item.author.handle; // 076: 새 주소(서버가 정함)
         a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.handle || ''));
         top.appendChild(a);
       }
