@@ -23,6 +23,17 @@
     return kst.getUTCFullYear() + '.' + pad(kst.getUTCMonth() + 1) + '.' + pad(kst.getUTCDate());
   }
 
+  // 선 아이콘(fragments/icons.html과 같은 그림). 그림은 고정 문자열이라 innerHTML로 넣어도 안전
+  function lineIcon(paths) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
+    svg.setAttribute('class', 'icon icon-inline'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+    svg.innerHTML = paths;
+    return svg;
+  }
+
   function el(tag, cls, text) {
     var node = document.createElement(tag);
     if (cls) { node.className = cls; }
@@ -82,7 +93,8 @@
     }
     var foot = el('p', 'card-foot');
     var likes = el('span', 'card-likes', '♡ ' + item.likeCount); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount); foot.appendChild(likes);
-    foot.appendChild(el('span', 'card-comments', '💬 ' + item.commentCount));
+    var comments = el('span', 'card-comments'); comments.setAttribute('aria-label', '댓글 ' + item.commentCount);
+    comments.appendChild(lineIcon('<path d="M20 12a7.5 7.5 0 0 1-11.1 6.6L4 20l1.4-4.5A7.5 7.5 0 1 1 20 12z"/>')); comments.appendChild(el('span', null, String(item.commentCount))); foot.appendChild(comments);
     var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
     foot.appendChild(time);
     article.appendChild(foot);

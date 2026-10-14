@@ -31,7 +31,7 @@
     </div>
     <p class="card-foot">
         <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}" th:text="${'♡ ' + card.likeCount()}">♡ 12</span>
-        <span class="card-comments" th:text="${'💬 ' + card.commentCount()}">💬 3</span>
+        <span class="card-comments" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">3</span></span>
         <time class="card-date" th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2026.10.02</time>
     </p>
 </article>

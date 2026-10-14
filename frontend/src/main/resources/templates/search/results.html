@@ -25,7 +25,7 @@
            th:attr="aria-current=${sort == 'latest' ? 'page' : null}">최신순</a>
     </nav>
     <p th:if="${emptyQuery}" class="notice">두 글자 이상 입력해 주세요</p>
-    <!-- 094 강성찬 개인 확장: 결과가 적을 때 자모 편집 거리로 고친 검색어 -->
+    <!-- 강성찬 개인 확장: 결과가 적을 때 자모 편집 거리로 고친 검색어 -->
     <p th:if="${!emptyQuery and suggestion != null}" class="notice">혹시
         <a th:href="${searchBase + '?q=' + encodedSuggestion + (owner == null ? '&tab=' + tab : '') + '&sort=' + sort}"
            th:text="${'''' + suggestion + ''''}">'검색어'</a><span th:text="${suggestionParticle}">을</span> 찾으셨나요?</p>

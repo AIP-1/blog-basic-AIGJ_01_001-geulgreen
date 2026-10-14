@@ -107,7 +107,7 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .andExpect(header().string("Cache-Control", "private, no-store"))
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).contains("<meta name=\"robots\" content=\"noindex\">").doesNotContain("og:title")
-                .contains("2026.09.30").contains("🔒 비공개");
+                .contains("2026.09.30").contains("비공개</span>").doesNotContain("🔒");
     }
 
     @Test

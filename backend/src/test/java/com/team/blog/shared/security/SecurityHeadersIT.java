@@ -50,7 +50,7 @@ class SecurityHeadersIT extends IntegrationTestBase {
                 .startsWith("default-src 'self'; script-src 'self'; img-src 'self' data: blob: " + storageEndpoint())
                 .contains("https://lh3.googleusercontent.com").contains("https://avatars.githubusercontent.com")
                 .contains("connect-src 'self' " + storageEndpoint())
-                .endsWith("object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+                .endsWith("object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://t.me");
     }
 
     @Test
