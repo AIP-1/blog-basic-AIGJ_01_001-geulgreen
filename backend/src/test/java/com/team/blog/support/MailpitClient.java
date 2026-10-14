@@ -30,7 +30,7 @@ public class MailpitClient {
     }
 
     /** 받은 메일 한 통. */
-    public record Mail(String id, List<String> to, String subject, String text, String html) {
+    public record Mail(String id, List<String> to, String subject, String text, String html, String fromName) {
 
         /** 본문(텍스트+HTML)에서 {@code path?token=…}의 토큰. */
         public Optional<String> token(String path) {
@@ -82,7 +82,7 @@ public class MailpitClient {
                 to.add(addr.path("Address").asString());
             }
             result.add(new Mail(id, to, full.path("Subject").asString(), full.path("Text").asString(),
-                    full.path("HTML").asString()));
+                    full.path("HTML").asString(), full.path("From").path("Name").asString()));
         }
         // API는 최신 메일이 먼저 온다 → 오래된 것부터로 뒤집는다
         java.util.Collections.reverse(result);

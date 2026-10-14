@@ -13,7 +13,6 @@
     <p class="auth-lead">글그린에서 나만의 블로그를 시작해 보세요.</p>
 
     <form method="post" th:action="@{/signup}" novalidate class="auth-form">
-        <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
 
         <div class="field">
             <label for="email">이메일</label>
@@ -94,6 +93,7 @@
 
         <fieldset class="field signup-agree">
             <legend>약관 동의 (필수)</legend>
+            <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
             <label class="agree-all"><input type="checkbox" data-agree-all> 모두 동의해요</label>
             <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수) <a href="/terms" target="_blank" rel="noopener">약관 보기</a></label>
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수) <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></label>

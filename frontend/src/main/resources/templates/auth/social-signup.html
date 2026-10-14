@@ -18,7 +18,6 @@
     </section>
 
     <form id="social-signup-form" method="post" th:action="@{/signup/social}" novalidate class="auth-form">
-        <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
 
         <div class="field" th:if="${needsEmail}">
             <label for="email">이메일</label>
@@ -68,6 +67,7 @@
 
         <fieldset class="field">
             <legend>약관 동의 (필수)</legend>
+            <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
             <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수)</label><br>
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label> <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
         </fieldset>

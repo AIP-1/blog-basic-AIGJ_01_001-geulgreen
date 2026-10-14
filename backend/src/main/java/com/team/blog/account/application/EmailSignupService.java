@@ -95,8 +95,17 @@ public class EmailSignupService {
     }
 
     private long doSignUp(EmailSignupCommand command, Handle[] submittedHandle, boolean emailVerified) {
-        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
+        // 화면 순서대로 검사한다: 이메일 → 닉네임 → 주소 → 비밀번호 → 약관(약관 안내가 앞 단계에서 먼저 뜨지 않게)
         String email = EmailRules.normalizeAndValidate(command.email());
+        Optional<AuthIdentity> existing = authIdentityRepository.findLocalByEmail(email);
+        if (existing.isPresent()) {
+            boolean withdrawing = memberRepository.findById(existing.get().getMemberId())
+                    .map(Member::isWithdrawalPending).orElse(false);
+            throw withdrawing ? new WithdrawnAccountExistsException() : new DuplicateEmailException();
+        }
+        Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
+        Handle handle = handleService.validateForSignup(command.handle(), Provider.LOCAL);
+        submittedHandle[0] = handle;
         List<PasswordPolicyViolation> violations = passwordPolicy.validate(command.password(), email);
         if (!violations.isEmpty()) {
             throw new InvalidPasswordException(violations);
@@ -104,15 +113,7 @@ public class EmailSignupService {
         if (!Objects.equals(command.password(), command.passwordConfirm())) {
             throw new PasswordMismatchException();
         }
-        Optional<AuthIdentity> existing = authIdentityRepository.findLocalByEmail(email);
-        if (existing.isPresent()) {
-            boolean withdrawing = memberRepository.findById(existing.get().getMemberId())
-                    .map(Member::isWithdrawalPending).orElse(false);
-            throw withdrawing ? new WithdrawnAccountExistsException() : new DuplicateEmailException();
-        }
-        Handle handle = handleService.validateForSignup(command.handle(), Provider.LOCAL);
-        submittedHandle[0] = handle;
-        Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
+        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
 
         Instant now = clock.instant();
         Member member = memberRepository.saveAndFlush(new Member(handle, nickname, now));

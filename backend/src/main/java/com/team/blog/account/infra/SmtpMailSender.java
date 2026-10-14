@@ -16,7 +16,7 @@ import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
 
 /**
- * {@link JavaMailSender} + Thymeleaf 메일 템플릿. From은 {@code blog.auth.mail.from}으로 고정(운영은 Gmail 계정 주소).
+ * {@link JavaMailSender} + Thymeleaf 메일 템플릿. From은 {@code blog.auth.mail.from}(운영은 Gmail 계정 주소)에 보내는 이름 {@code blog.auth.mail.from-name}(기본 "글그린")을 붙인다.
  * 실패 시 예외를 삼키고, 수신 주소를 가린 로그만 남긴다. 토큰·링크는 로그에 남기지 않는다(FR-014).
  */
 @Component
@@ -40,7 +40,7 @@ public class SmtpMailSender implements MailSender {
             String html = templateEngine.process(template, new Context(Locale.KOREAN, variables));
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
-            helper.setFrom(properties.mail().from());
+            helper.setFrom(properties.mail().from(), properties.mail().fromName());
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(toPlainText(html), html);
