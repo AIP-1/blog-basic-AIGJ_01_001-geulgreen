@@ -31,7 +31,8 @@
 
   function bind(input) {
     var list = document.querySelector(input.dataset.passwordRules);
-    var emailInput = document.querySelector(input.dataset.emailSource || '');
+    // 설정·재설정 화면엔 이메일 칸이 없다(빈 선택자는 querySelector가 오류를 던져 표시가 멈췄다)
+    var emailInput = input.dataset.emailSource ? document.querySelector(input.dataset.emailSource) : null;
     if (!list) { return; }
     var items = list.querySelectorAll('li[data-rule]');
     var labels = [];
