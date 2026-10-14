@@ -167,7 +167,7 @@ public class HandleService {
         if (bannedWordFilter.containsBannedInHandleBody(body)) {
             return new Violation(HandleViolation.HANDLE_BANNED_WORD, null);
         }
-        if (memberRepository.existsByHandle(handle.toString()) || !heldByOthers(List.of(handle.toString()), memberId).isEmpty()) {
+        if (memberRepository.existsByHandle(handle.toString()) || !heldByOthers(List.of(handle.toString()), memberId).isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return new Violation(HandleViolation.HANDLE_DUPLICATE, firstAvailable(handle, false));
         }
         return null;

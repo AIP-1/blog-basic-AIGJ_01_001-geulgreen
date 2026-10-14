@@ -55,7 +55,7 @@ public class TagListingQuery {
     }
 
     public Optional<Long> tagId(String normalizedName) {
-        return jdbc.queryForList("SELECT id FROM tag WHERE name = ?", Long.class, normalizedName).stream().findFirst();
+        return jdbc.queryForList("SELECT id FROM tag WHERE name = ?", Long.class, normalizedName).stream().findFirst(); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     /** 태그의 공개 글 수(없는 태그는 0). */

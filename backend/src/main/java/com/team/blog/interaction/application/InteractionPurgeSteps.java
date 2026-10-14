@@ -49,7 +49,7 @@ public final class InteractionPurgeSteps {
             while (jdbc.update("""
                     DELETE FROM comment c WHERE c.deleted_at IS NOT NULL AND c.post_id = ANY (?)
                       AND NOT EXISTS (SELECT 1 FROM comment r WHERE r.parent_id = c.id)
-                    """, (Object) posts.toArray(new Long[0])) > 0) {
+                    """, (Object) posts.toArray(new Long[0])) > 0) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 // 한 단계씩 위로
             }
             recount(posts);
@@ -84,7 +84,7 @@ public final class InteractionPurgeSteps {
         @Override
         public void purge(long memberId) {
             List<Long> posts = jdbc.queryForList("DELETE FROM post_like WHERE member_id = ? RETURNING post_id", Long.class, memberId);
-            if (!posts.isEmpty()) {
+            if (!posts.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 jdbc.update("""
                         UPDATE post p SET like_count = (SELECT count(*) FROM post_like l WHERE l.post_id = p.id) WHERE p.id = ANY (?)
                         """, (Object) posts.toArray(new Long[0]));

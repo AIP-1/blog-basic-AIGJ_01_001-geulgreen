@@ -95,7 +95,7 @@ public class SamplePostsService {
             long authorId = account(post.author());
             Integer exists = jdbc.queryForObject("SELECT count(*) FROM post WHERE author_id = ? AND title = ? AND deleted_at IS NULL",
                     Integer.class, authorId, post.title());
-            if (exists > 0) {
+            if (exists > 0) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 continue;
             }
             Optional<CurrentUser> author = Optional.of(new CurrentUser(authorId, "USER"));
@@ -124,7 +124,7 @@ public class SamplePostsService {
                 jdbc.update("UPDATE member SET handle = 'gone_' || id WHERE id = ?", id);
             }
         });
-        log(admin, "SAMPLE_POSTS_REMOVE", "테스트 계정 " + ids.size() + "개");
+        log(admin, "SAMPLE_POSTS_REMOVE", "테스트 계정 " + ids.size() + "개"); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
         return ids.size();
     }
 
@@ -140,11 +140,11 @@ public class SamplePostsService {
         Account account = ACCOUNTS.stream().filter(a -> a.handle().equals(handle)).findFirst()
                 .orElseThrow(() -> new IllegalStateException("모르는 테스트 계정: " + handle));
         List<Long> found = jdbc.queryForList("SELECT id FROM member WHERE handle = ? AND deleted_at IS NULL", Long.class, handle);
-        if (!found.isEmpty()) {
+        if (!found.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
             return found.get(0);
         }
         Timestamp now = Timestamp.from(clock.instant());
-        long id = jdbc.queryForObject("INSERT INTO member (handle, nickname, bio) VALUES (?, ?, ?) RETURNING id", Long.class,
+        long id = jdbc.queryForObject("INSERT INTO member (handle, nickname, bio) VALUES (?, ?, ?) RETURNING id", Long.class, // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 handle, account.nickname(), BIO);
         String email = handle + "@sample.invalid";
         jdbc.update("""

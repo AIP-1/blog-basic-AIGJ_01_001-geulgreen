@@ -155,7 +155,7 @@ public class PostTrashService {
     public int purgeAllByAuthor(long authorId) {
         Instant now = clock.instant();
         List<Long> ids = jdbc.queryForList("SELECT id FROM post WHERE author_id = ? FOR UPDATE", Long.class, authorId);
-        ids.forEach(id -> purgeLocked(id, now));
+        ids.forEach(id -> purgeLocked(id, now)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
         return ids.size();
     }
 

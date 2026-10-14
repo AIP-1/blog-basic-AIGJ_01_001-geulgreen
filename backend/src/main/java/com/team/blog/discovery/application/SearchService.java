@@ -126,6 +126,7 @@ public class SearchService {
     }
 
     private static final String TITLE_HAS = "p.title ILIKE ? ESCAPE '\\'";
+    private static final String AND = " AND ";
     private static final String TAG_HAS =
             "EXISTS (SELECT 1 FROM post_tag pt JOIN tag g ON g.id = pt.tag_id WHERE pt.post_id = p.id AND g.name ILIKE ? ESCAPE '\\')";
     private static final String BODY_HAS = "p.content_md ILIKE ? ESCAPE '\\'";
@@ -141,12 +142,12 @@ public class SearchService {
         for (String w : terms.words()) {
             String pattern = SearchTerms.likePattern(w);
             String tagPattern = SearchTerms.likePattern(w.toLowerCase(Locale.ROOT));
-            titles.append(titles.isEmpty() ? "" : " AND ").append(TITLE_HAS);
+            titles.append(titles.isEmpty() ? "" : AND).append(TITLE_HAS);
             titleArgs.add(pattern);
-            titleTags.append(titleTags.isEmpty() ? "" : " AND ").append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS).append(")");
+            titleTags.append(titleTags.isEmpty() ? "" : AND).append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS).append(")");
             titleTagArgs.add(pattern);
             titleTagArgs.add(tagPattern);
-            all.append(all.isEmpty() ? "" : " AND ").append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS);
+            all.append(all.isEmpty() ? "" : AND).append("(").append(TITLE_HAS).append(" OR ").append(TAG_HAS);
             allArgs.add(pattern);
             allArgs.add(tagPattern);
             if (SearchTerms.searchesBody(w)) {

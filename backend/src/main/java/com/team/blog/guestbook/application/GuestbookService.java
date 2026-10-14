@@ -51,7 +51,7 @@ public class GuestbookService {
         if (!r.allowed()) {
             throw new RateLimitedException(r.retryAfterSeconds());
         }
-        return jdbc.queryForObject("INSERT INTO guestbook_entry (owner_id, author_id, content, secret) VALUES (?, ?, ?, ?) RETURNING id",
+        return jdbc.queryForObject("INSERT INTO guestbook_entry (owner_id, author_id, content, secret) VALUES (?, ?, ?, ?) RETURNING id", // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 Long.class, ownerId, me.memberId(), content, secret);
     }
 
