@@ -9,7 +9,7 @@
     <h1>관리 대시보드</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
     <ul class="admin-stats">
-        <li th:if="${insights != null}"><span class="help">오늘 조회</span><strong th:text="${dash.todayViews()}">0</strong></li>
+        <li><span class="help">오늘 조회</span><strong th:text="${dash.todayViews()}">0</strong></li>
         <li><span class="help">새 가입</span><strong th:text="${dash.todayMembers()}">0</strong><span class="help" th:text="${'전체 회원 ' + dash.totalMembers()}">전체</span></li>
         <li><span class="help">새 글</span><strong th:text="${dash.todayPosts()}">0</strong><span class="help" th:text="${'발행한 글 ' + dash.totalPosts()}">전체</span></li>
         <li><span class="help">새 댓글</span><strong th:text="${dash.todayComments()}">0</strong><span class="help" th:text="${'전체 댓글 ' + dash.totalComments()}">전체</span></li>
@@ -17,16 +17,15 @@
             <strong th:text="${dash.pendingReports() + dash.newInquiries()}">0</strong>
             <span class="help"><a href="/admin/reports" th:text="${'신고 ' + dash.pendingReports()}">신고</a><th:block th:if="${contactPage == true}"> · <a href="/admin/inquiries" th:text="${'문의 ' + dash.newInquiries()}">문의</a></th:block></span></li>
     </ul>
-    <p class="help admin-today-note">숫자는 오늘(한국 시간) 기준이에요.</p>
-    <th:block th:if="${insights != null}">
+    <p class="help admin-today-note">오늘 조회·새 가입·새 글·새 댓글은 오늘(한국 시간) 기준이에요.</p>
     <section aria-labelledby="trend-heading" class="admin-panel">
-        <h2 id="trend-heading">최근 30일 추이</h2>
+        <h2 id="trend-heading" th:text="${'최근 ' + insights.days().size() + '일 추이'}">최근 30일 추이</h2>
         <ul class="admin-trends">
             <li th:each="t : ${insights.trends()}" th:class="${'admin-trend trend-' + t.key()}">
                 <p class="admin-trend-head"><span th:text="${t.label()}">조회</span>
                     <strong th:text="${t.total()}">0</strong><span class="help" th:text="${'하루 최고 ' + t.max()}">최고</span></p>
                 <svg th:unless="${t.empty()}" class="trend-svg" viewBox="0 0 300 100" preserveAspectRatio="none" role="img"
-                     th:attr="aria-label=${t.label() + ' 최근 30일 합계 ' + t.total() + ', 오늘 ' + t.today() + '(아래 표와 같음)'}">
+                     th:attr="aria-label=${t.label() + ' 최근 ' + insights.days().size() + '일 합계 ' + t.total() + ', 오늘 ' + t.today() + '(아래 표와 같음)'}">
                     <line class="trend-grid" x1="0" y1="52" x2="300" y2="52"></line>
                     <polygon class="trend-area" th:attr="points=${t.area()}"></polygon>
                     <polyline class="trend-line" th:attr="points=${t.line()}"></polyline>
@@ -44,7 +43,7 @@
             </table>
         </details>
     </section>
-    <div class="admin-columns">
+    <div class="admin-columns" th:if="${insightsEnabled}">
         <section aria-labelledby="popular-heading" class="admin-panel">
             <h2 id="popular-heading">인기 글 <span class="help">최근 7일 조회</span></h2>
             <ol class="admin-rank" th:unless="${insights.popular().isEmpty()}">
@@ -71,7 +70,6 @@
             <p class="help">새로 배포하면 켜진 시각이 바뀌어요.</p>
         </section>
     </div>
-    </th:block>
     <section aria-labelledby="sample-heading" th:if="${samplePostsEnabled}">
         <h2 id="sample-heading">테스트용 긴 글</h2>
         <p class="help" th:text="${'테스트 계정 4개(@test_로 시작)가 쓴 긴 글이에요. 지금 ' + samplePostCount + '편 있어요. 다시 눌러도 이미 있는 글은 건너뛰어요.'}">테스트 글</p>
