@@ -5,9 +5,10 @@
     <title>신고 처리 · 글그린</title>
 </head>
 <body>
-<main class="list-page" th:with="c=${detail.row()}, a=${detail.author()}">
+<main class="list-page admin-page" th:with="c=${detail.row()}, a=${detail.author()}">
     <p><a class="link-btn back" href="/admin/reports">신고 목록</a></p>
     <h1 th:text="${(c.targetType() == 'POST' ? '글' : '댓글') + ' 신고 ' + c.reportCount() + '건'}">글 신고 3건</h1>
+    <nav th:replace="~{fragments/admin-nav :: nav('reports')}"></nav>
     <!-- 신고 시점 복사본만(지금 원문은 열지 않음) -->
     <section aria-labelledby="snapshot-heading">
         <h2 id="snapshot-heading">신고 시점 내용</h2>
