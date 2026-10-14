@@ -178,8 +178,9 @@ main.list-page { max-width: 1120px; }
    사진 없는 카드도 같은 자리에 빈 사진 칸(색 역할)을 둬 빈 공간 없이 줄을 맞춘다(요약은 최대 160자라 글로는 못 채움).
    088: 홈·미션·내 글·시리즈(.home-cards)도 같은 세로 카드(사진을 왼쪽에 두던 가로 카드 없앰) */
 .card-grid .card-thumb { order: -1; }
-@media (min-width: 640px) { .card-grid:has(.card-thumb) .post-card:not(:has(.card-thumb))::before {
-    content: ""; order: -1; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--color-thumb-empty); } }
+/* 088 후속: 빈 사진 칸은 같은 줄에 사진 카드가 있을 때만(js/post/card-rows.js가 그 줄 카드에 .row-thumb) */
+.card-grid .post-card.row-thumb:not(:has(.card-thumb))::before {
+    content: ""; order: -1; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--color-thumb-empty); }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
 /* 088: 하트는 기본 회색 빈 하트(카드 목록은 내가 좋아요했는지 모른다) */
