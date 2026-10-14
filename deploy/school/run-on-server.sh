@@ -22,6 +22,9 @@ for v in APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD 
   if [ -z "${!v:-}" ]; then echo "환경 변수 ${v}가 비어 있어요(GitHub Secrets 확인)" >&2; exit 1; fi
 done
 
+# 붙여 넣다 따라 들어간 앞뒤 빈칸·줄바꿈은 지운다(키 모양 AIza…·AQ.…는 따지지 않음)
+GEMINI_API_KEY="$(printf %s "${GEMINI_API_KEY:-}" | tr -d '[:space:]')"
+
 DOCKER="docker"
 if ! docker info > /dev/null 2>&1; then DOCKER="sudo -n docker"; fi
 ${DOCKER} info > /dev/null 2>&1 || { echo "docker를 쓸 수 없어요(설치·권한 확인)" >&2; exit 1; }
