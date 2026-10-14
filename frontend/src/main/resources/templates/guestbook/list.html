@@ -19,7 +19,7 @@
     </form>
     <p th:unless="${currentMemberId != null}" class="help"><a th:href="${loginRedirect}">로그인</a>하면 방명록을 남길 수 있어요</p>
     <p th:if="${entries.isEmpty()}" class="empty-state">아직 방명록이 없어요. 첫 인사를 남겨 보세요</p>
-    <ul class="note-list">
+    <ul class="note-list" th:unless="${entries.isEmpty()}"><!-- 비었으면 테두리만 남은 회색 줄이 보여서 그리지 않음 -->
         <li th:each="e : ${entries}" class="note">
             <p class="note-meta"><a th:href="${paths.blog(e.handle())}" th:text="${e.handle()}">아이디</a>
                 · <span th:text="${entryDates.get(e.id())}">방금</span>
