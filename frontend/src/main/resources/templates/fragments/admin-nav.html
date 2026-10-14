@@ -7,14 +7,14 @@
 -->
 <nav th:fragment="nav(tab)" class="admin-nav" aria-label="관리 메뉴">
     <a href="/admin" th:classappend="${tab == 'dashboard'} ? 'active'" th:attr="aria-current=${tab == 'dashboard'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-chart}"></th:block><span>대시보드</span></a>
-    <p class="admin-nav-group" aria-hidden="true">콘텐츠</p>
+    <p class="admin-nav-group">콘텐츠</p>
     <a href="/admin/content" th:classappend="${tab == 'content'} ? 'active'" th:attr="aria-current=${tab == 'content'} ? 'page'"><th:block th:replace="~{fragments/icons :: pen}"></th:block><span>글·댓글</span></a>
     <a href="/admin/guestbook" th:classappend="${tab == 'guestbook'} ? 'active'" th:attr="aria-current=${tab == 'guestbook'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-book}"></th:block><span>방명록</span></a>
-    <p class="admin-nav-group" aria-hidden="true">회원·신고</p>
+    <p class="admin-nav-group">회원·신고</p>
     <a href="/admin/members" th:classappend="${tab == 'members'} ? 'active'" th:attr="aria-current=${tab == 'members'} ? 'page'"><th:block th:replace="~{fragments/icons :: people}"></th:block><span>회원</span></a>
     <a href="/admin/reports" th:classappend="${tab == 'reports'} ? 'active'" th:attr="aria-current=${tab == 'reports'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-flag}"></th:block><span>신고</span></a>
     <a href="/admin/inquiries" th:if="${contactPage == true}" th:classappend="${tab == 'inquiries'} ? 'active'" th:attr="aria-current=${tab == 'inquiries'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-mail}"></th:block><span>문의함</span></a>
-    <p class="admin-nav-group" aria-hidden="true">운영·시스템</p>
+    <p class="admin-nav-group">운영·시스템</p>
     <a href="/admin/notices" th:classappend="${tab == 'notices'} ? 'active'" th:attr="aria-current=${tab == 'notices'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-megaphone}"></th:block><span>공지</span></a>
     <a href="/admin/system" th:if="${@environment.getProperty('blog.admin.system.enabled', 'true') == 'true'}" th:classappend="${tab == 'system'} ? 'active'" th:attr="aria-current=${tab == 'system'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-server}"></th:block><span>시스템 상태</span></a>
     <a href="/admin/logs" th:classappend="${tab == 'logs'} ? 'active'" th:attr="aria-current=${tab == 'logs'} ? 'page'"><th:block th:replace="~{fragments/icons :: i-list}"></th:block><span>관리 기록</span></a>
