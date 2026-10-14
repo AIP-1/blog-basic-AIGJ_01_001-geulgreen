@@ -26,6 +26,7 @@ public class CommentQuery {
     private static final String SELECT = """
             SELECT c.id, c.post_id, c.parent_id, c.author_id, c.content, c.created_at, c.updated_at, c.deleted_at, c.hidden_at,
                    c.secret, (SELECT pa.author_id FROM comment pa WHERE pa.id = c.parent_id) AS parent_author,
+                   ARRAY(SELECT cl.member_id FROM comment_like cl WHERE cl.comment_id = c.id) AS likers,
                    m.handle, m.nickname, m.profile_image_url, m.withdrawn_at,
                    rt.handle AS rt_handle, rt.nickname AS rt_nickname, rt.withdrawn_at AS rt_withdrawn
             FROM comment c JOIN member m ON m.id = c.author_id LEFT JOIN member rt ON rt.id = c.reply_to_member_id
@@ -44,7 +45,7 @@ public class CommentQuery {
     private record Row(long id, long postId, Long parentId, long authorId, String content, Instant createdAt,
                        Instant updatedAt, boolean deleted, boolean hidden, String handle, String nickname, String image,
                        boolean authorWithdrawn, String rtHandle, String rtNickname, boolean rtWithdrawn, boolean secret,
-                       Long parentAuthorId) {
+                       Long parentAuthorId, List<Long> likers) {
     }
 
     private static Row row(ResultSet rs) throws SQLException {
@@ -53,7 +54,9 @@ public class CommentQuery {
                 rs.getTimestamp("deleted_at") != null, rs.getTimestamp("hidden_at") != null, rs.getString("handle"),
                 rs.getString("nickname"), rs.getString("profile_image_url"), rs.getTimestamp("withdrawn_at") != null,
                 rs.getString("rt_handle"), rs.getString("rt_nickname"), rs.getTimestamp("rt_withdrawn") != null,
-                rs.getBoolean("secret"), (Long) rs.getObject("parent_author"));
+                rs.getBoolean("secret"), (Long) rs.getObject("parent_author"),
+                // ponytail: 089 누른 사람 번호를 통째로 읽어 수·내가 눌렀는지를 정한다. 댓글당 좋아요가 수천이 되면 수 칸으로 바꾼다
+                List.of((Long[]) rs.getArray("likers").getArray()));
     }
 
     /** 글의 댓글 첫 페이지 또는 이어 보기({@code cursor})·이전 보기({@code before})·특정 댓글부터({@code around}). */
@@ -219,6 +222,7 @@ public class CommentQuery {
                     SELECT * FROM (
                       SELECT c.id, c.post_id, c.parent_id, c.author_id, c.content, c.created_at, c.updated_at, c.deleted_at, c.hidden_at,
                              c.secret, (SELECT pa.author_id FROM comment pa WHERE pa.id = c.parent_id) AS parent_author,
+                             ARRAY(SELECT cl.member_id FROM comment_like cl WHERE cl.comment_id = c.id) AS likers,
                              m.handle, m.nickname, m.profile_image_url, m.withdrawn_at,
                              rt.handle AS rt_handle, rt.nickname AS rt_nickname, rt.withdrawn_at AS rt_withdrawn,
                              row_number() OVER (PARTITION BY c.parent_id ORDER BY c.created_at, c.id) AS rn,
@@ -274,6 +278,7 @@ public class CommentQuery {
         return new CommentView(r.id(), r.parentId(), state, showContent ? r.content() : null, author, replyTo,
                 r.createdAt(), showContent && r.updatedAt().isAfter(r.createdAt()), mine,
                 normal && loggedIn, normal && mine, mine && (normal || "HIDDEN".equals(state)),
-                normal && loggedIn && !mine, replyCount, replies, repliesNext, r.secret());
+                normal && loggedIn && !mine, replyCount, replies, repliesNext, r.secret(),
+                normal && properties.likeEnabled() ? r.likers().size() : null, r.likers().contains(me));
     }
 }

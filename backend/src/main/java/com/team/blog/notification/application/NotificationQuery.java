@@ -152,7 +152,20 @@ public class NotificationQuery {
                 }
             }
             case LIKE -> {
-                if (readable) {
+                if (commentId != null) {
+                    // 089: 댓글 좋아요
+                    boolean commentOk = rs.getString("content") != null && rs.getTimestamp("c_deleted") == null
+                            && rs.getTimestamp("c_hidden") == null;
+                    if (readable && commentOk) {
+                        post = new NotificationItem.PostRef(title, postUrl, null);
+                        preview = preview(rs.getString("content"));
+                        url = commentUrl;
+                        message = who(actorName, others) + " 회원님의 댓글을 좋아해요: " + preview;
+                    } else {
+                        post = new NotificationItem.PostRef(null, null, true);
+                        message = UNAVAILABLE;
+                    }
+                } else if (readable) {
                     post = new NotificationItem.PostRef(title, postUrl, null);
                     url = postUrl;
                     message = who(actorName, others) + " 「" + title + "」을(를) 좋아해요";

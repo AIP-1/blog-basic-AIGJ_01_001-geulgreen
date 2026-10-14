@@ -15,7 +15,9 @@ public record CommentProperties(@DefaultValue("1000") int maxLength,
                                 /** 답글 깊이(028): 공통 1(최상위 아래 1단계), 0이면 무제한(강성찬 개인 확장). */
                                 @DefaultValue("1") int maxDepth,
                                 /** 043 비밀 댓글(강성찬 개인 확장). */
-                                @DefaultValue("true") boolean secretEnabled) {
+                                @DefaultValue("true") boolean secretEnabled,
+                                /** 089 댓글·답글 좋아요(강성찬 개인 확장). */
+                                @DefaultValue("true") boolean likeEnabled) {
 
     /** 답글을 바로 위 댓글에 다는 구조인지(028 강성찬 개인 확장). */
     public boolean nested() {

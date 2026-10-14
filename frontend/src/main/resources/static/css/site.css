@@ -322,6 +322,8 @@ a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px;
     border-radius: 999px; color: var(--color-text); text-decoration: none; }
 .notif-bell:hover, .icon-btn:hover { background: var(--color-surface-muted); }
 .like-button { padding: 6px 14px; }
+/* 089 댓글 좋아요 */
+.comment-like[aria-pressed="true"] .like-icon { color: var(--color-like); }
 .like-button[aria-pressed="true"], .like-button .like-icon { color: var(--color-like); }
 .list-retry, .handle-suggestion { padding: 4px 12px; font-size: .85em; }
 

@@ -1,9 +1,11 @@
 package com.team.blog.interaction.web;
 
+import com.team.blog.interaction.application.CommentLikeService;
 import com.team.blog.interaction.application.CommentPage;
 import com.team.blog.interaction.application.CommentQuery;
 import com.team.blog.interaction.application.CommentService;
 import com.team.blog.interaction.application.CommentView;
+import com.team.blog.interaction.application.LikeService;
 import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.security.CurrentUserProvider;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,13 +28,26 @@ public class CommentApiController {
 
     private final CommentService commentService;
     private final CommentQuery commentQuery;
+    private final CommentLikeService commentLikeService;
     private final CurrentUserProvider currentUserProvider;
 
     public CommentApiController(CommentService commentService, CommentQuery commentQuery,
-                                CurrentUserProvider currentUserProvider) {
+                                CommentLikeService commentLikeService, CurrentUserProvider currentUserProvider) {
         this.commentService = commentService;
         this.commentQuery = commentQuery;
+        this.commentLikeService = commentLikeService;
         this.currentUserProvider = currentUserProvider;
+    }
+
+    /** 089 강성찬 개인 확장: 댓글·답글 좋아요(글 좋아요와 같은 모양). */
+    @PutMapping("/api/comments/{commentId}/like")
+    public LikeService.LikeResult like(@PathVariable long commentId) {
+        return commentLikeService.set(currentUserProvider.current(), commentId, true);
+    }
+
+    @DeleteMapping("/api/comments/{commentId}/like")
+    public LikeService.LikeResult unlike(@PathVariable long commentId) {
+        return commentLikeService.set(currentUserProvider.current(), commentId, false);
     }
 
     @PostMapping("/api/posts/{postId}/comments")
