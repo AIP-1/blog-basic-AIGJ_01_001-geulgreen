@@ -68,6 +68,11 @@ test('추천마다 적용: 문단 나누기·말 빼기·소제목·사진 설�
   assert.match(w.applyHint(long, h.fix, '중간'), /\n\n## 중간\n\n문단이에요/);
   assert.equal(by('짧아요', 'title', '가'.repeat(41)).fix.ai.target, 'title');
   assert.equal(by('가'.repeat(130) + '.', 'sentence').fix.ai.text, '가'.repeat(130) + '.');
+  // 굵게·여러 줄이 섞인 긴 문장도 원문 그대로, 원문 위치로 넣는다
+  const md = '앞 문장이에요. **' + '굵'.repeat(70) + '**\n' + '이'.repeat(60) + '다. 끝';
+  const ai = by(md, 'sentence').fix.ai;
+  assert.equal(md.slice(ai.from, ai.to), ai.text);
+  assert.equal(ai.text, '**' + '굵'.repeat(70) + '**\n' + '이'.repeat(60) + '다.');
 });
 
 console.log(`${passed} passed`);

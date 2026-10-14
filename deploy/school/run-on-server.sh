@@ -22,8 +22,10 @@ for v in APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD 
   if [ -z "${!v:-}" ]; then echo "환경 변수 ${v}가 비어 있어요(GitHub Secrets 확인)" >&2; exit 1; fi
 done
 
-# 붙여 넣다 따라 들어간 앞뒤 빈칸·줄바꿈은 지운다(키 모양 AIza…·AQ.…는 따지지 않음)
-GEMINI_API_KEY="$(printf %s "${GEMINI_API_KEY:-}" | tr -d '[:space:]')"
+# 붙여 넣다 따라 들어간 앞뒤 빈칸·줄바꿈만 지운다(가운데는 그대로, 키 모양 AIza…·AQ.…는 따지지 않음)
+GEMINI_API_KEY="${GEMINI_API_KEY:-}"
+GEMINI_API_KEY="${GEMINI_API_KEY#"${GEMINI_API_KEY%%[![:space:]]*}"}"
+GEMINI_API_KEY="${GEMINI_API_KEY%"${GEMINI_API_KEY##*[![:space:]]}"}"
 
 DOCKER="docker"
 if ! docker info > /dev/null 2>&1; then DOCKER="sudo -n docker"; fi
@@ -103,13 +105,15 @@ wait_healthy() { # 5초마다, 최대 3분
 check_gemini() {
   if [ -z "${GEMINI_API_KEY:-}" ]; then echo "Gemini 키 없음: AI 기능은 꺼진 채로 켜져요"; return 0; fi
   local code
-  code="$(curl -s -o /dev/null -w '%{http_code}' -m 10 -H "x-goog-api-key: ${GEMINI_API_KEY}" \
+  # 키는 curl 인자가 아니라 표준 입력 설정으로 넘긴다(공용 서버에서 ps로 보이지 않게, printf는 셸 내장이라 프로세스가 안 생김)
+  code="$(printf 'header = "x-goog-api-key: %s"\n' "${GEMINI_API_KEY}" | curl -s -o /dev/null -w '%{http_code}' -m 10 --config - \
     "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL:-gemini-flash-lite-latest}" || true)"
   case "${code}" in
     200) echo "Gemini 키 확인: 통해요(200)" ;;
     400|401|403) echo "Gemini 키 확인: 거절됐어요(${code}). 키 값, API 사용 설정, 키의 API 제한을 확인하세요" ;;
     404) echo "Gemini 키 확인: 모델(${GEMINI_MODEL:-gemini-flash-lite-latest})을 찾지 못했어요(404)" ;;
-    *) echo "Gemini 키 확인: 서버에서 Google에 닿지 못했어요(${code})" ;;
+    000) echo "Gemini 키 확인: 서버에서 Google에 닿지 못했어요(연결 실패 또는 시간 초과)" ;;
+    *) echo "Gemini 키 확인: 예상하지 못한 응답이에요(${code})" ;;
   esac
 }
 
