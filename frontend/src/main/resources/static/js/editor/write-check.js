@@ -63,7 +63,6 @@
     return text.replace(IMAGE, '').replace(/\[([^\]]*)\]\([^)\s]*\)/g, '$1').replace(/<[^>]+>|\*\*|~~|[*`\\]/g, '');
   }
 
-  function sentencesOf(text) { return plain(text).match(/[^.!?。…\n]+[.!?。…]*/g) || []; }
 
   // 소제목 넣기: 문단이 둘 이상이면 가운데 문단 앞에, 아니면 맨 앞에 "## (물어본 소제목)"을 넣는다
   function headingFix(paras) {
@@ -165,16 +164,21 @@
         out.push({ kind: 'paragraph', text: '문단이 길어요(' + text.length + '자): 「' + excerpt(text) + '」 중간에 빈 줄을 넣어 나눠 보세요',
           fix: splitFix(md, p) });
       }
-      sentencesOf(p.text).forEach(function (sn) {
-        sn = sn.trim();
+      // 문장은 원문(Markdown)에서 자르고 위치를 함께 둔다: AI 결과를 정확히 그 자리에 넣으려고. 길이·첫말은 서식 표시를 뺀 글로 본다
+      var raw = md.slice(p.from, p.to), rm, re = /[^.!?。…]+[.!?。…]*/g;
+      while ((rm = re.exec(raw))) {
+        var body = rm[0].trim(), sn = plain(body).replace(/\s+/g, ' ').trim();
+        if (!sn) { continue; }
+        var from = p.from + rm.index + rm[0].search(/\S/);
         if (sn.length > LONG_SENTENCE && longSentences < MAX_EACH) {
           longSentences++;
           out.push({ kind: 'sentence', text: '문장이 길어요(' + sn.length + '자): 「' + excerpt(sn) + '」 두 문장으로 나눠 보세요',
-            fix: { label: 'AI로 나누기', ai: { target: 'body', text: sn, ask: '뜻과 말투는 그대로 두고 짧은 문장 두세 개로 나눠 줘. 나눈 문장만 답해 줘.' } } });
+            fix: { label: 'AI로 나누기', ai: { target: 'body', text: body, from: from, to: from + body.length,
+              ask: '뜻과 말투, Markdown 서식은 그대로 두고 짧은 문장 두세 개로 나눠 줘. 나눈 문장만 답해 줘.' } } });
         }
         var m = STARTERS.exec(sn);
         if (m) { starters[m[1]] = (starters[m[1]] || 0) + 1; }
-      });
+      }
     });
     Object.keys(starters).forEach(function (w) {
       if (starters[w] >= 3) {
@@ -294,9 +298,9 @@
             title.value = res.body.text.replace(/\s*\n\s*/g, ' ');
             title.dispatchEvent(new Event('input', { bubbles: true }));
           } else {
-            var next = applyFix(current(), ai.text, res.body.text);
-            if (next === null) { note('그 사이 글이 바뀌어서 넣지 못했어요'); return; }
-            setValue(next);
+            var now = current();
+            if (now.slice(ai.from, ai.to) !== ai.text) { note('그 사이 글이 바뀌어서 넣지 못했어요'); return; }
+            setValue(now.slice(0, ai.from) + res.body.text + now.slice(ai.to));
           }
           renderHints();
         }, function () { note('연결되지 않아 AI가 고치지 못했어요'); });
