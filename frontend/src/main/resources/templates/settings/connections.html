@@ -17,6 +17,7 @@
 
         <div th:if="${newKey != null}" class="notice" role="status">
             <p><strong>새 연결 키예요. 이 화면을 떠나면 다시 볼 수 없으니 지금 복사해 두세요.</strong></p>
+            <p>이 키는 비밀번호와 같아요. 채팅·메신저·글·스크린샷에 붙이지 말고, AI 도구의 설정 파일에만 넣어 주세요. 남에게 보였다면 끊고 새로 만들어요.</p>
             <p><code id="new-key" th:text="${newKey}">ggk_…</code>
                 <button type="button" class="btn btn-sm" data-copy="#new-key">복사</button></p>
         </div>

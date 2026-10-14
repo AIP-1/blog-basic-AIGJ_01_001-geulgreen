@@ -30,6 +30,7 @@ class McpIT extends IntegrationTestBase {
                 .with(TestAuth.member(memberId))).andReturn().getResponse().getContentAsString();
         Matcher m = Pattern.compile("ggk_[A-Za-z0-9_-]{43}").matcher(page);
         assertThat(m.find()).isTrue();
+        assertThat(page).contains("채팅·메신저·글·스크린샷에 붙이지 말고");
         return m.group();
     }
 
