@@ -154,7 +154,9 @@ main.list-page { max-width: 1120px; }
     color: var(--color-text); text-decoration: none; font-size: .92em; font-weight: 600; }
 .card-author span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 085 강성찬 개인 확장: 칸이 모자라면 태그가 먼저 줄어든다(아이디가 주 이름이라 마지막에 자름) */
-.card-author { flex: 0 1 auto; }
+/* 088: 아이디는 줄이지 않는다(머리 줄 전체보다 길 때만 …), 칸이 모자라면 태그가 먼저 줄어든다 */
+.card-author { flex: 0 0 auto; max-width: 100%; }
+.card-top { overflow: hidden; } /* 아주 긴 아이디(30자)일 때 태그가 칸 밖으로 나가지 않게 */
 .card-title { font-size: 1.08em; font-weight: 700; margin: 0; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden; }
 .card-link { color: inherit; text-decoration: none; }
@@ -165,17 +167,17 @@ main.list-page { max-width: 1120px; }
                 -webkit-box-orient: vertical; overflow: hidden; }
 /* 084: 두 칸 이상 나란할 때는 제목 2줄 자리를 늘 잡아 요약·사진·반응 줄의 높이를 옆 카드와 맞춘다 */
 @media (min-width: 640px) { .card-grid .card-title { min-height: calc(2em * 1.45); } }
-@media (min-width: 700px) { .home-cards .card-title { min-height: calc(2em * 1.45); } }
 .card-thumb { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: var(--color-thumb-empty); }
 /* 085 강성찬 개인 확장: 세로 카드 사진은 맨 위 같은 비율(벨로그처럼). 두 칸 이상이고 같은 목록에 사진 카드가 있으면
    사진 없는 카드도 같은 자리에 빈 사진 칸(색 역할)을 둬 빈 공간 없이 줄을 맞춘다(요약은 최대 160자라 글로는 못 채움).
-   가로 카드(.home-cards)는 사진이 왼쪽이라 그대로 */
-.card-grid:not(.home-cards) .card-thumb { order: -1; }
-@media (min-width: 640px) { .card-grid:not(.home-cards):has(.card-thumb) .post-card:not(:has(.card-thumb))::before {
+   088: 홈·미션·내 글·시리즈(.home-cards)도 같은 세로 카드(사진을 왼쪽에 두던 가로 카드 없앰) */
+.card-grid .card-thumb { order: -1; }
+@media (min-width: 640px) { .card-grid:has(.card-thumb) .post-card:not(:has(.card-thumb))::before {
     content: ""; order: -1; aspect-ratio: 16 / 10; border-radius: 12px; background: var(--color-thumb-empty); } }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
-.card-likes { color: var(--color-like); font-weight: 600; }
+/* 088: 하트는 기본 회색 빈 하트(카드 목록은 내가 좋아요했는지 모른다) */
+.card-likes { font-weight: 600; }
 .card-date { margin-left: auto; }
 .list-more { text-align: center; margin: 24px 0; }
 /* 067 후속(강성찬 개인 확장): 무한 스크롤이면 [더 보기]는 숨기고(화면 낭독용으로만 남김) 불러오는 동안만 작게 알림 */
@@ -760,18 +762,9 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 .home-tabs-row { align-items: center; }
 .home-tabs-row .home-tabs { flex: 1; }
 /* 가로 카드 2열 */
-main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
-@media (min-width: 700px) { main.list-page .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.home-cards .post-card { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; grid-template-areas: "body" "foot"; gap: 10px; }
-.home-cards .post-card:has(.card-thumb) { grid-template-columns: 120px minmax(0, 1fr); grid-template-areas: "thumb body" "thumb foot"; column-gap: 14px; }
-.home-cards .card-thumb { grid-area: thumb; aspect-ratio: auto; height: 100%; min-height: 120px; max-height: 190px; }
-.home-cards .card-foot { flex-wrap: nowrap; white-space: nowrap; gap: 10px; font-size: .85em; }
-.home-cards .card-foot .card-date { margin-left: auto; }
-@media (min-width: 1300px) { .home-cards .post-card:has(.card-thumb) { grid-template-columns: 150px minmax(0, 1fr); } }
-.home-cards .card-body { grid-area: body; }
-.home-cards .card-foot { grid-area: foot; }
-.home-cards .card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* 088: 홈·미션·내 글·시리즈도 세로 카드. 홈은 오른쪽 칸이 있어 넓은 화면에서 3칸 */
+main.list-page .home-cards { gap: 18px; }
+@media (min-width: 1100px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* 오른쪽 */
 .home-side { display: flex; flex-direction: column; gap: 18px; }
 /* 067 후속: 넓은 화면은 오른쪽 칸이 화면에 붙어 따라오고, 칸이 화면보다 길면 칸 안에서만 스크롤 */
@@ -1085,4 +1078,4 @@ main.list-page .home-cards { grid-template-columns: minmax(0, 1fr); gap: 18px; }
     display: inline-block; max-width: 100%; min-width: 0; vertical-align: bottom;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-nickname { display: block; }
-.newcomer-who, .comment-author, .card-author { max-width: 100%; min-width: 0; }
+.newcomer-who, .comment-author { max-width: 100%; min-width: 0; }
