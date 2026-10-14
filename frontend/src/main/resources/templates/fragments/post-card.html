@@ -11,10 +11,12 @@
 <article th:fragment="cardWith(card, date, showAuthor, extra)" class="post-card" th:attr="data-post-id=${card.id()}">
     <div class="card-body">
         <th:block th:replace="${extra}"></th:block>
-        <p class="card-top" th:if="${showAuthor or card.firstTag() != null}">
+        <!-- 084 강성찬 개인 확장: 머리 줄은 늘 두고(비면 CSS가 숨김, 옆 카드에 있으면 같은 높이로 자리), 추천 글은 이 줄에 "추천" 칩 -->
+        <p class="card-top">
             <a th:if="${showAuthor}" class="card-author" th:href="${paths.blog(card.author().handle())}">
                 <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
                 <span th:text="${card.author().handle()}">아이디</span></a>
+            <span th:if="${recReason != null}" class="card-rec" th:title="${recReason}" th:attr="aria-label=${'추천: ' + recReason}">추천</span>
             <!-- 시안(10-08): 첫 태그를 카드 머리에(색은 태그 길이로 4가지 중 하나) -->
             <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
                th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
