@@ -6,7 +6,7 @@
 </head>
 <body>
 <main class="list-page" th:with="c=${detail.row()}, a=${detail.author()}">
-    <p><a href="/admin/reports">신고 목록</a></p>
+    <p><a class="link-btn back" href="/admin/reports">신고 목록</a></p>
     <h1 th:text="${(c.targetType() == 'POST' ? '글' : '댓글') + ' 신고 ' + c.reportCount() + '건'}">글 신고 3건</h1>
     <!-- 신고 시점 복사본만(지금 원문은 열지 않음) -->
     <section aria-labelledby="snapshot-heading">

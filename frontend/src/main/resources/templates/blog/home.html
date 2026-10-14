@@ -58,7 +58,7 @@
     </section>
     <!-- 033 강성찬 개인 확장: 짧은 기록 -->
     <section th:if="${recentNotes != null and (!recentNotes.isEmpty() or isOwner)}" class="notes-box" aria-labelledby="notes-heading">
-        <h2 id="notes-heading" class="grass-title">짧은 기록 <a class="help" th:href="${paths.blog(owner.handle()) + '/notes'}">모두 보기</a></h2>
+        <h2 id="notes-heading" class="grass-title">짧은 기록 <a class="link-btn" th:href="${paths.blog(owner.handle()) + '/notes'}">모두 보기</a></h2>
         <th:block th:if="${isOwner}"><form th:replace="~{fragments/note :: noteForm(${paths.blog(owner.handle())})}"></form></th:block>
         <ul class="note-list">
             <th:block th:each="n : ${recentNotes}"><li th:replace="~{fragments/note :: item(${n}, ${noteDates.get(n.id())}, ${paths.blog(owner.handle())})}"></li></th:block>
@@ -91,7 +91,7 @@
         <span th:text="${'#' + filterTag + ' 글'}">#태그 글</span>
         <a th:href="${paths.blog(owner.handle())}">필터 해제</a>
     </p>
-    <p th:if="${continued}"><a th:href="${paths.blog(owner.handle())}">처음부터 보기</a></p>
+    <p th:if="${continued}"><a class="link-btn" th:href="${paths.blog(owner.handle())}">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued and filterTag == null and filterCategory == null}">
         <p class="empty-state" th:unless="${isOwner}">아직 공개한 글이 없어요</p>
         <div class="empty-state" th:if="${isOwner}">첫 글을 써 보세요

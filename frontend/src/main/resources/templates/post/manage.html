@@ -32,7 +32,7 @@
         <a th:href="@{/manage/posts(tab='published',visibility='private')}" th:attr="aria-current=${visibility == 'private' ? 'page' : null}">비공개</a>
     </nav>
     <p th:if="${tab == 'trash'}" class="notice">휴지통의 글은 30일 뒤 자동으로 완전히 삭제돼요</p>
-    <p th:if="${continued}"><a th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
+    <p th:if="${continued}"><a class="link-btn" th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
     <p th:if="${rows.isEmpty()}" class="help">아직 글이 없어요.</p>
 
     <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드 조각, 관리 정보는 배지, 관리 버튼은 ⋯ 메뉴 -->

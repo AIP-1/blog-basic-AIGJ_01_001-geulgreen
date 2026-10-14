@@ -128,7 +128,7 @@ class TagPagesIT extends IntegrationTestBase {
         assertThat(header).doesNotContain(">태그</a>")
                 .contains("class=\"search-menu\"").contains("action=\"/search\"").contains("name=\"q\"")
                 .contains("href=\"/tags/java\"").contains("#java").contains("#spring")
-                .contains("href=\"/tags\" class=\"search-menu-all\"");
+                .contains("href=\"/tags\" class=\"link-btn search-menu-all\"");
         assertThat(header.indexOf("#java")).isLessThan(header.indexOf("#spring"));
     }
 

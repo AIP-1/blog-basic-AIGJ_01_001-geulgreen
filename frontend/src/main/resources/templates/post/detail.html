@@ -175,7 +175,7 @@
                 <p><th:block th:replace="~{fragments/author :: byline(${author})}"></th:block></p>
                 <p class="profile-bio" th:if="${post.author().bio() != null}" th:text="${post.author().bio()}">소개</p>
                 <p>
-                    <a th:href="${paths.blog(post.author().handle())}">블로그 가기</a>
+                    <a class="link-btn" th:href="${paths.blog(post.author().handle())}">블로그 가기</a>
                     <th:block th:unless="${viewerIsAuthor}"><th:block
                               th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
                 </p>
@@ -221,7 +221,7 @@
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     이메일 인증을 마치면 댓글을 쓸 수 있어요. <button type="submit" class="btn-text btn-sm">인증 메일 다시 보내기</button>
                 </form>
-                <p th:if="${commentWriteState == 'GUEST'}"><a th:href="${loginRedirect}">로그인하고 댓글 쓰기</a></p>
+                <p th:if="${commentWriteState == 'GUEST'}"><a class="link-btn" th:href="${loginRedirect}">로그인하고 댓글 쓰기</a></p>
                 <p th:if="${commentWriteState == 'HIDDEN_POST'}" class="help">숨겨진 글에는 댓글을 쓸 수 없어요.</p>
             </th:block>
         </section>

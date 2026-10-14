@@ -1093,3 +1093,14 @@ main.list-page .home-cards { gap: 18px; }
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-nickname { display: block; }
 .newcomer-who, .comment-author { max-width: 100%; min-width: 0; }
+/* 혼자 떨어진 동작용 링크(처음부터 보기, 돌아가기, 전체 보기 등)는 작은 알약 버튼 + 화살표(문장 안 링크는 밑줄 글자 그대로). 색은 토큰만 */
+a.link-btn, .empty-state a:not([class]) { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
+    border-radius: 999px; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-size: .88rem; font-weight: 600;
+    line-height: 1.4; white-space: nowrap; vertical-align: middle; transition: background .15s ease; }
+a.link-btn::after, .empty-state a:not([class])::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
+a.link-btn:hover, .empty-state a:not([class]):hover { background: var(--color-surface-muted); text-decoration: none; }
+a.link-btn:focus-visible, .empty-state a:not([class]):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+a.link-btn.back { padding: 5px 14px 5px 12px; }
+a.link-btn.back::after { content: none; }
+a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
+.empty-state a:not([class]) { margin-left: 6px; }

@@ -28,7 +28,7 @@
     <th:block th:if="${!emptyQuery and tab == 'posts'}">
         <p th:if="${twoCharNotice}" class="help">두 글자 단어는 제목·태그에서만 찾았어요</p>
         <p th:if="${results.isEmpty() and !continued}" class="empty-state" th:text="${'''' + q + '''에 대한 글이 없어요'}">'검색어'에 대한 글이 없어요</p>
-        <p th:if="${continued}"><a th:href="${searchBase + '?q=' + encodedQ + '&sort=' + sort}">처음부터 보기</a></p>
+        <p th:if="${continued}"><a class="link-btn" th:href="${searchBase + '?q=' + encodedQ + '&sort=' + sort}">처음부터 보기</a></p>
         <div class="card-grid" id="card-grid">
             <!-- 086 강성찬 개인 확장: 공용 글 카드. 미리보기는 서버가 전체를 이스케이프한 뒤 검색어에만 <mark>를 붙인 값(FR-015) -->
             <th:block th:each="card : ${results}" th:with="snippetHtml=${card.snippetHtml()}">
