@@ -19,13 +19,14 @@ class ExploreIT extends IntegrationTestBase {
         long author = members.localMember("exwriter", "탐색작가", "exwriter@example.com", "Blog#2026ok", true);
         posts.published(author, "탐색에서 보일 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
         String page = mockMvc.perform(get("/explore")).andReturn().getResponse().getContentAsString();
-        // 086: 피드 형식(추천 블로그 줄 + 추천 글 카드), 비회원은 팔로우 대신 로그인 링크, 아이디가 주 이름(082)
-        assertThat(page).contains("<h1>탐색</h1>").contains("추천 블로그").contains("추천 글").contains("탐색에서 보일 글")
+        // 10-15 정리: 글 카드가 주인공, 사람 추천은 한 칸(추천 블로그 + 새로 온 작가), 비회원은 팔로우 대신 로그인 링크, 아이디가 주 이름(082)
+        assertThat(page).contains("<h1>탐색</h1>").contains("이런 사람은 어때요").contains("탐색에서 보일 글")
                 .contains("class=\"post-card\"").contains("href=\"/login\"")
                 .contains("href=\"/explore\" aria-current=\"page\"")
                 .contains("<span>exwriter</span>").doesNotContain("탐색작가")
-                // 086: 새로 온 작가도 여기로, 인기 태그는 링크만, 홈에는 추천·새로 온 작가 없이 탐색 링크
-                .contains("새로 온 작가").contains("href=\"/tags\"").doesNotContain("side-pills");
+                // 새로 온 작가는 "새 작가" 표시로 같은 칸에, 탭 옆 "태그 전체 보기"는 위 메뉴 태그와 겹쳐 뺌
+                .contains("person-new\">새 작가").doesNotContain("explore-tags-link").doesNotContain("side-pills")
+                .doesNotContain("feed-recommended").doesNotContain("newcomers-heading");
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
         // 홈 오른쪽 "둘러보기" 칸은 뺌(탐색은 머리말 메뉴로)
         assertThat(home).contains("href=\"/explore\"").doesNotContain("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")
