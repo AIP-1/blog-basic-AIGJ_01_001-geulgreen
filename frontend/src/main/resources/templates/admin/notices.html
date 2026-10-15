@@ -28,7 +28,7 @@
             </div>
             <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
         </form>
-        <p th:if="${list.empty()}" class="panel-empty">아직 올린 공지가 없어요.</p>
+        <p th:if="${list.empty()}" class="panel-empty" th:text="${q.isBlank() ? '아직 올린 공지가 없어요.' : '조건에 맞는 공지가 없어요.'}">아직 올린 공지가 없어요.</p>
         <ul class="admin-rows" th:unless="${list.empty()}">
             <li th:each="n : ${list.rows()}" class="admin-row">
                 <div class="admin-row-main">

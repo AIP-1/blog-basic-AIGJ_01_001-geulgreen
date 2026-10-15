@@ -82,7 +82,7 @@ class AdminToolsIT extends IntegrationTestBase {
         assertThat(first).contains("1 / 2쪽").contains("점검 공지 25").doesNotContain("점검 공지 5<").contains("page=2");
         String second = page("/admin/notices?q=점검&page=2", TestAuth.admin(admin));
         assertThat(second).contains("2 / 2쪽").contains("점검 공지 5<").doesNotContain("점검 공지 25");
-        assertThat(page("/admin/notices?q=없는말", TestAuth.admin(admin))).contains("아직 올린 공지가 없어요");
+        assertThat(page("/admin/notices?q=없는말", TestAuth.admin(admin))).contains("조건에 맞는 공지가 없어요");
     }
 
     @Test
