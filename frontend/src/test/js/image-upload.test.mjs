@@ -52,4 +52,17 @@ await test2('실패 안내는 다음에 넣은 사진이 시작되거나 올라�
   assert.equal(el.hidden, true);
 });
 
+test('실패 안내와 일반 안내는 어떤 순서로 와도 함께 남고, 정리할 때 실패 안내만 지운다', () => {
+  const el = { textContent: '', hidden: true };
+  const box = u.noticeBox(el);
+  const b = box.begin();
+  box.fail('GIF는 가로·세로 1920px까지 올릴 수 있어요.', b);
+  box.say('움직이는 WebP·APNG는 첫 장면만 남아요.');
+  assert.equal(el.textContent, 'GIF는 가로·세로 1920px까지 올릴 수 있어요. 움직이는 WebP·APNG는 첫 장면만 남아요.');
+  box.done(b + 1);
+  assert.equal(el.textContent, '움직이는 WebP·APNG는 첫 장면만 남아요.');
+  box.say('');
+  assert.equal(el.hidden, true);
+});
+
 console.log(`${passed} passed`);

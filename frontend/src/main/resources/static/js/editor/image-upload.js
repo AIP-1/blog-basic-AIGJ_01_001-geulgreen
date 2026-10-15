@@ -86,16 +86,20 @@
   }
 
   /* 사진 안내 칸. 실패 안내는 다음에 사진을 넣거나 그 뒤에 넣은 사진이 올라가면 지운다.
-     한 번에 고른 여러 장은 한 묶음이라, 같은 묶음의 실패는 형제 사진이 성공해도 남는다. 다른 안내(움직이는 WebP 등)는 그대로 둔다. */
+     한 번에 고른 여러 장은 한 묶음이라, 같은 묶음의 실패는 형제 사진이 성공해도 남는다.
+     실패 안내와 일반 안내(움직이는 WebP 등)는 따로 두어 서로 덮지 않고, 새 묶음이 시작되면 일반 안내도 지운다. */
   function noticeBox(el) {
-    var batch = 0, failBatch = -1, open = false;
-    function show(text) { el.textContent = text || ''; el.hidden = !text; }
-    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { show(''); failBatch = -1; } }
+    var batch = 0, failBatch = -1, open = false, failText = '', infoText = '';
+    function show() {
+      var text = [failText, infoText].filter(Boolean).join(' ');
+      el.textContent = text; el.hidden = !text;
+    }
+    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { failText = ''; failBatch = -1; show(); } }
     return {
-      say: function (text) { show(text); failBatch = -1; },
-      fail: function (text, b) { show(text); failBatch = b; },
+      say: function (text) { infoText = text || ''; show(); },
+      fail: function (text, b) { failText = text; failBatch = b; show(); },
       begin: function () {
-        if (!open) { open = true; batch++; clearOld(batch); Promise.resolve().then(function () { open = false; }); }
+        if (!open) { open = true; batch++; infoText = ''; clearOld(batch); show(); Promise.resolve().then(function () { open = false; }); }
         return batch;
       },
       done: clearOld
@@ -223,10 +227,14 @@
     }
 
     function retryPending() {
-      var b = box.begin();
       readIndex().then(function (ids) {
-        ids.forEach(function (id) {
-          if (textarea.value.indexOf('local:' + id) < 0) { forget(id); return; }
+        var waiting = ids.filter(function (id) {
+          if (textarea.value.indexOf('local:' + id) < 0) { forget(id); return false; }
+          return true;
+        });
+        if (!waiting.length) { return; } // 다시 올릴 사진이 없으면 지금 안내를 그대로 둔다
+        var b = box.begin();
+        waiting.forEach(function (id) {
           store.get(prefix + id).then(function (item) { if (item && item.blob) { upload(id, item.blob, b); } });
         });
       });
