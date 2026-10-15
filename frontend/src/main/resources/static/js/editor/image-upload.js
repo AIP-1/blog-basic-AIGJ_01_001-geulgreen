@@ -10,6 +10,9 @@
   'use strict';
 
   var MAX_SIDE = 1920, THUMB_WIDTH = 640, QUALITY = 0.8;
+  var GIF_MAX_SIDE = 1920; // 서버 blog.image.post.gif-max-dimension과 같은 값
+  var GIF_TOO_BIG = 'GIF는 가로·세로 1920px까지 올릴 수 있어요.';
+  var GIF_TOO_MANY_FRAMES = 'GIF는 300장면까지 올릴 수 있어요.';
   var TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
   function csrfHeaders() {
@@ -38,6 +41,7 @@
     return createImageBitmap(file).then(function (bitmap) {
       var original;
       if (file.type === 'image/gif') {
+        if (gifTooBig(bitmap)) { var e = new Error('gif'); e.final = GIF_TOO_BIG; throw e; } // 저장소에 올리기 전에 멈춘다
         original = Promise.resolve({ blob: file, type: 'image/gif' });
       } else {
         var longSide = Math.max(bitmap.width, bitmap.height);
@@ -70,11 +74,20 @@
     });
   }
 
-  function failMessage(res, data) {
+  function gifTooBig(bitmap) { return bitmap.width > GIF_MAX_SIDE || bitmap.height > GIF_MAX_SIDE; }
+
+  function failMessage(res, data, type) {
     if (res.status === 409) { return data.message || '저장 공간(1GB)을 다 썼어요.'; }
     if (res.status === 429) { return data.message || '잠시 뒤 다시 올려 주세요.'; }
+    if (res.status === 400 && type === 'image/gif' && data.detail === 'DIMENSION') { return GIF_TOO_BIG; }
+    if (res.status === 400 && type === 'image/gif' && data.detail === 'FRAMES') { return GIF_TOO_MANY_FRAMES; }
     if (res.status === 400) { return data.message || '이 사진은 올릴 수 없어요.'; }
     return null; // 다시 시도할 수 있는 실패
+  }
+
+  if (typeof module === 'object' && module.exports) { // Node 자체 검사(src/test/js/image-upload.test.mjs)
+    module.exports = { failMessage: failMessage, gifTooBig: gifTooBig };
+    return;
   }
 
   /* 사진 한 장을 원본·썸네일로 만들어 presign → PUT → complete. 성공하면 complete 응답({url, thumbUrl, ...}).
@@ -87,7 +100,7 @@
           thumbSize: thumb ? thumb.size : null }) })
         .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
         .then(function (r) {
-          if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data); throw e; }
+          if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data, original.type); throw e; }
           var p = r.data;
           var puts = [put(p.uploadUrl, p.headers, original.blob)];
           if (thumb && p.thumbUploadUrl) { puts.push(put(p.thumbUploadUrl, p.thumbHeaders, thumb)); }
@@ -98,7 +111,7 @@
         })
         .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
         .then(function (r) {
-          if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data); throw e; }
+          if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data, original.type); throw e; }
           return r.data;
         });
     });
