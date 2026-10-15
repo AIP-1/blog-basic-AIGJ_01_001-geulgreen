@@ -42,10 +42,22 @@
     <p th:if="${continued}"><a class="link-btn" th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
     <p th:if="${rows.isEmpty()}" class="help">아직 글이 없어요.</p>
 
-    <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드 조각, 관리 정보는 배지, 관리 버튼은 ⋯ 메뉴 -->
-    <ul class="post-rows card-grid home-cards" id="post-rows">
-        <li th:each="row : ${rows}" class="post-row" th:attr="data-post-id=${row.id()}">
-            <article th:replace="~{fragments/post-card :: cardWith(${cards.get(row.id())}, ${cardLabels.get(row.id())}, false, ~{post/manage :: manageExtra})}"></article>
+    <!-- 101 강성찬 개인 확장: 한 글 한 줄(제목 · 태그·공개 범위·배지 · 조회·좋아요·댓글 · 날짜 · ⋯ 메뉴). 휴대폰은 두 줄.
+         067의 카드는 같은 줄 카드 높이를 맞추느라(card-rows.js) 짧은 글 카드 아래가 비어 보였다 -->
+    <ul class="manage-list" id="post-rows">
+        <li th:each="row : ${rows}" class="post-row" th:with="card=${cards.get(row.id())}" th:attr="data-post-id=${row.id()}">
+            <div class="manage-row">
+                <a class="manage-row-title" th:href="${tab == 'drafts' ? '/write/' + row.id() : card.url()}"
+                   th:text="${#strings.isEmpty(row.title()) and !#strings.isEmpty(card.excerpt()) ? card.excerpt() : card.title()}" th:title="${card.title()}">제목</a>
+                <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
+                   th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
+                <th:block th:replace="~{post/manage :: manageExtra}"></th:block>
+                <p class="manage-row-stats help">
+                    <span th:text="${'♡ ' + card.likeCount()}" th:attr="aria-label=${'좋아요 ' + card.likeCount()}">♡ 0</span>
+                    <span th:text="${'💬 ' + card.commentCount()}">💬 0</span>
+                    <time th:attr="datetime=${card.firstPublicAt()}" th:text="${cardLabels.get(row.id())}">2026.10.15</time>
+                </p>
+            </div>
             <p class="row-error field-error" role="alert" hidden></p>
         </li>
     </ul>
