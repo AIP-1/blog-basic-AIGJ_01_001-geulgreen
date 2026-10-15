@@ -32,6 +32,13 @@
         <a th:href="@{/manage/posts(tab='published',visibility='private')}" th:attr="aria-current=${visibility == 'private' ? 'page' : null}">비공개</a>
     </nav>
     <p th:if="${tab == 'trash'}" class="notice">휴지통의 글은 30일 뒤 자동으로 완전히 삭제돼요</p>
+    <form th:if="${tab == 'trash' and counts.get('trash') > 0}" method="post" action="/manage/posts/trash/empty"
+          class="trash-empty" th:attr="data-confirm=${'휴지통의 글 ' + counts.get('trash') + '개를 영구 삭제합니다. 되돌릴 수 없어요.'}">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <!-- 스크립트가 없으면 확인창 대신 꼭 체크해야 하는 확인 -->
+        <noscript><label><input type="checkbox" required> <span th:text="${'글 ' + counts.get('trash') + '개를 영구 삭제해요. 되돌릴 수 없어요.'}">확인</span></label></noscript>
+        <button type="submit" class="btn btn-danger btn-sm">휴지통 비우기</button>
+    </form>
     <p th:if="${continued}"><a class="link-btn" th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
     <p th:if="${rows.isEmpty()}" class="help">아직 글이 없어요.</p>
 
@@ -44,7 +51,7 @@
     </ul>
     <p class="list-more"><a th:if="${nextCursor != null}" class="more-button" th:attr="data-cursor=${nextCursor}"
           th:href="@{/manage/posts(tab=${tab},visibility=${visibility},cursor=${nextCursor})}">더 보기</a></p>
-    <p id="manage-notice" class="notice" role="status" hidden></p>
+    <p id="manage-notice" class="notice" role="status" th:hidden="${manageNotice == null}" th:text="${manageNotice}"></p>
     <script th:src="@{/js/post/manage.js}" defer></script>
 </main>
 
@@ -63,8 +70,8 @@
             <span class="badge" th:text="${'조회 ' + views.get(row.id())}">조회</span>
         </th:block>
         <th:block th:if="${tab == 'trash'}">
-            <span class="badge" th:text="${row.status().name() == 'DRAFT' ? '(임시글이었음)' : '(발행 글이었음)'}">(발행 글이었음)</span>
-            <span class="badge" th:text="${daysLeft.get(row.id()) + '일 뒤 완전 삭제'}">30일 뒤 완전 삭제</span>
+            <span class="badge" th:text="${row.status().name() == 'DRAFT' ? '임시글' : '발행 글'}">발행 글</span>
+            <span class="badge" th:text="${daysLeft.get(row.id()) == 0 ? '오늘 삭제' : daysLeft.get(row.id()) + '일 남음'}">29일 남음</span>
         </th:block>
     </p>
     <details class="sort-menu manage-menu">
