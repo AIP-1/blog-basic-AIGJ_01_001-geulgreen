@@ -202,6 +202,37 @@ class PostTrashIT extends IntegrationTestBase {
     }
 
     @Test
+    void tabCountsFollowTrashRestorePurge() throws Exception {
+        long me = writer(members, "countme");
+        long draft = posts.draft(me, "임시", "본문", 0);
+        long empty = posts.draft(me, "", "", 0);
+        jdbc.update("UPDATE post SET updated_at = ? WHERE id = ?", java.sql.Timestamp.from(clock.instant()), empty); // 방금 만든 빈 글은 목록에 보인다
+        long pub = posts.published(me, "발행", "본문", 1, T);
+        expectCounts(me, 1, 2, 0);
+
+        mockMvc.perform(delete("/api/posts/{id}", draft).with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
+        expectCounts(me, 1, 1, 1);
+        mockMvc.perform(delete("/api/posts/{id}", empty).with(csrf()).with(TestAuth.member(me)))
+                .andExpect(jsonPath("$.purged").value(true));
+        expectCounts(me, 1, 0, 1); // 빈 임시글은 휴지통을 거치지 않는다
+        mockMvc.perform(delete("/api/posts/{id}", pub).with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
+        expectCounts(me, 0, 0, 2);
+        mockMvc.perform(post("/api/posts/{id}/restore", pub).with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());
+        expectCounts(me, 1, 0, 1);
+        mockMvc.perform(delete("/api/posts/{id}/permanent", draft).with(csrf()).with(TestAuth.member(me))).andExpect(status().isNoContent());
+        expectCounts(me, 1, 0, 0);
+        mockMvc.perform(get("/api/me/posts/counts")).andExpect(status().isUnauthorized());
+        assertThat(mockMvc.perform(get("/manage/posts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
+                .contains("data-count-tab=\"drafts\""); // 화면 스크립트가 고쳐 쓸 탭 표시
+    }
+
+    private void expectCounts(long me, int published, int drafts, int trash) throws Exception {
+        mockMvc.perform(get("/api/me/posts/counts").with(TestAuth.member(me))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(published)).andExpect(jsonPath("$.drafts").value(drafts))
+                .andExpect(jsonPath("$.trash").value(trash));
+    }
+
+    @Test
     void concurrentTrashRestorePurgeStayConsistent() throws Exception {
         long me = writer(members, "trashrace");
         long id = posts.published(me, "경합", "본문", 1, T);

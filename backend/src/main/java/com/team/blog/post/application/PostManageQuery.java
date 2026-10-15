@@ -96,6 +96,11 @@ public class PostManageQuery {
         return new ManagePage(List.copyOf(rows), next, counts);
     }
 
+    /** 로그인한 회원의 탭별 글 수(화면에서 삭제·복구 뒤 탭 숫자 갱신용). */
+    public Map<String, Long> counts(Optional<CurrentUser> currentUser) {
+        return counts(accountGuard.requireLoggedIn(currentUser).memberId());
+    }
+
     /** 탭별 글 수(GROUP BY 1번). */
     public Map<String, Long> counts(long memberId) {
         Map<String, Long> counts = new LinkedHashMap<>();

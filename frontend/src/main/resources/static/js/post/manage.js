@@ -45,6 +45,19 @@
     purge: '영구 삭제하면 되돌릴 수 없어요. 댓글·좋아요도 함께 지워져요'
   };
 
+  // 삭제·복구·영구 삭제 뒤 탭 옆 글 수를 서버 값으로 다시 쓴다(빈 임시글은 휴지통을 거치지 않으므로 추측하지 않는다)
+  var countsSeq = 0;
+  function refreshCounts() {
+    var seq = ++countsSeq;
+    return call('GET', '/api/me/posts/counts').then(function (counts) {
+      if (seq !== countsSeq) { return; } // 늦게 온 옛 응답이 새 숫자를 덮지 않게
+      Array.prototype.forEach.call(document.querySelectorAll('[data-count-tab]'), function (a) {
+        var n = counts[a.dataset.countTab];
+        if (typeof n === 'number') { a.textContent = a.dataset.countLabel + ' ' + n; }
+      });
+    }).catch(function () { /* 숫자는 다음에 화면을 열 때 맞춰진다 */ });
+  }
+
   function init() {
     // 휴지통 비우기: 확인만 받고 폼은 그대로 제출(서버가 돌아올 때 알림)
     Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
@@ -67,6 +80,7 @@
           if (data && data.purged) { notice('빈 글이라 바로 삭제했어요'); }
           if (action === 'restore') { notice('복구했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요'); }
           row.remove();
+          refreshCounts();
         }).catch(function (err) {
           fail(row, (err.data && err.data.message) || '처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
         });
