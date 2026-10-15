@@ -48,7 +48,7 @@
         <li th:each="row : ${rows}" class="post-row" th:with="card=${cards.get(row.id())}" th:attr="data-post-id=${row.id()}">
             <div class="manage-row">
                 <a class="manage-row-title" th:href="${tab == 'drafts' ? '/write/' + row.id() : card.url()}"
-                   th:text="${#strings.isEmpty(card.title()) ? '(제목 없음)' : card.title()}" th:title="${card.title()}">제목</a>
+                   th:text="${!#strings.isEmpty(card.title()) ? card.title() : (!#strings.isEmpty(card.excerpt()) ? card.excerpt() : '(제목 없음)')}" th:title="${card.title()}">제목</a>
                 <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
                    th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
                 <th:block th:replace="~{post/manage :: manageExtra}"></th:block>
