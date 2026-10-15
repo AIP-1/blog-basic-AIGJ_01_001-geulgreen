@@ -42,7 +42,8 @@ public class NewcomerQuery {
         return properties.enabled();
     }
 
-    public List<Newcomer> recent() {
+    /** {@code viewerId}(비회원 -1) 자신과 이미 팔로우한 사람은 뺀다(10-15 탐색 사람 추천). */
+    public List<Newcomer> recent(long viewerId) {
         Timestamp since = Timestamp.from(clock.instant().minus(properties.window()));
         return jdbc.query("""
                 SELECT handle, nickname, profile_image_url, id, title FROM (
@@ -50,8 +51,10 @@ public class NewcomerQuery {
                   FROM post p JOIN member m ON m.id = p.author_id
                   WHERE """ + " " + accessPolicy.publicListingCondition("p", "m") + """
                   ORDER BY p.author_id, p.first_public_at, p.id
-                ) firsts WHERE first_public_at >= ? ORDER BY first_public_at DESC LIMIT """ + " " + properties.limit(),
+                ) firsts WHERE first_public_at >= ? AND author_id <> ?
+                  AND author_id NOT IN (SELECT f.followee_id FROM follow f WHERE f.follower_id = ?)
+                ORDER BY first_public_at DESC LIMIT """ + " " + properties.limit(),
                 (rs, n) -> new Newcomer(rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url"),
-                        rs.getLong("id"), rs.getString("title")), since);
+                        rs.getLong("id"), rs.getString("title")), since, viewerId, viewerId);
     }
 }
