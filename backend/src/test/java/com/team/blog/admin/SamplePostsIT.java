@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.team.blog.media.application.ImageStorage;
 import com.team.blog.support.IntegrationTestBase;
+import java.util.List;
 import com.team.blog.support.TestAuth;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ class SamplePostsIT extends IntegrationTestBase {
 
     @Autowired
     JdbcTemplate jdbc;
+
+    @Autowired
+    ImageStorage storage;
 
     private int samplePosts() {
         return jdbc.queryForObject("""
@@ -43,14 +48,27 @@ class SamplePostsIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/admin").with(TestAuth.admin(admin))).andReturn().getResponse().getContentAsString())
                 .contains("테스트 글 넣기").contains("모두 지우기");
 
+        // 사진 글: 평소 업로드처럼 완료된 사진, 카드 썸네일, 본문 그림
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE thumbnail_url IS NOT NULL AND title LIKE '%산책%'",
+                Integer.class)).isEqualTo(1);
+        List<String> keys = jdbc.queryForList("SELECT storage_key FROM image WHERE status = 'ATTACHED' AND detached_at IS NULL", String.class);
+        assertThat(keys).hasSizeGreaterThanOrEqualTo(24);
+        long imagePostId = jdbc.queryForObject("SELECT id FROM post WHERE title LIKE '%산책%'", Long.class);
+        assertThat(mockMvc.perform(get("/test_minji/posts/{id}", imagePostId)).andReturn().getResponse().getContentAsString())
+                .contains("<img").doesNotContain("image:13-");
+        assertThat(storage.inspect(keys.get(0))).isPresent();
+
         mockMvc.perform(post("/admin/sample-posts").with(csrf()).with(TestAuth.admin(admin))).andExpect(status().is3xxRedirection());
         assertThat(samplePosts()).isEqualTo(seeded);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM image", Integer.class)).isEqualTo(keys.size());
 
         mockMvc.perform(post("/admin/sample-posts/remove").with(csrf()).with(TestAuth.admin(admin)))
                 .andExpect(status().is3xxRedirection());
         assertThat(samplePosts()).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM member WHERE handle LIKE 'test\\_%'", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_identity WHERE email LIKE '%@sample.invalid'", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM image", Integer.class)).isZero();
+        assertThat(storage.inspect(keys.get(0))).isEmpty();
 
         // 지운 뒤 다시 넣을 수 있다
         mockMvc.perform(post("/admin/sample-posts").with(csrf()).with(TestAuth.admin(admin))).andExpect(status().is3xxRedirection());

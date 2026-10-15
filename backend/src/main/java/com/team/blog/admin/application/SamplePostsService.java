@@ -1,6 +1,10 @@
 package com.team.blog.admin.application;
 
 import com.team.blog.account.application.WithdrawalPurgeStep;
+import com.team.blog.media.application.ImageStorage;
+import com.team.blog.media.application.ImageUploadService;
+import com.team.blog.media.application.PresignCommand;
+import com.team.blog.media.application.PresignResult;
 import com.team.blog.moderation.application.AdminGuard;
 import com.team.blog.post.application.PostDraftService;
 import com.team.blog.post.application.PostPublishService;
@@ -19,7 +23,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,6 +39,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * 테스트용 긴 글(083, 강성찬 개인 확장): 관리자 화면 버튼 한 번으로 표시가 분명한 테스트 계정 4개와 긴 글을 넣고, 한 번으로 모두 지운다.
  * 글 본문은 {@code classpath:sample-posts/*.md}. 남의 글이어야 피드·탐색·추천에 보이므로 별도 계정으로 쓴다. 다시 눌러도 이미 있는 계정·글은 건너뛴다.
+ * 13번부터는 본문에 직접 그린 그림 3장이 있고 첫 그림이 카드 썸네일이 된다(지울 때 사진 파일도 바로 지운다).
  * 계정은 로그인할 수 없다(아무도 모르는 비밀번호). {@code blog.admin.sample-posts-enabled=false}면 버튼도 기능도 없다.
  */
 @Service
@@ -47,6 +57,9 @@ public class SamplePostsService {
     record SamplePost(String author, String title, List<String> tags, String body) {
     }
 
+    private static final Logger log = LoggerFactory.getLogger(SamplePostsService.class);
+    private static final Pattern IMAGE_REF = Pattern.compile("\\(image:([0-9]+-[0-9]+)\\)");
+
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
     private final AdminGuard adminGuard;
@@ -56,11 +69,16 @@ public class SamplePostsService {
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
     private final boolean enabled;
+    private final ImageUploadService uploads;
+    private final ImageStorage storage;
 
     public SamplePostsService(JdbcTemplate jdbc, TransactionTemplate tx, AdminGuard adminGuard, PostDraftService drafts,
                               PostPublishService publisher, List<WithdrawalPurgeStep> purgeSteps,
                               PasswordEncoder passwordEncoder, Clock clock,
-                              @Value("${blog.admin.sample-posts-enabled:true}") boolean enabled) {
+                              @Value("${blog.admin.sample-posts-enabled:true}") boolean enabled,
+                              ImageUploadService uploads, ImageStorage storage) {
+        this.uploads = uploads;
+        this.storage = storage;
         this.jdbc = jdbc;
         this.tx = tx;
         this.adminGuard = adminGuard;
@@ -99,9 +117,10 @@ public class SamplePostsService {
                 continue;
             }
             Optional<CurrentUser> author = Optional.of(new CurrentUser(authorId, "USER"));
-            long postId = drafts.create(author, post.title(), post.body());
+            String body = withUploadedImages(author, post.body());
+            long postId = drafts.create(author, post.title(), body);
             publisher.publish(author, postId, UUID.randomUUID().toString(),
-                    new PublishCommand(post.title(), post.body(), post.tags(), "PUBLIC", 0L));
+                    new PublishCommand(post.title(), body, post.tags(), "PUBLIC", 0L));
             // 피드 순서가 자연스럽게 보이도록 발행 시각을 몇 시간씩 앞으로 당긴다
             Timestamp at = Timestamp.from(now.minus(Duration.ofHours(5L * (posts.size() - i))));
             jdbc.update("UPDATE post SET published_at = ?, first_public_at = ?, created_at = ? WHERE id = ?", at, at, at, postId);
@@ -124,8 +143,57 @@ public class SamplePostsService {
                 jdbc.update("UPDATE member SET handle = 'gone_' || id WHERE id = ?", id);
             }
         });
+        deleteImages(ids);
         log(admin, "SAMPLE_POSTS_REMOVE", "테스트 계정 " + ids.size() + "개"); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
         return ids.size();
+    }
+
+    /**
+     * 본문의 {@code (image:13-1)} 자리를 실제 사진 주소로. 평소 업로드처럼 승인 → 원본·썸네일 올리기 → 완료 검사를 거친다(브라우저가 하던
+     * PUT만 서버가 직접). 그림은 {@code sample-posts/images/13-1.webp}와 {@code 13-1_thumb.webp}(가로 640).
+     */
+    private String withUploadedImages(Optional<CurrentUser> author, String body) {
+        Matcher m = IMAGE_REF.matcher(body);
+        StringBuilder out = new StringBuilder();
+        while (m.find()) {
+            m.appendReplacement(out, Matcher.quoteReplacement("(" + upload(author, m.group(1)) + ")"));
+        }
+        return m.appendTail(out).toString();
+    }
+
+    private String upload(Optional<CurrentUser> author, String name) {
+        byte[] original = resource("sample-posts/images/" + name + ".webp");
+        byte[] thumb = resource("sample-posts/images/" + name + "_thumb.webp");
+        PresignResult presigned = uploads.presign(author,
+                new PresignCommand("POST", "image/webp", (long) original.length, name + ".webp", (long) thumb.length));
+        var keys = jdbc.queryForMap("SELECT storage_key, thumb_storage_key FROM image WHERE id = ?", presigned.imageId());
+        storage.put((String) keys.get("storage_key"), "image/webp", original);
+        storage.put((String) keys.get("thumb_storage_key"), "image/webp", thumb);
+        return uploads.complete(author, presigned.imageId()).url();
+    }
+
+    /** 정리 단계는 사진을 끊김 표시만 한다(7일 뒤 정리). 테스트 사진은 바로 지운다. 파일 삭제가 실패한 사진은 정리 작업에 맡긴다. */
+    private void deleteImages(List<Long> memberIds) {
+        jdbc.queryForList("SELECT id, storage_key, thumb_storage_key FROM image WHERE uploader_id = ANY (?)",
+                (Object) memberIds.toArray(new Long[0])).forEach(row -> {
+            try {
+                storage.delete((String) row.get("storage_key"));
+                if (row.get("thumb_storage_key") != null) {
+                    storage.delete((String) row.get("thumb_storage_key"));
+                }
+                jdbc.update("DELETE FROM image WHERE id = ?", row.get("id"));
+            } catch (RuntimeException e) {
+                log.warn("테스트 사진 파일 삭제 실패, 정리 작업에서 다시: imageId={}", row.get("id"));
+            }
+        });
+    }
+
+    private static byte[] resource(String path) {
+        try (var in = new ClassPathResource(path).getInputStream()) {
+            return in.readAllBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private CurrentUser requireEnabledAdmin(Optional<CurrentUser> current) {

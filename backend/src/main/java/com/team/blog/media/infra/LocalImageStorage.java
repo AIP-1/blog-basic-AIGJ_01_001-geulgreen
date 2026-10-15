@@ -125,6 +125,15 @@ public class LocalImageStorage implements ImageStorage {
     }
 
     @Override
+    public void put(String key, String contentType, byte[] bytes) {
+        try {
+            write(key, contentType, new java.io.ByteArrayInputStream(bytes), bytes.length);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
     public void delete(String key) {
         Path file = resolve(key);
         try {
