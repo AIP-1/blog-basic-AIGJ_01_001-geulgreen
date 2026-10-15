@@ -33,4 +33,20 @@ class SitemapIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/robots.txt")).andReturn().getResponse().getContentAsString())
                 .contains("Sitemap: ").contains("/sitemap.xml").contains("Disallow: /api/");
     }
+
+    @Test
+    void sampleTestAccountsAreNotListed() throws Exception {
+        long sample = members.localMember("test_minji", "테스트민지", "test_minji@example.com", "Blog#2026ok", true);
+        long id = posts.published(sample, "테스트 글", "본문", 1, Instant.parse("2026-10-09T00:00:00Z"));
+        String xml = mockMvc.perform(get("/sitemap.xml")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(xml).doesNotContain("test_minji").doesNotContain("/posts/" + id + "<");
+    }
+
+    @Test
+    void blogPageCanonicalUsesPublicAddressWithoutAt() throws Exception {
+        members.localMember("canonblog", "canonblog", "canonblog@example.com", "Blog#2026ok", true);
+        String html = mockMvc.perform(get("/canonblog")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(html).containsPattern("<link rel=\"canonical\" href=\"[^\"]*/canonblog\">")
+                .containsPattern("<meta property=\"og:url\" content=\"[^\"]*/canonblog\">").doesNotContain("/@canonblog\"");
+    }
 }
