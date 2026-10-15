@@ -66,10 +66,14 @@ public class ManagePostsController {
         // 067 후속(강성찬 개인 확장): 홈 카드 조각에 넘길 카드와 카드 아래 날짜 글자
         Map<Long, PostCard> cards = new HashMap<>();
         Map<Long, String> cardLabels = new HashMap<>();
+        Map<Long, String> rowDates = new HashMap<>();
         for (ManageRow row : page.items()) {
             savedLabels.put(row.id(), CardDates.label(row.updatedAt(), now));
             dates.put(row.id(), tab == ManageTab.TRASH ? KoreanDateFormatter.monthDay(row.deletedAt())
                     : CardDates.label(row.publishedAt(), now));
+            // 102 강성찬 개인 확장: 날짜 칸은 한 가지 모양(24시간 안은 "23분 전", 그 밖은 2026.10.12), 자세한 말은 마우스를 올리면(title)
+            Instant shownAt = tab == ManageTab.DRAFTS ? row.updatedAt() : tab == ManageTab.TRASH ? row.deletedAt() : row.publishedAt();
+            rowDates.put(row.id(), CardDates.label(shownAt, now));
             views.put(row.id(), ViewCountFormat.format(row.viewCount()));
             cards.put(row.id(), row.card(tab == ManageTab.DRAFTS ? "/write/" + row.id() : tab == ManageTab.TRASH ? null : row.url()));
             cardLabels.put(row.id(), tab == ManageTab.DRAFTS ? "마지막 저장 " + savedLabels.get(row.id())
@@ -93,6 +97,7 @@ public class ManagePostsController {
         model.addAttribute("daysLeft", daysLeft);
         model.addAttribute("cards", cards);
         model.addAttribute("cardLabels", cardLabels);
+        model.addAttribute("rowDates", rowDates);
         return "post/manage";
     }
 

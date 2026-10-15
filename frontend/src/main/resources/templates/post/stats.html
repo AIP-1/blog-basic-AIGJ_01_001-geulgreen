@@ -18,9 +18,9 @@
 
     <section aria-labelledby="days-heading" class="stats-card">
         <h2 id="days-heading" th:text="${'최근 30일 조회 ' + stats.recentViews()}">최근 30일 조회 0</h2>
-        <!-- 101 강성찬 개인 확장: 막대에 마우스를 올리거나(탭·키보드로 고르면) 날짜와 조회 수가 뜬다(관리자 그래프와 같은 방식) -->
-        <div class="stats-bars">
-            <span th:each="d : ${stats.days()}" class="stats-bar" tabindex="0" role="img" th:attr="aria-label=${d.label() + ' 조회 ' + d.views() + '회'}">
+        <!-- 101·102 강성찬 개인 확장: 막대에 마우스를 올리거나 누르면(휴대폰은 탭) 날짜와 조회 수가 뜬다. 낭독기는 아래 숨은 표를 읽는다 -->
+        <div class="stats-bars" aria-hidden="true">
+            <span th:each="d : ${stats.days()}" class="stats-bar" tabindex="-1">
                 <span class="stats-bar-fill" th:style="${'height:' + d.percent() + '%'}"></span>
                 <span class="stats-tip" aria-hidden="true" th:text="${d.label() + ' · ' + d.views() + '회'}">10.9 · 0회</span>
             </span>
@@ -28,15 +28,13 @@
         <div class="stats-axis" aria-hidden="true">
             <span th:text="${stats.days()[0].label()}">9.10</span><span th:text="${stats.days()[stats.days().size() - 1].label()}">10.9</span>
         </div>
-        <details class="stats-numbers">
-            <summary><span>날짜별 숫자 보기</span><svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
-            <table class="stats-table">
-                <thead><tr><th scope="col">날짜</th><th scope="col">조회</th></tr></thead>
-                <!-- 최근 날짜가 위 -->
-                <tbody><tr th:each="i : ${#numbers.sequence(stats.days().size() - 1, 0, -1)}" th:with="d=${stats.days()[i]}">
-                    <td th:text="${d.label()}">10.9</td><td th:text="${d.views()}">0</td></tr></tbody>
-            </table>
-        </details>
+        <!-- 102: 보이는 "날짜별 숫자 보기"는 뺐다(막대를 올리거나 누르면 숫자가 뜸). 화면 낭독기용 표만 남긴다 -->
+        <div class="visually-hidden"><table class="stats-table">
+            <caption>최근 30일 날짜별 조회</caption>
+            <thead><tr><th scope="col">날짜</th><th scope="col">조회</th></tr></thead>
+            <tbody><tr th:each="i : ${#numbers.sequence(stats.days().size() - 1, 0, -1)}" th:with="d=${stats.days()[i]}">
+                <td th:text="${d.label()}">10.9</td><td th:text="${d.views()}">0</td></tr></tbody>
+        </table></div>
     </section>
 
     <section aria-labelledby="top-heading" class="stats-card">
