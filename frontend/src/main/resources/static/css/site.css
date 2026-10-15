@@ -1254,3 +1254,11 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .tag-sections-more { text-align: center; }
 .tag-sections-more.loading::before { content: "불러오는 중…"; color: var(--color-text-muted); font-size: .9em; }
 .tag-sections-more.loading a { display: none; }
+/* 다크 모드는 같은 장면의 밤 그림(배너·고양이, chan이 준 그림 10-15). 시스템 다크 + 설정의 화면 테마 둘 다 따름 */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .hero-photo { background-image: url("/images/hero-night.webp"); }
+    :root:not([data-theme="light"]) img.art-day { display: none !important; }
+}
+@media not all and (prefers-color-scheme: dark) { :root:not([data-theme="dark"]) img.art-night { display: none !important; } }
+:root[data-theme="dark"] .hero-photo { background-image: url("/images/hero-night.webp"); }
+:root[data-theme="dark"] img.art-day, :root[data-theme="light"] img.art-night { display: none !important; }

@@ -127,7 +127,7 @@
         --color-tag-bg: #24303D;
         --color-tag-text: #B9CDE6;
         --color-hero-from: #2A2420;
-        --color-cat-art-bg: #FCF2E6;
+        --color-cat-art-bg: #2E3758; /* 밤 고양이 그림 바탕 */
         --color-cat-art-text: #5C4A3D;
         --tone-green-bg: #22301F;
         --tone-green-fg: #9BD08A;
@@ -197,7 +197,7 @@
     --color-tag-bg: #24303D;
     --color-tag-text: #B9CDE6;
     --color-hero-from: #2A2420;
-    --color-cat-art-bg: #FCF2E6;
+    --color-cat-art-bg: #2E3758; /* 밤 고양이 그림 바탕 */
     --color-cat-art-text: #5C4A3D;
     --tone-green-bg: #22301F;
     --tone-green-fg: #9BD08A;
