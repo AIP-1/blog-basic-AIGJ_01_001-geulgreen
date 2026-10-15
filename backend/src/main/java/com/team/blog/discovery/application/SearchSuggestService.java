@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,7 @@ public class SearchSuggestService {
     private final JdbcTemplate jdbc;
     private final PostAccessPolicy accessPolicy;
     private final SearchProperties properties;
-    private volatile Snapshot snapshot;
+    private final AtomicReference<Snapshot> snapshot = new AtomicReference<>();
 
     public SearchSuggestService(JdbcTemplate jdbc, PostAccessPolicy accessPolicy, SearchProperties properties) {
         this.jdbc = jdbc;
@@ -138,16 +139,16 @@ public class SearchSuggestService {
     }
 
     private Snapshot snapshot() {
-        Snapshot s = snapshot;
+        Snapshot s = snapshot.get();
         long ttl = properties.suggestCacheTtl().toNanos();
         if (s != null && System.nanoTime() - s.loadedAt() < ttl) {
             return s;
         }
         synchronized (this) {
-            s = snapshot;
+            s = snapshot.get();
             if (s == null || System.nanoTime() - s.loadedAt() >= ttl) {
                 s = load();
-                snapshot = s;
+                snapshot.set(s);
             }
             return s;
         }

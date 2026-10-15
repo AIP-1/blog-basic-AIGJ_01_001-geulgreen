@@ -30,6 +30,8 @@ import tools.jackson.databind.JsonNode;
 @Service
 public class McpTools {
 
+    private static final String INVALID_REQUEST = "INVALID_REQUEST";
+
     /** 도구가 돌려주는 실패. {@code code}는 화면 API와 같은 이유 코드. */
     public static class ToolException extends RuntimeException {
         public ToolException(String code) {
@@ -112,7 +114,7 @@ public class McpTools {
     private Map<String, Object> updateDraft(Optional<CurrentUser> user, JsonNode args) {
         Long postId = number(args, "post_id");
         if (postId == null) {
-            throw new ToolException("INVALID_REQUEST");
+            throw new ToolException(INVALID_REQUEST);
         }
         List<String> tags = tags(args);
         EditingContent current = drafts.editing(user, postId);
@@ -174,13 +176,13 @@ public class McpTools {
     }
 
     /** 태그 칸이 없으면 null(바꾸지 않음). 있으면 정규화·중복 제거·개수 확인. */
-    private List<String> tags(JsonNode args) {
+    private List<String> tags(JsonNode args) { // NOSONAR null은 "태그를 바꾸지 않음"이라는 뜻이라 빈 목록(모두 지움)과 다르다
         JsonNode node = args == null ? null : args.get("tags");
         if (node == null || node.isNull()) {
             return null;
         }
         if (!node.isArray()) {
-            throw new ToolException("INVALID_REQUEST");
+            throw new ToolException(INVALID_REQUEST);
         }
         Set<String> out = new LinkedHashSet<>();
         for (JsonNode t : node) {
@@ -198,7 +200,7 @@ public class McpTools {
     private static String required(JsonNode args, String field) {
         String v = text(args, field);
         if (v == null) {
-            throw new ToolException("INVALID_REQUEST");
+            throw new ToolException(INVALID_REQUEST);
         }
         return v;
     }
@@ -209,7 +211,7 @@ public class McpTools {
             return null;
         }
         if (!node.isString()) {
-            throw new ToolException("INVALID_REQUEST");
+            throw new ToolException(INVALID_REQUEST);
         }
         return node.stringValue();
     }
@@ -220,7 +222,7 @@ public class McpTools {
             return null;
         }
         if (!node.isIntegralNumber() || !node.canConvertToLong()) {
-            throw new ToolException("INVALID_REQUEST");
+            throw new ToolException(INVALID_REQUEST);
         }
         return node.longValue();
     }
