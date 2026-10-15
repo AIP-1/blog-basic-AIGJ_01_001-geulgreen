@@ -18,7 +18,6 @@
         </form>
         <nav class="manage-tabs tags-sort" aria-label="정렬">
             <a th:href="@{/tags(q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'popular' ? 'page' : null}">인기순</a>
-            <a th:href="@{/tags(sort='name',q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'name' ? 'page' : null}">이름순</a>
             <a th:href="@{/tags(sort='recent',q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'recent' ? 'page' : null}">최근순</a>
         </nav>
     </header>
