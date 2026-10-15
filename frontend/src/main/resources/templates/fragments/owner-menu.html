@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  098 강성찬 개인 확장: 내 글 ⋯ 메뉴의 "공개 범위" 한 줄(글 화면·내 글 카드가 같이 씀).
+  누르면 그 자리에서 다섯 가지가 펼쳐지고 지금 값에 ✓. 고르면 js/post/visibility-menu.js가 바로 저장한다(PATCH).
+-->
+<details th:fragment="visibility(postId, current)" class="menu-sub visibility-menu"
+         th:with="label=${current == 'PRIVATE' ? '나만 보기' : (current == 'FRIENDS' ? '친구 공개' : (current == 'LINK' ? '링크 공개' : (current == 'GROUP' ? '그룹 공개' : '전체 공개')))}"
+         th:attr="data-post-id=${postId},data-visibility=${current}">
+    <summary><svg th:replace="~{fragments/icons :: globe}"></svg><span class="menu-text">공개 범위</span>
+        <span class="menu-value" data-visibility-label th:text="${label}">전체 공개</span><svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
+    <div class="menu-sub-list" role="group" aria-label="공개 범위">
+        <button type="button" th:each="o : ${ {'PUBLIC','FRIENDS','LINK','GROUP','PRIVATE'} }" th:attr="data-visibility-option=${o},aria-pressed=${o == current}"><svg
+                th:replace="~{fragments/icons :: check}"></svg><span th:text="${o == 'PRIVATE' ? '나만 보기' : (o == 'FRIENDS' ? '친구 공개' : (o == 'LINK' ? '링크 공개' : (o == 'GROUP' ? '그룹 공개' : '전체 공개')))}">전체 공개</span></button>
+    </div>
+</details>
+</body>
+</html>
