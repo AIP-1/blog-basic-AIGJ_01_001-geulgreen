@@ -72,9 +72,13 @@ public class ContactController {
     }
 
     @GetMapping("/admin/inquiries")
-    public String inbox(Model model, HttpServletResponse response) {
+    public String inbox(@RequestParam(value = "status", defaultValue = "all") String status,
+                        @RequestParam(value = "q", required = false) String q,
+                        @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("inquiries", inquiries.list(currentUserProvider.current()));
+        model.addAttribute("status", status);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", inquiries.list(currentUserProvider.current(), status, q, page));
         return "admin/inquiries";
     }
 

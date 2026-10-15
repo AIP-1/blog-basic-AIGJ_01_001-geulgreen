@@ -60,14 +60,38 @@ class TagIconIT extends IntegrationTestBase {
         tag(a, "docker", 1);
         tag(b, "docker", 0);
         jdbc.update("UPDATE post SET view_count = 100 WHERE id = ?", a);
+        // 10-15 태그 화면: 제목·태그 수, 태그마다 아이콘·글 수·가로 카드 줄, 정렬(인기·이름·최근), 검색, 위 메뉴의 태그
         String html = mockMvc.perform(get("/tags")).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("전체 2개").contains("tag-pill tone-blue").contains("#docker").contains("#docker 2개")
-                .contains("tag-pill tone-green");
+        assertThat(html).contains("tags-total\">2개").contains("tag-section-name tone-blue").contains("#docker").contains("글 2편")
+                .contains("tag-section-name tone-green").contains("class=\"tag-row\"").contains("도커 정리").contains("제주 여행")
+                .contains("href=\"/tags\" aria-current=\"page\">태그</a>");
         assertThat(jdbc.queryForObject("SELECT icon FROM tag_icon ti JOIN tag t ON t.id = ti.tag_id WHERE t.name = 'docker'",
                 String.class)).isEqualTo("whale");
-        // 글 많은 순은 docker(2) 먼저, 많이 본 순은 조회 합 같으면… 제주(100)·docker(100) → 글 수로 docker 먼저, 이름 순은 docker → 제주
+        // 인기순은 글 수가 많은 docker 먼저, 이름순은 docker → 제주, 최근순은 마지막 글이 더 최근인 docker(b가 a보다 늦음) 먼저
+        assertThat(html.indexOf("#docker")).isLessThan(html.indexOf("#제주"));
         String byName = mockMvc.perform(get("/tags?sort=name")).andReturn().getResponse().getContentAsString();
         assertThat(byName.indexOf("#docker")).isLessThan(byName.indexOf("#제주"));
-        assertThat(byName).contains("이름 순");
+        String recent = mockMvc.perform(get("/tags?sort=recent")).andReturn().getResponse().getContentAsString();
+        assertThat(recent.indexOf("#docker")).isLessThan(recent.indexOf("#제주"));
+        // 검색은 이름에 그 글자가 든 태그만
+        String found = mockMvc.perform(get("/tags?q=제")).andReturn().getResponse().getContentAsString();
+        assertThat(found).contains("찾은 1개").contains("#제주").doesNotContain("tag-section-name tone-blue");
+        // 이어 붙일 묶음(10개 다음): 지금은 2개뿐이라 빈 조각
+        String more = mockMvc.perform(get("/tags/sections?offset=10")).andReturn().getResponse().getContentAsString();
+        assertThat(more).doesNotContain("tag-section");
+    }
+
+    @Test
+    void tagsPageLoadsTenSectionsThenMore() throws Exception {
+        long me = members.localMember("tagmany", "태그많이", "tagmany@example.com", "Blog#2026ok", true);
+        for (int i = 0; i < 12; i++) {
+            tag(posts.published(me, "글" + i, "본문", 1, T.minusSeconds(100 - i)), "많은태그" + i, 0);
+        }
+        String html = mockMvc.perform(get("/tags")).andReturn().getResponse().getContentAsString();
+        assertThat(html.split("class=\"tag-section\"", -1)).hasSize(11);
+        assertThat(html).contains("data-more=\"/tags/sections?sort=popular&amp;offset=10\"");
+        String more = mockMvc.perform(get("/tags/sections?sort=popular&offset=10")).andReturn().getResponse().getContentAsString();
+        assertThat(more.split("class=\"tag-section\"", -1)).hasSize(3);
+        assertThat(more).doesNotContain("tag-sections-more").doesNotContain("<html");
     }
 }

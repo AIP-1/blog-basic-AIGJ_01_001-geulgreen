@@ -8,6 +8,7 @@ import com.team.blog.moderation.application.AdminGuard;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.event.InquiryReceived;
 import com.team.blog.shared.security.CurrentUser;
+import com.team.blog.shared.web.AdminList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -114,10 +115,14 @@ public class InquiryService {
         return id;
     }
 
-    /** 관리자 문의함: 새 문의 먼저, 그 안에서 최신순. */
-    public List<Inquiry> list(Optional<CurrentUser> current) {
+    /** 관리자 문의함: 새 문의 먼저, 그 안에서 최신순(098 후속: 상태 new·done·all, 검색, 쪽 넘김을 DB에서). */
+    public AdminList<Inquiry> list(Optional<CurrentUser> current, String status, String q, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query(SELECT + " ORDER BY i.status = 'DONE', i.id DESC LIMIT 200", ROW);
+        String p = AdminList.like(q);
+        return AdminList.query(jdbc, SELECT + " WHERE (? <> 'new' OR i.status = 'NEW') AND (? <> 'done' OR i.status = 'DONE')"
+                + " AND (i.title ILIKE ? ESCAPE '\\' OR i.content ILIKE ? ESCAPE '\\' OR i.email ILIKE ? ESCAPE '\\'"
+                + " OR coalesce(m.handle, '') ILIKE ? ESCAPE '\\')", "i.status = 'DONE', i.id DESC", ROW, page,
+                String.valueOf(status), String.valueOf(status), p, p, p, p);
     }
 
     public Inquiry get(Optional<CurrentUser> current, long id) {
