@@ -534,7 +534,7 @@
     // Markdown 칸(textarea)을 다루는 방법. 060 보이는 대로 쓰기 칸은 window.blogVisual.adapter가 같은 모양으로 다룬다
     var textSurface = {
       el: function () { return ta; },
-      hasSelection: function () { return ta.selectionStart !== ta.selectionEnd; },
+      hasSelection: function () { return /\S/.test(ta.value.slice(ta.selectionStart, ta.selectionEnd)); },
       snapshot: function () { return { start: ta.selectionStart, end: ta.selectionEnd }; },
       same: function (x, y) { return !!x && !!y && x.start === y.start && x.end === y.end; },
       rects: function (snap) { return { a: caretPoint(ta, snap.start), b: caretPoint(ta, snap.end) }; },
