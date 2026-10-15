@@ -118,6 +118,21 @@ public class PostTrashService {
         evictBuffer(postId);
     }
 
+    /** 휴지통 비우기: 내 휴지통 글만 한 트랜잭션으로 영구 삭제(영구 삭제와 같은 정리). 지운 글 수. */
+    public int emptyTrash(Optional<CurrentUser> currentUser) {
+        CurrentUser user = accountGuard.requireLoggedIn(currentUser);
+        Instant now = clock.instant();
+        List<Long> ids = transactionTemplate.execute(status -> {
+            List<Long> locked = jdbc.queryForList(
+                    "SELECT id FROM post WHERE author_id = ? AND deleted_at IS NOT NULL ORDER BY id FOR UPDATE",
+                    Long.class, user.memberId());
+            locked.forEach(id -> purgeLocked(id, now)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다
+            return locked;
+        });
+        ids.forEach(this::evictBuffer); // NOSONAR 위와 같음
+        return ids.size();
+    }
+
     /** 30일 자동 정리(011 R-3): 한 묶음. 지운 글 수. */
     public int purgeExpired() {
         Instant now = clock.instant();
