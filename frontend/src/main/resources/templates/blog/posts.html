@@ -27,7 +27,7 @@
         </details>
     </nav>
     <p th:if="${filterCategory != null}" class="tag-filter">
-        <span th:text="${'📁 ' + filterCategory.name() + ' 글'}">카테고리 글</span>
+        <span><svg th:replace="~{fragments/icons :: folder}"></svg> <th:block th:text="${filterCategory.name() + ' 글'}">카테고리 글</th:block></span>
         <a th:href="${postsPath}">필터 해제</a>
     </p>
     <p th:if="${filterTag != null}" class="tag-filter">

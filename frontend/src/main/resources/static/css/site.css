@@ -1462,6 +1462,14 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .sort-menu-panel .menu-sub-list button[aria-pressed="true"] .icon { visibility: visible; }
 .menu-sub-list button:disabled { opacity: .6; cursor: wait; }
 
+/* 100 후속(강성찬 개인 확장): 프로필의 방명록·RSS는 테두리만 있는 작은 알약, 방문 수는 아이콘 + 보조 글자 */
+.blog-links { gap: 8px; flex-wrap: nowrap; margin: 10px 0; }
+.blog-links a { display: inline-flex; align-items: center; gap: 5px; padding: 3px 11px; border: 1px solid var(--color-border); border-radius: 999px;
+    color: var(--color-text-muted); font-size: .85em; font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.blog-links a:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+.blog-visits { display: flex; align-items: center; gap: 5px; margin: 6px 0 0; color: var(--color-text-muted); font-size: .88em; }
+.grass-streak .icon, .pinned-label .icon { width: 1em; height: 1em; vertical-align: -0.14em; }
+.title-with-icon .icon { width: .85em; height: .85em; vertical-align: -0.08em; color: var(--color-brand); }
 /* 101 강성찬 개인 확장: 내 글은 한 글 한 줄. 넓은 화면은 제목 · 태그·공개 범위·배지 · 숫자·날짜 · ⋯, 휴대폰은 제목 한 줄 + 나머지 한 줄 */
 .manage-list { list-style: none; margin: 16px 0; padding: 0; border-top: 1px solid var(--color-border); }
 #post-rows.manage-list > .post-row { display: block; padding: 0; border: 0; border-bottom: 1px solid var(--color-border); }
