@@ -833,8 +833,9 @@ main.admin-page { max-width: 1280px; }
 .site-notice a { margin-left: 8px; }
 /* 051~054 방문자 수·읽기 진행 막대·공유하기·고정 글(강성찬 개인 확장) */
 .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 50; background: transparent; pointer-events: none; }
-.read-progress span { display: block; height: 100%; width: 0; background: var(--color-brand); border-radius: 0 4px 4px 0;
-    transition: width .08s linear; }
+/* 096: 폭 대신 scaleX(레이아웃을 다시 계산하지 않음). 부드럽게 따라가는 건 reading-extras.js가 맡는다 */
+.read-progress span { display: block; height: 100%; width: 100%; background: var(--color-brand);
+    transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
 .sort-menu.share-menu summary::before, .sort-menu.share-menu summary::after { content: none; }
 .share-menu .sort-menu-panel { left: 0; right: auto; }
 .share-menu .sort-menu-panel { min-width: 180px; gap: 2px; }
