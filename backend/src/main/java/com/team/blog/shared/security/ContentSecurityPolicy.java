@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * CSP 문자열(헌법 IV, 12 §8). 003: 사진 저장소 출처와 소셜 사진 호스트를 {@code img-src}·{@code connect-src}에 더한다
  * (브라우저 직접 업로드·소셜 사진 복사, 003 research R-12). {@code blob:}은 자르기 미리보기용. 나머지 지시어는 001 그대로다.
- * 092 후속: 카카오톡 공유 키가 있을 때만 카카오 SDK(t1.kakaocdn.net)와 공유 서버를 연다.
+ * 092 후속: 카카오톡 공유 키가 있을 때만 카카오 SDK(t1.kakaocdn.net)와 공유 서버(폼 전송 포함)를 연다.
  */
 @Component
 public class ContentSecurityPolicy {
@@ -31,7 +31,8 @@ public class ContentSecurityPolicy {
         this.value = "default-src 'self'; script-src 'self'" + (kakao ? " " + KAKAO_SDK_ORIGIN : "") + "; "
                 + "img-src 'self' data: blob:" + join(storageOrigins) + join(socialHosts) + "; "
                 + "connect-src 'self'" + join(connectOrigins) + join(socialHosts) + (kakao ? " https://sharer.kakao.com https://kapi.kakao.com" : "") + "; "
-                + "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://t.me"; // 096: [텔레그램 연결] 폼이 봇 링크로 303
+                + "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://t.me" // 096: [텔레그램 연결] 폼이 봇 링크로 303
+                + (kakao ? " https://sharer.kakao.com https://accounts.kakao.com" : ""); // PC 카카오톡 공유: SDK가 공유 창에 폼을 보내고, 로그아웃 상태면 카카오 로그인으로 넘어간다
     }
 
     public String value() {

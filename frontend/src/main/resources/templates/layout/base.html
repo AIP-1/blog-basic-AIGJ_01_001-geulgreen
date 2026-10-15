@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="naver-site-verification" content="8c234994bf44d54fd78129b9dbce9b02b9a1e981" />
+    <meta name="google-site-verification" content="JcK60q4baHWu4df5kzaYTouU6ecq0m9rH7AbHm-pu7A" />
     <!-- 024: 그리기 전에 테마를 정한다(외부 파일, defer 없음) -->
     <script th:src="@{/js/theme-init.js}"></script>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
@@ -35,8 +36,8 @@
         <meta property="og:title" content="글그린">
         <meta property="og:description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
         <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
-            <link rel="canonical" th:href="${siteOrigin + currentPath}">
-            <meta property="og:url" th:content="${siteOrigin + currentPath}">
+            <link rel="canonical" th:href="${siteOrigin + canonicalPath}">
+            <meta property="og:url" th:content="${siteOrigin + canonicalPath}">
             <meta property="og:image" th:content="${siteOrigin + '/images/og-default.png'}">
         </th:block>
     </th:block>
@@ -62,11 +63,11 @@
                 <!-- 079 강성찬 개인 확장: 탐색(추천 글·블로그·인기 태그, 휴대폰에서도 닿게) -->
                 <a href="/explore" th:attr="aria-current=${currentPath == '/explore' ? 'page' : null}">탐색</a>
                 <a href="/tags" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/tags') ? 'page' : null}">태그</a>
+                <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리). 10-15 chan: 피드를 미션 앞으로 -->
+                <a href="/feed" th:if="${currentMemberId != null}" th:attr="aria-current=${currentPath == '/feed' ? 'page' : null}">피드</a>
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
                    th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
-                <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리) -->
                 <th:block th:if="${currentMemberId != null}">
-                    <a href="/feed" th:attr="aria-current=${currentPath == '/feed' ? 'page' : null}">피드</a>
                     <a href="/admin" th:if="${currentIsAdmin}" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/admin') ? 'page' : null}">관리</a>
                 </th:block>
             </div>

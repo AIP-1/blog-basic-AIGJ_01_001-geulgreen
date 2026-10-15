@@ -57,6 +57,13 @@ public class LayoutModelAdvice {
         return request.getRequestURI();
     }
 
+    /** canonical·og:url: 블로그 주소는 안쪽 /@ 경로가 아니라 사람이 연 주소. */
+    @ModelAttribute("canonicalPath")
+    public String canonicalPath(jakarta.servlet.http.HttpServletRequest request) {
+        Object original = request.getAttribute(HandlePathCanonicalizer.ORIGINAL_PATH);
+        return original != null ? (String) original : request.getRequestURI();
+    }
+
     /** 076: 블로그 주소 링크({@code ${paths.blog(handle)}}). */
     @ModelAttribute("paths")
     public BlogPaths paths() {
