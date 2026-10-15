@@ -39,9 +39,6 @@
     --color-tag-text: #3A5378;
     --color-hero-from: #FFF4E4;
     --color-cat-art-bg: #FCF2E6;
-    /* 사진 배너 위 덮개·그림 밝기(라이트는 그대로) */
-    --color-hero-overlay: transparent;
-    --art-filter: none;
     --color-cat-art-text: #5C4A3D;
     --tone-green-bg: #EAF4E4;
     --tone-green-fg: #4E8A3E;
@@ -131,9 +128,6 @@
         --color-tag-text: #B9CDE6;
         --color-hero-from: #2A2420;
         --color-cat-art-bg: #FCF2E6;
-        /* 다크: 밝은 사진 배너와 크림색 고양이 그림이 화면에서 튀지 않게 조금 어둡게 */
-        --color-hero-overlay: rgba(18, 18, 18, .42);
-        --art-filter: brightness(.78) saturate(.9);
         --color-cat-art-text: #5C4A3D;
         --tone-green-bg: #22301F;
         --tone-green-fg: #9BD08A;
@@ -204,9 +198,6 @@
     --color-tag-text: #B9CDE6;
     --color-hero-from: #2A2420;
     --color-cat-art-bg: #FCF2E6;
-    /* 다크: 밝은 사진 배너와 크림색 고양이 그림이 화면에서 튀지 않게 조금 어둡게 */
-    --color-hero-overlay: rgba(18, 18, 18, .42);
-    --art-filter: brightness(.78) saturate(.9);
     --color-cat-art-text: #5C4A3D;
     --tone-green-bg: #22301F;
     --tone-green-fg: #9BD08A;

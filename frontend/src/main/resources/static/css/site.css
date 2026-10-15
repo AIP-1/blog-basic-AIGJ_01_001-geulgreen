@@ -378,8 +378,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
 /* 사진 배너(static/images/hero.webp, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
    검색창만 사진의 문구 아래(가로 18.5%, 세로 72%)에 얹는다. 비율을 그대로 지켜 문구 위치가 어긋나지 않게 한다 */
-.hero-photo { background: linear-gradient(var(--color-hero-overlay), var(--color-hero-overlay)), url("/images/hero.webp") center / 100% 100% no-repeat, var(--color-hero-from);
-    aspect-ratio: 2172 / 724; }
+.hero-photo { background: url("/images/hero.webp") center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
 .hero-photo .hero-inner { position: absolute; inset: 0; max-width: none; padding: 0; min-height: 0; display: block; }
 .hero-photo .hero-slogan, .hero-photo .hero-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hero-photo .hero-search { position: absolute; left: 18.5%; top: 70%; width: 34%; min-width: 240px; max-width: none; }
@@ -421,9 +420,6 @@ main.auth-page { max-width: 960px; }
 /* 로그인 그림은 왼쪽 칸을 꽉 채운다(그림 바탕색 = 칸 바탕색) */
 .auth-art { padding: 0; background: var(--color-cat-art-bg); overflow: hidden; }
 .auth-art .cat-art { width: 100%; height: 100%; max-width: none; object-fit: contain; border-radius: 0; }
-/* 크림색 고양이 그림(태그·미션·로그인·오류 화면)은 다크 모드에서 밝기를 낮춤(토큰 --art-filter) */
-.cat-art, .tags-hero-art, .mission-hero-art img, .auth-art { filter: var(--art-filter); }
-.auth-art .cat-art { filter: none; } /* 상자째 한 번만 */
 .auth-panel { padding: 48px 44px; }
 .auth-panel h1 { margin: 0 0 4px; font-size: 1.6em; }
 .auth-lead { margin: 0 0 24px; color: var(--color-text-muted); }
@@ -837,8 +833,9 @@ main.admin-page { max-width: 1280px; }
 .site-notice a { margin-left: 8px; }
 /* 051~054 방문자 수·읽기 진행 막대·공유하기·고정 글(강성찬 개인 확장) */
 .read-progress { position: fixed; top: 0; left: 0; right: 0; height: 4px; z-index: 50; background: transparent; pointer-events: none; }
-.read-progress span { display: block; height: 100%; width: 0; background: var(--color-brand); border-radius: 0 4px 4px 0;
-    transition: width .08s linear; }
+/* 096: 폭 대신 scaleX(레이아웃을 다시 계산하지 않음). 부드럽게 따라가는 건 reading-extras.js가 맡는다 */
+.read-progress span { display: block; height: 100%; width: 100%; background: var(--color-brand);
+    transform: scaleX(0); transform-origin: 0 50%; will-change: transform; }
 .sort-menu.share-menu summary::before, .sort-menu.share-menu summary::after { content: none; }
 .share-menu .sort-menu-panel { left: 0; right: auto; }
 .share-menu .sort-menu-panel { min-width: 180px; gap: 2px; }
@@ -1192,7 +1189,7 @@ main.list-page .home-cards { gap: 18px; }
 .insta-stats li, .insta-stats a { color: var(--color-text); text-decoration: none; font-weight: 700; }
 .signup-code [data-code-entry] { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
 .signup-code [data-code-entry][hidden] { display: none; }
-.signup-code [data-code-entry] label { flex-basis: 100%; }
+.signup-code [data-code-entry] label, .signup-code [data-code-entry] .help { flex-basis: 100%; margin: 0; }
 .signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }
 /* 079 강성찬 개인 확장: 탐색 화면(홈 오른쪽 칸 상자를 그대로, 넓으면 추천 글·블로그 두 칸) */
 .explore-page { display: flex; flex-direction: column; gap: 18px; }

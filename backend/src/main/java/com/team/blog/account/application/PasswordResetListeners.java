@@ -40,9 +40,9 @@ public class PasswordResetListeners {
                 variables.put("minutes", properties.resetTokenTtl().toMinutes());
                 variables.put("code", event.code());
                 variables.put("codeMinutes", insta.codeTtl().toMinutes());
-                mailSender.send(event.email(), "[블로그] 비밀번호 재설정 안내", "mail/reset", variables);
+                mailSender.send(event.email(), "[글그린] 비밀번호 재설정 안내", "mail/reset", variables);
             } else {
-                mailSender.send(event.email(), "[블로그] 비밀번호 찾기 안내", "mail/social-only", variables);
+                mailSender.send(event.email(), "[글그린] 비밀번호 찾기 안내", "mail/social-only", variables);
             }
         } catch (RuntimeException e) {
             log.warn("재설정 메일 처리 실패: cause={}", e.getClass().getSimpleName());

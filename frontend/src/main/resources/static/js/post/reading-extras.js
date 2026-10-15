@@ -4,17 +4,29 @@
   var bar = document.querySelector('#read-progress span');
   var body = document.querySelector('.post-body');
   if (bar && body) {
-    var ticking = false;
+    // 096: 목표 값까지 남은 거리의 이만큼씩 한 장면마다 다가간다. 짧은 글이 한 번에 0→100%로 가도 0.3초 남짓 미끄러진다
+    var EASE = 0.12;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var target = 0, shown = 0, frame = 0;
+    var draw = function () {
+      frame = 0;
+      shown = reduce ? target : shown + (target - shown) * EASE;
+      if (Math.abs(target - shown) < 0.001) { shown = target; }
+      bar.style.transform = 'scaleX(' + shown.toFixed(4) + ')';
+      if (shown !== target) { frame = window.requestAnimationFrame(draw); }
+    };
     var update = function () {
-      ticking = false;
       var rect = body.getBoundingClientRect();
       var total = rect.height - window.innerHeight;
-      var done = total <= 0 ? (rect.top < 0 ? 1 : 0) : Math.min(1, Math.max(0, -rect.top / total));
-      bar.style.width = (done * 100).toFixed(1) + '%';
+      if (total > 0) {
+        target = Math.min(1, Math.max(0, -rect.top / total));
+      } else {
+        // 본문이 한 화면에 다 들어가는 짧은 글은 본문이 화면 위로 지나간 비율로(아래 댓글·관련 글 길이와 상관없이)
+        target = Math.min(1, Math.max(0, -rect.top / Math.max(rect.height, 1)));
+      }
+      if (!frame) { frame = window.requestAnimationFrame(draw); }
     };
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; window.requestAnimationFrame(update); }
-    }, { passive: true });
+    window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
     update();
   }

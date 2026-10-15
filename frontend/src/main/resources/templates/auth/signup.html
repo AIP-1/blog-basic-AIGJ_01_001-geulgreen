@@ -32,6 +32,7 @@
                 <label for="email-code">메일로 받은 6자리 코드</label>
                 <input id="email-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}">
                 <button type="button" class="btn btn-sm" data-code-verify>확인</button>
+                <p class="help">메일이 안 보이면 스팸함도 확인해 주세요</p>
             </div>
             <p class="availability" data-code-status aria-live="polite"
                th:text="${codeVerifiedEmail != null} ? '이메일을 확인했어요' : ''"></p>
