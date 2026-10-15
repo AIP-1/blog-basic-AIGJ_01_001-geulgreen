@@ -26,6 +26,9 @@ public interface ImageStorage {
     /** 사진을 보여줄 공개 주소. */
     String publicUrl(String key);
 
+    /** 서버가 직접 올리기(083 테스트 글 넣기 전용, 승인·완료 검사는 평소처럼 {@code ImageUploadService}로). 실패하면 예외. */
+    void put(String key, String contentType, byte[] bytes);
+
     /** 삭제. 없는 키도 성공으로 본다. 실패하면 예외. */
     void delete(String key);
 }

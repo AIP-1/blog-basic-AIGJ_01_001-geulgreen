@@ -44,6 +44,11 @@ final class TestRenderers {
             }
 
             @Override
+            public void put(String key, String contentType, byte[] bytes) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public void delete(String key) {
                 // 렌더링 테스트는 지우지 않는다
             }
