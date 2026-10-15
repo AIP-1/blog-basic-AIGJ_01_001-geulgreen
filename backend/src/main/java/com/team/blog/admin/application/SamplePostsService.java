@@ -226,7 +226,7 @@ public class SamplePostsService {
         jdbc.update("INSERT INTO admin_log (admin_id, action, target) VALUES (?, ?, ?)", admin.memberId(), action, target);
     }
 
-    private static String[] handles() {
+    public static String[] handles() {
         return ACCOUNTS.stream().map(Account::handle).toArray(String[]::new);
     }
 

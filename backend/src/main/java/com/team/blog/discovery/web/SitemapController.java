@@ -1,5 +1,6 @@
 package com.team.blog.discovery.web;
 
+import com.team.blog.admin.application.SamplePostsService;
 import com.team.blog.post.application.PostAccessPolicy;
 import com.team.blog.post.markdown.MarkdownProperties;
 import java.time.format.DateTimeFormatter;
@@ -34,17 +35,20 @@ public class SitemapController {
         StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
                 .append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         url(xml, "/", null);
+        // 관리자 화면에서 넣는 테스트 계정(083)은 검색 엔진에 알리지 않는다
+        String[] samples = SamplePostsService.handles();
+        String notSample = " AND m.handle NOT IN (" + String.join(",", java.util.Collections.nCopies(samples.length, "?")) + ")";
         jdbc.query("SELECT DISTINCT m.handle FROM post p JOIN member m ON m.id = p.author_id WHERE "
-                + accessPolicy.publicListingCondition("p", "m") + " ORDER BY m.handle LIMIT 10000",
-                rs -> { url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")), null); });
+                + accessPolicy.publicListingCondition("p", "m") + notSample + " ORDER BY m.handle LIMIT 10000",
+                rs -> { url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")), null); }, (Object[]) samples);
         jdbc.query("""
                 SELECT p.id, m.handle, COALESCE(p.edited_at, p.first_public_at) AS changed
                 FROM post p JOIN member m ON m.id = p.author_id WHERE """ + " " + accessPolicy.publicListingCondition("p", "m")
-                + " ORDER BY p.first_public_at DESC, p.id DESC LIMIT " + MAX_URLS / 2,
+                + notSample + " ORDER BY p.first_public_at DESC, p.id DESC LIMIT " + MAX_URLS / 2,
                 rs -> {
                     url(xml, com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + rs.getLong("id"),
                             DateTimeFormatter.ISO_INSTANT.format(rs.getTimestamp("changed").toInstant()));
-                });
+                }, (Object[]) samples);
         xml.append("</urlset>\n");
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(xml.toString());
     }
