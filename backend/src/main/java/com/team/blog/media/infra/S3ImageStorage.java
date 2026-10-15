@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -95,6 +96,12 @@ public class S3ImageStorage implements ImageStorage {
     @Override
     public String publicUrl(String key) {
         return properties.effectivePublicBaseUrl() + "/" + properties.bucket() + "/" + key;
+    }
+
+    @Override
+    public void put(String key, String contentType, byte[] bytes) {
+        s3.putObject(PutObjectRequest.builder().bucket(properties.bucket()).key(key).contentType(contentType)
+                .cacheControl(CACHE_CONTROL).build(), RequestBody.fromBytes(bytes));
     }
 
     @Override

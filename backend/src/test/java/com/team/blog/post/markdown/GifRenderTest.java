@@ -49,6 +49,10 @@ class GifRenderTest {
                 return "https://cdn.devlog.example/blog-images/" + k;
             }
 
+            public void put(String k, String t, byte[] b) {
+                throw new UnsupportedOperationException();
+            }
+
             public void delete(String k) {
                 // 렌더링 테스트는 지우지 않는다
             }
