@@ -625,9 +625,6 @@ main.stats-page { max-width: 900px; }
 .stats-bar { flex: 1; height: 100%; display: flex; align-items: flex-end; background: var(--color-surface-muted); border-radius: 4px; }
 .stats-bar-fill { width: 100%; background: var(--color-brand-fill); border-radius: 4px; }
 .stats-axis { display: flex; justify-content: space-between; color: var(--color-text-muted); font-size: .85em; margin-top: 4px; }
-.stats-table { border-collapse: collapse; margin-top: 8px; }
-.stats-table th, .stats-table td { padding: 2px 12px; text-align: right; border-bottom: 1px solid var(--color-border); }
-.stats-top li { margin: 6px 0; }
 /* 033 짧은 기록(강성찬 개인 확장) */
 .notes-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; }
 .note-form textarea { width: 100%; min-height: 4.5em; resize: vertical; }
@@ -1464,4 +1461,59 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .sort-menu-panel .menu-sub-list button[aria-pressed="true"] { font-weight: 700; }
 .sort-menu-panel .menu-sub-list button[aria-pressed="true"] .icon { visibility: visible; }
 .menu-sub-list button:disabled { opacity: .6; cursor: wait; }
+
+/* 101 강성찬 개인 확장: 내 글은 한 글 한 줄. 넓은 화면은 제목 · 태그·공개 범위·배지 · 숫자·날짜 · ⋯, 휴대폰은 제목 한 줄 + 나머지 한 줄 */
+.manage-list { list-style: none; margin: 16px 0; padding: 0; border-top: 1px solid var(--color-border); }
+#post-rows.manage-list > .post-row { display: block; padding: 0; border: 0; border-bottom: 1px solid var(--color-border); }
+.manage-row { display: flex; align-items: center; gap: 8px 12px; padding: 12px 4px; min-width: 0; }
+.manage-row-title { flex: 1 1 auto; min-width: 0; color: var(--color-text); font-weight: 600; text-decoration: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.manage-row-title:hover { text-decoration: underline; }
+.manage-row .card-tag { position: static; margin: 0; flex: none; }
+.manage-row .manage-badges { margin: 0; padding: 0; flex: none; display: flex; gap: 6px; align-items: center; font-size: .85em; }
+.manage-row-stats { margin: 0; flex: none; display: flex; gap: 12px; align-items: center; font-size: .85em; white-space: nowrap; }
+.manage-row .manage-menu { position: relative; top: auto; right: auto; order: 9; flex: none; }
+.manage-row .manage-menu .sort-menu-panel { right: 0; }
+.manage-list > .post-row > .row-error { margin: 0 4px 10px; }
+@media (max-width: 640px) {
+    .manage-row { flex-wrap: wrap; }
+    .manage-row-title { flex: 1 1 calc(100% - 56px); }
+    .manage-row .manage-menu { order: 1; }
+    .manage-row .card-tag, .manage-row .manage-badges, .manage-row-stats { order: 2; }
+}
+
+/* 101 통계: 막대 풍선 도움말, 날짜별 숫자 표, 많이 읽힌 글 줄 */
+.stats-bar { position: relative; outline: none; cursor: crosshair; }
+.stats-bar:hover .stats-bar-fill, .stats-bar:focus .stats-bar-fill { background: var(--color-brand); }
+.stats-bar:focus-visible { box-shadow: 0 0 0 2px var(--color-focus); }
+.stats-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 2; white-space: nowrap;
+    padding: 3px 8px; border-radius: 6px; background: var(--color-text); color: var(--color-bg); font-size: .78em; font-weight: 700;
+    pointer-events: none; opacity: 0; }
+.stats-bar:nth-child(-n+4) .stats-tip { left: 0; transform: none; }
+.stats-bar:nth-last-child(-n+4) .stats-tip { left: auto; right: 0; transform: none; }
+.stats-bar:hover .stats-tip, .stats-bar:focus .stats-tip { opacity: 1; }
+.stats-numbers { margin-top: 12px; }
+.stats-numbers > summary { list-style: none; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--color-control-border); font-size: .88em; font-weight: 600; cursor: pointer; }
+.stats-numbers > summary::-webkit-details-marker { display: none; }
+.stats-numbers > summary:hover { background: var(--color-surface-muted); }
+.stats-numbers .menu-chevron { transition: transform .15s ease; }
+.stats-numbers[open] .menu-chevron { transform: rotate(90deg); }
+.stats-table { border-collapse: collapse; margin-top: 10px; width: 100%; max-width: 320px; font-size: .9em; }
+.stats-table th { text-align: left; color: var(--color-text-muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--color-border); }
+.stats-table td { padding: 6px 8px; border-bottom: 1px solid var(--color-border); }
+.stats-table th:last-child, .stats-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.stats-top { list-style: none; margin: 0; padding: 0; }
+.stats-top li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 0;
+    border-top: 1px solid var(--color-border); }
+.stats-top li:first-child { border-top: 0; padding-top: 2px; }
+.stats-rank { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 8px; font-size: .82em; font-weight: 700;
+    color: var(--color-text-muted); background: var(--color-surface-muted); }
+.stats-rank.is-first { color: var(--color-on-fill); background: var(--color-brand-fill); }
+.stats-top-title { min-width: 0; color: var(--color-text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stats-top-title:hover { text-decoration: underline; }
+.stats-top-views { display: flex; align-items: center; gap: 8px; font-size: .88em; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.stats-top-bar { width: 80px; height: 6px; border-radius: 999px; background: var(--color-surface-muted); overflow: hidden; }
+.stats-top-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--color-brand-fill); }
+@media (max-width: 560px) { .stats-top-bar { width: 48px; } }
 

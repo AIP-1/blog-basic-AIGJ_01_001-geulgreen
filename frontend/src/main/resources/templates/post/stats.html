@@ -18,19 +18,23 @@
 
     <section aria-labelledby="days-heading" class="stats-card">
         <h2 id="days-heading" th:text="${'최근 30일 조회 ' + stats.recentViews()}">최근 30일 조회 0</h2>
-        <div class="stats-bars" aria-hidden="true">
-            <span th:each="d : ${stats.days()}" class="stats-bar" th:title="${d.label() + ' · ' + d.views() + '회'}">
+        <!-- 101 강성찬 개인 확장: 막대에 마우스를 올리거나(탭·키보드로 고르면) 날짜와 조회 수가 뜬다(관리자 그래프와 같은 방식) -->
+        <div class="stats-bars">
+            <span th:each="d : ${stats.days()}" class="stats-bar" tabindex="0" role="img" th:attr="aria-label=${d.label() + ' 조회 ' + d.views() + '회'}">
                 <span class="stats-bar-fill" th:style="${'height:' + d.percent() + '%'}"></span>
+                <span class="stats-tip" aria-hidden="true" th:text="${d.label() + ' · ' + d.views() + '회'}">10.9 · 0회</span>
             </span>
         </div>
         <div class="stats-axis" aria-hidden="true">
             <span th:text="${stats.days()[0].label()}">9.10</span><span th:text="${stats.days()[stats.days().size() - 1].label()}">10.9</span>
         </div>
-        <details>
-            <summary>날짜별 숫자 보기</summary>
+        <details class="stats-numbers">
+            <summary><span>날짜별 숫자 보기</span><svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
             <table class="stats-table">
                 <thead><tr><th scope="col">날짜</th><th scope="col">조회</th></tr></thead>
-                <tbody><tr th:each="d : ${stats.days()}"><td th:text="${d.label()}">10.9</td><td th:text="${d.views()}">0</td></tr></tbody>
+                <!-- 최근 날짜가 위 -->
+                <tbody><tr th:each="i : ${#numbers.sequence(stats.days().size() - 1, 0, -1)}" th:with="d=${stats.days()[i]}">
+                    <td th:text="${d.label()}">10.9</td><td th:text="${d.views()}">0</td></tr></tbody>
             </table>
         </details>
     </section>
@@ -38,9 +42,14 @@
     <section aria-labelledby="top-heading" class="stats-card">
         <h2 id="top-heading">30일 동안 많이 읽힌 글</h2>
         <p th:if="${stats.top().isEmpty()}" class="help">아직 집계된 조회가 없어요</p>
-        <ol class="stats-top">
-            <li th:each="p : ${stats.top()}"><a th:href="${p.url()}" th:text="${p.title()}">제목</a>
-                <span class="help" th:text="${p.views() + '회'}">0회</span></li>
+        <!-- 101: 순위 칸 · 제목(한 줄) · 1위 대비 막대와 조회 수 -->
+        <ol class="stats-top" th:unless="${stats.top().isEmpty()}" th:with="max=${stats.top()[0].views() > 0 ? stats.top()[0].views() : 1}">
+            <li th:each="p, st : ${stats.top()}">
+                <span class="stats-rank" th:classappend="${st.first} ? 'is-first'" th:text="${st.count}">1</span>
+                <a class="stats-top-title" th:href="${p.url()}" th:text="${p.title()}" th:title="${p.title()}">제목</a>
+                <span class="stats-top-views"><span class="stats-top-bar" aria-hidden="true"><span th:style="${'width:' + (p.views() * 100 / max) + '%'}"></span></span>
+                    <span th:text="${p.views() + '회'}">0회</span></span>
+            </li>
         </ol>
     </section>
 </main>
