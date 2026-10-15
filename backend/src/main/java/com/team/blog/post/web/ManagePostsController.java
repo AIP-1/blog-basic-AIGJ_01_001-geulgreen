@@ -12,7 +12,6 @@ import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.KoreanDateFormatter;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,7 +76,9 @@ public class ManagePostsController {
                     : tab == ManageTab.TRASH ? "삭제 " + dates.get(row.id())
                     : dates.get(row.id()) + (row.editedAt() != null ? " · 수정됨 " + KoreanDateFormatter.monthDay(row.editedAt()) : ""));
             if (row.purgeAt() != null) {
-                daysLeft.put(row.id(), Math.max(0, Duration.between(now, row.purgeAt()).toDays())); // 하루가 안 남으면 0 = 오늘 삭제
+                daysLeft.put(row.id(), Math.max(0, java.time.temporal.ChronoUnit.DAYS.between( // 한국 날짜 기준, 0 = 오늘 삭제
+                        java.time.LocalDate.ofInstant(now, KoreanDateFormatter.SEOUL),
+                        java.time.LocalDate.ofInstant(row.purgeAt(), KoreanDateFormatter.SEOUL))));
             }
         }
         model.addAttribute("tab", tab.param());
