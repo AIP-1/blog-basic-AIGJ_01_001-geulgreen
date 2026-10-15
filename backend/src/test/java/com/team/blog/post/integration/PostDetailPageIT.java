@@ -67,7 +67,7 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .contains("<meta property=\"article:published_time\" content=\"2026-10-01T00:00:00Z\">")
                 .doesNotContain("article:modified_time").doesNotContain("noindex")
                 .contains("조회 1.2만").contains("class=\"like-number\">7<").contains("댓글 3").contains("2026.10.01")
-                .contains("href=\"/detailmeta\"").contains("블로그 가기")
+                .contains("href=\"/detailmeta\"").contains("class=\"author-card-name\"").contains("글 1").contains("팔로워 0")
                 .contains("href=\"/login?redirect=/detailmeta/posts/" + id + "\"")
                 .contains("class=\"like-button\"").doesNotContain("id=\"visibility-select\"")
                 .contains("data-view-post-id=\"" + id + "\"");
@@ -133,7 +133,8 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .filter(inv -> inv.getMethod().getName().startsWith("query") && inv.getArguments().length > 0
                         && inv.getArgument(0) instanceof String)
                 .map(inv -> (String) inv.getArgument(0)).distinct().toList();
-        assertThat(sqls.stream().filter(sql -> sql.contains("FROM post p JOIN member m")).toList()).hasSize(1);
+        // 글 본문을 읽는 쿼리는 하나(097 작성자 카드의 공개 글 수 count(*)는 본문을 읽지 않으니 따로 센다)
+        assertThat(sqls.stream().filter(sql -> sql.contains("FROM post p JOIN member m") && !sql.startsWith("SELECT count(*)")).toList()).hasSize(1);
         assertThat(String.join("\n", sqls)).doesNotContain("content_md\n").doesNotContain("p.content_md");
     }
 }

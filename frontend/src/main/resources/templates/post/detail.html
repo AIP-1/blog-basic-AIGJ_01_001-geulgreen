@@ -173,19 +173,24 @@
             <button type="button" th:if="${canReact}" class="report-button" th:attr="data-report-post-id=${post.id()}">신고</button>
             <span class="like-message help" role="status" hidden></span>
         </div>
-        <!-- 작성자 카드(FR-013): 팔로우 버튼은 018 -->
-        <aside class="author-card">
-            <th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, 56)}"></th:block>
+        <!-- 작성자 카드(FR-013): 팔로우 버튼은 018. 097 강성찬 개인 확장: 한 줄 카드(왼쪽 아이콘·이름·한 줄 소개·숫자, 오른쪽 버튼). 아이콘·이름이 블로그 링크 -->
+        <aside class="author-card" aria-label="글쓴이">
+            <a class="author-card-avatar" th:href="${paths.blog(post.author().handle())}" aria-hidden="true" tabindex="-1">
+                <th:block th:replace="~{fragments/avatar :: avatar(${author.avatar()}, 56)}"></th:block></a>
             <div class="author-card-text">
-                <p><th:block th:replace="~{fragments/author :: byline(${author})}"></th:block></p>
-                <p class="profile-bio" th:if="${post.author().bio() != null}" th:text="${post.author().bio()}">소개</p>
-                <p>
-                    <a class="link-btn" th:href="${paths.blog(post.author().handle())}">블로그 가기</a>
-                    <th:block th:unless="${viewerIsAuthor}"><th:block
-                              th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
+                <a class="author-card-name" th:href="${paths.blog(post.author().handle())}" th:text="${post.author().handle()}">아이디</a>
+                <p class="author-card-bio" th:if="${post.author().bio() != null and !post.author().bio().isBlank()}" th:text="${post.author().bio()}">소개</p>
+                <p class="author-card-stats help">
+                    <span th:text="${'글 ' + authorPostCount}">글 12</span> ·
+                    <a th:href="${paths.blog(post.author().handle()) + '/followers'}" th:text="${'팔로워 ' + authorFollowers}">팔로워 3</a>
                 </p>
-                <p class="follow-message help" role="status" hidden></p>
             </div>
+            <div class="author-card-actions">
+                <th:block th:unless="${viewerIsAuthor}"><th:block
+                          th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
+                <a th:if="${viewerIsAuthor}" class="btn btn-sm" th:href="${paths.blog(post.author().handle())}">내 블로그</a>
+            </div>
+            <p class="follow-message help" role="status" hidden></p>
         </aside>
         <!-- 댓글(014): 첫 20개를 화면과 함께, 스크립트 없이도 더 보기·작성 -->
         <section id="comments" class="comments" aria-label="댓글"
