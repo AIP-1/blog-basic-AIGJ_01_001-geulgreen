@@ -31,6 +31,12 @@ import tools.jackson.databind.JsonNode;
 public class McpTools {
 
     private static final String INVALID_REQUEST = "INVALID_REQUEST";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_CONTENT_MD = "content_md";
+    private static final String KEY_POST_ID = "post_id";
+    private static final String KEY_CATEGORY_ID = "category_id";
+    private static final String KEY_DESCRIPTION = "description";
+    private static final String TYPE_STRING = "string";
 
     /** 도구가 돌려주는 실패. {@code code}는 화면 API와 같은 이유 코드. */
     public static class ToolException extends RuntimeException {
@@ -42,23 +48,23 @@ public class McpTools {
     public record Tool(String name, String description, Map<String, Object> inputSchema) {
     }
 
-    private static final Map<String, Object> TITLE = Map.of("type", "string", "description", "제목(100자까지)");
-    private static final Map<String, Object> CONTENT = Map.of("type", "string", "description", "본문(Markdown)");
-    private static final Map<String, Object> TAGS = Map.of("type", "array", "items", Map.of("type", "string"),
-            "description", "태그(10개까지, # 없이). 주면 글의 태그를 이 목록으로 바꿔요");
+    private static final Map<String, Object> TITLE = Map.of("type", TYPE_STRING, KEY_DESCRIPTION, "제목(100자까지)");
+    private static final Map<String, Object> CONTENT = Map.of("type", TYPE_STRING, KEY_DESCRIPTION, "본문(Markdown)");
+    private static final Map<String, Object> TAGS = Map.of("type", "array", "items", Map.of("type", TYPE_STRING),
+            KEY_DESCRIPTION, "태그(10개까지, # 없이). 주면 글의 태그를 이 목록으로 바꿔요");
     private static final Map<String, Object> CATEGORY = Map.of("type", "integer",
-            "description", "카테고리 번호(list_tags_and_categories로 확인)");
-    private static final Map<String, Object> POST_ID = Map.of("type", "integer", "description", "임시글 번호");
+            KEY_DESCRIPTION, "카테고리 번호(list_tags_and_categories로 확인)");
+    private static final Map<String, Object> POST_ID = Map.of("type", "integer", KEY_DESCRIPTION, "임시글 번호");
 
     public static final List<Tool> TOOLS = List.of(
             new Tool("create_draft", "글그린 블로그에 새 임시글을 만들어요. 공개되지 않고, 글쓴이가 글쓰기 화면에서 읽고 직접 발행해요."
                     + " 나눈 이야기나 한 작업을 블로그 글로 정리할 때 써요. 비밀번호·토큰·개인 정보는 넣지 마세요.",
-                    schema(Map.of("title", TITLE, "content_md", CONTENT, "tags", TAGS, "category_id", CATEGORY),
-                            List.of("title", "content_md"))),
+                    schema(Map.of(KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS, KEY_CATEGORY_ID, CATEGORY),
+                            List.of(KEY_TITLE, KEY_CONTENT_MD))),
             new Tool("update_draft", "내 임시글을 고쳐요. 준 칸만 바뀌어요. 발행한 글은 고칠 수 없어요.",
-                    schema(Map.of("post_id", POST_ID, "title", TITLE, "content_md", CONTENT, "tags", TAGS), List.of("post_id"))),
+                    schema(Map.of(KEY_POST_ID, POST_ID, KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS), List.of(KEY_POST_ID))),
             new Tool("list_drafts", "내 임시글 목록(최근에 고친 순)을 봐요. 이어 쓸 글을 찾을 때 써요.",
-                    schema(Map.of("cursor", Map.of("type", "string", "description", "다음 쪽(앞 응답의 next_cursor)")), List.of())),
+                    schema(Map.of("cursor", Map.of("type", TYPE_STRING, KEY_DESCRIPTION, "다음 쪽(앞 응답의 next_cursor)")), List.of())),
             new Tool("list_tags_and_categories", "내가 쓴 태그(많이 쓴 순)와 내 카테고리 목록을 봐요. 태그를 고를 때 있는 이름을 먼저 써요.",
                     schema(Map.of(), List.of())));
 
@@ -97,11 +103,11 @@ public class McpTools {
 
     private Map<String, Object> createDraft(Optional<CurrentUser> user, JsonNode args) {
         List<String> tags = tags(args); // 태그부터 검사해서 잘못된 태그로 빈 임시글이 남지 않게
-        Long categoryId = categories.enabled() ? number(args, "category_id") : null;
+        Long categoryId = categories.enabled() ? number(args, KEY_CATEGORY_ID) : null;
         if (categoryId != null && user.isPresent() && categories.find(user.get().memberId(), categoryId).isEmpty()) {
             throw new ToolException("CATEGORY_NOT_FOUND");
         }
-        long postId = drafts.create(user, required(args, "title"), required(args, "content_md"));
+        long postId = drafts.create(user, required(args, KEY_TITLE), required(args, KEY_CONTENT_MD));
         if (tags != null) {
             tagService.replace(postId, tags);
         }
@@ -112,7 +118,7 @@ public class McpTools {
     }
 
     private Map<String, Object> updateDraft(Optional<CurrentUser> user, JsonNode args) {
-        Long postId = number(args, "post_id");
+        Long postId = number(args, KEY_POST_ID);
         if (postId == null) {
             throw new ToolException(INVALID_REQUEST);
         }
@@ -121,8 +127,8 @@ public class McpTools {
         if (current.status() != PostStatus.DRAFT) {
             throw new ToolException("NOT_A_DRAFT");
         }
-        String title = text(args, "title");
-        String content = text(args, "content_md");
+        String title = text(args, KEY_TITLE);
+        String content = text(args, KEY_CONTENT_MD);
         if (title != null || content != null) {
             drafts.save(user, postId, new SaveCommand(title != null ? title : current.title(),
                     content != null ? content : current.contentMd(), current.version()));
@@ -137,8 +143,8 @@ public class McpTools {
         ManagePage page = manageQuery.page(user, ManageTab.DRAFTS, null, text(args, "cursor"));
         List<Map<String, Object>> items = page.items().stream().map(row -> {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("post_id", row.id());
-            m.put("title", row.title());
+            m.put(KEY_POST_ID, row.id());
+            m.put(KEY_TITLE, row.title());
             m.put("updated_at", row.updatedAt().toString());
             m.put("edit_url", editUrl(row.id()));
             return m;
@@ -156,15 +162,15 @@ public class McpTools {
                 WHERE p.author_id = ? AND p.deleted_at IS NULL GROUP BY t.name ORDER BY n DESC, t.name LIMIT 100""",
                 (rs, i) -> Map.<String, Object>of("name", rs.getString("name"), "posts", rs.getLong("n")), me);
         List<Map<String, Object>> cats = categories.enabled() ? categories.list(me).stream()
-                .map(c -> Map.<String, Object>of("category_id", c.id(), "name", c.name())).toList() : List.of();
+                .map(c -> Map.<String, Object>of(KEY_CATEGORY_ID, c.id(), "name", c.name())).toList() : List.of();
         return Map.of("tags", tags, "categories", cats);
     }
 
     private Map<String, Object> draft(long postId, EditingContent c) {
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("post_id", postId);
+        out.put(KEY_POST_ID, postId);
         out.put("status", "DRAFT");
-        out.put("title", c.title());
+        out.put(KEY_TITLE, c.title());
         out.put("tags", tagService.tagsOf(postId));
         out.put("edit_url", editUrl(postId));
         out.put("note", "임시글이에요. 글쓴이가 이 주소에서 읽고 직접 발행해요.");

@@ -116,16 +116,21 @@ public class SearchSuggestService {
             if (exclude.contains(d.id()) || authorId != null && d.authorId() != authorId) {
                 continue;
             }
-            int score = 0;
-            for (String q : qs) {
-                score += (matches(d.title(), q) ? 3 : 0) + (matches(d.tags(), q) ? 2 : 0) + (matches(d.body(), q) ? 1 : 0);
-            }
+            int score = score(d, qs);
             if (score > 0) {
                 scored.add(new Scored(d.id(), score));
             }
         }
         // docs는 최근 글부터라 안정 정렬이면 같은 점수 안에서 최근 글이 앞
         return scored.stream().sorted(Comparator.comparingInt(Scored::score).reversed()).limit(limit).map(Scored::id).toList();
+    }
+
+    private static int score(Doc d, List<String> qs) {
+        int score = 0;
+        for (String q : qs) {
+            score += (matches(d.title(), q) ? 3 : 0) + (matches(d.tags(), q) ? 2 : 0) + (matches(d.body(), q) ? 1 : 0);
+        }
+        return score;
     }
 
     private static boolean matches(Set<String> tokens, String q) {

@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -94,154 +95,115 @@ public class NotificationQuery {
                 """, (rs, i) -> item(rs, user, now), args.toArray());
     }
 
+    /** 행동한 사람: 화면용 정보(탈퇴·없음이면 null 또는 탈퇴 표시)와 문장에 넣을 짧은 이름. */
+    private record ActorPart(NotificationItem.Actor actor, String name) {
+    }
+
+    /** 알림이 가리키는 글: 제목·주소와 받는 사람이 읽을 수 있는지, 숨겨진 본인 글인지. */
+    private record PostPart(String title, String url, boolean readable, boolean ownHidden) {
+    }
+
+    /** 화면에 보일 글 참조·미리보기·문장·이동 주소. */
+    private record Body(NotificationItem.PostRef post, String preview, String message, String url) {
+    }
+
     private NotificationItem item(ResultSet rs, CurrentUser user, Instant now) throws SQLException {
         NotificationType type = NotificationType.valueOf(rs.getString("type"));
         Instant updatedAt = rs.getTimestamp("updated_at").toInstant();
         boolean read = rs.getTimestamp("read_at") != null;
-        NotificationItem.Actor actor = null;
-        String actorName = AuthorDisplay.WITHDRAWN_LABEL;
-        if (rs.getObject("last_actor_id") != null) {
-            Timestamp w = rs.getTimestamp("a_withdrawn");
-            AuthorDisplay d = AuthorDisplay.of(rs.getString("a_handle"), rs.getString("a_nickname"),
-                    w == null ? null : w.toInstant(), rs.getString("a_picture"));
-            actor = d.withdrawn() ? new NotificationItem.Actor(AuthorDisplay.WITHDRAWN_LABEL, null, null, true)
-                    : new NotificationItem.Actor(d.nickname(), d.handle(), d.profileImageUrl(), false);
-            actorName = d.shortLabel();
-        }
+        ActorPart actor = actor(rs);
         int count = rs.getInt("actor_count");
         Integer others = (type == NotificationType.LIKE || type == NotificationType.FOLLOW || type == NotificationType.FRIEND_REQUEST || type == NotificationType.FOLLOW_REQUEST) ? Math.max(0, count - 1) : null;
-        String title = null;
-        String postUrl = null;
-        boolean readable = false;
-        boolean ownHidden = false;
+        Body body = body(rs, type, postPart(rs, user), actor.name(), others);
+        boolean noActor = type == NotificationType.REPORT_RESOLVED || type == NotificationType.CONTENT_HIDDEN || type == NotificationType.INQUIRY;
+        return new NotificationItem(rs.getLong("id"), type.name(), read, updatedAt, CardDates.label(updatedAt, now),
+                noActor ? null : actor.actor(), others, body.post(), body.preview(), rs.getString("result"), body.message(), body.url());
+    }
+
+    private static ActorPart actor(ResultSet rs) throws SQLException {
+        if (rs.getObject("last_actor_id") == null) {
+            return new ActorPart(null, AuthorDisplay.WITHDRAWN_LABEL);
+        }
+        Timestamp w = rs.getTimestamp("a_withdrawn");
+        AuthorDisplay d = AuthorDisplay.of(rs.getString("a_handle"), rs.getString("a_nickname"),
+                w == null ? null : w.toInstant(), rs.getString("a_picture"));
+        NotificationItem.Actor actor = d.withdrawn() ? new NotificationItem.Actor(AuthorDisplay.WITHDRAWN_LABEL, null, null, true)
+                : new NotificationItem.Actor(d.nickname(), d.handle(), d.profileImageUrl(), false);
+        return new ActorPart(actor, d.shortLabel());
+    }
+
+    private PostPart postPart(ResultSet rs, CurrentUser user) throws SQLException {
         long postId = rs.getLong("post_id");
-        if (!rs.wasNull() && rs.getString("status") != null) {
-            boolean authorWithdrawn = rs.getTimestamp("p_author_withdrawn") != null;
-            boolean deleted = rs.getTimestamp("p_deleted") != null;
-            boolean hidden = rs.getTimestamp("p_hidden") != null;
-            long authorId = rs.getLong("author_id");
-            PostFacts facts = new PostFacts(postId, authorId, PostStatus.valueOf(rs.getString("status")),
-                    rs.getString("visibility"), authorWithdrawn, false);
-            boolean canRead = !deleted && PostStatus.PUBLISHED.name().equals(rs.getString("status"))
-                    && accessPolicy.canRead(Optional.of(user), facts);
-            readable = canRead && !hidden;
-            ownHidden = canRead && hidden && authorId == user.memberId();
-            title = rs.getString("title");
-            postUrl = com.team.blog.shared.web.BlogPaths.of(rs.getString("p_handle")) + "/posts/" + postId;
+        boolean noPost = rs.wasNull();
+        String status = rs.getString("status");
+        if (noPost || status == null) {
+            return new PostPart(null, null, false, false);
         }
-        NotificationItem.PostRef post = null;
-        String preview = null;
-        String message;
-        String url = null;
+        boolean authorWithdrawn = rs.getTimestamp("p_author_withdrawn") != null;
+        boolean deleted = rs.getTimestamp("p_deleted") != null;
+        boolean hidden = rs.getTimestamp("p_hidden") != null;
+        long authorId = rs.getLong("author_id");
+        PostFacts facts = new PostFacts(postId, authorId, PostStatus.valueOf(status),
+                rs.getString("visibility"), authorWithdrawn, false);
+        boolean canRead = !deleted && PostStatus.PUBLISHED.name().equals(status)
+                && accessPolicy.canRead(Optional.of(user), facts);
+        return new PostPart(rs.getString("title"), com.team.blog.shared.web.BlogPaths.of(rs.getString("p_handle")) + "/posts/" + postId,
+                canRead && !hidden, canRead && hidden && authorId == user.memberId());
+    }
+
+    private Body body(ResultSet rs, NotificationType type, PostPart p, String actorName, Integer others) throws SQLException {
         Long commentId = rs.getObject("comment_id") == null ? null : rs.getLong("comment_id");
-        String commentUrl = commentId == null || postUrl == null ? postUrl : postUrl + "?comment=" + commentId + "#comment-" + commentId;
-        switch (type) {
-            case COMMENT, REPLY -> {
-                boolean commentOk = rs.getString("content") != null && rs.getTimestamp("c_deleted") == null
-                        && rs.getTimestamp("c_hidden") == null;
-                if (readable && commentOk) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    preview = preview(rs.getString("content"));
-                    url = commentUrl;
-                    message = type == NotificationType.COMMENT
-                            ? actorName + "님이 「" + title + "」에 댓글을 남겼어요: " + preview
-                            : actorName + "님이 회원님의 댓글에 답글을 남겼어요: " + preview;
-                } else {
-                    post = new NotificationItem.PostRef(null, null, true);
-                    message = UNAVAILABLE;
-                }
-            }
-            case LIKE -> {
-                if (commentId != null) {
-                    // 089: 댓글 좋아요
-                    boolean commentOk = rs.getString("content") != null && rs.getTimestamp("c_deleted") == null
-                            && rs.getTimestamp("c_hidden") == null;
-                    if (readable && commentOk) {
-                        post = new NotificationItem.PostRef(title, postUrl, null);
-                        preview = preview(rs.getString("content"));
-                        url = commentUrl;
-                        message = who(actorName, others) + " 회원님의 댓글을 좋아해요: " + preview;
-                    } else {
-                        post = new NotificationItem.PostRef(null, null, true);
-                        message = UNAVAILABLE;
-                    }
-                } else if (readable) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    url = postUrl;
-                    message = who(actorName, others) + " 「" + title + "」을(를) 좋아해요";
-                } else {
-                    post = new NotificationItem.PostRef(null, null, true);
-                    message = UNAVAILABLE;
-                }
-            }
-            case FIRST_PUBLIC -> {
-                if (readable) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    url = postUrl;
-                    message = actorName + "님이 친구에게만 보여 주던 「" + title + "」을(를) 모두에게 공개했어요";
-                } else {
-                    post = new NotificationItem.PostRef(null, null, true);
-                    message = UNAVAILABLE;
-                }
-            }
-            case MISSION_DONE -> {
-                if (readable) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    url = postUrl;
-                    message = actorName + "님이 오늘의 미션 글을 올렸어요: 「" + title + "」";
-                } else {
-                    post = new NotificationItem.PostRef(null, null, true);
-                    message = UNAVAILABLE;
-                }
-            }
-            case NEW_POST -> {
-                if (readable) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    url = postUrl;
-                    message = actorName + "님이 새 글을 올렸어요: 「" + title + "」";
-                } else {
-                    post = new NotificationItem.PostRef(null, null, true);
-                    message = UNAVAILABLE;
-                }
-            }
-            case FOLLOW -> {
-                url = "/me/followers";
-                message = who(actorName, others) + " 회원님을 팔로우해요";
-            }
-            case FRIEND_REQUEST -> {
-                url = "/settings/friends";
-                message = who(actorName, others) + " 친구 요청을 보냈어요";
-            }
-            case FOLLOW_REQUEST -> {
-                url = "/settings/privacy";
-                message = who(actorName, others) + " 팔로우를 요청했어요";
-            }
-            case INQUIRY -> {
-                url = "/admin/inquiries";
-                message = "새 문의가 왔어요. 문의함에서 확인해 주세요";
-            }
-            case REPORT_RESOLVED -> message = "ACTION_TAKEN".equals(rs.getString("result"))
+        String commentUrl = commentId == null || p.url() == null ? p.url() : p.url() + "?comment=" + commentId + "#comment-" + commentId;
+        return switch (type) {
+            case COMMENT -> onComment(rs, p, commentUrl, pv -> actorName + "님이 「" + p.title() + "」에 댓글을 남겼어요: " + pv);
+            case REPLY -> onComment(rs, p, commentUrl, pv -> actorName + "님이 회원님의 댓글에 답글을 남겼어요: " + pv);
+            // 089: 댓글 좋아요
+            case LIKE -> commentId != null
+                    ? onComment(rs, p, commentUrl, pv -> who(actorName, others) + " 회원님의 댓글을 좋아해요: " + pv)
+                    : onPost(p, who(actorName, others) + " 「" + p.title() + "」을(를) 좋아해요");
+            case FIRST_PUBLIC -> onPost(p, actorName + "님이 친구에게만 보여 주던 「" + p.title() + "」을(를) 모두에게 공개했어요");
+            case MISSION_DONE -> onPost(p, actorName + "님이 오늘의 미션 글을 올렸어요: 「" + p.title() + "」");
+            case NEW_POST -> onPost(p, actorName + "님이 새 글을 올렸어요: 「" + p.title() + "」");
+            case FOLLOW -> new Body(null, null, who(actorName, others) + " 회원님을 팔로우해요", "/me/followers");
+            case FRIEND_REQUEST -> new Body(null, null, who(actorName, others) + " 친구 요청을 보냈어요", "/settings/friends");
+            case FOLLOW_REQUEST -> new Body(null, null, who(actorName, others) + " 팔로우를 요청했어요", "/settings/privacy");
+            case INQUIRY -> new Body(null, null, "새 문의가 왔어요. 문의함에서 확인해 주세요", "/admin/inquiries");
+            case REPORT_RESOLVED -> new Body(null, null, "ACTION_TAKEN".equals(rs.getString("result"))
                     ? "신고하신 내용을 검토해 조치했어요. 알려 주셔서 고마워요"
-                    : "신고하신 내용을 검토했지만 운영 정책 위반은 아니었어요";
-            case CONTENT_HIDDEN -> {
-                if (commentId != null) {
-                    message = "회원님의 댓글이 운영 정책에 따라 숨겨졌어요";
-                    url = (readable || ownHidden) ? commentUrl : null;
-                } else if (readable || ownHidden) {
-                    post = new NotificationItem.PostRef(title, postUrl, null);
-                    message = "회원님의 글「" + title + "」이(가) 운영 정책에 따라 숨겨졌어요";
-                    url = postUrl;
-                } else {
-                    message = "회원님의 글이 운영 정책에 따라 숨겨졌어요";
-                }
-            }
-            default -> message = "";
+                    : "신고하신 내용을 검토했지만 운영 정책 위반은 아니었어요", null);
+            case CONTENT_HIDDEN -> contentHidden(p, commentId, commentUrl);
+            default -> new Body(null, null, "", null);
+        };
+    }
+
+    private static Body unavailable() {
+        return new Body(new NotificationItem.PostRef(null, null, true), null, UNAVAILABLE, null);
+    }
+
+    private static Body onPost(PostPart p, String message) {
+        return p.readable() ? new Body(new NotificationItem.PostRef(p.title(), p.url(), null), null, message, p.url()) : unavailable();
+    }
+
+    private Body onComment(ResultSet rs, PostPart p, String commentUrl, UnaryOperator<String> message) throws SQLException {
+        String content = rs.getString("content");
+        boolean commentOk = content != null && rs.getTimestamp("c_deleted") == null && rs.getTimestamp("c_hidden") == null;
+        if (!p.readable() || !commentOk) {
+            return unavailable();
         }
-        if (type == NotificationType.REPORT_RESOLVED || type == NotificationType.CONTENT_HIDDEN || type == NotificationType.INQUIRY) {
-            actor = null;
+        String preview = preview(content);
+        return new Body(new NotificationItem.PostRef(p.title(), p.url(), null), preview, message.apply(preview), commentUrl);
+    }
+
+    private static Body contentHidden(PostPart p, Long commentId, String commentUrl) {
+        boolean visible = p.readable() || p.ownHidden();
+        if (commentId != null) {
+            return new Body(null, null, "회원님의 댓글이 운영 정책에 따라 숨겨졌어요", visible ? commentUrl : null);
         }
-        return new NotificationItem(rs.getLong("id"), type.name(), read, updatedAt, CardDates.label(updatedAt, now), actor,
-                others, post, preview, rs.getString("result"), message, url);
+        if (visible) {
+            return new Body(new NotificationItem.PostRef(p.title(), p.url(), null), null,
+                    "회원님의 글「" + p.title() + "」이(가) 운영 정책에 따라 숨겨졌어요", p.url());
+        }
+        return new Body(null, null, "회원님의 글이 운영 정책에 따라 숨겨졌어요", null);
     }
 
     private static String who(String actorName, Integer others) {

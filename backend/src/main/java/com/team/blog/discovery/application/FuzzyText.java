@@ -39,7 +39,10 @@ public final class FuzzyText {
     /** 자모 길이에 따라 봐줄 거리: 4 이하 1, 9 이하 2, 그 위 3. */
     public static int allowance(String jamo) {
         int n = jamo.length();
-        return n <= 4 ? 1 : n <= 9 ? 2 : 3;
+        if (n <= 4) {
+            return 1;
+        }
+        return n <= 9 ? 2 : 3;
     }
 
     /** 편집 거리(삽입·삭제·바꾸기 1). {@code max}를 넘으면 일찍 그만두고 max+1. */
