@@ -17,7 +17,12 @@ public record ManageRow(long id, String title, PostStatus status, String visibil
     public PostCard card(String href) {
         // 휴지통 줄만 본문 미리보기를 읽으므로(PostManageQuery) 빈 글 판정도 휴지통에서만
         boolean emptyTrashed = deletedAt != null && status == PostStatus.DRAFT && (excerpt == null || excerpt.isBlank());
-        String shown = title != null && !title.isBlank() ? title : emptyTrashed ? "빈 임시글" : "(제목 없음)";
+        String shown;
+        if (title != null && !title.isBlank()) {
+            shown = title;
+        } else {
+            shown = emptyTrashed ? "빈 임시글" : "(제목 없음)";
+        }
         return new PostCard(id, href, shown, excerpt == null ? "" : excerpt, thumbnailUrl, publishedAt, commentCount, likeCount,
                 null, firstTag);
     }

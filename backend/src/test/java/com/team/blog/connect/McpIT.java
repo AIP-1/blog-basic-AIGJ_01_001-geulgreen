@@ -49,10 +49,8 @@ class McpIT extends IntegrationTestBase {
     }
 
     @Test
-    void keyLetsAiWriteOnlyMyDrafts() throws Exception {
-        long me = member("mcpme");
-        long other = member("mcpother");
-        String key = issueKey(me);
+    void keySpeaksMcpWithoutCookies() throws Exception {
+        String key = issueKey(member("mcpproto"));
         // 원문은 DB에 없다
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_key WHERE key_hash = ?", Integer.class, key)).isZero();
 
@@ -75,6 +73,13 @@ class McpIT extends IntegrationTestBase {
         assertThat(rpc(key, "{not json").getContentAsString()).contains("-32700");
         assertThat(mockMvc.perform(get("/mcp").header("Authorization", "Bearer " + key)).andReturn().getResponse()
                 .getStatus()).isEqualTo(405);
+    }
+
+    @Test
+    void keyLetsAiWriteOnlyMyDrafts() throws Exception {
+        long me = member("mcpme");
+        long other = member("mcpother");
+        String key = issueKey(me);
 
         // 임시글 만들기: 상태 DRAFT, 태그 정규화
         String created = call(key, "create_draft",

@@ -28,6 +28,7 @@ public class McpController {
 
     private static final Logger log = LoggerFactory.getLogger(McpController.class);
     static final List<String> PROTOCOL_VERSIONS = List.of("2025-06-18", "2025-03-26", "2024-11-05");
+    private static final String PROTOCOL_VERSION = "protocolVersion";
     private static final String INSTRUCTIONS = "글그린 블로그에 연결돼 있어요. 사용자가 블로그에 글로 남겨 달라고 하면"
             + " create_draft로 나눈 이야기를 임시글로 정리해 주세요. 글은 공개되지 않고 사용자가 직접 읽고 발행해요."
             + " 비밀번호·토큰·개인 정보·회사 내부 주소는 글에 넣지 마세요. 이어 쓰거나 고칠 때는 list_drafts로 찾고 update_draft로 고쳐요.";
@@ -87,9 +88,9 @@ public class McpController {
     }
 
     private Map<String, Object> initialize(JsonNode params) {
-        String asked = params == null || params.get("protocolVersion") == null ? "" : params.get("protocolVersion").asString("");
+        String asked = params == null || params.get(PROTOCOL_VERSION) == null ? "" : params.get(PROTOCOL_VERSION).asString("");
         Map<String, Object> out = new LinkedHashMap<>();
-        out.put("protocolVersion", PROTOCOL_VERSIONS.contains(asked) ? asked : PROTOCOL_VERSIONS.get(0));
+        out.put(PROTOCOL_VERSION, PROTOCOL_VERSIONS.contains(asked) ? asked : PROTOCOL_VERSIONS.get(0));
         out.put("capabilities", Map.of("tools", Map.of("listChanged", false)));
         out.put("serverInfo", Map.of("name", "geulgreen", "title", "글그린", "version", "1.0.0"));
         out.put("instructions", INSTRUCTIONS);

@@ -38,30 +38,22 @@ class LayoutModelForErrors {
 
     void fill(ModelAndView view, HttpServletRequest request) {
         for (ControllerAdviceBean advice : advices.updateAndGet(a -> a != null ? a : ControllerAdviceBean.findAnnotatedBeans(context))) {
-            if (advice.getBeanType() == null || !advice.isApplicableToBeanType(Probe.class)) {
-                continue;
+            Class<?> type = advice.getBeanType();
+            if (type != null && advice.isApplicableToBeanType(Probe.class)) {
+                fillFrom(advice, type, view, request);
             }
-            Set<Method> methods = MethodIntrospector.selectMethods(advice.getBeanType(),
-                    (ReflectionUtils.MethodFilter) m -> AnnotatedElementUtils.hasAnnotation(m, ModelAttribute.class)
-                            && !AnnotatedElementUtils.hasAnnotation(m, RequestMapping.class));
-            Object bean = null;
-            for (Method method : methods) {
-                String name = method.getAnnotation(ModelAttribute.class).value();
-                if (name.isEmpty() || view.getModel().containsKey(name) || method.getReturnType() == void.class) {
-                    continue;
-                }
-                Object[] args = new Object[method.getParameterCount()];
-                boolean supported = true;
-                for (int i = 0; i < args.length; i++) {
-                    if (method.getParameterTypes()[i].isInstance(request)) {
-                        args[i] = request;
-                    } else {
-                        supported = false;
-                    }
-                }
-                if (!supported) {
-                    continue;
-                }
+        }
+    }
+
+    private static void fillFrom(ControllerAdviceBean advice, Class<?> type, ModelAndView view, HttpServletRequest request) {
+        Set<Method> methods = MethodIntrospector.selectMethods(type,
+                (ReflectionUtils.MethodFilter) m -> AnnotatedElementUtils.hasAnnotation(m, ModelAttribute.class)
+                        && !AnnotatedElementUtils.hasAnnotation(m, RequestMapping.class));
+        Object bean = null;
+        for (Method method : methods) {
+            String name = method.getAnnotation(ModelAttribute.class).value();
+            Object[] args = wanted(name, method, view) ? args(method, request) : null;
+            if (args != null) {
                 try {
                     if (bean == null) {
                         bean = advice.resolveBean();
@@ -73,5 +65,21 @@ class LayoutModelForErrors {
                 }
             }
         }
+    }
+
+    private static boolean wanted(String name, Method method, ModelAndView view) {
+        return !name.isEmpty() && !view.getModel().containsKey(name) && method.getReturnType() != void.class;
+    }
+
+    /** 인자가 모두 요청으로 채워지면 그 배열, 하나라도 다른 종류면 null. */
+    private static Object[] args(Method method, HttpServletRequest request) {
+        Object[] args = new Object[method.getParameterCount()];
+        for (int i = 0; i < args.length; i++) {
+            if (!method.getParameterTypes()[i].isInstance(request)) {
+                return null;
+            }
+            args[i] = request;
+        }
+        return args;
     }
 }

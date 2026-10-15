@@ -28,12 +28,12 @@ class EditorPageIT extends IntegrationTestBase {
         assertThat(html.indexOf("class=\"editor-bar\"")).isLessThan(html.indexOf("id=\"post-title\""));
         // 058 강성찬 개인 확장: 글을 드래그하면 뜨는 서식 창
         assertThat(html).contains("/js/editor/format-toolbar-").contains("id=\"format-hint\"")
-                .contains("data-writing-ai=\"false\"").doesNotContain("J AI에게 부탁") // 059: Gemini 키가 없으면 AI 칸 없음
+                .contains("data-writing-ai=\"false\"").doesNotContain("AI에게 부탁") // 059: Gemini 키가 없으면 AI 칸 없음
                 // 060 보이는 대로 쓰기: 변환 도구와 편집 칸 스크립트(Markdown 칸은 그대로 남아 저장·자동 저장에 쓰인다)
                 .contains("/js/editor/visual-editor-").contains("/webjars/marked/").contains("/webjars/turndown/")
                 .contains("id=\"post-content\"")
                 // 064·065 강성찬 개인 확장: / 명령 안내와 [표] 버튼
-                .contains("줄 처음에 / 를 쓰면").contains("id=\"table-insert\"")
+                .contains("넣기 메뉴").contains("<kbd>/</kbd>").contains("id=\"table-insert\"")
                 // 085 강성찬 개인 확장: 미리보기 대신 글 점검(키가 없으면 맞춤법 검사 대신 안내)
                 .contains("id=\"check-toggle\"").contains("/js/editor/write-check-").contains("맞춤법 검사는 AI가 연결되면")
                 .doesNotContain("id=\"preview-toggle\"").doesNotContain("/js/editor/preview-").doesNotContain("id=\"spell-run\"")

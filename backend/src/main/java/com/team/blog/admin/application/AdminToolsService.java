@@ -32,7 +32,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminToolsService {
 
     private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
-
+    private static final String POSTS_PATH = "/posts/";
+    private static final String CONTENT = "content";
+    private static final String REPORT = "report";
+    private static final String HANDLE = "handle";
+    private static final String TITLE = "title";
+    private static final String NICKNAME = "nickname";
+    private static final String CREATED_AT = "created_at";
+    private static final String MESSAGE = "message";
 
     public record Day(LocalDate date, long members, long posts, long comments, long views) {
     }
@@ -45,7 +52,10 @@ public class AdminToolsService {
         }
 
         public String dir() {
-            return now > before ? "up" : now < before ? "down" : "same";
+            if (now > before) {
+                return "up";
+            }
+            return now < before ? "down" : "same";
         }
     }
 
@@ -106,7 +116,7 @@ public class AdminToolsService {
     public record PopularPost(long id, String title, String handle, long views) {
 
         public String url() {
-            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id;
+            return com.team.blog.shared.web.BlogPaths.of(handle) + POSTS_PATH + id;
         }
     }
 
@@ -117,7 +127,7 @@ public class AdminToolsService {
             if (postId == null) {
                 return com.team.blog.shared.web.BlogPaths.of(handle);
             }
-            return com.team.blog.shared.web.BlogPaths.of(postHandle) + "/posts/" + postId + (commentId == null ? "" : "?comment=" + commentId + "#comment-" + commentId);
+            return com.team.blog.shared.web.BlogPaths.of(postHandle) + POSTS_PATH + postId + (commentId == null ? "" : "?comment=" + commentId + "#comment-" + commentId);
         }
     }
 
@@ -128,7 +138,7 @@ public class AdminToolsService {
                           boolean hidden, String hiddenReason, long views, int comments) {
 
         public String url() {
-            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + id;
+            return com.team.blog.shared.web.BlogPaths.of(handle) + POSTS_PATH + id;
         }
     }
 
@@ -136,7 +146,7 @@ public class AdminToolsService {
                              String nickname, Instant createdAt, boolean hidden) {
 
         public String url() {
-            return com.team.blog.shared.web.BlogPaths.of(postHandle) + "/posts/" + postId + "?comment=" + id + "#comment-" + id;
+            return com.team.blog.shared.web.BlogPaths.of(postHandle) + POSTS_PATH + postId + "?comment=" + id + "#comment-" + id;
         }
     }
 
@@ -150,14 +160,14 @@ public class AdminToolsService {
     public record LogRow(Instant at, String admin, String action, String target, String detail) {
 
         private static final Map<String, String[]> LABELS = Map.ofEntries(
-                Map.entry("POST_HIDE", new String[] {"글 숨김", "content"}), Map.entry("POST_UNHIDE", new String[] {"글 숨김 해제", "content"}),
-                Map.entry("COMMENT_HIDE", new String[] {"댓글 숨김", "content"}),
-                Map.entry("COMMENT_UNHIDE", new String[] {"댓글 숨김 해제", "content"}),
-                Map.entry("GUESTBOOK_DELETE", new String[] {"방명록 삭제", "content"}),
+                Map.entry("POST_HIDE", new String[] {"글 숨김", CONTENT}), Map.entry("POST_UNHIDE", new String[] {"글 숨김 해제", CONTENT}),
+                Map.entry("COMMENT_HIDE", new String[] {"댓글 숨김", CONTENT}),
+                Map.entry("COMMENT_UNHIDE", new String[] {"댓글 숨김 해제", CONTENT}),
+                Map.entry("GUESTBOOK_DELETE", new String[] {"방명록 삭제", CONTENT}),
                 Map.entry("NOTICE_POST", new String[] {"공지 올림", "notice"}), Map.entry("NOTICE_OFF", new String[] {"공지 끔", "notice"}),
-                Map.entry("REPORT_HIDDEN", new String[] {"신고 숨김 처리", "report"}),
-                Map.entry("REPORT_REJECTED", new String[] {"신고 반려", "report"}),
-                Map.entry("REPORT_CLOSED_NO_TARGET", new String[] {"신고 닫음(대상 없음)", "report"}),
+                Map.entry("REPORT_HIDDEN", new String[] {"신고 숨김 처리", REPORT}),
+                Map.entry("REPORT_REJECTED", new String[] {"신고 반려", REPORT}),
+                Map.entry("REPORT_CLOSED_NO_TARGET", new String[] {"신고 닫음(대상 없음)", REPORT}),
                 Map.entry("SUSPEND", new String[] {"회원 정지", "member"}),
                 Map.entry("SAMPLE_POSTS_SEED", new String[] {"테스트 글 넣기", "etc"}),
                 Map.entry("SAMPLE_POSTS_REMOVE", new String[] {"테스트 글 지우기", "etc"}));
@@ -268,7 +278,7 @@ public class AdminToolsService {
                 JOIN post p ON p.id = d.post_id JOIN member m ON m.id = p.author_id
                 WHERE d.view_date > ? AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL
                 GROUP BY p.id, p.title, m.handle ORDER BY views DESC, p.id DESC LIMIT 5
-                """, (rs, i) -> new PopularPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("views")),
+                """, (rs, i) -> new PopularPost(rs.getLong("id"), rs.getString(TITLE), rs.getString(HANDLE), rs.getLong("views")),
                 java.sql.Date.valueOf(today.minusDays(7)));
         List<Activity> activity = jdbc.query("""
                 SELECT at, kind, who, what, ph, pid, cid FROM (
@@ -339,8 +349,8 @@ public class AdminToolsService {
                 FROM post p JOIN member m ON m.id = p.author_id
                 WHERE p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND (p.title ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
                       OR m.nickname ILIKE ? ESCAPE '\\') AND (NOT ? OR p.hidden_at IS NOT NULL)
-                """, "p.published_at DESC, p.id DESC", (rs, n) -> new PostRow(rs.getLong("id"), rs.getString("title"),
-                rs.getString("handle"), rs.getString("nickname"), rs.getString("visibility"), rs.getTimestamp("published_at").toInstant(),
+                """, "p.published_at DESC, p.id DESC", (rs, n) -> new PostRow(rs.getLong("id"), rs.getString(TITLE),
+                rs.getString(HANDLE), rs.getString(NICKNAME), rs.getString("visibility"), rs.getTimestamp("published_at").toInstant(),
                 rs.getTimestamp("hidden_at") != null, rs.getString("hidden_reason"), rs.getLong("view_count"), rs.getInt("comment_count")),
                 page, like(q), like(q), like(q), hiddenOnly);
     }
@@ -353,8 +363,8 @@ public class AdminToolsService {
                 WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL AND (c.content ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
                       OR m.nickname ILIKE ? ESCAPE '\\') AND (NOT ? OR c.hidden_at IS NOT NULL)
                 """, "c.created_at DESC, c.id DESC", (rs, n) -> new CommentRow(rs.getLong("id"), rs.getLong("post_id"),
-                rs.getString("title"), rs.getString("post_handle"), rs.getString("content"), rs.getString("handle"), rs.getString("nickname"),
-                rs.getTimestamp("created_at").toInstant(), rs.getTimestamp("hidden_at") != null),
+                rs.getString(TITLE), rs.getString("post_handle"), rs.getString(CONTENT), rs.getString(HANDLE), rs.getString(NICKNAME),
+                rs.getTimestamp(CREATED_AT).toInstant(), rs.getTimestamp("hidden_at") != null),
                 page, like(q), like(q), like(q), hiddenOnly);
     }
 
@@ -420,8 +430,8 @@ public class AdminToolsService {
                 FROM guestbook_entry g JOIN member o ON o.id = g.owner_id JOIN member m ON m.id = g.author_id
                 WHERE (g.content ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\'
                        OR o.handle ILIKE ? ESCAPE '\\') AND (NOT ? OR g.secret)
-                """, "g.id DESC", (rs, n) -> new GuestbookRow(rs.getLong("id"), rs.getString("owner_handle"), rs.getString("content"),
-                rs.getBoolean("secret"), rs.getString("handle"), rs.getString("nickname"), rs.getTimestamp("created_at").toInstant()),
+                """, "g.id DESC", (rs, n) -> new GuestbookRow(rs.getLong("id"), rs.getString("owner_handle"), rs.getString(CONTENT),
+                rs.getBoolean("secret"), rs.getString(HANDLE), rs.getString(NICKNAME), rs.getTimestamp(CREATED_AT).toInstant()),
                 page, like(q), like(q), like(q), like(q), secretOnly);
     }
 
@@ -440,8 +450,8 @@ public class AdminToolsService {
         adminGuard.requireAdmin(current);
         return AdminList.query(jdbc, "SELECT id, message, link_url, active, created_at FROM site_notice"
                         + " WHERE message ILIKE ? ESCAPE '\\' OR coalesce(link_url, '') ILIKE ? ESCAPE '\\'", "id DESC",
-                (rs, n) -> new Notice(rs.getLong("id"), rs.getString("message"), rs.getString("link_url"), rs.getBoolean("active"),
-                        rs.getTimestamp("created_at").toInstant()), page, like(q), like(q));
+                (rs, n) -> new Notice(rs.getLong("id"), rs.getString(MESSAGE), rs.getString("link_url"), rs.getBoolean("active"),
+                        rs.getTimestamp(CREATED_AT).toInstant()), page, like(q), like(q));
     }
 
     /** 새 공지를 켠다(켜진 공지는 하나만: 예전 것은 끈다). 링크는 이 사이트 주소(/로 시작)나 https만. */
@@ -450,7 +460,7 @@ public class AdminToolsService {
         CurrentUser admin = adminGuard.requireAdmin(current);
         String message = rawMessage == null ? "" : rawMessage.strip();
         if (message.isEmpty() || message.codePointCount(0, message.length()) > 200) {
-            throw new ProfileValidationException(FieldError.of("message", "NOTICE_MESSAGE_INVALID"));
+            throw new ProfileValidationException(FieldError.of(MESSAGE, "NOTICE_MESSAGE_INVALID"));
         }
         String link = rawLink == null || rawLink.isBlank() ? null : rawLink.strip();
         if (link != null && !((link.startsWith("/") && !link.startsWith("//")) || link.startsWith("https://")) || link != null
@@ -474,8 +484,8 @@ public class AdminToolsService {
     /** 지금 켜진 공지(모든 화면 위 띠). */
     public Optional<Notice> activeNotice() {
         return jdbc.query("SELECT id, message, link_url, active, created_at FROM site_notice WHERE active ORDER BY id DESC LIMIT 1",
-                (rs, i) -> new Notice(rs.getLong("id"), rs.getString("message"), rs.getString("link_url"), true,
-                        rs.getTimestamp("created_at").toInstant())).stream().findFirst();
+                (rs, i) -> new Notice(rs.getLong("id"), rs.getString(MESSAGE), rs.getString("link_url"), true,
+                        rs.getTimestamp(CREATED_AT).toInstant())).stream().findFirst();
     }
 
     // ----- 050 관리 기록 -----
