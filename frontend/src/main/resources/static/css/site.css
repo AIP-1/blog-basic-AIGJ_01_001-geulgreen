@@ -1016,8 +1016,9 @@ main.list-page .home-cards { gap: 18px; }
 /* 꼬리말 */
 .footer-inner { justify-content: space-between; }
 .footer-slogan { color: var(--color-text-muted); margin: 0; }
-.footer-links { display: flex; gap: 16px; margin: 0; }
-.footer-links a { color: var(--color-text-muted); text-decoration: none; font-size: .9em; }
+/* 좁은 화면에서 링크가 단어 중간에서 끊기지 않게: 링크 하나는 한 줄, 넘치면 링크째 다음 줄로 */
+.footer-links { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; }
+.footer-links a { color: var(--color-text-muted); text-decoration: none; font-size: .9em; white-space: nowrap; }
 .footer-links a:hover { color: var(--color-text); text-decoration: underline; }
 /* 055 카드 대표 사진 고르기(강성찬 개인 확장) */
 .cover-field .field-label { margin: 0; font-weight: 600; }
