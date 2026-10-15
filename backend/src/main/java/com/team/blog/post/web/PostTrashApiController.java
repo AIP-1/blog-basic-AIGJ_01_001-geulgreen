@@ -36,6 +36,11 @@ public class PostTrashApiController {
         return manageQuery.page(currentUserProvider.current(), ManageTab.of(tab), visibility, cursor);
     }
 
+    @GetMapping("/api/me/posts/counts")
+    public Map<String, Long> myPostCounts() {
+        return manageQuery.counts(currentUserProvider.current());
+    }
+
     @DeleteMapping("/api/posts/{postId}")
     public PostTrashService.TrashResult trash(@PathVariable long postId) {
         return trashService.trash(currentUserProvider.current(), postId);
