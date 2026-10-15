@@ -186,6 +186,7 @@ main.list-page { max-width: var(--page-wide); }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
 /* 088: 하트는 기본 회색 빈 하트(카드 목록은 내가 좋아요했는지 모른다) */
+#manage[data-tab="trash"] .card-likes, #manage[data-tab="trash"] .card-comments { display: none; } /* 휴지통 카드엔 반응 숫자 대신 미리보기만 */
 .card-likes, .card-comments { font-weight: 600; } /* 088 후속: 좋아요·댓글 숫자 굵기 같게 */
 .card-likes.is-liked { color: var(--color-like); } /* 088 후속: 내가 좋아요 한 글은 빨간 ♥(js/post/liked-hearts.js) */
 .card-date { margin-left: auto; }
@@ -476,6 +477,24 @@ main:has(> article.post) { max-width: 808px; }
 .post-tags { margin: 28px 0 8px; }
 .reaction-row { padding: 16px 0; border-bottom: 1px solid var(--color-border); gap: 16px; }
 .author-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 20px; margin: 28px 0; }
+/* 097 강성찬 개인 확장: 작성자 카드 한 줄(아이콘 · 이름·소개·숫자 · 오른쪽 버튼). 휴대폰은 버튼이 글 아래 한 줄로 */
+.author-card { align-items: center; gap: 16px; flex-wrap: wrap; }
+.author-card-avatar { flex: none; line-height: 0; border-radius: 50%; }
+.author-card-text { display: flex; flex-direction: column; gap: 2px; }
+.author-card-text p { margin: 0; }
+.author-card-name { font-weight: 700; font-size: 1.08em; color: var(--color-text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-card-name:hover { text-decoration: underline; }
+.author-card-bio { color: var(--color-text-muted); font-size: .93em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-card-stats { font-size: .85em; }
+.author-card-stats a { color: inherit; text-decoration: none; }
+.author-card-stats a:hover { text-decoration: underline; }
+.author-card-actions { flex: none; display: flex; align-items: center; gap: 8px; }
+.author-card-actions .follow-form { margin: 0; }
+.author-card-actions .follow-button, .author-card-actions .btn { min-width: 96px; padding: 8px 18px; font-size: .93em; justify-content: center; }
+.author-card > .follow-message { flex-basis: 100%; margin: 0; }
+@media (max-width: 560px) { .author-card { padding: 16px; gap: 12px 14px; }
+    .author-card-actions { flex-basis: 100%; }
+    .author-card-actions .follow-form, .author-card-actions .follow-button, .author-card-actions > .btn { flex: 1; width: 100%; } }
 
 /* 댓글 */
 .comment { padding: 14px 0; }
@@ -1261,9 +1280,30 @@ main.list-page .home-cards { gap: 18px; }
 .explore-page { display: flex; flex-direction: column; gap: 18px; }
 .explore-page h1 { margin: 0; }
 .explore-page h2 { margin: 0; font-size: 1.05em; }
-.explore-page .feed-recommended { margin: 0; }
-.explore-page .newcomers { margin: 0; }
-.explore-tags-link { margin-left: auto; font-size: .9em; }
+/* 10-15 탐색 정리: 글이 주인공, 사람 추천은 한 칸(넓으면 오른쪽 칸, 좁으면 탭 위 가로 한 줄) */
+.explore-layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "people" "main"; gap: 18px; }
+.explore-main { grid-area: main; min-width: 0; }
+.explore-main .home-tabs-row { margin-top: 0; }
+.explore-people { grid-area: people; min-width: 0; }
+.explore-people h2 { margin: 0 0 10px; font-size: .95em; color: var(--color-text-muted); font-weight: 600; }
+.people-list { list-style: none; margin: 0; padding: 0 0 4px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: thin; }
+.person-row { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--color-border);
+    border-radius: 14px; background: var(--color-surface); }
+.person-link { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--color-text); text-decoration: none; }
+.person-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.person-id { font-weight: 600; font-size: .9em; white-space: nowrap; }
+.person-new { font-size: .72em; color: var(--color-brand); }
+.explore-people .follow-form { margin: 0; flex: none; }
+/* 팔로우는 작은 테두리 단추(글보다 눈에 띄지 않게) */
+.explore-people .follow-button, .explore-people .follow-button:not([aria-pressed="true"]) { padding: 3px 10px; font-size: .78em; background: transparent;
+    border: 1px solid var(--color-brand); color: var(--color-brand); }
+.explore-people .follow-button:not([aria-pressed="true"]):hover { background: var(--color-brand-soft); color: var(--color-brand); }
+@media (min-width: 1000px) {
+    .explore-layout:not(.no-people) { grid-template-columns: minmax(0, 1fr) 260px; grid-template-areas: "main people"; gap: 28px; }
+    .explore-people { position: sticky; top: 76px; align-self: start; }
+    .people-list { flex-direction: column; overflow: visible; }
+    .person-row { justify-content: space-between; }
+}
 /* 086: 피드는 목록 끝에 탐색으로 가는 한 줄 */
 .feed-end { margin: 8px 0 24px; text-align: center; color: var(--color-text-muted); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
 
@@ -1353,3 +1393,12 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .series-card .icon { grid-row: span 2; color: var(--color-brand); }
 .series-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .series-cards .manage-badges form { position: relative; z-index: 1; margin: 0; }
+/* 머리말 화면 모드 버튼: 라이트에서는 달(다크로), 다크에서는 해(라이트로). 테마 판단은 밤 그림과 같은 규칙 */
+.theme-switch { border: 0; background: none; color: var(--color-text); padding: 0; cursor: pointer; }
+.theme-switch .icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-switch .icon-sun { display: inline; }
+    :root:not([data-theme="light"]) .theme-switch .icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-switch .icon-sun { display: inline; }
+:root[data-theme="dark"] .theme-switch .icon-moon { display: none; }

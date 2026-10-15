@@ -12,7 +12,6 @@ import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.KoreanDateFormatter;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -76,7 +76,9 @@ public class ManagePostsController {
                     : tab == ManageTab.TRASH ? "삭제 " + dates.get(row.id())
                     : dates.get(row.id()) + (row.editedAt() != null ? " · 수정됨 " + KoreanDateFormatter.monthDay(row.editedAt()) : ""));
             if (row.purgeAt() != null) {
-                daysLeft.put(row.id(), Math.max(0, (Duration.between(now, row.purgeAt()).toHours() + 23) / 24));
+                daysLeft.put(row.id(), Math.max(0, java.time.temporal.ChronoUnit.DAYS.between( // 한국 날짜 기준, 0 = 오늘 삭제
+                        java.time.LocalDate.ofInstant(now, KoreanDateFormatter.SEOUL),
+                        java.time.LocalDate.ofInstant(row.purgeAt(), KoreanDateFormatter.SEOUL))));
             }
         }
         model.addAttribute("tab", tab.param());
@@ -110,6 +112,13 @@ public class ManagePostsController {
     public RedirectView purge(@PathVariable long postId, @RequestParam(value = "tab", required = false) String tab) {
         trashService.purge(currentUserProvider.current(), postId);
         return back(tab);
+    }
+
+    @PostMapping("/manage/posts/trash/empty")
+    public RedirectView emptyTrash(RedirectAttributes flash) {
+        int purged = trashService.emptyTrash(currentUserProvider.current());
+        flash.addFlashAttribute("manageNotice", "휴지통을 비웠어요 (" + purged + "개)");
+        return back("trash");
     }
 
     private static RedirectView back(String tab) {

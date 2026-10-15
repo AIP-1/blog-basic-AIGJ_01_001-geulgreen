@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import com.team.blog.post.markdown.ContentRenderer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +32,12 @@ public class PostManageQuery {
     private final JdbcTemplate jdbc;
     private final PostProperties properties;
     private final java.time.Clock clock;
+    private final ContentRenderer renderer;
 
-    public PostManageQuery(AccountGuard accountGuard, JdbcTemplate jdbc, PostProperties properties, java.time.Clock clock) {
+    public PostManageQuery(AccountGuard accountGuard, JdbcTemplate jdbc, PostProperties properties, java.time.Clock clock,
+                           ContentRenderer renderer) {
         this.clock = clock;
+        this.renderer = renderer;
         this.accountGuard = accountGuard;
         this.jdbc = jdbc;
         this.properties = properties;
@@ -50,7 +54,11 @@ public class PostManageQuery {
                        d.edit_version AS d_version, m.handle,
                        COALESCE(tz.teaser, p.excerpt) AS excerpt, COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url,
                        (SELECT t.name FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
-                        WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag
+                        WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag""");
+        // 휴지통 탭만: 발행 전에 지운 글은 요약이 없어 본문 앞부분으로 미리보기를 만든다(제목 없는 글 구분)
+        sql.append(tab == ManageTab.TRASH ? ", CASE WHEN p.excerpt IS NULL THEN left(p.content_md, 4000) END AS preview_md" : "");
+        sql.append("""
+
                 FROM post p JOIN member m ON m.id = p.author_id LEFT JOIN post_draft d ON d.post_id = p.id
                      LEFT JOIN post_teaser tz ON tz.post_id = p.id LEFT JOIN post_cover pcv ON pcv.post_id = p.id
                 WHERE p.author_id = ?""");
@@ -77,7 +85,7 @@ public class PostManageQuery {
             args.add(after.get().id());
         }
         sql.append(" ORDER BY ").append(sortColumn).append(" DESC, p.id DESC LIMIT ").append(size + 1);
-        List<ManageRow> rows = jdbc.query(sql.toString(), (rs, n) -> row(rs), args.toArray());
+        List<ManageRow> rows = jdbc.query(sql.toString(), (rs, n) -> row(rs, tab == ManageTab.TRASH), args.toArray());
         String next = null;
         if (rows.size() > size) {
             rows = rows.subList(0, size);
@@ -86,6 +94,11 @@ public class PostManageQuery {
         }
         Map<String, Long> counts = after.isEmpty() ? counts(user.memberId()) : null;
         return new ManagePage(List.copyOf(rows), next, counts);
+    }
+
+    /** 로그인한 회원의 탭별 글 수(화면에서 삭제·복구 뒤 탭 숫자 갱신용). */
+    public Map<String, Long> counts(Optional<CurrentUser> currentUser) {
+        return counts(accountGuard.requireLoggedIn(currentUser).memberId());
     }
 
     /** 탭별 글 수(GROUP BY 1번). */
@@ -101,7 +114,19 @@ public class PostManageQuery {
         return counts;
     }
 
-    private ManageRow row(ResultSet rs) throws SQLException {
+    private ManageRow row(ResultSet rs, boolean trash) throws SQLException {
+        String excerpt = rs.getString("excerpt");
+        String previewMd = trash ? rs.getString("preview_md") : null;
+        if (excerpt == null && previewMd != null && !previewMd.isBlank()) {
+            try {
+                excerpt = renderer.render(previewMd).excerpt(); // 화면에 보이는 글자만(정화된 요약과 같은 규칙)
+            } catch (RuntimeException e) {
+                excerpt = null; // 미리보기는 덤: 못 만들면 아래 안내
+            }
+            if (excerpt == null || excerpt.isBlank()) {
+                excerpt = "글자 없이 사진·코드만 있어요"; // 본문은 있으니 "빈 임시글"이 아니다
+            }
+        }
         PostStatus status = PostStatus.valueOf(rs.getString("status"));
         long draftVersion = rs.getLong("d_version");
         boolean editing = status == PostStatus.PUBLISHED && !rs.wasNull() && draftVersion > rs.getLong("edit_version");
@@ -113,7 +138,7 @@ public class PostManageQuery {
                 deletedAt == null ? null : deletedAt.plus(properties.trash().retention()),
                 rs.getLong("view_count"), rs.getInt("like_count"), rs.getInt("comment_count"),
                 com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + id,
-                rs.getString("excerpt"), rs.getString("thumbnail_url"), rs.getString("first_tag"));
+                excerpt, rs.getString("thumbnail_url"), rs.getString("first_tag"));
     }
 
     private static Instant instant(Timestamp ts) {
