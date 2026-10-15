@@ -61,7 +61,7 @@ public class SignupCodeApiController {
             return reply(HttpStatus.TOO_MANY_REQUESTS, "잠시 후 다시 시도해 주세요");
         }
         String code = codes.issue(EmailCodeService.Purpose.SIGNUP, email, "ok");
-        mailSender.send(email, "[블로그] 인증 코드 " + code, "mail/code", Map.of("code", code,
+        mailSender.send(email, "[글그린] 인증 코드 " + code, "mail/code", Map.of("code", code,
                 "minutes", codes.ttl().toMinutes(), "purpose", "가입 화면에 아래 코드를 넣어 주세요."));
         return reply(HttpStatus.OK, "코드를 보냈어요. 메일함을 확인해 주세요");
     }

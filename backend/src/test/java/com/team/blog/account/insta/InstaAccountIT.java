@@ -50,11 +50,12 @@ class InstaAccountIT extends IntegrationTestBase {
     void signupWithEmailCodeCreatesVerifiedAccountWithoutLinkMail() throws Exception {
         Browser browser = new Browser(mockMvc);
         assertThat(browser.perform(get("/signup")).getResponse().getContentAsString())
-                .contains("인증 코드 받기", "Google로 계속하기");
+                .contains("인증 코드 받기", "Google로 계속하기", "스팸함도 확인해 주세요");
         assertThat(browser.perform(post("/api/signup/code").with(csrf()).param("email", "new@example.com"))
                 .getResponse().getStatus()).isEqualTo(200);
         String code = codeFrom("new@example.com");
         assertThat(mailpit.awaitMessagesTo("new@example.com", 1).get(0).fromName()).isEqualTo("글그린"); // 보내는 이름
+        assertThat(mailpit.awaitMessagesTo("new@example.com", 1).get(0).subject()).startsWith("[글그린] 인증 코드");
         // 1분 안에 다시 요청하면 막힘
         assertThat(browser.perform(post("/api/signup/code").with(csrf()).param("email", "new@example.com"))
                 .getResponse().getStatus()).isEqualTo(429);
