@@ -10,6 +10,9 @@
   'use strict';
 
   var MAX_SIDE = 1920, THUMB_WIDTH = 640, QUALITY = 0.8;
+  var GIF_MAX_SIDE = 1920; // 서버 blog.image.post.gif-max-dimension과 같은 값
+  var GIF_TOO_BIG = 'GIF는 가로·세로 1920px까지 올릴 수 있어요.';
+  var GIF_TOO_MANY_FRAMES = 'GIF는 300장면까지 올릴 수 있어요.';
   var TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
   function csrfHeaders() {
@@ -38,6 +41,7 @@
     return createImageBitmap(file).then(function (bitmap) {
       var original;
       if (file.type === 'image/gif') {
+        if (gifTooBig(bitmap)) { var e = new Error('gif'); e.final = GIF_TOO_BIG; throw e; } // 저장소에 올리기 전에 멈춘다
         original = Promise.resolve({ blob: file, type: 'image/gif' });
       } else {
         var longSide = Math.max(bitmap.width, bitmap.height);
@@ -70,11 +74,46 @@
     });
   }
 
-  function failMessage(res, data) {
+  function gifTooBig(bitmap) { return bitmap.width > GIF_MAX_SIDE || bitmap.height > GIF_MAX_SIDE; }
+
+  function failMessage(res, data, type) {
     if (res.status === 409) { return data.message || '저장 공간(1GB)을 다 썼어요.'; }
     if (res.status === 429) { return data.message || '잠시 뒤 다시 올려 주세요.'; }
+    if (res.status === 400 && type === 'image/gif' && data.detail === 'DIMENSION') { return GIF_TOO_BIG; }
+    if (res.status === 400 && type === 'image/gif' && data.detail === 'FRAMES') { return GIF_TOO_MANY_FRAMES; }
     if (res.status === 400) { return data.message || '이 사진은 올릴 수 없어요.'; }
     return null; // 다시 시도할 수 있는 실패
+  }
+
+  /* 사진 안내 칸. 실패 안내는 다음에 사진을 넣거나 그 뒤에 넣은 사진이 올라가면 지운다.
+     한 번에 고른 여러 장은 한 묶음이라, 같은 묶음의 실패는 형제 사진이 성공해도 남는다.
+     실패 안내와 일반 안내(움직이는 WebP 등)는 따로 두어 서로 덮지 않고, 새 묶음이 시작되면 일반 안내도 지운다.
+     실패는 도착한 때의 묶음에 붙인다: 늦게 온 지난 묶음의 실패도 사진이 빠졌다는 걸 알려야 하므로 다음 동작까지 남긴다. */
+  function noticeBox(el) {
+    var batch = 0, failBatch = -1, open = false, fails = [], infoText = '';
+    function show() {
+      var text = fails.concat(infoText ? [infoText] : []).join(' ');
+      el.textContent = text; el.hidden = !text;
+    }
+    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { fails = []; failBatch = -1; show(); } }
+    return {
+      say: function (text) { infoText = text || ''; show(); },
+      fail: function (text) {
+        if (failBatch !== batch) { fails = []; failBatch = batch; }
+        if (fails.indexOf(text) < 0) { fails.push(text); }
+        show();
+      },
+      begin: function () {
+        if (!open) { open = true; batch++; infoText = ''; clearOld(batch); show(); Promise.resolve().then(function () { open = false; }); }
+        return batch;
+      },
+      done: clearOld
+    };
+  }
+
+  if (typeof module === 'object' && module.exports) { // Node 자체 검사(src/test/js/image-upload.test.mjs)
+    module.exports = { failMessage: failMessage, gifTooBig: gifTooBig, noticeBox: noticeBox };
+    return;
   }
 
   /* 사진 한 장을 원본·썸네일로 만들어 presign → PUT → complete. 성공하면 complete 응답({url, thumbUrl, ...}).
@@ -87,7 +126,7 @@
           thumbSize: thumb ? thumb.size : null }) })
         .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
         .then(function (r) {
-          if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data); throw e; }
+          if (!r.res.ok) { var e = new Error('presign'); e.final = failMessage(r.res, r.data, original.type); throw e; }
           var p = r.data;
           var puts = [put(p.uploadUrl, p.headers, original.blob)];
           if (thumb && p.thumbUploadUrl) { puts.push(put(p.thumbUploadUrl, p.thumbHeaders, thumb)); }
@@ -98,7 +137,7 @@
         })
         .then(function (res) { return res.json().then(function (d) { return { res: res, data: d }; }); })
         .then(function (r) {
-          if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data); throw e; }
+          if (!r.res.ok) { var e = new Error('complete'); e.final = failMessage(r.res, r.data, original.type); throw e; }
           return r.data;
         });
     });
@@ -117,7 +156,8 @@
     var prefix = 'draft:' + editor.state.memberId + ':' + editor.state.postId + ':img:';
     var indexKey = prefix + 'index';
 
-    function say(text) { notice.textContent = text || ''; notice.hidden = !text; }
+    var box = noticeBox(notice);
+    var say = box.say;
 
     function visual() { return window.blogVisual && window.blogVisual.active(); }
 
@@ -154,18 +194,19 @@
       });
     }
 
-    function upload(id, file) {
+    function upload(id, file, b) {
       return uploadFile(file).then(function (data) {
         replaceMarker(id, '![](' + data.url + ')');
+        box.done(b);
         return forget(id).then(checkUsage);
       }).catch(function (e) {
         if (e && e.final) {
           replaceMarker(id, '');
-          say(e.final);
+          box.fail(e.final);
           return forget(id);
         }
         replaceMarker(id, '![업로드 대기](local:' + id + ')');
-        say('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
+        box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
         return null;
       });
     }
@@ -179,21 +220,27 @@
     }
 
     function add(file) {
-      if (TYPES.indexOf(file.type) < 0) { say('jpg·png·gif·webp 사진만 올릴 수 있어요.'); return; }
-      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { say('GIF는 10MB까지 올릴 수 있어요.'); return; }
+      var b = box.begin();
+      if (TYPES.indexOf(file.type) < 0) { box.fail('jpg·png·gif·webp 사진만 올릴 수 있어요.'); return; }
+      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { box.fail('GIF는 10MB까지 올릴 수 있어요.'); return; }
       var id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       insertAtCursor('![업로드 중](local:' + id + ')');
       isAnimatedStill(file).then(function (animated) {
         if (animated) { say('움직이는 WebP·APNG는 첫 장면만 남아요. 움직임을 살리려면 GIF로 올려 주세요.'); }
       });
-      remember(id, file).then(function () { return upload(id, file); });
+      remember(id, file).then(function () { return upload(id, file, b); });
     }
 
     function retryPending() {
       readIndex().then(function (ids) {
-        ids.forEach(function (id) {
-          if (textarea.value.indexOf('local:' + id) < 0) { forget(id); return; }
-          store.get(prefix + id).then(function (item) { if (item && item.blob) { upload(id, item.blob); } });
+        var waiting = ids.filter(function (id) {
+          if (textarea.value.indexOf('local:' + id) < 0) { forget(id); return false; }
+          return true;
+        });
+        if (!waiting.length) { return; } // 다시 올릴 사진이 없으면 지금 안내를 그대로 둔다
+        var b = box.begin();
+        waiting.forEach(function (id) {
+          store.get(prefix + id).then(function (item) { if (item && item.blob) { upload(id, item.blob, b); } });
         });
       });
     }
