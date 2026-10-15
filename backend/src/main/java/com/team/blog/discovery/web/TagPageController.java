@@ -74,20 +74,60 @@ public class TagPageController {
         return "tag/tag";
     }
 
-    /** 태그 모아 보기. 056 강성찬 개인 확장: 정렬(글 많은 순·많이 본 순·이름 순), 전체 수, 태그 아이콘. */
+    /** 한 번에 그리는 태그 묶음 수와 묶음마다 카드 수. */
+    static final int SECTIONS = 10;
+    static final int CARDS = 10;
+
+    /**
+     * 태그 모아 보기. 강성찬 개인 확장(10-15, devlog 태그 화면 참고): 제목·전체 태그 수, 태그 검색, 인기순·이름순·최근순,
+     * 태그마다 가로로 넘기는 글 카드 줄. 처음 {@value #SECTIONS}개 묶음, 나머지는 끝에 가까워지면 {@code /tags/sections}로 이어 붙인다.
+     */
     @GetMapping("/tags")
-    public String tags(@RequestParam(value = "sort", required = false) String sort, Model model) {
-        String s = "views".equals(sort) || "name".equals(sort) ? sort : "posts";
-        List<TagListingQuery.TagCount> tags = switch (s) {
-            case "views" -> browseQuery.byViews(100);
-            case "name" -> tagQuery.top(100).stream().sorted(java.util.Comparator.comparing(TagListingQuery.TagCount::name)).toList();
-            default -> tagQuery.top(100);
-        };
-        model.addAttribute("tags", tags);
-        model.addAttribute("sort", s);
-        model.addAttribute("tagTotal", browseQuery.total());
-        model.addAttribute("tagStyles", tagIcons.styles(tags.stream().map(TagListingQuery.TagCount::name).toList()));
+    public String tags(@RequestParam(value = "sort", required = false) String sort,
+                       @RequestParam(value = "q", required = false) String q, Model model) {
+        fillSections(model, sort, q, 0);
+        model.addAttribute("tagTotal", browseQuery.count(q));
         return "tag/tags";
+    }
+
+    /** 이어 붙일 태그 묶음(HTML 조각). */
+    @GetMapping("/tags/sections")
+    public String moreSections(@RequestParam(value = "sort", required = false) String sort,
+                               @RequestParam(value = "q", required = false) String q,
+                               @RequestParam(value = "offset", defaultValue = "0") int offset, Model model) {
+        fillSections(model, sort, q, Math.max(0, offset));
+        return "tag/tags :: sections";
+    }
+
+    private void fillSections(Model model, String sort, String q, int offset) {
+        String s = "name".equals(sort) || "recent".equals(sort) ? sort : "popular";
+        String query = q == null ? "" : q.strip();
+        if (query.length() > 30) {
+            query = query.substring(0, 30);
+        }
+        List<com.team.blog.discovery.application.TagBrowseQuery.Section> sections = browseQuery.sections(s, query, offset, SECTIONS + 1);
+        boolean more = sections.size() > SECTIONS;
+        sections = more ? sections.subList(0, SECTIONS) : sections;
+        java.time.Instant now = clock.instant();
+        java.util.Map<Long, List<com.team.blog.post.application.PostCard>> cards = new java.util.HashMap<>();
+        java.util.Map<Long, String> dates = new java.util.HashMap<>();
+        java.util.Map<String, String> latest = new java.util.HashMap<>();
+        for (var sec : sections) {
+            List<com.team.blog.post.application.PostCard> row = listQuery.byTag(sec.id(), null).items().stream().limit(CARDS).toList();
+            cards.put(sec.id(), row);
+            row.forEach(c -> dates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), now)));
+            latest.put(sec.name(), com.team.blog.post.application.CardDates.label(sec.latest(), now));
+        }
+        model.addAttribute("sections", sections);
+        model.addAttribute("sectionCards", cards);
+        model.addAttribute("cardDates", dates);
+        model.addAttribute("latestLabels", latest);
+        model.addAttribute("tagStyles", tagIcons.styles(sections.stream().map(com.team.blog.discovery.application.TagBrowseQuery.Section::name).toList()));
+        model.addAttribute("sort", s);
+        model.addAttribute("q", query);
+        model.addAttribute("moreUrl", more ? org.springframework.web.util.UriComponentsBuilder.fromPath("/tags/sections")
+                .queryParam("sort", s).queryParamIfPresent("q", Optional.of(query).filter(x -> !x.isEmpty()))
+                .queryParam("offset", offset + SECTIONS).encode().build().toUriString() : null);
     }
 
     @GetMapping("/api/tags/{name}/posts")
