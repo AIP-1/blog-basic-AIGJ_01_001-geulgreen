@@ -114,7 +114,7 @@ class TagPagesIT extends IntegrationTestBase {
         assertThat(redis.hasKey("tags:top")).isTrue();
         assertThat(redis.getExpire("tags:top")).isBetween(1L, 600L);
         assertThat(mockMvc.perform(get("/tags")).andReturn().getResponse().getContentAsString())
-                .contains("#java 3").doesNotContain("hidden-tag");
+                .contains("글 3편").doesNotContain("hidden-tag");
     }
 
     /** 078 강성찬 개인 확장: 머리말에 태그 메뉴 대신 🔍 패널(검색창 + 인기 태그 칩 + 태그 전체 보기). 비회원도 같다. */
@@ -125,7 +125,8 @@ class TagPagesIT extends IntegrationTestBase {
         tagged(a, "2", T, "java");
         String html = mockMvc.perform(get("/search")).andReturn().getResponse().getContentAsString();
         String header = html.substring(html.indexOf("<header"), html.indexOf("</header>"));
-        assertThat(header).doesNotContain(">태그</a>")
+        // 10-15: 위 메뉴에 태그가 다시 생겼다(태그 화면을 새로 꾸미며, chan)
+        assertThat(header).contains("href=\"/tags\">태그</a>")
                 .contains("class=\"search-menu\"").contains("action=\"/search\"").contains("name=\"q\"")
                 .contains("href=\"/tags/java\"").contains("#java").contains("#spring")
                 .contains("href=\"/tags\" class=\"link-btn search-menu-all\"");

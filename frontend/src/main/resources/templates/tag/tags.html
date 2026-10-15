@@ -5,34 +5,53 @@
     <title>태그 · 글그린</title>
 </head>
 <body>
+<!-- 강성찬 개인 확장(10-15): 태그 모아 보기. 제목·태그 수, 태그 검색, 정렬, 태그마다 가로로 넘기는 글 카드 줄 -->
 <main class="list-page tags-page">
-    <!-- 056 강성찬 개인 확장(10-12 시안): 태그 배너 -->
-    <section class="tags-hero" aria-labelledby="tags-title">
-        <div class="tags-hero-text">
-            <h1 id="tags-title"><th:block th:replace="~{fragments/icons :: paw}"></th:block> 태그
-                <span class="tags-hero-paw"><th:block th:replace="~{fragments/icons :: paw}"></th:block></span></h1>
-            <p>관심 있는 주제를 태그로 찾아보세요.<br>다양한 사람들의 글이 기다리고 있어요.</p>
-        </div>
-        <img class="tags-hero-art" th:src="@{/images/sleeping-cat.jpg}" alt="" width="880" height="641">
-    </section>
-    <section class="tags-box" aria-labelledby="tags-box-title">
-        <div class="tags-box-head">
-            <h2 id="tags-box-title"><th:block th:replace="~{fragments/icons :: tag}"></th:block> 인기 태그
-                <span class="count-chip" th:text="${'전체 ' + tagTotal + '개'}">전체 28개</span></h2>
-            <details class="sort-menu">
-                <summary th:text="${sort == 'views' ? '많이 본 순' : sort == 'name' ? '이름 순' : '글 많은 순'}">글 많은 순</summary>
-                <div class="sort-menu-panel">
-                    <a href="/tags" th:attr="aria-current=${sort == 'posts' ? 'true' : null}">글 많은 순</a>
-                    <a href="/tags?sort=views" th:attr="aria-current=${sort == 'views' ? 'true' : null}">많이 본 순</a>
-                    <a href="/tags?sort=name" th:attr="aria-current=${sort == 'name' ? 'true' : null}">이름 순</a>
+    <header class="tags-head">
+        <h1>태그 <span class="tags-total" th:text="${(q.isEmpty() ? '' : '찾은 ') + tagTotal + '개'}">271개</span></h1>
+        <p class="help">주제별로 모인 글을 둘러보세요. 태그를 누르면 그 태그의 글을 모두 볼 수 있어요.</p>
+        <form method="get" action="/tags" role="search" class="tags-search">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <label for="tags-q" class="visually-hidden">태그 찾기</label>
+            <input id="tags-q" type="search" name="q" maxlength="30" th:value="${q}" placeholder="태그 이름으로 찾기">
+            <button type="submit" class="btn btn-sm">찾기</button>
+        </form>
+        <nav class="manage-tabs tags-sort" aria-label="정렬">
+            <a th:href="@{/tags(q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'popular' ? 'page' : null}">인기순</a>
+            <a th:href="@{/tags(sort='name',q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'name' ? 'page' : null}">이름순</a>
+            <a th:href="@{/tags(sort='recent',q=${q.isEmpty() ? null : q})}" th:attr="aria-current=${sort == 'recent' ? 'page' : null}">최근순</a>
+        </nav>
+    </header>
+    <p th:if="${sections.isEmpty()}" class="empty-state"
+       th:text="${q.isEmpty() ? '아직 공개된 글에 쓰인 태그가 없어요' : '''' + q + '''이(가) 들어간 태그가 없어요'}">태그가 없어요</p>
+    <div id="tag-sections" class="tag-sections">
+        <th:block th:fragment="sections">
+            <section th:each="sec : ${sections}" class="tag-section" th:attr="aria-label=${'#' + sec.name()}"
+                     th:with="st=${tagStyles.get(sec.name())}">
+                <div class="tag-section-head">
+                    <h2><a th:href="@{/tags/{n}(n=${sec.name()})}" th:class="${'tag-section-name tone-' + (st != null ? st.tone() : 'gray')}">
+                        <svg th:replace="~{fragments/tag-icons :: icon(${st != null ? st.icon() : 'hash'})}"></svg>
+                        <span th:text="${'#' + sec.name()}">#태그</span></a></h2>
+                    <p class="help" th:text="${'글 ' + sec.postCount() + '편 · 최근 ' + latestLabels.get(sec.name())}">글 3편 · 최근 2시간 전</p>
+                    <span class="tag-row-arrows">
+                        <button type="button" class="icon-btn tag-row-prev" aria-label="이전 글">‹</button>
+                        <button type="button" class="icon-btn tag-row-next" aria-label="다음 글">›</button>
+                    </span>
                 </div>
-            </details>
-        </div>
-        <p th:if="${tags.isEmpty()}" class="empty-state">아직 공개된 글에 쓰인 태그가 없어요</p>
-        <ul class="tag-pills">
-            <li th:each="t : ${tags}"><a th:replace="~{fragments/tag-pill :: pill(${t.name()}, ${t.postCount()}, ${tagStyles.get(t.name())})}"></a></li>
-        </ul>
-    </section>
+                <div class="tag-row">
+                    <th:block th:each="card : ${sectionCards.get(sec.id())}">
+                        <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
+                    </th:block>
+                    <a th:if="${sec.postCount() > sectionCards.get(sec.id()).size()}" class="tag-row-all" th:href="@{/tags/{n}(n=${sec.name()})}"
+                       th:text="${'#' + sec.name() + ' 글 모두 보기 →'}">모두 보기</a>
+                </div>
+            </section>
+            <div th:if="${moreUrl != null}" class="tag-sections-more" th:attr="data-more=${moreUrl}">
+                <a th:href="${moreUrl}">태그 더 보기</a>
+            </div>
+        </th:block>
+    </div>
+    <script th:src="@{/js/tag/tags-page.js}" defer></script>
 </main>
 </body>
 </html>

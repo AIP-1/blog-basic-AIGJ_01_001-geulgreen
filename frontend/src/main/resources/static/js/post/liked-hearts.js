@@ -33,6 +33,8 @@
       .catch(function () { /* 못 받으면 빈 하트 그대로 */ });
   }
 
+  window.blogLikedHearts = { check: check }; // 태그 화면처럼 카드 묶음을 붙이는 곳에서 부른다
+
   function init() {
     check();
     if ('MutationObserver' in window) {
