@@ -15,7 +15,9 @@ public record ManageRow(long id, String title, PostStatus status, String visibil
 
     /** 홈 카드 조각(fragments/post-card)에 넘길 모양. 작성자는 보이지 않으므로 비운다. */
     public PostCard card(String href) {
-        String shown = title == null || title.isBlank() ? "(제목 없음)" : title;
+        // 휴지통 줄만 본문 미리보기를 읽으므로(PostManageQuery) 빈 글 판정도 휴지통에서만
+        boolean emptyTrashed = deletedAt != null && status == PostStatus.DRAFT && (excerpt == null || excerpt.isBlank());
+        String shown = title != null && !title.isBlank() ? title : emptyTrashed ? "빈 임시글" : "(제목 없음)";
         return new PostCard(id, href, shown, excerpt == null ? "" : excerpt, thumbnailUrl, publishedAt, commentCount, likeCount,
                 null, firstTag);
     }

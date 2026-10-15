@@ -70,7 +70,7 @@ class ManagePostsIT extends IntegrationTestBase {
         String trash = mockMvc.perform(get("/manage/posts").param("tab", "trash").with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(trash).contains("휴지통의 글은 30일 뒤 자동으로 완전히 삭제돼요").contains("버린 글")
-                .contains("(발행 글이었음)").contains("일 뒤 완전 삭제").contains("복구").contains("영구 삭제");
+                .contains("발행 글").contains("일 남음").contains("복구").contains("영구 삭제");
         mockMvc.perform(get("/manage/posts")).andExpect(status().isSeeOther());
         assertThat(d1 + pub + priv).isPositive();
     }

@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,6 +41,9 @@ class PostTrashIT extends IntegrationTestBase {
 
     @Autowired
     PostListQuery listQuery;
+
+    @Autowired
+    java.time.Clock clock;
 
     private Map<String, Object> row(long id) {
         return posts.post(id);
@@ -149,6 +153,52 @@ class PostTrashIT extends IntegrationTestBase {
         mockMvc.perform(post("/manage/posts/{id}/restore", id).param("tab", "trash").with(csrf()).with(TestAuth.member(me)))
                 .andExpect(redirectedUrl("/manage/posts?tab=trash"));
         assertThat(row(id).get("deleted_at")).isNull();
+    }
+
+    @Test
+    void emptyTrashPurgesOnlyMyTrashedPostsWithSameCleanupAsPurge() throws Exception {
+        long me = writer(members, "emptier");
+        long other = writer(members, "emptieroth");
+        long a = posts.published(me, "휴지통 글", "본문", 1, T);
+        long b = posts.draft(me, "", "첫 줄 미리보기\n\n둘째 문단", 0);
+        long kept = posts.published(me, "남는 글", "본문", 1, T);
+        long othersTrashed = posts.published(other, "남의 휴지통", "본문", 1, T);
+        jdbc.update("INSERT INTO comment (post_id, author_id, content) VALUES (?, ?, '댓글')", a, other);
+        jdbc.update("INSERT INTO post_like (post_id, member_id) VALUES (?, ?)", a, other);
+        long image = jdbc.queryForObject("""
+                INSERT INTO image (uploader_id, storage_key, original_name, content_type, size_bytes, status, purpose)
+                VALUES (?, 'images/x/2.webp', 'a', 'image/webp', 10, 'ATTACHED', 'POST') RETURNING id
+                """, Long.class, me);
+        jdbc.update("INSERT INTO post_image (post_id, image_id) VALUES (?, ?)", a, image);
+        jdbc.update("UPDATE post SET deleted_at = ? WHERE id IN (?, ?, ?)", java.sql.Timestamp.from(clock.instant()), a, b, othersTrashed);
+
+        // 휴지통 카드: 버튼·개수 확인 문구, 제목 없는 글은 본문 미리보기, 반응 숫자 대신 남은 날
+        String page = mockMvc.perform(get("/manage/posts").param("tab", "trash").with(TestAuth.member(me)))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(page).contains("휴지통 비우기").contains("휴지통의 글 2개를 영구 삭제합니다. 되돌릴 수 없어요.")
+                .contains("첫 줄 미리보기").contains(">임시글<").contains("일 남음");
+
+        mockMvc.perform(post("/manage/posts/trash/empty").with(TestAuth.member(me))).andExpect(status().isForbidden()); // CSRF
+        mockMvc.perform(post("/manage/posts/trash/empty").with(csrf())).andExpect(status().is3xxRedirection()); // 로그인으로
+        assertThat(posts.exists(a)).isTrue();
+
+        mockMvc.perform(post("/manage/posts/trash/empty").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(status().isSeeOther()).andExpect(redirectedUrl("/manage/posts?tab=trash"))
+                .andExpect(flash().attribute("manageNotice", "휴지통을 비웠어요 (2개)"));
+        assertThat(posts.exists(a)).isFalse();
+        assertThat(posts.exists(b)).isFalse();
+        assertThat(posts.exists(kept)).isTrue();
+        assertThat(posts.exists(othersTrashed)).isTrue();
+        for (String table : new String[] {"post_like", "comment", "post_image"}) {
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE post_id = ?", Integer.class, a)).as(table).isZero();
+        }
+        assertThat(jdbc.queryForObject("SELECT detached_at FROM image WHERE id = ?", java.sql.Timestamp.class, image)).isNotNull();
+
+        // 빈 휴지통: 버튼이 없고, 다시 눌러도 0개
+        assertThat(mockMvc.perform(get("/manage/posts").param("tab", "trash").with(TestAuth.member(me)))
+                .andReturn().getResponse().getContentAsString()).doesNotContain("휴지통 비우기");
+        mockMvc.perform(post("/manage/posts/trash/empty").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(flash().attribute("manageNotice", "휴지통을 비웠어요 (0개)"));
     }
 
     @Test

@@ -46,6 +46,13 @@
   };
 
   function init() {
+    // 휴지통 비우기: 확인만 받고 폼은 그대로 제출(서버가 돌아올 때 알림)
+    Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
+      form.addEventListener('submit', function (e) {
+        if (!window.confirm(form.dataset.confirm)) { e.preventDefault(); }
+      });
+    });
+
     Array.prototype.forEach.call(document.querySelectorAll('form[data-row-action]'), function (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();

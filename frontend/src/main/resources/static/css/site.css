@@ -186,6 +186,7 @@ main.list-page { max-width: var(--page-wide); }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .card-foot { margin: 0; display: flex; align-items: center; gap: 14px; color: var(--color-text-muted); font-size: .88em; }
 /* 088: 하트는 기본 회색 빈 하트(카드 목록은 내가 좋아요했는지 모른다) */
+#manage[data-tab="trash"] .card-likes, #manage[data-tab="trash"] .card-comments { display: none; } /* 휴지통 카드엔 반응 숫자 대신 미리보기만 */
 .card-likes, .card-comments { font-weight: 600; } /* 088 후속: 좋아요·댓글 숫자 굵기 같게 */
 .card-likes.is-liked { color: var(--color-like); } /* 088 후속: 내가 좋아요 한 글은 빨간 ♥(js/post/liked-hearts.js) */
 .card-date { margin-left: auto; }
