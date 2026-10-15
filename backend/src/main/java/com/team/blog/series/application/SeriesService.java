@@ -151,6 +151,9 @@ public class SeriesService {
         if (mine == null || mine == 0) {
             throw new NotFoundException();
         }
+        // 먼저 잠그고 나서 보이는 순서를 읽는다(사이에 글이 빠지거나 옮겨지지 않게)
+        List<Long> all = new java.util.ArrayList<>(jdbc.queryForList(
+                "SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position, post_id FOR UPDATE", Long.class, seriesId));
         List<Long> visible = items(seriesId).stream().map(Item::id).toList();
         int at = visible.indexOf(postId);
         int to = up ? at - 1 : at + 1;
@@ -160,8 +163,6 @@ public class SeriesService {
         if (to < 0 || to >= visible.size()) {
             return;
         }
-        List<Long> all = new java.util.ArrayList<>(jdbc.queryForList(
-                "SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position, post_id FOR UPDATE", Long.class, seriesId));
         java.util.Collections.swap(all, all.indexOf(postId), all.indexOf(visible.get(to)));
         for (int i = 0; i < all.size(); i++) {
             jdbc.update("UPDATE series_post SET position = ? WHERE post_id = ?", i + 1, all.get(i));
