@@ -8,30 +8,43 @@
 <main class="list-page admin-page">
     <h1 th:text="${inquiry.title()}">문의</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
-    <p>
-        <span class="badge" th:text="${inquiry.done()} ? '처리 완료' : '새 문의'">새 문의</span>
-        <span class="badge" th:text="${inquiry.kindLabel()}">종류</span>
-        <span class="help" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.createdAt())}">시각</span>
-    </p>
-    <p class="help">
-        <th:block th:if="${inquiry.memberHandle() != null}">보낸 회원 <a th:href="@{/{h}(h=${inquiry.memberHandle()})}" th:text="${'@' + inquiry.memberHandle()}">@회원</a> · </th:block>
-        <th:block th:unless="${inquiry.memberHandle() != null}">비회원 · </th:block>
-        답장 주소 <span th:text="${inquiry.email()}">메일</span>
-    </p>
-    <p class="snapshot" th:text="${inquiry.content()}">내용</p>
-    <section th:if="${inquiry.done()}">
-        <h2>보낸 답장</h2>
-        <p class="help" th:if="${inquiry.repliedAt() != null}" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.repliedAt())}">시각</p>
-        <p class="snapshot" th:text="${inquiry.reply()}">답장</p>
-    </section>
-    <form th:unless="${inquiry.done()}" method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="note-form">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <p th:if="${error != null}" class="form-error" role="alert" th:text="${error}">오류</p>
-        <label for="inquiry-reply">답장하기</label>
-        <textarea id="inquiry-reply" name="reply" required maxlength="3000" th:text="${replyDraft}"></textarea>
-        <div class="note-form-bar"><button type="submit" class="btn btn-primary btn-sm">답장 보내고 처리 완료</button></div>
-    </form>
-    <p><a class="link-btn back" href="/admin/inquiries">문의함으로</a></p>
+    <p class="admin-back"><a class="link-btn back" href="/admin/inquiries">문의함으로</a></p>
+    <div class="admin-detail">
+        <div class="admin-detail-main">
+            <section class="admin-panel" aria-labelledby="inquiry-body-heading">
+                <h2 id="inquiry-body-heading">문의 내용
+                    <span th:class="${inquiry.done()} ? 'st st-ok' : 'st st-new'" th:text="${inquiry.done()} ? '처리 완료' : '새 문의'">새 문의</span>
+                    <span class="st st-info" th:text="${inquiry.kindLabel()}">종류</span></h2>
+                <p class="snapshot" th:text="${inquiry.content()}">내용</p>
+            </section>
+            <section class="admin-panel" th:if="${inquiry.done()}" aria-labelledby="inquiry-reply-heading">
+                <h2 id="inquiry-reply-heading">보낸 답장 <span class="panel-sub" th:if="${inquiry.repliedAt() != null}"
+                    th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.repliedAt())}">시각</span></h2>
+                <p class="snapshot" th:text="${inquiry.reply()}">답장</p>
+            </section>
+            <section class="admin-panel" th:unless="${inquiry.done()}" aria-labelledby="inquiry-form-heading">
+                <h2 id="inquiry-form-heading">답장하기</h2>
+                <form method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="admin-form">
+                    <input th:replace="~{fragments/admin-list :: csrf}">
+                    <p th:if="${error != null}" class="form-error" role="alert" th:text="${error}">오류</p>
+                    <label for="inquiry-reply" class="visually-hidden">답장</label>
+                    <textarea id="inquiry-reply" name="reply" required maxlength="3000" rows="8" th:text="${replyDraft}"></textarea>
+                    <div class="admin-form-bar"><button type="submit" class="btn btn-primary btn-sm">답장 보내고 처리 완료</button></div>
+                </form>
+            </section>
+        </div>
+        <div class="admin-detail-side">
+            <section class="admin-panel" aria-labelledby="inquiry-from-heading">
+                <h2 id="inquiry-from-heading">보낸 사람</h2>
+                <dl class="admin-server">
+                    <div><dt>회원</dt><dd><a th:if="${inquiry.memberHandle() != null}" th:href="${paths.blog(inquiry.memberHandle())}" th:text="${'@' + inquiry.memberHandle()}">@회원</a>
+                        <span th:unless="${inquiry.memberHandle() != null}">비회원</span></dd></div>
+                    <div><dt>답장 주소</dt><dd th:text="${inquiry.email()}">메일</dd></div>
+                    <div><dt>받은 시각</dt><dd th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.createdAt())}">시각</dd></div>
+                </dl>
+            </section>
+        </div>
+    </div>
 </main>
 </body>
 </html>

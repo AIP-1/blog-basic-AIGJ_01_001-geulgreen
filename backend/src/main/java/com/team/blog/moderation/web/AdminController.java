@@ -42,12 +42,19 @@ public class AdminController {
     }
 
     @GetMapping("/admin/reports")
-    public String reports(@RequestParam(value = "tab", defaultValue = "pending") String tab, Model model,
+    public String reports(@RequestParam(value = "tab", defaultValue = "pending") String tab,
+                          @RequestParam(value = "type", defaultValue = "all") String type,
+                          @RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model,
                           HttpServletResponse response) {
         response.setHeader("Cache-Control", "private, no-store");
         boolean done = "done".equals(tab);
+        String target = "POST".equals(type) || "COMMENT".equals(type) ? type : "all";
         model.addAttribute("tab", done ? "done" : "pending");
-        model.addAttribute("cases", done ? query.done(currentUserProvider.current()) : query.pending(currentUserProvider.current()));
+        model.addAttribute("type", target);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", query.cases(currentUserProvider.current(), done, target, q, page));
+        model.addAttribute("adminTab", "reports");
         model.addAttribute("pageNoindex", true);
         return "admin/reports";
     }
@@ -87,10 +94,14 @@ public class AdminController {
     }
 
     @GetMapping("/admin/members")
-    public String members(@RequestParam(value = "q", required = false) String q, Model model, HttpServletResponse response) {
+    public String members(@RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "status", defaultValue = "all") String status,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         response.setHeader("Cache-Control", "private, no-store");
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("members", query.members(currentUserProvider.current(), q));
+        model.addAttribute("status", status);
+        model.addAttribute("list", query.members(currentUserProvider.current(), q, status, page));
+        model.addAttribute("adminTab", "members");
         model.addAttribute("pageNoindex", true);
         return "admin/members";
     }

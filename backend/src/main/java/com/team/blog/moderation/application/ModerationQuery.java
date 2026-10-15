@@ -1,6 +1,7 @@
 package com.team.blog.moderation.application;
 
 import com.team.blog.shared.security.CurrentUser;
+import com.team.blog.shared.web.AdminList;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -73,16 +74,17 @@ public class ModerationQuery {
                 rs.getTimestamp("handled_at") == null ? null : rs.getTimestamp("handled_at").toInstant(), rs.getBoolean("target_hidden"));
     }
 
-    public List<CaseRow> pending(Optional<CurrentUser> current) {
+    /**
+     * 신고 목록(098 후속: 검색·종류·쪽 넘김을 DB에서). 대기는 신고 많은 순, 처리됨은 최근 처리 순.
+     * @param type POST·COMMENT, 그 밖은 전체
+     */
+    public AdminList<CaseRow> cases(Optional<CurrentUser> current, boolean done, String type, String q, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query(CASE_SELECT + " WHERE c.status = 'PENDING' ORDER BY cnt DESC, last_at DESC, c.id DESC LIMIT 100",
-                (rs, n) -> row(rs));
-    }
-
-    public List<CaseRow> done(Optional<CurrentUser> current) {
-        adminGuard.requireAdmin(current);
-        return jdbc.query(CASE_SELECT + " WHERE c.status <> 'PENDING' ORDER BY c.closed_at DESC NULLS LAST, c.id DESC LIMIT 100",
-                (rs, n) -> row(rs));
+        String pattern = AdminList.like(q);
+        return AdminList.query(jdbc, CASE_SELECT + " WHERE (c.status = 'PENDING') <> ? AND (? = 'all' OR c.target_type = ?)"
+                        + " AND (coalesce(c.snapshot_title, '') ILIKE ? ESCAPE '\\' OR coalesce(c.snapshot_content, '') ILIKE ? ESCAPE '\\')",
+                done ? "c.closed_at DESC NULLS LAST, c.id DESC" : "cnt DESC, last_at DESC, c.id DESC", (rs, n) -> row(rs), page,
+                done, "POST".equals(type) || "COMMENT".equals(type) ? type : "all", String.valueOf(type), pattern, pattern);
     }
 
     public Optional<CaseDetail> detail(Optional<CurrentUser> current, long caseId) {
@@ -124,10 +126,11 @@ public class ModerationQuery {
                 new AuthorInfo(author.id(), author.handle(), author.nickname(), author.joinedAt(), author.hiddenCount(), suspensions)));
     }
 
-    public List<MemberRow> members(Optional<CurrentUser> current, String q) {
+    /** 회원 목록(098 후속: 검색·상태(all·suspended·admin)·쪽 넘김을 DB에서). */
+    public AdminList<MemberRow> members(Optional<CurrentUser> current, String q, String status, int page) {
         adminGuard.requireAdmin(current);
-        String pattern = "%" + (q == null ? "" : q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")) + "%";
-        return jdbc.query("""
+        String pattern = AdminList.like(q);
+        return AdminList.query(jdbc, """
                 SELECT m.id, m.handle, m.nickname, m.role, m.created_at, s.ends_at, s.id AS sid,
                        (SELECT a.email FROM auth_identity a WHERE a.member_id = m.id AND a.email IS NOT NULL ORDER BY a.id LIMIT 1) AS email,
                        (SELECT count(*) FROM post p WHERE p.author_id = m.id AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL) AS post_count
@@ -136,11 +139,11 @@ public class ModerationQuery {
                                    AND (x.ends_at IS NULL OR x.ends_at > now()) ORDER BY started_at DESC LIMIT 1) s ON TRUE
                 WHERE m.deleted_at IS NULL AND (m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\'
                       OR EXISTS (SELECT 1 FROM auth_identity a WHERE a.member_id = m.id AND a.email ILIKE ? ESCAPE '\\'))
-                ORDER BY m.id DESC LIMIT 50
-                """, (rs, n) -> new MemberRow(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("role"),
+                      AND (? <> 'suspended' OR s.id IS NOT NULL) AND (? <> 'admin' OR m.role = 'ADMIN')
+                """, "m.id DESC", (rs, n) -> new MemberRow(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("role"),
                 rs.getTimestamp("created_at").toInstant(), rs.getObject("sid") != null,
                 rs.getTimestamp("ends_at") == null ? null : rs.getTimestamp("ends_at").toInstant(),
                 rs.getObject("sid") != null && rs.getTimestamp("ends_at") == null, rs.getString("email"), rs.getLong("post_count")),
-                pattern, pattern, pattern);
+                page, pattern, pattern, pattern, String.valueOf(status), String.valueOf(status));
     }
 }

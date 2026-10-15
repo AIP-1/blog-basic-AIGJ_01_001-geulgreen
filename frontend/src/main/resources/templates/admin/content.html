@@ -8,58 +8,83 @@
 <main class="list-page admin-page">
     <h1>글·댓글 관리</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
-    <p class="help">신고가 없어도 바로 숨길 수 있어요. 숨긴 글·댓글은 쓴 사람에게만 "숨겨졌어요"로 보여요.</p>
-    <form method="get" action="/admin/content" class="search-form">
-        <select name="type" aria-label="종류">
-            <option value="posts" th:selected="${type == 'posts'}">글</option>
-            <option value="comments" th:selected="${type == 'comments'}">댓글</option>
-        </select>
-        <label for="content-q" class="visually-hidden">찾을 말</label>
-        <input id="content-q" type="search" name="q" th:value="${q}" placeholder="제목·내용·닉네임·주소">
-        <button type="submit">찾기</button>
-    </form>
-    <p th:if="${rows.isEmpty()}" class="empty-state">찾은 결과가 없어요</p>
-    <ul class="post-rows" th:if="${type == 'posts'}">
-        <li th:each="r : ${rows}" class="post-row">
-            <div class="row-main">
-                <a th:href="${r.url()}" th:text="${r.title()}">제목</a>
-                <span class="help" th:text="${r.nickname() + ' @' + r.handle() + ' · 조회 ' + r.views() + ' · 댓글 ' + r.comments()}">글쓴이</span>
-                <span class="badge" th:if="${r.visibility() != 'PUBLIC'}" th:text="${r.visibility()}">범위</span>
-                <span class="badge" th:if="${r.hidden()}">숨김</span>
+    <nav class="manage-tabs admin-tabs" aria-label="글·댓글">
+        <a th:href="@{/admin/content(q=${q},status=${status})}" th:attr="aria-current=${type == 'posts' ? 'page' : null}">글</a>
+        <a th:href="@{/admin/content(type='comments',q=${q},status=${status})}" th:attr="aria-current=${type == 'comments' ? 'page' : null}">댓글</a>
+    </nav>
+    <section class="admin-panel admin-list" aria-label="글·댓글 목록">
+        <form method="get" action="/admin/content" class="admin-toolbar">
+            <div class="admin-search">
+                <label for="content-q" class="visually-hidden">찾을 말</label>
+                <input id="content-q" type="search" name="q" th:value="${q}" th:placeholder="${type == 'posts' ? '제목·닉네임·아이디' : '댓글 내용·닉네임·아이디'}">
+                <input type="hidden" name="type" th:value="${type}"><input type="hidden" name="status" th:value="${status}">
+                <button type="submit" class="btn btn-sm">찾기</button>
             </div>
-            <div class="row-actions">
-                <form method="post" th:action="@{/admin/posts/{id}/hide(id=${r.id()})}" th:unless="${r.hidden()}" class="inline-form">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <select name="reason" aria-label="숨김 사유"><option th:each="x : ${reasons}" th:value="${x.name()}" th:text="${x.label()}">사유</option></select>
-                    <button type="submit">숨기기</button>
-                </form>
-                <form method="post" th:action="@{/admin/posts/{id}/unhide(id=${r.id()})}" th:if="${r.hidden()}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit">숨김 해제</button>
-                </form>
-            </div>
-        </li>
-    </ul>
-    <ul class="post-rows" th:if="${type == 'comments'}">
-        <li th:each="r : ${rows}" class="post-row">
-            <div class="row-main">
-                <p class="comment-content" th:text="${r.content()}">댓글</p>
-                <span class="help" th:text="${r.nickname() + ' @' + r.handle() + ' · 글: '}">쓴 사람</span><a th:href="${r.url()}" th:text="${r.postTitle()}">글</a>
-                <span class="badge" th:if="${r.hidden()}">숨김</span>
-            </div>
-            <div class="row-actions">
-                <form method="post" th:action="@{/admin/comments/{id}/hide(id=${r.id()})}" th:unless="${r.hidden()}" class="inline-form">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <select name="reason" aria-label="숨김 사유"><option th:each="x : ${reasons}" th:value="${x.name()}" th:text="${x.label()}">사유</option></select>
-                    <button type="submit">숨기기</button>
-                </form>
-                <form method="post" th:action="@{/admin/comments/{id}/unhide(id=${r.id()})}" th:if="${r.hidden()}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit">숨김 해제</button>
-                </form>
-            </div>
-        </li>
-    </ul>
+            <nav class="admin-chips" aria-label="숨김 여부">
+                <a th:href="@{/admin/content(type=${type},q=${q})}" th:attr="aria-current=${status == 'all'} ? 'true'">전체</a>
+                <a th:href="@{/admin/content(type=${type},q=${q},status='hidden')}" th:attr="aria-current=${status == 'hidden'} ? 'true'">숨긴 것만</a>
+            </nav>
+            <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
+        </form>
+        <p class="help admin-list-note">신고가 없어도 바로 숨길 수 있어요. 숨긴 글·댓글은 쓴 사람에게만 "숨겨졌어요"로 보여요.</p>
+        <p th:if="${list.empty()}" class="panel-empty">찾은 결과가 없어요.</p>
+        <ul class="admin-rows" th:if="${type == 'posts' and !list.empty()}">
+            <li th:each="r : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span class="st st-bad" th:if="${r.hidden()}">숨김</span>
+                        <span class="st st-muted" th:if="${r.visibility() != 'PUBLIC'}" th:text="${r.visibility() == 'PRIVATE' ? '비공개' : '일부 공개'}">범위</span>
+                        <a class="row-link" th:href="${r.url()}" th:text="${r.title()}">제목</a>
+                    </p>
+                    <p class="admin-row-meta"><span th:text="${r.nickname() + ' @' + r.handle()}">글쓴이</span>
+                        <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(r.publishedAt())}">시각</span>
+                        <span th:text="${'조회 ' + r.views()}">조회</span><span th:text="${'댓글 ' + r.comments()}">댓글</span></p>
+                </div>
+                <div class="admin-row-actions">
+                    <details class="admin-action" th:unless="${r.hidden()}">
+                        <summary class="btn btn-sm">숨기기</summary>
+                        <form method="post" th:action="@{/admin/posts/{id}/hide(id=${r.id()})}" class="admin-action-form">
+                            <input th:replace="~{fragments/admin-list :: csrf}">
+                            <select name="reason" aria-label="숨김 사유"><option th:each="x : ${reasons}" th:value="${x.name()}" th:text="${x.label()}">사유</option></select>
+                            <button type="submit" class="btn btn-sm btn-danger">숨기기</button>
+                        </form>
+                    </details>
+                    <form method="post" th:action="@{/admin/posts/{id}/unhide(id=${r.id()})}" th:if="${r.hidden()}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm">숨김 해제</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <ul class="admin-rows" th:if="${type == 'comments' and !list.empty()}">
+            <li th:each="r : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span class="st st-bad" th:if="${r.hidden()}">숨김</span>
+                        <span class="row-text-title" th:text="${r.content()}">댓글</span>
+                    </p>
+                    <p class="admin-row-meta"><span th:text="${r.nickname() + ' @' + r.handle()}">쓴 사람</span>
+                        <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(r.createdAt())}">시각</span>
+                        <a class="row-url" th:href="${r.url()}" th:text="${'글: ' + r.postTitle()}">글</a></p>
+                </div>
+                <div class="admin-row-actions">
+                    <details class="admin-action" th:unless="${r.hidden()}">
+                        <summary class="btn btn-sm">숨기기</summary>
+                        <form method="post" th:action="@{/admin/comments/{id}/hide(id=${r.id()})}" class="admin-action-form">
+                            <input th:replace="~{fragments/admin-list :: csrf}">
+                            <select name="reason" aria-label="숨김 사유"><option th:each="x : ${reasons}" th:value="${x.name()}" th:text="${x.label()}">사유</option></select>
+                            <button type="submit" class="btn btn-sm btn-danger">숨기기</button>
+                        </form>
+                    </details>
+                    <form method="post" th:action="@{/admin/comments/{id}/unhide(id=${r.id()})}" th:if="${r.hidden()}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm">숨김 해제</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <nav th:replace="~{fragments/admin-list :: pager(${list})}"></nav>
+    </section>
 </main>
 </body>
 </html>

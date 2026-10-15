@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 098 후속 관리자 목록 공통 조각(강성찬 개인 확장): 개수, 쪽 넘김. list = AdminList -->
+<p th:fragment="count(list)" class="admin-count" role="status">
+    <strong th:text="${list.total()}">0</strong>건
+</p>
+<nav th:fragment="pager(list)" class="admin-pager" aria-label="쪽 넘김" th:if="${list.pages() > 1}">
+    <a th:if="${list.prevUrl() != null}" th:href="${list.prevUrl()}" class="btn btn-sm" rel="prev">이전</a>
+    <span th:unless="${list.prevUrl() != null}" class="btn btn-sm is-disabled" aria-disabled="true">이전</span>
+    <span class="admin-pager-now" th:text="${list.page() + ' / ' + list.pages() + '쪽'}">1 / 3쪽</span>
+    <a th:if="${list.nextUrl() != null}" th:href="${list.nextUrl()}" class="btn btn-sm" rel="next">다음</a>
+    <span th:unless="${list.nextUrl() != null}" class="btn btn-sm is-disabled" aria-disabled="true">다음</span>
+</nav>
+<input th:fragment="csrf" type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+</body>
+</html>

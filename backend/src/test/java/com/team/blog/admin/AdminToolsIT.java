@@ -73,6 +73,28 @@ class AdminToolsIT extends IntegrationTestBase {
     }
 
     @Test
+    void adminListsPageTwentyRowsAndKeepFiltersInPageLinks() throws Exception {
+        long admin = member("boss11");
+        for (int i = 1; i <= 25; i++) {
+            jdbc.update("INSERT INTO site_notice (message, active, created_by) VALUES (?, false, ?)", "점검 공지 " + i, admin);
+        }
+        String first = page("/admin/notices?q=점검", TestAuth.admin(admin));
+        assertThat(first).contains("1 / 2쪽").contains("점검 공지 25").doesNotContain("점검 공지 5<").contains("page=2");
+        String second = page("/admin/notices?q=점검&page=2", TestAuth.admin(admin));
+        assertThat(second).contains("2 / 2쪽").contains("점검 공지 5<").doesNotContain("점검 공지 25");
+        assertThat(page("/admin/notices?q=없는말", TestAuth.admin(admin))).contains("조건에 맞는 공지가 없어요");
+        // 오래된 줄도 DB 검색으로 찾힌다(예전 500줄 제한 없음)
+        jdbc.update("INSERT INTO site_notice (message, active, created_by) SELECT '최근 공지 ' || g, false, ? FROM generate_series(1, 520) g",
+                admin);
+        String all = page("/admin/notices", TestAuth.admin(admin));
+        assertThat(all).contains(">545<").contains("1 / 28쪽");
+        assertThat(page("/admin/notices?q=점검 공지 1&page=1", TestAuth.admin(admin))).contains("점검 공지 1<").contains(">11<");
+        jdbc.update("INSERT INTO admin_log (admin_id, action, target) VALUES (?, 'POST_HIDE', '글 #77')", admin);
+        assertThat(page("/admin/logs?q=글 숨김", TestAuth.admin(admin))).contains("글 #77");
+        assertThat(page("/admin/logs?cat=notice", TestAuth.admin(admin))).doesNotContain("글 #77");
+    }
+
+    @Test
     void hideAndUnhideWithoutReportIsLogged() throws Exception {
         long user = member("writer1");
         long admin = member("boss2");

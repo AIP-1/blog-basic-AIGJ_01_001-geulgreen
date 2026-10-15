@@ -8,40 +8,60 @@
 <main class="list-page admin-page">
     <h1>회원 관리</h1>
     <nav th:replace="~{fragments/admin-nav :: nav('members')}"></nav>
-    <form method="get" action="/admin/members" class="search-form">
-        <label for="member-q" class="visually-hidden">닉네임·주소·이메일</label>
-        <input id="member-q" type="search" name="q" th:value="${q}" placeholder="닉네임·주소·이메일">
-        <button type="submit">찾기</button>
-    </form>
-    <ul class="post-rows">
-        <li th:each="m : ${members}" class="post-row">
-            <div class="row-main">
-                <span th:text="${m.nickname()}">닉네임</span> <a th:href="${paths.blog(m.handle())}" th:text="${'@' + m.handle()}">@주소</a>
-                <span class="badge" th:if="${m.role() == 'ADMIN'}">관리자</span>
-                <!-- 046 강성찬 개인 확장: 이메일·가입일·글 수 -->
-                <span class="help" th:text="${(m.email() != null ? m.email() + ' · ' : '') + '가입 ' + m.joinedLabel() + ' · 글 ' + m.postCount()}">이메일 · 가입일 · 글 수</span>
-                <span class="badge" th:if="${m.suspended()}"
-                      th:text="${m.suspendedLabel()}">정지</span>
+    <section class="admin-panel admin-list" aria-label="회원 목록">
+        <form method="get" action="/admin/members" class="admin-toolbar">
+            <div class="admin-search">
+                <label for="member-q" class="visually-hidden">닉네임·아이디·이메일</label>
+                <input id="member-q" type="search" name="q" th:value="${q}" placeholder="닉네임·아이디·이메일">
+                <input type="hidden" name="status" th:value="${status}">
+                <button type="submit" class="btn btn-sm">찾기</button>
             </div>
-            <div class="row-actions" th:if="${m.role() != 'ADMIN'}">
-                <form method="post" th:action="@{/admin/members/{id}/suspend(id=${m.id()})}" th:unless="${m.suspended()}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <select name="period" aria-label="정지 기간">
-                        <option value="1">1일</option>
-                        <option value="7">7일</option>
-                        <option value="30">30일</option>
-                        <option value="PERMANENT">영구</option>
-                    </select>
-                    <input type="text" name="reason" maxlength="200" required placeholder="정지 사유" aria-label="정지 사유">
-                    <button type="submit">정지</button>
-                </form>
-                <form method="post" th:action="@{/admin/members/{id}/lift(id=${m.id()})}" th:if="${m.suspended()}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit">정지 해제</button>
-                </form>
-            </div>
-        </li>
-    </ul>
+            <nav class="admin-chips" aria-label="회원 상태">
+                <a th:href="@{/admin/members(q=${q})}" th:attr="aria-current=${status == 'all'} ? 'true'">전체</a>
+                <a th:href="@{/admin/members(q=${q},status='suspended')}" th:attr="aria-current=${status == 'suspended'} ? 'true'">정지</a>
+                <a th:href="@{/admin/members(q=${q},status='admin')}" th:attr="aria-current=${status == 'admin'} ? 'true'">관리자</a>
+            </nav>
+            <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
+        </form>
+        <p th:if="${list.empty()}" class="panel-empty">조건에 맞는 회원이 없어요.</p>
+        <ul class="admin-rows" th:unless="${list.empty()}">
+            <li th:each="m : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span class="st st-brand" th:if="${m.role() == 'ADMIN'}">관리자</span>
+                        <span class="st st-bad" th:if="${m.suspended()}" th:text="${m.permanent()} ? '영구 정지' : '정지'">정지</span>
+                        <a class="row-link" th:href="${paths.blog(m.handle())}" th:text="${m.nickname()}">닉네임</a>
+                        <span class="row-handle" th:text="${'@' + m.handle()}">@아이디</span>
+                    </p>
+                    <!-- 046 강성찬 개인 확장: 이메일·가입일·글 수 -->
+                    <p class="admin-row-meta"><span th:if="${m.email() != null}" th:text="${m.email()}">메일</span>
+                        <span th:text="${'가입 ' + m.joinedLabel()}">가입</span><span th:text="${'글 ' + m.postCount()}">글</span>
+                        <span th:if="${m.suspended() and !m.permanent()}" th:text="${m.suspendedLabel()}">정지 ~</span></p>
+                </div>
+                <div class="admin-row-actions" th:if="${m.role() != 'ADMIN'}">
+                    <details class="admin-action" th:unless="${m.suspended()}">
+                        <summary class="btn btn-sm">정지</summary>
+                        <form method="post" th:action="@{/admin/members/{id}/suspend(id=${m.id()})}" class="admin-action-form">
+                            <input th:replace="~{fragments/admin-list :: csrf}">
+                            <select name="period" aria-label="정지 기간">
+                                <option value="1">1일</option>
+                                <option value="7">7일</option>
+                                <option value="30">30일</option>
+                                <option value="PERMANENT">영구</option>
+                            </select>
+                            <input type="text" name="reason" maxlength="200" required placeholder="정지 사유" aria-label="정지 사유">
+                            <button type="submit" class="btn btn-sm btn-danger">정지하기</button>
+                        </form>
+                    </details>
+                    <form method="post" th:action="@{/admin/members/{id}/lift(id=${m.id()})}" th:if="${m.suspended()}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm">정지 해제</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <nav th:replace="~{fragments/admin-list :: pager(${list})}"></nav>
+    </section>
 </main>
 </body>
 </html>

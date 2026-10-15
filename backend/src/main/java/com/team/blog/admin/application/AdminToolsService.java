@@ -8,6 +8,7 @@ import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.error.ProfileValidationException;
 import com.team.blog.shared.event.ContentHidden;
 import com.team.blog.shared.security.CurrentUser;
+import com.team.blog.shared.web.AdminList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -147,6 +148,47 @@ public class AdminToolsService {
     }
 
     public record LogRow(Instant at, String admin, String action, String target, String detail) {
+
+        private static final Map<String, String[]> LABELS = Map.ofEntries(
+                Map.entry("POST_HIDE", new String[] {"글 숨김", "content"}), Map.entry("POST_UNHIDE", new String[] {"글 숨김 해제", "content"}),
+                Map.entry("COMMENT_HIDE", new String[] {"댓글 숨김", "content"}),
+                Map.entry("COMMENT_UNHIDE", new String[] {"댓글 숨김 해제", "content"}),
+                Map.entry("GUESTBOOK_DELETE", new String[] {"방명록 삭제", "content"}),
+                Map.entry("NOTICE_POST", new String[] {"공지 올림", "notice"}), Map.entry("NOTICE_OFF", new String[] {"공지 끔", "notice"}),
+                Map.entry("REPORT_HIDDEN", new String[] {"신고 숨김 처리", "report"}),
+                Map.entry("REPORT_REJECTED", new String[] {"신고 반려", "report"}),
+                Map.entry("REPORT_CLOSED_NO_TARGET", new String[] {"신고 닫음(대상 없음)", "report"}),
+                Map.entry("SUSPEND", new String[] {"회원 정지", "member"}),
+                Map.entry("SAMPLE_POSTS_SEED", new String[] {"테스트 글 넣기", "etc"}),
+                Map.entry("SAMPLE_POSTS_REMOVE", new String[] {"테스트 글 지우기", "etc"}));
+
+        /** 화면에 보일 한국어 이름(모르는 코드는 그대로). */
+        public String actionLabel() {
+            String[] v = LABELS.get(action);
+            return v == null ? action : v[0];
+        }
+
+        /** 한국어 이름에 q가 들어 있는 코드들(q가 비면 빈 배열: 다른 칸 ILIKE '%%'가 모두 고른다). */
+        static String[] actionsMatching(String q) {
+            if (q == null || q.isBlank()) {
+                return new String[0];
+            }
+            return LABELS.entrySet().stream().filter(e -> e.getValue()[0].contains(q.strip())).map(Map.Entry::getKey)
+                    .toArray(String[]::new);
+        }
+
+        /** 묶음에 든 코드들, 모르는 묶음(전체)이면 null. */
+        static String[] actionsIn(String cat) {
+            String[] hits = LABELS.entrySet().stream().filter(e -> e.getValue()[1].equals(cat) && !"etc".equals(cat))
+                    .map(Map.Entry::getKey).toArray(String[]::new);
+            return hits.length == 0 ? null : hits;
+        }
+
+        /** 필터 묶음: content·notice·report·member·etc. */
+        public String category() {
+            String[] v = LABELS.get(action);
+            return v == null ? "etc" : v[1];
+        }
     }
 
     private final JdbcTemplate jdbc;
@@ -288,32 +330,32 @@ public class AdminToolsService {
 
     // ----- 047 글·댓글 관리 -----
 
-    public List<PostRow> posts(Optional<CurrentUser> current, String q) {
+    /** 047 글 목록(098 후속: 검색·숨긴 것만·쪽 넘김을 DB에서). */
+    public AdminList<PostRow> posts(Optional<CurrentUser> current, String q, boolean hiddenOnly, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("""
+        return AdminList.query(jdbc, """
                 SELECT p.id, p.title, m.handle, m.nickname, p.visibility, p.published_at, p.hidden_at, p.hidden_reason,
                        p.view_count, p.comment_count
                 FROM post p JOIN member m ON m.id = p.author_id
                 WHERE p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND (p.title ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
-                      OR m.nickname ILIKE ? ESCAPE '\\')
-                ORDER BY p.published_at DESC, p.id DESC LIMIT 50
-                """, (rs, i) -> new PostRow(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getString("nickname"),
-                rs.getString("visibility"), rs.getTimestamp("published_at").toInstant(), rs.getTimestamp("hidden_at") != null,
-                rs.getString("hidden_reason"), rs.getLong("view_count"), rs.getInt("comment_count")),
-                like(q), like(q), like(q));
+                      OR m.nickname ILIKE ? ESCAPE '\\') AND (NOT ? OR p.hidden_at IS NOT NULL)
+                """, "p.published_at DESC, p.id DESC", (rs, n) -> new PostRow(rs.getLong("id"), rs.getString("title"),
+                rs.getString("handle"), rs.getString("nickname"), rs.getString("visibility"), rs.getTimestamp("published_at").toInstant(),
+                rs.getTimestamp("hidden_at") != null, rs.getString("hidden_reason"), rs.getLong("view_count"), rs.getInt("comment_count")),
+                page, like(q), like(q), like(q), hiddenOnly);
     }
 
-    public List<CommentRow> comments(Optional<CurrentUser> current, String q) {
+    public AdminList<CommentRow> comments(Optional<CurrentUser> current, String q, boolean hiddenOnly, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("""
+        return AdminList.query(jdbc, """
                 SELECT c.id, c.post_id, p.title, pm.handle AS post_handle, c.content, m.handle, m.nickname, c.created_at, c.hidden_at
                 FROM comment c JOIN post p ON p.id = c.post_id JOIN member pm ON pm.id = p.author_id JOIN member m ON m.id = c.author_id
                 WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL AND (c.content ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
-                      OR m.nickname ILIKE ? ESCAPE '\\')
-                ORDER BY c.created_at DESC, c.id DESC LIMIT 50
-                """, (rs, i) -> new CommentRow(rs.getLong("id"), rs.getLong("post_id"), rs.getString("title"),
-                rs.getString("post_handle"), rs.getString("content"), rs.getString("handle"), rs.getString("nickname"),
-                rs.getTimestamp("created_at").toInstant(), rs.getTimestamp("hidden_at") != null), like(q), like(q), like(q));
+                      OR m.nickname ILIKE ? ESCAPE '\\') AND (NOT ? OR c.hidden_at IS NOT NULL)
+                """, "c.created_at DESC, c.id DESC", (rs, n) -> new CommentRow(rs.getLong("id"), rs.getLong("post_id"),
+                rs.getString("title"), rs.getString("post_handle"), rs.getString("content"), rs.getString("handle"), rs.getString("nickname"),
+                rs.getTimestamp("created_at").toInstant(), rs.getTimestamp("hidden_at") != null),
+                page, like(q), like(q), like(q), hiddenOnly);
     }
 
     /** 신고 없이 바로 숨기기(022와 같은 숨김 칸·사유를 쓴다). */
@@ -371,14 +413,16 @@ public class AdminToolsService {
 
     // ----- 048 방명록 관리 -----
 
-    public List<GuestbookRow> guestbook(Optional<CurrentUser> current) {
+    public AdminList<GuestbookRow> guestbook(Optional<CurrentUser> current, String q, boolean secretOnly, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("""
+        return AdminList.query(jdbc, """
                 SELECT g.id, o.handle AS owner_handle, g.content, g.secret, m.handle, m.nickname, g.created_at
                 FROM guestbook_entry g JOIN member o ON o.id = g.owner_id JOIN member m ON m.id = g.author_id
-                ORDER BY g.id DESC LIMIT 100
-                """, (rs, i) -> new GuestbookRow(rs.getLong("id"), rs.getString("owner_handle"), rs.getString("content"),
-                rs.getBoolean("secret"), rs.getString("handle"), rs.getString("nickname"), rs.getTimestamp("created_at").toInstant()));
+                WHERE (g.content ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\'
+                       OR o.handle ILIKE ? ESCAPE '\\') AND (NOT ? OR g.secret)
+                """, "g.id DESC", (rs, n) -> new GuestbookRow(rs.getLong("id"), rs.getString("owner_handle"), rs.getString("content"),
+                rs.getBoolean("secret"), rs.getString("handle"), rs.getString("nickname"), rs.getTimestamp("created_at").toInstant()),
+                page, like(q), like(q), like(q), like(q), secretOnly);
     }
 
     @Transactional
@@ -392,11 +436,12 @@ public class AdminToolsService {
 
     // ----- 049 사이트 공지 -----
 
-    public List<Notice> notices(Optional<CurrentUser> current) {
+    public AdminList<Notice> notices(Optional<CurrentUser> current, String q, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("SELECT id, message, link_url, active, created_at FROM site_notice ORDER BY id DESC LIMIT 50",
-                (rs, i) -> new Notice(rs.getLong("id"), rs.getString("message"), rs.getString("link_url"), rs.getBoolean("active"),
-                        rs.getTimestamp("created_at").toInstant()));
+        return AdminList.query(jdbc, "SELECT id, message, link_url, active, created_at FROM site_notice"
+                        + " WHERE message ILIKE ? ESCAPE '\\' OR coalesce(link_url, '') ILIKE ? ESCAPE '\\'", "id DESC",
+                (rs, n) -> new Notice(rs.getLong("id"), rs.getString("message"), rs.getString("link_url"), rs.getBoolean("active"),
+                        rs.getTimestamp("created_at").toInstant()), page, like(q), like(q));
     }
 
     /** 새 공지를 켠다(켜진 공지는 하나만: 예전 것은 끈다). 링크는 이 사이트 주소(/로 시작)나 https만. */
@@ -435,10 +480,15 @@ public class AdminToolsService {
 
     // ----- 050 관리 기록 -----
 
-    /** 이 화면에서 한 일 + 신고 처리(022) + 회원 정지(022)를 한 줄로, 최신순. */
-    public List<LogRow> logs(Optional<CurrentUser> current) {
+    /**
+     * 이 화면에서 한 일 + 신고 처리(022) + 회원 정지(022)를 한 줄로, 최신순. 찾을 말은 관리자·대상·내용·코드와 한국어 이름(글 숨김 등)에서,
+     * cat은 한 일 묶음(report·member·content·notice, 그 밖은 전체).
+     */
+    public AdminList<LogRow> logs(Optional<CurrentUser> current, String q, String cat, int page) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("""
+        String[] labelHits = LogRow.actionsMatching(q);
+        String[] inCat = LogRow.actionsIn(cat);
+        return AdminList.query(jdbc, """
                 SELECT at, admin, action, target, detail FROM (
                   SELECT l.created_at AS at, a.nickname AS admin, l.action, l.target, l.detail
                   FROM admin_log l JOIN member a ON a.id = l.admin_id
@@ -448,9 +498,12 @@ public class AdminToolsService {
                   UNION ALL
                   SELECT s.started_at, a.nickname, 'SUSPEND', '@' || m.handle, s.reason
                   FROM member_suspension s JOIN member m ON m.id = s.member_id JOIN member a ON a.id = s.suspended_by
-                ) x ORDER BY at DESC LIMIT 100
-                """, (rs, i) -> new LogRow(rs.getTimestamp("at").toInstant(), rs.getString("admin"), rs.getString("action"),
-                rs.getString("target"), rs.getString("detail")));
+                ) x
+                WHERE (admin ILIKE ? ESCAPE '\\' OR target ILIKE ? ESCAPE '\\' OR coalesce(detail, '') ILIKE ? ESCAPE '\\'
+                       OR action ILIKE ? ESCAPE '\\' OR action = ANY (?)) AND (? OR action = ANY (?))
+                """, "at DESC", (rs, n) -> new LogRow(rs.getTimestamp("at").toInstant(), rs.getString("admin"), rs.getString("action"),
+                rs.getString("target"), rs.getString("detail")), page, like(q), like(q), like(q), like(q), labelHits,
+                inCat == null, inCat == null ? new String[0] : inCat);
     }
 
     private void log(CurrentUser admin, String action, String target, String detail) {
@@ -463,6 +516,6 @@ public class AdminToolsService {
     }
 
     private static String like(String q) {
-        return "%" + (q == null ? "" : q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")) + "%";
+        return AdminList.like(q);
     }
 }

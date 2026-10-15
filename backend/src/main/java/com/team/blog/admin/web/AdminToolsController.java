@@ -71,13 +71,18 @@ public class AdminToolsController {
 
     @GetMapping("/admin/content")
     public String content(@RequestParam(value = "q", required = false) String q,
-                          @RequestParam(value = "type", defaultValue = "posts") String type, Model model,
+                          @RequestParam(value = "type", defaultValue = "posts") String type,
+                          @RequestParam(value = "status", defaultValue = "all") String status,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model,
                           HttpServletResponse response) {
         noStore(response, model);
         boolean comments = "comments".equals(type);
+        boolean hiddenOnly = "hidden".equals(status);
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("type", comments ? "comments" : "posts");
-        model.addAttribute("rows", comments ? tools.comments(currentUserProvider.current(), q) : tools.posts(currentUserProvider.current(), q));
+        model.addAttribute("status", hiddenOnly ? "hidden" : "all");
+        model.addAttribute("list", comments ? tools.comments(currentUserProvider.current(), q, hiddenOnly, page)
+                : tools.posts(currentUserProvider.current(), q, hiddenOnly, page));
         model.addAttribute("reasons", ReportReason.values());
         model.addAttribute("adminTab", "content");
         return "admin/content";
@@ -108,9 +113,14 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/guestbook")
-    public String guestbook(Model model, HttpServletResponse response) {
+    public String guestbook(@RequestParam(value = "q", required = false) String q,
+                            @RequestParam(value = "status", defaultValue = "all") String status,
+                            @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("entries", tools.guestbook(currentUserProvider.current()));
+        boolean secretOnly = "secret".equals(status);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("status", secretOnly ? "secret" : "all");
+        model.addAttribute("list", tools.guestbook(currentUserProvider.current(), q, secretOnly, page));
         model.addAttribute("adminTab", "guestbook");
         return "admin/guestbook";
     }
@@ -122,9 +132,11 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/notices")
-    public String notices(Model model, HttpServletResponse response) {
+    public String notices(@RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("notices", tools.notices(currentUserProvider.current()));
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", tools.notices(currentUserProvider.current(), q, page));
         model.addAttribute("adminTab", "notices");
         return "admin/notices";
     }
@@ -143,9 +155,13 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/logs")
-    public String logs(Model model, HttpServletResponse response) {
+    public String logs(@RequestParam(value = "q", required = false) String q,
+                       @RequestParam(value = "cat", defaultValue = "all") String cat,
+                       @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("logs", tools.logs(currentUserProvider.current()));
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("cat", cat);
+        model.addAttribute("list", tools.logs(currentUserProvider.current(), q, cat, page));
         model.addAttribute("adminTab", "logs");
         return "admin/logs";
     }
