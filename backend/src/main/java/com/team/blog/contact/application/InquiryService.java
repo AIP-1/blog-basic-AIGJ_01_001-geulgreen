@@ -31,6 +31,7 @@ public class InquiryService {
     public static final List<String> KIND_ORDER = List.of("ACCOUNT", "BUG", "IDEA", "OTHER");
     public static final int TITLE_MAX = 100;
     public static final int CONTENT_MAX = 3000;
+    private static final String LENGTH_HINT = "자로 적어 주세요";
 
     /** 양식으로 다시 보여 줄 거절 사유. */
     public static class Rejected extends RuntimeException {
@@ -78,7 +79,7 @@ public class InquiryService {
 
     /** 로그인한 회원의 답장 주소(처음 연결한 계정의 이메일). 없으면 null. */
     public String memberEmail(Optional<CurrentUser> current) {
-        return current.flatMap(u -> jdbc.queryForList(
+        return current.flatMap(u -> jdbc.queryForList( // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 "SELECT email FROM auth_identity WHERE member_id = ? AND email IS NOT NULL ORDER BY id LIMIT 1", String.class,
                 u.memberId()).stream().findFirst()).orElse(null);
     }
@@ -92,10 +93,10 @@ public class InquiryService {
             throw new Rejected("문의 종류를 골라 주세요");
         }
         if (title.isEmpty() || title.codePointCount(0, title.length()) > TITLE_MAX) {
-            throw new Rejected("제목은 1~" + TITLE_MAX + "자로 적어 주세요");
+            throw new Rejected("제목은 1~" + TITLE_MAX + "" + LENGTH_HINT);
         }
         if (content.isEmpty() || content.codePointCount(0, content.length()) > CONTENT_MAX) {
-            throw new Rejected("내용은 1~" + CONTENT_MAX + "자로 적어 주세요");
+            throw new Rejected("내용은 1~" + CONTENT_MAX + "" + LENGTH_HINT);
         }
         String email = memberEmail(current);
         if (email == null) {
@@ -136,7 +137,7 @@ public class InquiryService {
         Inquiry inquiry = get(current, id);
         String reply = rawReply == null ? "" : rawReply.strip().replace("\r\n", "\n");
         if (reply.isEmpty() || reply.codePointCount(0, reply.length()) > CONTENT_MAX) {
-            throw new Rejected("답장은 1~" + CONTENT_MAX + "자로 적어 주세요");
+            throw new Rejected("답장은 1~" + CONTENT_MAX + "" + LENGTH_HINT);
         }
         jdbc.update("UPDATE inquiry SET status = 'DONE', reply = ?, replied_by = ?, replied_at = ? WHERE id = ?", reply,
                 admin.memberId(), Timestamp.from(clock.instant()), id);

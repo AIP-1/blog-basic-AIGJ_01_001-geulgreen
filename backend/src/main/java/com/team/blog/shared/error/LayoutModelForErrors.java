@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -29,17 +30,14 @@ class LayoutModelForErrors {
     }
 
     private final ApplicationContext context;
-    private volatile List<ControllerAdviceBean> advices;
+    private final AtomicReference<List<ControllerAdviceBean>> advices = new AtomicReference<>();
 
     LayoutModelForErrors(ApplicationContext context) {
         this.context = context;
     }
 
     void fill(ModelAndView view, HttpServletRequest request) {
-        if (advices == null) {
-            advices = ControllerAdviceBean.findAnnotatedBeans(context);
-        }
-        for (ControllerAdviceBean advice : advices) {
+        for (ControllerAdviceBean advice : advices.updateAndGet(a -> a != null ? a : ControllerAdviceBean.findAnnotatedBeans(context))) {
             if (advice.getBeanType() == null || !advice.isApplicableToBeanType(Probe.class)) {
                 continue;
             }

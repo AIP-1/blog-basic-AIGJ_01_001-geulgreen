@@ -77,7 +77,7 @@ public final class FuzzyText {
             return out;
         }
         for (String w : Normalizer.normalize(s, Normalizer.Form.NFC).split("[^\\p{L}\\p{N}_+#.-]+")) {
-            String t = w.replaceAll("^[_+#.-]+|[_.-]+$", ""); // C++·C# 끝 기호는 남긴다
+            String t = w.replaceAll("(?:^[_+#.-]+)|(?:[_.-]+$)", ""); // C++·C# 끝 기호는 남긴다
             if (t.codePointCount(0, t.length()) >= 2) {
                 out.add(t);
             }

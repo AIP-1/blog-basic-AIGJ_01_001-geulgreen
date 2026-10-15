@@ -125,8 +125,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         assertThat(section.indexOf("태그 하나 겹침")).isLessThan(section.indexOf("같은 글쓴이 글"));
         assertThat(section.indexOf("같은 글쓴이 글")).isLessThan(section.indexOf("인기 글"));
         assertThat(section).doesNotContain("그냥 최신 글").doesNotContain("지금 글").doesNotContain("비공개 같은 태그")
-                .doesNotContain("친구 공개 같은 태그");
-        assertThat(section).contains("\"nextCursor\":null");
+                .doesNotContain("친구 공개 같은 태그").contains("\"nextCursor\":null");
         // 글 화면은 관련 글 칸만 두고 스크립트가 한 번 불러온다(무한 스크롤 API는 없어짐)
         assertThat(page("/rela/posts/" + src, v)).contains("관련 글").doesNotContain("관심 있을 만한 글")
                 .contains("data-list-api=\"/api/posts/" + src + "/related\"");

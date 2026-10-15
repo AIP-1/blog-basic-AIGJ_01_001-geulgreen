@@ -75,7 +75,7 @@ public class TelegramService {
     }
 
     public boolean linked(long memberId) {
-        return !jdbc.queryForList("SELECT 1 FROM telegram_link WHERE member_id = ?", Integer.class, memberId).isEmpty();
+        return !jdbc.queryForList("SELECT 1 FROM telegram_link WHERE member_id = ?", Integer.class, memberId).isEmpty(); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 
     /** 일회용 코드를 만들어 봇 링크를 돌려준다. 봇 아이디를 못 얻으면 empty. */
@@ -132,6 +132,6 @@ public class TelegramService {
     /** 관리자(연결한 사람만)에게 보낸다. 요청 스레드가 아니라 알림 대기열에서 부른다. */
     public void toAdmins(String text) {
         List<Long> chats = jdbc.queryForList(ADMINS, Long.class);
-        chats.forEach(chat -> client.send(chat, text));
+        chats.forEach(chat -> client.send(chat, text)); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 }
