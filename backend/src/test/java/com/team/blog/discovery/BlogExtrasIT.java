@@ -58,13 +58,13 @@ class BlogExtrasIT extends IntegrationTestBase {
         mockMvc.perform(post("/posts/{id}/pin", first).with(csrf()).with(TestAuth.member(other))).andExpect(status().isNotFound());
         mockMvc.perform(post("/posts/{id}/pin", first).with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
         String blog = mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString();
-        assertThat(blog).contains("📌 고정 글");
+        assertThat(blog).contains("class=\"pinned-label\"");
         assertThat(blog.indexOf("고정할 글")).isLessThan(blog.indexOf("새 글"));
         // 비공개로 바꾸면 목록에서 고정 글도 안 보인다
         jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", first);
-        assertThat(mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString()).doesNotContain("📌 고정 글");
+        assertThat(mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString()).doesNotContain("class=\"pinned-label\"");
         jdbc.update("UPDATE post SET visibility = 'PUBLIC' WHERE id = ?", first);
         mockMvc.perform(post("/posts/{id}/unpin", first).with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
-        assertThat(mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString()).doesNotContain("📌 고정 글");
+        assertThat(mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString()).doesNotContain("class=\"pinned-label\"");
     }
 }

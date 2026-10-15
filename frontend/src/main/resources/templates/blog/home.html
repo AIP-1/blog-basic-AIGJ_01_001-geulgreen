@@ -9,7 +9,7 @@
     <th:block th:replace="~{fragments/blog-header :: header}"></th:block>
     <!-- 054 강성찬 개인 확장: 고정 글 -->
     <section th:if="${pinnedCard != null}" class="pinned-post shelf" aria-label="고정 글">
-        <p class="pinned-label">📌 고정 글</p>
+        <p class="pinned-label"><svg th:replace="~{fragments/icons :: pin}"></svg> 고정 글</p>
         <div class="card-grid pinned-grid">
             <article th:replace="~{fragments/post-card :: card(${pinnedCard}, ${pinnedDate}, false)}"></article>
         </div>
@@ -17,7 +17,7 @@
     <!-- 031 강성찬 개인 확장: 잔디·스트릭(최근 1년, 공개 글·공개 글 댓글만) -->
     <section th:if="${grass != null}" class="grass" aria-labelledby="grass-heading">
         <h2 id="grass-heading" class="grass-title">기록
-            <span class="grass-streak" th:if="${grass.currentStreak() > 0}" th:text="${'🔥 ' + grass.currentStreak() + '일 연속'}">🔥 3일 연속</span>
+            <span class="grass-streak" th:if="${grass.currentStreak() > 0}"><svg th:replace="~{fragments/icons :: flame}"></svg> <th:block th:text="${grass.currentStreak() + '일 연속'}">3일 연속</th:block></span>
             <span class="help" th:text="${'최근 1년 ' + grass.activeDays() + '일 · 최고 ' + grass.bestStreak() + '일 연속'}">최근 1년</span></h2>
         <div class="grass-grid" role="img" th:attr="aria-label=${'최근 1년 동안 ' + grass.activeDays() + '일 기록, 최고 ' + grass.bestStreak() + '일 연속'}">
             <div class="grass-week" th:each="w : ${grass.weeks()}">
