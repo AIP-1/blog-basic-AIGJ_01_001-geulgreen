@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="naver-site-verification" content="8c234994bf44d54fd78129b9dbce9b02b9a1e981" />
+    <meta name="google-site-verification" content="JcK60q4baHWu4df5kzaYTouU6ecq0m9rH7AbHm-pu7A" />
     <!-- 024: 그리기 전에 테마를 정한다(외부 파일, defer 없음) -->
     <script th:src="@{/js/theme-init.js}"></script>
     <meta name="_csrf" th:if="${_csrf != null}" th:content="${_csrf.token}">
@@ -35,8 +36,8 @@
         <meta property="og:title" content="글그린">
         <meta property="og:description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
         <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
-            <link rel="canonical" th:href="${siteOrigin + currentPath}">
-            <meta property="og:url" th:content="${siteOrigin + currentPath}">
+            <link rel="canonical" th:href="${siteOrigin + canonicalPath}">
+            <meta property="og:url" th:content="${siteOrigin + canonicalPath}">
             <meta property="og:image" th:content="${siteOrigin + '/images/og-default.png'}">
         </th:block>
     </th:block>

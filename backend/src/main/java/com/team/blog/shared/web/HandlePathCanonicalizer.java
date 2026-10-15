@@ -32,6 +32,8 @@ import org.springframework.web.util.UriUtils;
 public class HandlePathCanonicalizer extends OncePerRequestFilter {
 
     private static final String OLD_PREFIX = "/@";
+    /** 안쪽으로 바꾸기 전 주소(canonical·og:url용, {@link LayoutModelAdvice#canonicalPath}). */
+    public static final String ORIGINAL_PATH = HandlePathCanonicalizer.class.getName() + ".originalPath";
 
     private final HandleService handleService;
 
@@ -75,6 +77,7 @@ public class HandlePathCanonicalizer extends OncePerRequestFilter {
             return;
         }
         String inner = contextPath + OLD_PREFIX + rawSegment + rest;
+        request.setAttribute(ORIGINAL_PATH, request.getRequestURI());
         chain.doFilter(new HttpServletRequestWrapper(request) {
             @Override
             public String getRequestURI() {
