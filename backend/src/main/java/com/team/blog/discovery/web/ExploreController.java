@@ -75,9 +75,25 @@ public class ExploreController {
         model.addAttribute("listApi", trending ? "/api/posts/trending" : "/api/explore");
         model.addAttribute("moreLinkBase", trending ? "?tab=trending&cursor=" : "?cursor=");
         boolean firstRecommended = !trending && !continued;
-        model.addAttribute("recommended", firstRecommended ? recommendedBlogQuery.forMember(viewer) : List.of());
-        model.addAttribute("newcomers", firstRecommended && newcomerQuery.enabled() ? newcomerQuery.recent() : List.of());
+        model.addAttribute("people", firstRecommended ? people(viewer) : List.of());
         return "explore";
+    }
+
+    /** 사람 추천 한 줄(10-15 탐색 정리): 추천 블로그와 새로 온 작가를 합친 것. {@code newcomer}면 "새 작가" 표시. */
+    public record Person(String handle, com.team.blog.account.application.ProfileAvatar avatar, boolean newcomer) {
+    }
+
+    static final int PEOPLE = 8;
+
+    /** 추천 블로그 먼저, 그다음 새로 온 작가 중 아직 없는 사람. 같은 사람은 한 번만, 나와 이미 팔로우한 사람은 빼고, 최대 {@value #PEOPLE}명. */
+    private List<Person> people(long viewer) {
+        java.util.Map<String, Person> out = new java.util.LinkedHashMap<>();
+        java.util.Set<String> fresh = new java.util.HashSet<>();
+        List<com.team.blog.discovery.application.NewcomerQuery.Newcomer> newcomers = newcomerQuery.enabled() ? newcomerQuery.recent(viewer) : List.of();
+        newcomers.forEach(n -> fresh.add(n.handle()));
+        recommendedBlogQuery.forMember(viewer).forEach(b -> out.putIfAbsent(b.handle(), new Person(b.handle(), b.avatar(), fresh.contains(b.handle()))));
+        newcomers.forEach(n -> out.putIfAbsent(n.handle(), new Person(n.handle(), n.avatar(), true)));
+        return out.values().stream().limit(PEOPLE).toList();
     }
 
     @GetMapping("/api/explore")
