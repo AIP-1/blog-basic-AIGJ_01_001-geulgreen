@@ -55,7 +55,7 @@ class BlogPageListIT extends IntegrationTestBase {
         for (int i = 0; i < 14; i++) {
             posts.published(me, "블로그 글 " + i, "본문", 1, T0.plus(Duration.ofHours(i)));
         }
-        String html = mockMvc.perform(get("/blogpager")).andReturn().getResponse().getContentAsString();
+        String html = mockMvc.perform(get("/blogpager/posts")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("게시물 14").contains("블로그 글 13").contains("더 보기").doesNotContain("블로그 글 1<");
         mockMvc.perform(get("/nobodyhere")).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/members/nobodyhere/posts")).andExpect(status().isNotFound());

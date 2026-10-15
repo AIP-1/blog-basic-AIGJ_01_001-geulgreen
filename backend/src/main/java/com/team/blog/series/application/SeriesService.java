@@ -139,6 +139,35 @@ public class SeriesService {
         before.ifPresent(s -> dropIfEmpty(s.id()));
     }
 
+    /**
+     * 100 강성찬 개인 확장: 내 시리즈에서 글을 보이는 목록({@link #items})의 바로 앞·뒤 글과 자리를 바꾼다.
+     * 숨은 글(비공개 등)은 제자리. 끝에서 더 못 가면 그대로. 자리 번호는 1부터 다시 매긴다.
+     */
+    @Transactional
+    public void move(Optional<CurrentUser> current, long seriesId, long postId, boolean up) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        Integer mine = jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ? AND member_id = ?", Integer.class,
+                seriesId, me.memberId());
+        if (mine == null || mine == 0) {
+            throw new NotFoundException();
+        }
+        List<Long> visible = items(seriesId).stream().map(Item::id).toList();
+        int at = visible.indexOf(postId);
+        int to = up ? at - 1 : at + 1;
+        if (at < 0) {
+            throw new NotFoundException();
+        }
+        if (to < 0 || to >= visible.size()) {
+            return;
+        }
+        List<Long> all = new java.util.ArrayList<>(jdbc.queryForList(
+                "SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position, post_id FOR UPDATE", Long.class, seriesId));
+        java.util.Collections.swap(all, all.indexOf(postId), all.indexOf(visible.get(to)));
+        for (int i = 0; i < all.size(); i++) {
+            jdbc.update("UPDATE series_post SET position = ? WHERE post_id = ?", i + 1, all.get(i));
+        }
+    }
+
     /** 탈퇴 정리. */
     public void purgeWithdrawn(long memberId) {
         jdbc.update("DELETE FROM series WHERE member_id = ?", memberId);
