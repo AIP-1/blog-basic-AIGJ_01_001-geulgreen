@@ -39,7 +39,7 @@ public class PasswordChangedListener {
             return;
         }
         try {
-            mailSender.send(event.email(), "[블로그] 비밀번호가 변경됐어요", "mail/password-changed",
+            mailSender.send(event.email(), "[글그린] 비밀번호가 변경됐어요", "mail/password-changed",
                     Map.of("resetLink", properties.mail().linkBaseUrl() + "/password/forgot"));
         } catch (RuntimeException e) {
             log.warn("비밀번호 변경 알림 메일 실패: to={} cause={}", DomainEvent.maskEmail(event.email()),

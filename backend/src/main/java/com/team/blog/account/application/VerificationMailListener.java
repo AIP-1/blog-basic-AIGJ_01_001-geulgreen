@@ -29,7 +29,7 @@ public class VerificationMailListener {
     public void on(VerificationMailRequested event) {
         try {
             String link = properties.mail().linkBaseUrl() + "/auth/verify?token=" + event.rawToken();
-            mailSender.send(event.email(), "[블로그] 이메일 인증을 완료해 주세요", "mail/verify",
+            mailSender.send(event.email(), "[글그린] 이메일 인증을 완료해 주세요", "mail/verify",
                     Map.of("link", link, "hours", properties.verifyTokenTtl().toHours()));
         } catch (RuntimeException e) {
             log.warn("인증 메일 처리 실패: memberId={} cause={}", event.memberId(), e.getClass().getSimpleName());

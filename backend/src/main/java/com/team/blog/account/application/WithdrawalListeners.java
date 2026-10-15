@@ -35,7 +35,7 @@ public class WithdrawalListeners {
             return;
         }
         try {
-            mailSender.send(e.email(), "[블로그] 회원 탈퇴 신청을 받았어요", "mail/withdraw-requested",
+            mailSender.send(e.email(), "[글그린] 회원 탈퇴 신청을 받았어요", "mail/withdraw-requested",
                     Map.of("deadline", KoreanDateFormatter.dateTime(e.restoreDeadline())));
         } catch (RuntimeException ex) {
             log.warn("탈퇴 접수 메일 실패: memberId={} cause={}", e.memberId(), ex.getClass().getSimpleName());
@@ -48,7 +48,7 @@ public class WithdrawalListeners {
             return;
         }
         try {
-            mailSender.send(e.email(), "[블로그] 계정이 복구됐어요", "mail/restored", Map.of());
+            mailSender.send(e.email(), "[글그린] 계정이 복구됐어요", "mail/restored", Map.of());
         } catch (RuntimeException ex) {
             log.warn("복구 완료 메일 실패: memberId={} cause={}", e.memberId(), ex.getClass().getSimpleName());
         }

@@ -1188,7 +1188,7 @@ main.list-page .home-cards { gap: 18px; }
 .insta-stats li, .insta-stats a { color: var(--color-text); text-decoration: none; font-weight: 700; }
 .signup-code [data-code-entry] { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
 .signup-code [data-code-entry][hidden] { display: none; }
-.signup-code [data-code-entry] label { flex-basis: 100%; }
+.signup-code [data-code-entry] label, .signup-code [data-code-entry] .help { flex-basis: 100%; margin: 0; }
 .signup-code #email-code { flex: 1 1 120px; min-width: 0; letter-spacing: 4px; }
 /* 079 강성찬 개인 확장: 탐색 화면(홈 오른쪽 칸 상자를 그대로, 넓으면 추천 글·블로그 두 칸) */
 .explore-page { display: flex; flex-direction: column; gap: 18px; }
