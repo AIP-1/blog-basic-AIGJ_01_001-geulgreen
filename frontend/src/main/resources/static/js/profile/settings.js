@@ -134,7 +134,7 @@
           status.textContent = '';
           showErrors(form, result.body, 'nickname');
         }
-      }).catch(function () { status.textContent = '저장하지 못했어요. 잠시 후 다시 시도해 주세요'; });
+      }).catch(function () { status.dataset.toast = 'error'; status.textContent = '저장하지 못했어요. 잠시 후 다시 시도해 주세요'; });
     });
   }
 
@@ -170,7 +170,7 @@
         var code = result.body && result.body.code;
         var field = code === 'PASSWORD_SAME_AS_CURRENT' ? 'newPassword' : 'currentPassword';
         showErrors(form, result.body, field);
-      }).catch(function () { status.textContent = '바꾸지 못했어요. 잠시 후 다시 시도해 주세요'; });
+      }).catch(function () { status.dataset.toast = 'error'; status.textContent = '바꾸지 못했어요. 잠시 후 다시 시도해 주세요'; });
     });
   }
 

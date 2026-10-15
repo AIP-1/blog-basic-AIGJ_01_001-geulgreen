@@ -65,7 +65,7 @@
         .catch(function (err) {
           liked = serverLiked; count = serverCount; paint();
           if (err.status === 403) { say(['이메일 인증을 마치면 좋아요를 누를 수 있어요.']); }
-          else { say(['좋아요를 반영하지 못했어요']); }
+          else { message.dataset.toast = 'error'; say(['좋아요를 반영하지 못했어요']); }
         })
         .then(function () { sending = false; });
     }

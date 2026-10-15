@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 /** 관리자 화면 확장(045~050, 강성찬 개인 확장): 대시보드·글/댓글·방명록·공지·관리 기록. 관리자가 아니면 404(스크립트 없는 폼). */
@@ -58,14 +59,16 @@ public class AdminToolsController {
 
     /** 083 테스트용 긴 글 넣기·모두 지우기(강성찬 개인 확장). */
     @PostMapping("/admin/sample-posts")
-    public RedirectView seedSamplePosts() {
+    public RedirectView seedSamplePosts(RedirectAttributes flash) {
         samplePosts.seed(currentUserProvider.current());
+        flash.addFlashAttribute("successMessage", "테스트 글을 넣었어요");
         return seeOther("/admin");
     }
 
     @PostMapping("/admin/sample-posts/remove")
-    public RedirectView removeSamplePosts() {
+    public RedirectView removeSamplePosts(RedirectAttributes flash) {
         samplePosts.remove(currentUserProvider.current());
+        flash.addFlashAttribute("successMessage", "테스트 글을 모두 지웠어요");
         return seeOther("/admin");
     }
 
@@ -89,26 +92,30 @@ public class AdminToolsController {
     }
 
     @PostMapping("/admin/posts/{id}/hide")
-    public RedirectView hidePost(@PathVariable long id, @RequestParam("reason") String reason) {
+    public RedirectView hidePost(@PathVariable long id, @RequestParam("reason") String reason, RedirectAttributes flash) {
         tools.hidePost(currentUserProvider.current(), id, reason);
+        flash.addFlashAttribute("successMessage", "글을 숨겼어요");
         return seeOther("/admin/content");
     }
 
     @PostMapping("/admin/posts/{id}/unhide")
-    public RedirectView unhidePost(@PathVariable long id) {
+    public RedirectView unhidePost(@PathVariable long id, RedirectAttributes flash) {
         tools.unhidePost(currentUserProvider.current(), id);
+        flash.addFlashAttribute("successMessage", "글 숨김을 풀었어요");
         return seeOther("/admin/content");
     }
 
     @PostMapping("/admin/comments/{id}/hide")
-    public RedirectView hideComment(@PathVariable long id, @RequestParam("reason") String reason) {
+    public RedirectView hideComment(@PathVariable long id, @RequestParam("reason") String reason, RedirectAttributes flash) {
         tools.hideComment(currentUserProvider.current(), id, reason);
+        flash.addFlashAttribute("successMessage", "댓글을 숨겼어요");
         return seeOther("/admin/content?type=comments");
     }
 
     @PostMapping("/admin/comments/{id}/unhide")
-    public RedirectView unhideComment(@PathVariable long id) {
+    public RedirectView unhideComment(@PathVariable long id, RedirectAttributes flash) {
         tools.unhideComment(currentUserProvider.current(), id);
+        flash.addFlashAttribute("successMessage", "댓글 숨김을 풀었어요");
         return seeOther("/admin/content?type=comments");
     }
 
@@ -126,8 +133,9 @@ public class AdminToolsController {
     }
 
     @PostMapping("/admin/guestbook/{id}/delete")
-    public RedirectView deleteGuestbook(@PathVariable long id) {
+    public RedirectView deleteGuestbook(@PathVariable long id, RedirectAttributes flash) {
         tools.deleteGuestbook(currentUserProvider.current(), id);
+        flash.addFlashAttribute("successMessage", "방명록 글을 지웠어요");
         return seeOther("/admin/guestbook");
     }
 
@@ -143,14 +151,16 @@ public class AdminToolsController {
 
     @PostMapping("/admin/notices")
     public RedirectView postNotice(@RequestParam("message") String message,
-                                   @RequestParam(value = "linkUrl", required = false) String linkUrl) {
+                                   @RequestParam(value = "linkUrl", required = false) String linkUrl, RedirectAttributes flash) {
         tools.postNotice(currentUserProvider.current(), message, linkUrl);
+        flash.addFlashAttribute("successMessage", "공지를 올렸어요");
         return seeOther("/admin/notices");
     }
 
     @PostMapping("/admin/notices/{id}/off")
-    public RedirectView noticeOff(@PathVariable long id) {
+    public RedirectView noticeOff(@PathVariable long id, RedirectAttributes flash) {
         tools.turnOffNotice(currentUserProvider.current(), id);
+        flash.addFlashAttribute("successMessage", "공지를 내렸어요");
         return seeOther("/admin/notices");
     }
 

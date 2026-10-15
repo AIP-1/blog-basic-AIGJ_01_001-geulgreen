@@ -20,7 +20,7 @@
             <p>
                 <th:block th:replace="~{fragments/follow :: button(${owner.handle()}, false, ${currentMemberId != null}, ${loginRedirect}, ${paths.blog(owner.handle())})}"></th:block>
             </p>
-            <p class="follow-message help" role="status" hidden></p>
+            <p class="follow-message help" role="status" hidden data-toast="success"></p>
         </div>
     </header>
     <section class="private-account" aria-labelledby="private-heading">

@@ -100,7 +100,8 @@ class AdminToolsIT extends IntegrationTestBase {
         long admin = member("boss2");
         long postId = posts.published(user, "문제 있는 글", "본문", 1, T);
         mockMvc.perform(post("/admin/posts/{id}/hide", postId).param("reason", "SPAM").with(csrf()).with(TestAuth.admin(admin)))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash().attribute("successMessage", "글을 숨겼어요"));
         assertThat(jdbc.queryForObject("SELECT hidden_reason FROM post WHERE id = ?", String.class, postId)).isEqualTo("SPAM");
         mockMvc.perform(get("/writer1/posts/{id}", postId)).andExpect(status().isNotFound());
         mockMvc.perform(post("/admin/posts/{id}/unhide", postId).with(csrf()).with(TestAuth.admin(admin)))

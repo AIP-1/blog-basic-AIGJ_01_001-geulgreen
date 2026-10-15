@@ -210,6 +210,7 @@ public class AuthController {
             case RATE_LIMITED -> "잠시 후 다시 시도해 주세요";
             case ALREADY_VERIFIED -> "이미 인증된 계정이에요";
         });
+        view.addObject("noticeKind", result == EmailVerificationService.ResendResult.RATE_LIMITED ? "error" : "success"); // 결과 상자 색(toast.js)
         view.addObject("resendResult", result.name());
         return view;
     }
