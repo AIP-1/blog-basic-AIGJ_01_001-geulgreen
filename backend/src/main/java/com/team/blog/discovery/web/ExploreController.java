@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * 추천 글은 내 글·팔로우한 사람 글(피드에 나옴)을 뺀 077 규칙 순서.
  * 086: 홈에 있던 [트렌딩] 탭(019, 스냅샷 커서)과 새로 온 작가(036)도 여기로. 인기 태그는 검색 창·/tags에만(여기는 링크).
  */
-@Controller
+@Controller // NOSONAR /explore 화면(뷰 이름)과 JSON API를 함께 내므로 @RestController가 아니다
 public class ExploreController {
 
     private final RecommendedPostQuery recommendedPostQuery;

@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,30 +39,35 @@ public class SearchController {
     private final SearchService searchService;
     private final BlogOwnerResolver ownerResolver;
     private final TagListingQuery tagListingQuery;
-    private final VisitorKeys visitorKeys;
-    private final CurrentUserProvider currentUserProvider;
-    private final ClientIpResolver clientIpResolver;
+    private final VisitorKey visitorKey;
     private final java.time.Clock clock;
     private final SearchSuggestService suggestService;
     private final SearchProperties properties;
 
+    /** 요청 제한에 쓰는 방문자 키(회원 → 쿠키 → IP·UA)를 요청에서 만든다. */
+    @Component
+    record VisitorKey(VisitorKeys visitorKeys, CurrentUserProvider currentUserProvider, ClientIpResolver clientIpResolver) {
+
+        String of(HttpServletRequest request) {
+            return visitorKeys.key(currentUserProvider.current(), VisitorCookie.read(request),
+                    clientIpResolver.resolve(request), request.getHeader("User-Agent"));
+        }
+    }
+
     public SearchController(SearchService searchService, BlogOwnerResolver ownerResolver, TagListingQuery tagListingQuery,
-                            VisitorKeys visitorKeys, CurrentUserProvider currentUserProvider, ClientIpResolver clientIpResolver,
-                            java.time.Clock clock, SearchSuggestService suggestService, SearchProperties properties) {
+                            VisitorKey visitorKey, java.time.Clock clock, SearchSuggestService suggestService,
+                            SearchProperties properties) {
         this.clock = clock;
         this.suggestService = suggestService;
         this.properties = properties;
         this.searchService = searchService;
         this.ownerResolver = ownerResolver;
         this.tagListingQuery = tagListingQuery;
-        this.visitorKeys = visitorKeys;
-        this.currentUserProvider = currentUserProvider;
-        this.clientIpResolver = clientIpResolver;
+        this.visitorKey = visitorKey;
     }
 
     private void limit(HttpServletRequest request) {
-        searchService.limit(visitorKeys.key(currentUserProvider.current(), VisitorCookie.read(request),
-                clientIpResolver.resolve(request), request.getHeader("User-Agent")));
+        searchService.limit(visitorKey.of(request));
     }
 
     @GetMapping("/search")
@@ -106,22 +112,31 @@ public class SearchController {
         model.addAttribute("twoCharNotice", terms.hasTwoCharWord());
         String base = owner == null ? "/search" : com.team.blog.shared.web.BlogPaths.of(owner.handle());
         model.addAttribute("searchBase", base);
+        if (people) {
+            fillPeople(model, terms);
+        } else {
+            fillPosts(model, terms, latest, cursor, owner);
+        }
+    }
+
+    private void fillPeople(Model model, SearchTerms terms) {
+        model.addAttribute("encodedQ", UriUtils.encodeQueryParam(terms.text(), StandardCharsets.UTF_8));
+        List<SearchService.Person> found = searchService.people(terms);
+        model.addAttribute("people", found);
+        Optional<String> fix = suggestion(terms, found.size(), null, model);
+        model.addAttribute("fixedPeople", fix.isPresent() && found.isEmpty() ? searchService.people(SearchTerms.parse(fix.get())) : List.of());
+    }
+
+    private void fillPosts(Model model, SearchTerms terms, boolean latest, String cursor, BlogOwner owner) {
         String enc = UriUtils.encodeQueryParam(terms.text(), StandardCharsets.UTF_8);
         model.addAttribute("encodedQ", enc);
         Long ownerId = owner == null ? null : owner.memberId();
-        if (people) {
-            List<SearchService.Person> found = searchService.people(terms);
-            model.addAttribute("people", found);
-            Optional<String> fix = suggestion(terms, found.size(), null, model);
-            model.addAttribute("fixedPeople", fix.isPresent() && found.isEmpty() ? searchService.people(SearchTerms.parse(fix.get())) : List.of());
-            return;
-        }
         SearchService.SearchPage page;
         boolean continued = cursor != null && !cursor.isEmpty();
         try {
-            page = searchService.posts(terms, latest, owner == null ? null : owner.memberId(), cursor);
+            page = searchService.posts(terms, latest, ownerId, cursor);
         } catch (PostContentException e) {
-            page = searchService.posts(terms, latest, owner == null ? null : owner.memberId(), null);
+            page = searchService.posts(terms, latest, ownerId, null);
             continued = false;
         }
         List<SearchService.SearchCard> fixedResults = List.of();
@@ -149,10 +164,10 @@ public class SearchController {
         model.addAttribute("results", page.items());
         model.addAttribute("nextCursor", page.nextCursor());
         model.addAttribute("continued", continued);
-        model.addAttribute("listApi", "/api/search/posts?q=" + enc + "&sort=" + (latest ? "latest" : "relevance")
+        String order = latest ? "latest" : "relevance";
+        model.addAttribute("listApi", "/api/search/posts?q=" + enc + "&sort=" + order
                 + (owner == null ? "" : "&blog=" + owner.handle()));
-        model.addAttribute("moreLinkBase", "?q=" + enc + (owner == null ? "&tab=posts" : "") + "&sort="
-                + (latest ? "latest" : "relevance") + "&cursor=");
+        model.addAttribute("moreLinkBase", "?q=" + enc + (owner == null ? "&tab=posts" : "") + "&sort=" + order + "&cursor=");
     }
 
     /** 094: 결과가 적으면 고친 검색어를 화면에 넘긴다("혹시 ○○을 찾으셨나요?"). 스위치를 끄면 늘 비어 있다. */
