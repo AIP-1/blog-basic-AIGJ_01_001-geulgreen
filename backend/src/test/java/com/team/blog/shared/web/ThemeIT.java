@@ -55,8 +55,9 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(head).as(path).contains("<meta name=\"color-scheme\" content=\"light dark\">")
                 .containsPattern("<script src=\"/js/theme-init-[0-9a-f]{32}\\.js\"></script>").contains("/css/theme-");
         assertThat(head.indexOf("theme-init-")).as(path).isLessThan(head.indexOf("/css/site-"));
-        // 061 강성찬 개인 확장: 테마 버튼은 머리말이 아니라 설정 화면에
-        assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"")
+        // 061 강성찬 개인 확장: 시스템·라이트·다크 고르기는 설정 화면에, 머리말에는 한 번에 바꾸는 해/달 버튼만(스크립트가 보여 줌)
+        assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"").contains("id=\"theme-switch\"")
+                .containsPattern("/js/theme-switch-[0-9a-f]{32}\\.js")
                 .doesNotContain("<style>").doesNotContainPattern("<script>(?!</script>)");
         assertThat(Pattern.compile("<script(?![^>]*\\ssrc=)[^>]*>").matcher(html).find()).as(path + " 인라인 스크립트").isFalse();
     }

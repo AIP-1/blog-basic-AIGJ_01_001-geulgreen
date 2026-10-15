@@ -1339,3 +1339,12 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 @media not all and (prefers-color-scheme: dark) { :root:not([data-theme="dark"]) img.art-night { display: none !important; } }
 :root[data-theme="dark"] .hero-photo { background-image: url("/images/hero-night.webp"); }
 :root[data-theme="dark"] img.art-day, :root[data-theme="light"] img.art-night { display: none !important; }
+/* 머리말 화면 모드 버튼: 라이트에서는 달(다크로), 다크에서는 해(라이트로). 테마 판단은 밤 그림과 같은 규칙 */
+.theme-switch { border: 0; background: none; color: var(--color-text); padding: 0; cursor: pointer; }
+.theme-switch .icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-switch .icon-sun { display: inline; }
+    :root:not([data-theme="light"]) .theme-switch .icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-switch .icon-sun { display: inline; }
+:root[data-theme="dark"] .theme-switch .icon-moon { display: none; }
