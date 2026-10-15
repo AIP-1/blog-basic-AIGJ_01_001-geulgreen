@@ -11,8 +11,8 @@
     <div class="auth-panel">
     <h1>다시 와줘서 반가워요!</h1>
     <p class="auth-lead">글그린에서 새로운 이야기를 읽어 보세요.</p>
-    <p class="notice" th:if="${notice != null}" th:text="${notice}" role="status" data-toast>알림</p>
-    <p class="form-error" th:if="${message != null}" th:text="${message}" role="alert" data-toast>오류</p>
+    <p class="notice" th:if="${notice != null}" th:text="${notice}" role="status" data-toast="success">알림</p>
+    <p class="form-error" th:if="${message != null}" th:text="${message}" role="alert" data-toast="error">오류</p>
 
     <form method="post" th:action="@{/login}" class="auth-form">
         <input type="hidden" name="redirect" th:if="${redirect != null}" th:value="${redirect}">

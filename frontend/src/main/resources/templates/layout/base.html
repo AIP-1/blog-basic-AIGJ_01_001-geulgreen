@@ -146,7 +146,7 @@
     <a th:if="${siteNotice.linkUrl() != null}" th:href="${siteNotice.linkUrl()}">자세히</a>
 </div>
 <div hidden id="logout-cleanup" th:if="${logoutCleanupMemberId != null}" th:attr="data-member-id=${logoutCleanupMemberId}"></div>
-<p th:if="${toast != null}" class="notice" role="status" data-toast th:text="${toast}">완료</p>
+<p th:if="${successMessage != null}" class="notice" role="status" data-toast="success" th:text="${successMessage}">완료</p>
 <main th:replace="${content}">
 </main>
 <footer class="site-footer">

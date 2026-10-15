@@ -80,7 +80,7 @@
             </div>
 
             <button type="submit">저장</button>
-            <p class="form-status" id="profile-status" aria-live="polite" data-toast></p>
+            <p class="form-status" id="profile-status" aria-live="polite" data-toast="success"></p>
         </form>
 
         <!-- 074 강성찬 개인 확장: 블로그 주소(아이디) 바꾸기. 14일에 두 번, 예전 주소는 14일 동안 나만 되돌릴 수 있고 옛 주소로 오면 새 주소로 넘김 -->
@@ -101,7 +101,7 @@
                 <p class="field-error" data-error-for="handle" role="alert"></p>
             </div>
             <button type="submit" th:disabled="${handleNextAllowed != null}">주소 바꾸기</button>
-            <p class="form-status" id="handle-status" aria-live="polite" data-toast></p>
+            <p class="form-status" id="handle-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
 
@@ -145,7 +145,7 @@
                 <p class="field-error" data-error-for="newPasswordConfirm" role="alert"></p>
             </div>
             <button type="submit">비밀번호 변경</button>
-            <p class="form-status" id="password-status" aria-live="polite" data-toast></p>
+            <p class="form-status" id="password-status" aria-live="polite" data-toast="success"></p>
         </form>
 
         <form id="visibility-form" novalidate>
@@ -159,7 +159,7 @@
                               th:checked="${profile.defaultVisibility() == 'PRIVATE'}"> 나만 보기</label>
             </fieldset>
             <p class="field-error" data-error-for="defaultVisibility" role="alert"></p>
-            <p class="form-status" id="visibility-status" aria-live="polite" data-toast></p>
+            <p class="form-status" id="visibility-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
     <!-- 073·087 강성찬 개인 확장: 비공개 계정 스위치(받은 요청 목록은 /settings/privacy) -->
@@ -235,14 +235,14 @@
             </div>
             <p class="help">운영 알림(신고 결과·숨김)은 끌 수 없어요</p>
             <button type="submit">알림 설정 저장</button>
-            <p class="form-status" id="notification-status" aria-live="polite" data-toast></p>
+            <p class="form-status" id="notification-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
     <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
     <section th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
         <h2 id="telegram-heading">텔레그램 알림</h2>
         <p class="help" th:text="${telegramLinked ? '연결됐어요. 새 문의·새 가입·새 신고가 텔레그램으로 와요.' : '연결하면 새 문의·새 가입·새 신고를 텔레그램으로 받아요. 누르면 봇이 열리고, [시작]을 누르면 연결돼요.'}">안내</p>
-        <p th:if="${param.telegram != null}" class="field-error" role="alert" data-toast>봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
+        <p th:if="${param.telegram != null}" class="field-error" role="alert" data-toast="error">봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
         <form method="post" th:action="${telegramLinked ? '/settings/telegram/unlink' : '/settings/telegram/link'}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <button type="submit" th:text="${telegramLinked ? '연결 끊기' : '텔레그램 연결'}">텔레그램 연결</button>

@@ -15,13 +15,13 @@
         <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요.
             AI는 임시글을 만들고 고치기만 하고, 발행은 내가 글쓰기 화면에서 직접 해요. 남의 글이나 지우기는 할 수 없어요.</p>
 
-        <div th:if="${newKey != null}" class="notice" role="status">
+        <div th:if="${newKey != null}" class="notice" role="status" data-toast-inline>
             <p><strong>새 연결 키예요. 이 화면을 떠나면 다시 볼 수 없으니 지금 복사해 두세요.</strong></p>
             <p>이 키는 비밀번호와 같아요. 채팅·메신저·글·스크린샷에 붙이지 말고, AI 도구의 설정 파일에만 넣어 주세요. 남에게 보였다면 끊고 새로 만들어요.</p>
             <p><code id="new-key" th:text="${newKey}">ggk_…</code>
                 <button type="button" class="btn btn-sm" data-copy="#new-key">복사</button></p>
         </div>
-        <p th:if="${tooMany}" class="field-error" role="alert" data-toast
+        <p th:if="${tooMany}" class="field-error" role="alert" data-toast="error"
            th:text="${'키는 ' + maxKeys + '개까지 만들 수 있어요. 안 쓰는 키를 끊고 다시 해 주세요.'}">키가 너무 많아요</p>
 
         <form method="post" action="/settings/connections/ai" class="inline-form">

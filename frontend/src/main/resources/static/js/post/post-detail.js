@@ -35,7 +35,7 @@
             status.textContent = select.value === 'PRIVATE' ? '나만 볼 수 있게 바꿨어요.' : (select.value === 'FRIENDS' ? '친구만 볼 수 있게 바꿨어요.' : (select.value === 'LINK' ? '링크를 아는 사람만 볼 수 있게 바꿨어요.' : '전체 공개로 바꿨어요.'));
             window.location.reload();
           })
-          .catch(function () { select.value = previous; status.textContent = '공개 범위를 바꾸지 못했어요.'; });
+          .catch(function () { select.value = previous; status.dataset.toast = 'error'; status.textContent = '공개 범위를 바꾸지 못했어요.'; });
       });
     }
     var trash = document.getElementById('trash-post');
@@ -47,7 +47,7 @@
             if (!res.ok) { throw new Error(String(res.status)); }
             window.location.assign('/manage/posts?tab=trash');
           })
-          .catch(function () { status.textContent = '삭제하지 못했어요.'; });
+          .catch(function () { status.dataset.toast = 'error'; status.textContent = '삭제하지 못했어요.'; });
       });
     }
     // 075 강성찬 개인 확장: ⋯ 메뉴의 [글 설정]이 카테고리·시리즈·카드 한 줄 소개 창을 연다. 소개 저장·AI 제안 뒤(#teaser)엔 다시 연다

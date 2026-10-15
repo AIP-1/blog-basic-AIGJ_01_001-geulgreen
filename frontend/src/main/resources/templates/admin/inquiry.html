@@ -26,7 +26,7 @@
                 <h2 id="inquiry-form-heading">답장하기</h2>
                 <form method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="admin-form">
                     <input th:replace="~{fragments/admin-list :: csrf}">
-                    <p th:if="${error != null}" class="form-error" role="alert" data-toast th:text="${error}">오류</p>
+                    <p th:if="${error != null}" class="form-error" role="alert" data-toast="error" th:text="${error}">오류</p>
                     <label for="inquiry-reply" class="visually-hidden">답장</label>
                     <textarea id="inquiry-reply" name="reply" required maxlength="3000" rows="8" th:text="${replyDraft}"></textarea>
                     <div class="admin-form-bar"><button type="submit" class="btn btn-primary btn-sm">답장 보내고 처리 완료</button></div>

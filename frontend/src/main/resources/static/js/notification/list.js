@@ -75,7 +75,7 @@
         }
       })
       .catch(function () {
-        status.textContent = '불러오지 못했어요';
+        status.dataset.toast = 'error'; status.textContent = '불러오지 못했어요';
         more.removeAttribute('aria-disabled');
       });
   });

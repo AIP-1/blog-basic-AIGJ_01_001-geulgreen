@@ -79,21 +79,21 @@ public class AdminController {
         if (period != null && !period.isEmpty() && authorId != null) {
             suspension.suspend(currentUserProvider.current(), authorId, period, suspendReason);
         }
-        flash.addFlashAttribute("toast", "숨기고 신고를 처리했어요");
+        flash.addFlashAttribute("successMessage", "숨기고 신고를 처리했어요");
         return seeOther("/admin/reports");
     }
 
     @PostMapping("/admin/reports/{caseId}/reject")
     public RedirectView rejectForm(@PathVariable long caseId, RedirectAttributes flash) {
         moderation.reject(currentUserProvider.current(), caseId);
-        flash.addFlashAttribute("toast", "신고를 기각했어요");
+        flash.addFlashAttribute("successMessage", "신고를 기각했어요");
         return seeOther("/admin/reports");
     }
 
     @PostMapping("/admin/reports/{caseId}/unhide")
     public RedirectView unhideForm(@PathVariable long caseId, RedirectAttributes flash) {
         moderation.unhide(currentUserProvider.current(), caseId);
-        flash.addFlashAttribute("toast", "숨김을 풀었어요");
+        flash.addFlashAttribute("successMessage", "숨김을 풀었어요");
         return seeOther("/admin/reports?tab=done");
     }
 
@@ -114,14 +114,14 @@ public class AdminController {
     public RedirectView suspendForm(@PathVariable long memberId, @RequestParam("period") String period,
                                     @RequestParam("reason") String reason, RedirectAttributes flash) {
         suspension.suspend(currentUserProvider.current(), memberId, period, reason);
-        flash.addFlashAttribute("toast", "회원을 정지했어요");
+        flash.addFlashAttribute("successMessage", "회원을 정지했어요");
         return seeOther("/admin/members");
     }
 
     @PostMapping("/admin/members/{memberId}/lift")
     public RedirectView liftForm(@PathVariable long memberId, RedirectAttributes flash) {
         suspension.lift(currentUserProvider.current(), memberId);
-        flash.addFlashAttribute("toast", "정지를 풀었어요");
+        flash.addFlashAttribute("successMessage", "정지를 풀었어요");
         return seeOther("/admin/members");
     }
 

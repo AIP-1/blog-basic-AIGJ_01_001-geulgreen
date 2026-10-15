@@ -85,7 +85,7 @@
             <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
                 <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
             </ul>
-            <span th:if="${viewerIsAuthor}" id="author-action-status" class="help" role="status" data-toast></span>
+            <span th:if="${viewerIsAuthor}" id="author-action-status" class="help" role="status" data-toast="success"></span>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
         <!-- 052 강성찬 개인 확장: 읽기 진행 막대(스크립트가 스크롤에 맞춰 채운다) -->
@@ -168,10 +168,10 @@
                     <button type="button" class="share-native" hidden><th:block th:replace="~{fragments/icons :: apps}"></th:block> 다른 앱으로</button>
                 </div>
             </details>
-            <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status" data-toast></span>
+            <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status" data-toast="success"></span>
             <span class="view-count" th:text="${'조회 ' + viewCount}" th:attr="title=${viewNotice}">조회 1,234</span>
             <button type="button" th:if="${canReact}" class="report-button" th:attr="data-report-post-id=${post.id()}">신고</button>
-            <span class="like-message help" role="status" hidden data-toast></span>
+            <span class="like-message help" role="status" hidden data-toast="success"></span>
         </div>
         <!-- 작성자 카드(FR-013): 팔로우 버튼은 018. 097 강성찬 개인 확장: 한 줄 카드(왼쪽 아이콘·이름·한 줄 소개·숫자, 오른쪽 버튼). 아이콘·이름이 블로그 링크 -->
         <aside class="author-card" aria-label="글쓴이">
@@ -190,7 +190,7 @@
                           th:replace="~{fragments/follow :: button(${post.author().handle()}, ${followingAuthor}, ${currentMemberId != null}, ${loginRedirect}, ${post.url()})}"></th:block></th:block>
                 <a th:if="${viewerIsAuthor}" class="btn btn-sm" th:href="${paths.blog(post.author().handle())}">내 블로그</a>
             </div>
-            <p class="follow-message help" role="status" hidden data-toast></p>
+            <p class="follow-message help" role="status" hidden data-toast="success"></p>
         </aside>
         <!-- 댓글(014): 첫 20개를 화면과 함께, 스크립트 없이도 더 보기·작성 -->
         <section id="comments" class="comments" aria-label="댓글"
@@ -290,7 +290,7 @@
             <section th:if="${teaserBox != null}" id="teaser" class="notice teaser-box" aria-labelledby="teaser-heading">
                 <h2 id="teaser-heading">카드 한 줄 소개</h2>
                 <p class="help">글 목록 카드에 요약 대신 보여요. 비워 두면 본문 앞부분이 보여요.</p>
-                <p th:if="${teaserError != null}" class="form-error" role="alert" th:text="${teaserError}">오류</p>
+                <p th:if="${teaserError != null}" class="form-error" role="alert" data-toast-inline th:text="${teaserError}">오류</p>
                 <form method="post" th:action="@{/posts/{id}/teaser(id=${post.id()})}" class="teaser-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <label for="teaser-text" class="visually-hidden">한 줄 소개</label>
@@ -327,7 +327,7 @@
             <button type="button" id="report-cancel">취소</button>
         </form>
     </dialog>
-    <p class="help" id="report-status" role="status" data-toast th:if="${canReact}"></p>
+    <p class="help" id="report-status" role="status" data-toast="success" th:if="${canReact}"></p>
     <script th:src="@{/js/post/report.js}" defer th:if="${canReact}"></script>
     <th:block th:if="${post.contentHtml() != null and post.contentHtml().contains('<pre')}"><!-- 코드 블록이 있을 때만(40 §2) -->
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
