@@ -108,6 +108,9 @@
                     <a href="/tags" class="link-btn search-menu-all">태그 전체 보기</a>
                 </div>
             </details>
+            <!-- 화면 모드 한 번에 바꾸기(라이트↔다크). 누르기 전엔 기기 설정, 누르면 설정의 "화면 테마"와 같은 곳에 저장. 스크립트가 없으면 숨김 -->
+            <button type="button" id="theme-switch" class="icon-btn theme-switch" hidden aria-label="다크 모드로 바꾸기">
+                <th:block th:replace="~{fragments/icons :: moon}"></th:block><th:block th:replace="~{fragments/icons :: sun}"></th:block></button>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
@@ -154,6 +157,7 @@
 </footer>
 <script th:src="@{/js/auth/auth-logout.js}" defer></script>
 <script th:src="@{/js/menu.js}" defer></script>
+<script th:src="@{/js/theme-switch.js}" defer></script>
 <script th:src="@{/js/post/card-rows.js}" defer></script>
 <script th:if="${currentMemberId != null}" th:src="@{/js/notification/bell.js}" defer></script>
 <script th:if="${currentMemberId != null}" th:src="@{/js/post/liked-hearts.js}" defer></script>
