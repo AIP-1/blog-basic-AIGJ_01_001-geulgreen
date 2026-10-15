@@ -684,6 +684,9 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .post-toc .toc-sub { margin-left: 1em; list-style: circle; }
 .post-toc a { color: var(--color-text); text-decoration: none; }
 .post-toc a:hover { text-decoration: underline; }
+/* 100: 목차로 간 소제목은 위에 붙은 머리말(높이는 toc.js가 --header-h로) 아래 16px에. 지금 읽는 소제목은 목차에서 굵게 */
+.post-body :is(h2, h3) { scroll-margin-top: calc(var(--header-h, 72px) + 16px); }
+.post-toc a[aria-current="location"] { color: var(--color-brand); font-weight: 700; }
 @media (min-width: 1240px) {
     .post-toc { position: fixed; top: 96px; right: max(16px, calc((100vw - 808px) / 2 - 260px)); width: 220px; max-height: 70vh; overflow: auto; margin: 0; font-size: .9em; }
 }

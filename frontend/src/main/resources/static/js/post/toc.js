@@ -23,4 +23,29 @@
   toc.appendChild(title);
   toc.appendChild(list);
   toc.hidden = false;
+
+  // 100 강성찬 개인 확장: 목차로 가면 제목이 위에 붙은 머리말에 가리지 않게 머리말 높이를 CSS(--header-h)에 알려 준다(휴대폰·PC 높이가 다름)
+  var header = document.querySelector('.site-header');
+  var setHeader = function () {
+    document.documentElement.style.setProperty('--header-h', (header ? header.offsetHeight : 0) + 'px');
+  };
+  setHeader();
+  window.addEventListener('resize', setHeader);
+
+  // 지금 읽는 소제목을 목차에 표시(머리말 바로 아래를 지난 마지막 소제목)
+  var links = list.querySelectorAll('a');
+  var ticking = false;
+  var mark = function () {
+    ticking = false;
+    var line = (header ? header.offsetHeight : 0) + 24;
+    var current = -1;
+    heads.forEach(function (h, i) { if (h.getBoundingClientRect().top <= line) { current = i; } });
+    links.forEach(function (a, i) {
+      if (i === current) { a.setAttribute('aria-current', 'location'); } else { a.removeAttribute('aria-current'); }
+    });
+  };
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(mark); }
+  }, { passive: true });
+  mark();
 })();
