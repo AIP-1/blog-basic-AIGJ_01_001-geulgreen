@@ -85,8 +85,25 @@
     return null; // 다시 시도할 수 있는 실패
   }
 
+  /* 사진 안내 칸. 실패 안내는 다음에 사진을 넣거나 그 뒤에 넣은 사진이 올라가면 지운다.
+     한 번에 고른 여러 장은 한 묶음이라, 같은 묶음의 실패는 형제 사진이 성공해도 남는다. 다른 안내(움직이는 WebP 등)는 그대로 둔다. */
+  function noticeBox(el) {
+    var batch = 0, failBatch = -1, open = false;
+    function show(text) { el.textContent = text || ''; el.hidden = !text; }
+    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { show(''); failBatch = -1; } }
+    return {
+      say: function (text) { show(text); failBatch = -1; },
+      fail: function (text, b) { show(text); failBatch = b; },
+      begin: function () {
+        if (!open) { open = true; batch++; clearOld(batch); Promise.resolve().then(function () { open = false; }); }
+        return batch;
+      },
+      done: clearOld
+    };
+  }
+
   if (typeof module === 'object' && module.exports) { // Node 자체 검사(src/test/js/image-upload.test.mjs)
-    module.exports = { failMessage: failMessage, gifTooBig: gifTooBig };
+    module.exports = { failMessage: failMessage, gifTooBig: gifTooBig, noticeBox: noticeBox };
     return;
   }
 
@@ -130,7 +147,8 @@
     var prefix = 'draft:' + editor.state.memberId + ':' + editor.state.postId + ':img:';
     var indexKey = prefix + 'index';
 
-    function say(text) { notice.textContent = text || ''; notice.hidden = !text; }
+    var box = noticeBox(notice);
+    var say = box.say;
 
     function visual() { return window.blogVisual && window.blogVisual.active(); }
 
@@ -167,18 +185,19 @@
       });
     }
 
-    function upload(id, file) {
+    function upload(id, file, b) {
       return uploadFile(file).then(function (data) {
         replaceMarker(id, '![](' + data.url + ')');
+        box.done(b);
         return forget(id).then(checkUsage);
       }).catch(function (e) {
         if (e && e.final) {
           replaceMarker(id, '');
-          say(e.final);
+          box.fail(e.final, b);
           return forget(id);
         }
         replaceMarker(id, '![업로드 대기](local:' + id + ')');
-        say('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
+        box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.', b);
         return null;
       });
     }
@@ -192,21 +211,23 @@
     }
 
     function add(file) {
-      if (TYPES.indexOf(file.type) < 0) { say('jpg·png·gif·webp 사진만 올릴 수 있어요.'); return; }
-      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { say('GIF는 10MB까지 올릴 수 있어요.'); return; }
+      var b = box.begin();
+      if (TYPES.indexOf(file.type) < 0) { box.fail('jpg·png·gif·webp 사진만 올릴 수 있어요.', b); return; }
+      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { box.fail('GIF는 10MB까지 올릴 수 있어요.', b); return; }
       var id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       insertAtCursor('![업로드 중](local:' + id + ')');
       isAnimatedStill(file).then(function (animated) {
         if (animated) { say('움직이는 WebP·APNG는 첫 장면만 남아요. 움직임을 살리려면 GIF로 올려 주세요.'); }
       });
-      remember(id, file).then(function () { return upload(id, file); });
+      remember(id, file).then(function () { return upload(id, file, b); });
     }
 
     function retryPending() {
+      var b = box.begin();
       readIndex().then(function (ids) {
         ids.forEach(function (id) {
           if (textarea.value.indexOf('local:' + id) < 0) { forget(id); return; }
-          store.get(prefix + id).then(function (item) { if (item && item.blob) { upload(id, item.blob); } });
+          store.get(prefix + id).then(function (item) { if (item && item.blob) { upload(id, item.blob, b); } });
         });
       });
     }
