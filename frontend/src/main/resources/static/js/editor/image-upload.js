@@ -87,17 +87,22 @@
 
   /* 사진 안내 칸. 실패 안내는 다음에 사진을 넣거나 그 뒤에 넣은 사진이 올라가면 지운다.
      한 번에 고른 여러 장은 한 묶음이라, 같은 묶음의 실패는 형제 사진이 성공해도 남는다.
-     실패 안내와 일반 안내(움직이는 WebP 등)는 따로 두어 서로 덮지 않고, 새 묶음이 시작되면 일반 안내도 지운다. */
+     실패 안내와 일반 안내(움직이는 WebP 등)는 따로 두어 서로 덮지 않고, 새 묶음이 시작되면 일반 안내도 지운다.
+     실패는 도착한 때의 묶음에 붙인다: 늦게 온 지난 묶음의 실패도 사진이 빠졌다는 걸 알려야 하므로 다음 동작까지 남긴다. */
   function noticeBox(el) {
-    var batch = 0, failBatch = -1, open = false, failText = '', infoText = '';
+    var batch = 0, failBatch = -1, open = false, fails = [], infoText = '';
     function show() {
-      var text = [failText, infoText].filter(Boolean).join(' ');
+      var text = fails.concat(infoText ? [infoText] : []).join(' ');
       el.textContent = text; el.hidden = !text;
     }
-    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { failText = ''; failBatch = -1; show(); } }
+    function clearOld(b) { if (failBatch >= 0 && failBatch < b) { fails = []; failBatch = -1; show(); } }
     return {
       say: function (text) { infoText = text || ''; show(); },
-      fail: function (text, b) { failText = text; failBatch = b; show(); },
+      fail: function (text) {
+        if (failBatch !== batch) { fails = []; failBatch = batch; }
+        if (fails.indexOf(text) < 0) { fails.push(text); }
+        show();
+      },
       begin: function () {
         if (!open) { open = true; batch++; infoText = ''; clearOld(batch); show(); Promise.resolve().then(function () { open = false; }); }
         return batch;
@@ -197,11 +202,11 @@
       }).catch(function (e) {
         if (e && e.final) {
           replaceMarker(id, '');
-          box.fail(e.final, b);
+          box.fail(e.final);
           return forget(id);
         }
         replaceMarker(id, '![업로드 대기](local:' + id + ')');
-        box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.', b);
+        box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
         return null;
       });
     }
@@ -216,8 +221,8 @@
 
     function add(file) {
       var b = box.begin();
-      if (TYPES.indexOf(file.type) < 0) { box.fail('jpg·png·gif·webp 사진만 올릴 수 있어요.', b); return; }
-      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { box.fail('GIF는 10MB까지 올릴 수 있어요.', b); return; }
+      if (TYPES.indexOf(file.type) < 0) { box.fail('jpg·png·gif·webp 사진만 올릴 수 있어요.'); return; }
+      if (file.size > 10 * 1024 * 1024 && file.type === 'image/gif') { box.fail('GIF는 10MB까지 올릴 수 있어요.'); return; }
       var id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       insertAtCursor('![업로드 중](local:' + id + ')');
       isAnimatedStill(file).then(function (animated) {

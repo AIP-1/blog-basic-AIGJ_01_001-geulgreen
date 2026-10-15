@@ -30,7 +30,7 @@ await test2('실패 안내는 다음에 넣은 사진이 시작되거나 올라�
   const box = u.noticeBox(el);
   const tick = () => Promise.resolve();
   let b = box.begin();
-  box.fail('GIF는 가로·세로 1920px까지 올릴 수 있어요.', b);
+  box.fail('GIF는 가로·세로 1920px까지 올릴 수 있어요.');
   await tick();
   b = box.begin();                       // 새 사진을 넣기 시작하면 지난 실패 안내가 사라진다
   assert.equal(el.hidden, true);
@@ -41,14 +41,17 @@ await test2('실패 안내는 다음에 넣은 사진이 시작되거나 올라�
   // 한 번에 고른 두 장: 한 장 실패, 다른 장 성공 → 실패 안내가 남는다
   const one = box.begin(), two = box.begin();
   assert.equal(one, two);
-  box.fail('이 사진은 올릴 수 없어요.', one);
+  box.fail('이 사진은 올릴 수 없어요.');
   box.done(two);
   assert.equal(el.textContent, '이 사진은 올릴 수 없어요.');
   await tick();
-  // 지난 실패 뒤 나중에 넣은 사진이 성공하면 지운다(시작 때 이미 지워졌어도 다시 실패가 남아 있으면)
+  // 지난 묶음의 실패가 늦게 와도 보여 주고, 지금 묶음이 성공해도 다음 동작까지 남긴다
   const later = box.begin();
-  box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.', one);
+  box.fail('사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
   box.done(later);
+  assert.equal(el.textContent, '사진을 올리지 못했어요. 연결되면 자동으로 다시 올려요.');
+  await tick();
+  box.begin();
   assert.equal(el.hidden, true);
 });
 
@@ -56,13 +59,17 @@ test('실패 안내와 일반 안내는 어떤 순서로 와도 함께 남고, �
   const el = { textContent: '', hidden: true };
   const box = u.noticeBox(el);
   const b = box.begin();
-  box.fail('GIF는 가로·세로 1920px까지 올릴 수 있어요.', b);
+  box.fail('GIF는 가로·세로 1920px까지 올릴 수 있어요.');
   box.say('움직이는 WebP·APNG는 첫 장면만 남아요.');
   assert.equal(el.textContent, 'GIF는 가로·세로 1920px까지 올릴 수 있어요. 움직이는 WebP·APNG는 첫 장면만 남아요.');
   box.done(b + 1);
   assert.equal(el.textContent, '움직이는 WebP·APNG는 첫 장면만 남아요.');
+  box.fail('jpg·png·gif·webp 사진만 올릴 수 있어요.');
+  box.fail('GIF는 10MB까지 올릴 수 있어요.');
+  box.fail('GIF는 10MB까지 올릴 수 있어요.');   // 같은 묶음의 다른 실패는 모으고 같은 문구는 한 번만
+  assert.equal(el.textContent, 'jpg·png·gif·webp 사진만 올릴 수 있어요. GIF는 10MB까지 올릴 수 있어요. 움직이는 WebP·APNG는 첫 장면만 남아요.');
   box.say('');
-  assert.equal(el.hidden, true);
+  assert.equal(el.textContent, 'jpg·png·gif·webp 사진만 올릴 수 있어요. GIF는 10MB까지 올릴 수 있어요.');
 });
 
 console.log(`${passed} passed`);
