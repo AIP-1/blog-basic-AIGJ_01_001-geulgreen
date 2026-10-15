@@ -69,7 +69,7 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .contains("조회 1.2만").contains("class=\"like-number\">7<").contains("댓글 3").contains("2026.10.01")
                 .contains("href=\"/detailmeta\"").contains("class=\"author-card-name\"").contains("글 1").contains("팔로워 0")
                 .contains("href=\"/login?redirect=/detailmeta/posts/" + id + "\"")
-                .contains("class=\"like-button\"").doesNotContain("id=\"visibility-select\"")
+                .contains("class=\"like-button\"").doesNotContain("data-visibility-option")
                 .contains("data-view-post-id=\"" + id + "\"");
         String description = html.substring(html.indexOf("<meta name=\"description\" content=\"") + 34);
         assertThat(description.substring(0, description.indexOf('"')).codePointCount(0, description.indexOf('"'))).isEqualTo(160);
@@ -83,7 +83,7 @@ class PostDetailPageIT extends IntegrationTestBase {
         jdbc.update("UPDATE post SET edited_at = '2026-10-03T00:00:00Z' WHERE id = ?", id);
         String mine = mockMvc.perform(get("/detailowner/posts/{id}", id).with(TestAuth.member(me)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(mine).contains("id=\"visibility-select\"").contains("data-trash-post").contains(">수정</a>")
+        assertThat(mine).contains("data-visibility-option=\"PRIVATE\"").contains("class=\"menu-sub visibility-menu\"").contains("data-trash-post").contains(">수정</a>")
                 .contains("class=\"sort-menu post-owner-menu\"").contains("id=\"post-settings\"")
                 .doesNotContain("class=\"like-button\"").doesNotContain("class=\"follow-button\"")
                 .doesNotContain("data-view-post-id").contains("수정됨").contains("10월 3일")
@@ -91,7 +91,7 @@ class PostDetailPageIT extends IntegrationTestBase {
         String theirs = mockMvc.perform(get("/detailowner/posts/{id}", id).with(TestAuth.member(reader)))
                 .andReturn().getResponse().getContentAsString();
         assertThat(theirs).contains("class=\"like-button\"").contains("class=\"report-button\"")
-                .contains("data-follow-handle=\"detailowner\"").doesNotContain("id=\"visibility-select\"")
+                .contains("data-follow-handle=\"detailowner\"").doesNotContain("data-visibility-option")
                 .doesNotContain("post-owner-menu").doesNotContain("id=\"post-settings\"");
         String admin = mockMvc.perform(get("/detailowner/posts/{id}", id).with(TestAuth.admin(reader)))
                 .andReturn().getResponse().getContentAsString();

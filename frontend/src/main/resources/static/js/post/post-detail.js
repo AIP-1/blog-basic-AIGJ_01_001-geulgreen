@@ -18,26 +18,13 @@
     if (!article) { return; }
     var postId = article.dataset.postId;
     var status = document.getElementById('author-action-status');
-    var select = document.getElementById('visibility-select');
-    if (select) {
-      var previous = select.value;
-      select.addEventListener('change', function () {
-        // 026 강성찬 개인 확장: 넓히는 쪽(→ 전체 공개)만 확인(41 §4)
-        if (select.value === 'PUBLIC' && previous !== 'PUBLIC' && !window.confirm('모든 사람이 볼 수 있게 돼요. 공개할까요?')) {
-          select.value = previous;
-          return;
-        }
-        fetch('/api/posts/' + postId + '/visibility', { method: 'PATCH', headers: csrfHeaders(), credentials: 'same-origin',
-          body: JSON.stringify({ visibility: select.value }) })
-          .then(function (res) {
-            if (!res.ok) { throw new Error(String(res.status)); }
-            previous = select.value;
-            status.textContent = select.value === 'PRIVATE' ? '나만 볼 수 있게 바꿨어요.' : (select.value === 'FRIENDS' ? '친구만 볼 수 있게 바꿨어요.' : (select.value === 'LINK' ? '링크를 아는 사람만 볼 수 있게 바꿨어요.' : '전체 공개로 바꿨어요.'));
-            window.location.reload();
-          })
-          .catch(function () { select.value = previous; status.textContent = '공개 범위를 바꾸지 못했어요.'; });
-      });
-    }
+    // 098: 공개 범위는 ⋯ 메뉴의 펼치는 줄(js/post/visibility-menu.js)이 저장한다. 글 화면은 상태 안내가 바뀌니 새로 그린다
+    var NOTE = { PRIVATE: '나만 볼 수 있게 바꿨어요.', FRIENDS: '친구만 볼 수 있게 바꿨어요.', LINK: '링크를 아는 사람만 볼 수 있게 바꿨어요.' };
+    document.addEventListener('visibility-changed', function (e) {
+      status.textContent = NOTE[e.detail.visibility] || (e.detail.label + '로 바꿨어요.');
+      window.location.reload();
+    });
+    document.addEventListener('visibility-failed', function (e) { status.textContent = e.detail.message; });
     var trash = document.getElementById('trash-post');
     if (trash) {
       trash.addEventListener('click', function () {

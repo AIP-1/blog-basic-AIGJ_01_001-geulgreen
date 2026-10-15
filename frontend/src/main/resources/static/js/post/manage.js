@@ -87,30 +87,21 @@
       });
     });
 
-    Array.prototype.forEach.call(document.querySelectorAll('.visibility-toggle'), function (button) {
-      button.addEventListener('click', function () {
-        var row = rowOf(button);
-        var to = button.dataset.visibility !== 'PUBLIC' ? 'PUBLIC' : 'PRIVATE'; // 친구 공개(025)도 공개 쪽으로
-        // 026 강성찬 개인 확장: 넓히는 쪽(→ 전체 공개)만 확인(41 §4)
-        if (to === 'PUBLIC' && !window.confirm('모든 사람이 볼 수 있게 돼요. 공개할까요?')) { return; }
-        button.disabled = true;
-        call('PATCH', '/api/posts/' + button.dataset.postId + '/visibility', { visibility: to }).then(function (data) {
-          button.disabled = false;
-          button.dataset.visibility = data.visibility;
-          button.textContent = data.visibility !== 'PUBLIC' ? '전체 공개로' : '나만 보기로';
-          var badge = row.querySelector('[data-visibility-badge]');
-          if (badge) {
-            badge.dataset.visibility = data.visibility;
-            // 아이콘은 data-visibility로 CSS가 고른다(fragments/visibility.html)
-            var label = data.visibility === 'PRIVATE' ? '비공개' : (data.visibility === 'FRIENDS' ? '친구 공개' : (data.visibility === 'LINK' ? '링크 공개' : (data.visibility === 'GROUP' ? '그룹 공개' : '공개')));
-            badge.querySelector('.vis-label').textContent = label;
-            badge.title = label;
-          }
-        }).catch(function (err) {
-          button.disabled = false;
-          fail(row, (err.data && err.data.message) || '공개 범위를 바꾸지 못했어요.');
-        });
-      });
+    // 098: 공개 범위는 ⋯ 메뉴의 펼치는 줄(js/post/visibility-menu.js)이 저장하고, 여기서는 카드의 공개 범위 표시만 바꾼다
+    document.addEventListener('visibility-changed', function (e) {
+      var row = rowOf(e.target);
+      var badge = row && row.querySelector('[data-visibility-badge]');
+      if (!badge) { return; }
+      var v = e.detail.visibility;
+      // 아이콘은 data-visibility로 CSS가 고른다(fragments/visibility.html)
+      var label = v === 'PRIVATE' ? '비공개' : (v === 'FRIENDS' ? '친구 공개' : (v === 'LINK' ? '링크 공개' : (v === 'GROUP' ? '그룹 공개' : '공개')));
+      badge.dataset.visibility = v;
+      badge.querySelector('.vis-label').textContent = label;
+      badge.title = label;
+    });
+    document.addEventListener('visibility-failed', function (e) {
+      var row = rowOf(e.target);
+      if (row) { fail(row, e.detail.message); }
     });
 
     Array.prototype.forEach.call(document.querySelectorAll('.discard-editing'), function (button) {

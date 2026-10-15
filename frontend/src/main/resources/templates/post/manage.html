@@ -52,6 +52,7 @@
     <p class="list-more"><a th:if="${nextCursor != null}" class="more-button" th:attr="data-cursor=${nextCursor}"
           th:href="@{/manage/posts(tab=${tab},visibility=${visibility},cursor=${nextCursor})}">더 보기</a></p>
     <p id="manage-notice" class="notice" role="status" th:hidden="${manageNotice == null}" th:text="${manageNotice}"></p>
+    <script th:src="@{/js/post/visibility-menu.js}" defer></script>
     <script th:src="@{/js/post/manage.js}" defer></script>
 </main>
 
@@ -77,25 +78,25 @@
     <details class="sort-menu manage-menu">
         <summary aria-label="글 관리">⋯</summary>
         <div class="sort-menu-panel">
-            <a th:if="${tab == 'drafts'}" th:href="@{/write/{id}(id=${row.id()})}">이어 쓰기</a>
+            <!-- 098 강성찬 개인 확장: 글 화면 ⋯ 메뉴와 같은 줄 모양(선 아이콘, 공개 범위는 그 자리에서 펼침) -->
+            <a th:if="${tab == 'drafts'}" th:href="@{/write/{id}(id=${row.id()})}"><svg th:replace="~{fragments/icons :: pen}"></svg>이어 쓰기</a>
             <th:block th:if="${tab == 'published'}">
-                <a th:href="@{/write/{id}(id=${row.id()})}" th:text="${row.editing() ? '이어서 수정' : '수정'}">수정</a>
-                <button type="button" th:if="${row.editing()}" class="discard-editing" th:attr="data-post-id=${row.id()}">변경 취소</button>
-                <button type="button" class="visibility-toggle" th:attr="data-post-id=${row.id()},data-visibility=${row.visibility()}"
-                        th:text="${row.visibility() != 'PUBLIC' ? '전체 공개로' : '나만 보기로'}">나만 보기로</button>
+                <a th:href="@{/write/{id}(id=${row.id()})}"><svg th:replace="~{fragments/icons :: pen}"></svg><span th:text="${row.editing() ? '이어서 수정' : '수정'}">수정</span></a>
+                <button type="button" th:if="${row.editing()}" class="discard-editing" th:attr="data-post-id=${row.id()}"><svg th:replace="~{fragments/icons :: restore}"></svg>변경 취소</button>
+                <details th:replace="~{fragments/owner-menu :: visibility(${row.id()}, ${row.visibility()})}"></details>
             </th:block>
             <form th:if="${tab != 'trash'}" method="post" th:action="@{/manage/posts/{id}/trash(id=${row.id()},tab=${tab})}" data-row-action="trash">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="menu-danger">삭제</button>
+                <button type="submit" class="menu-danger"><svg th:replace="~{fragments/icons :: trash}"></svg>삭제</button>
             </form>
             <th:block th:if="${tab == 'trash'}">
                 <form method="post" th:action="@{/manage/posts/{id}/restore(id=${row.id()},tab=${tab})}" data-row-action="restore">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit">복구</button>
+                    <button type="submit"><svg th:replace="~{fragments/icons :: restore}"></svg>복구</button>
                 </form>
                 <form method="post" th:action="@{/manage/posts/{id}/purge(id=${row.id()},tab=${tab})}" data-row-action="purge">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit" class="menu-danger">영구 삭제</button>
+                    <button type="submit" class="menu-danger"><svg th:replace="~{fragments/icons :: trash}"></svg>영구 삭제</button>
                 </form>
             </th:block>
         </div>
