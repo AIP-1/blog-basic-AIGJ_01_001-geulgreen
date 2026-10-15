@@ -18,7 +18,8 @@
                 <li th:if="${friendCount != null}"><a href="/settings/friends" th:text="${'친구 ' + friendCount}">친구 3</a></li>
             </ul>
             <p th:if="${instaAccount and isOwner}"><a class="btn btn-sm" href="/settings#settings-profile">프로필 편집</a></p>
-            <p class="help" th:if="${instaAccount and blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</p>
+            <p class="blog-visits" th:if="${instaAccount and blogVisits != null}"><svg th:replace="~{fragments/icons :: i-chart}"></svg>
+                <span th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span></p>
             <p class="help" th:unless="${instaAccount}">
                 <!-- 051 강성찬 개인 확장: 방문자 수 -->
                 <span th:if="${blogVisits != null}" th:text="${'오늘 ' + blogVisits.today() + ' · 전체 ' + blogVisits.total()}">오늘 3 · 전체 120</span><span th:if="${blogVisits != null}"> · </span>
@@ -28,9 +29,9 @@
                 <a href="/settings/friends" th:text="${'친구 ' + friendCount}">친구 3</a></th:block>
             </p>
             <!-- 040·044 강성찬 개인 확장: 방명록·RSS(시리즈는 아래 탭으로, 100) -->
-            <p class="help blog-links">
-                <a th:if="${guestbookEnabled}" th:href="${paths.blog(owner.handle()) + '/guestbook'}">📖 방명록</a>
-                <a th:if="${rssEnabled}" th:href="${paths.blog(owner.handle()) + '/rss'}">RSS</a>
+            <p class="blog-links" th:if="${guestbookEnabled or rssEnabled}">
+                <a th:if="${guestbookEnabled}" th:href="${paths.blog(owner.handle()) + '/guestbook'}"><svg th:replace="~{fragments/icons :: comment}"></svg>방명록</a>
+                <a th:if="${rssEnabled}" th:href="${paths.blog(owner.handle()) + '/rss'}"><svg th:replace="~{fragments/icons :: rss}"></svg>RSS</a>
             </p>
             <!-- 018 팔로우 버튼(내 블로그에서는 없음) -->
             <p th:unless="${isOwner}">

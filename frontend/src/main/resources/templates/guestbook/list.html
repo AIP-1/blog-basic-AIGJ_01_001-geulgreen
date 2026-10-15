@@ -6,7 +6,7 @@
 </head>
 <body>
 <main class="notes-page guestbook-page">
-    <h1 th:text="${'📖 ' + owner.handle() + '님의 방명록'}">방명록</h1>
+    <h1 class="title-with-icon"><svg th:replace="~{fragments/icons :: comment}"></svg> <span th:text="${owner.handle() + '님의 방명록'}">방명록</span></h1>
     <p><a class="link-btn back" th:href="${paths.blog(owner.handle())}">블로그로 돌아가기</a></p>
     <form th:if="${currentMemberId != null}" method="post" th:action="${paths.blog(owner.handle()) + '/guestbook'}" class="note-form guestbook-form">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

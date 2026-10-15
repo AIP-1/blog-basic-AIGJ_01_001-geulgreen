@@ -144,4 +144,18 @@ class ProfileTabsIT extends IntegrationTestBase {
         mockMvc.perform(get("/api/members/tabpop/posts").param("sort", "popular").param("cursor", "abc"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void profilePagesUseLineIconsNotEmoji() throws Exception {
+        long me = member("tabicon");
+        long post = posts.published(me, "아이콘 글", "본문", 1, T);
+        addToSeries(me, post, "new");
+        long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        java.util.regex.Pattern emoji = java.util.regex.Pattern.compile("[\\x{1F300}-\\x{1FAFF}]");
+        for (String url : new String[] {"/tabicon", "/tabicon/posts", "/tabicon/series", "/tabicon/series/" + sid, "/tabicon/guestbook"}) {
+            String html = page(url);
+            assertThat(emoji.matcher(html).find()).as(url).isFalse();
+        }
+        assertThat(page("/tabicon")).contains("class=\"blog-links\"").contains("/tabicon/guestbook").contains("/tabicon/rss");
+    }
 }
