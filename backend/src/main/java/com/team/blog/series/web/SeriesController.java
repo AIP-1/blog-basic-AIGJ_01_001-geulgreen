@@ -4,12 +4,13 @@ import static com.team.blog.shared.web.Redirects.seeOther;
 
 import com.team.blog.account.application.BlogOwner;
 import com.team.blog.account.application.BlogOwnerResolver;
+import com.team.blog.discovery.web.BlogHeaderModel;
 import com.team.blog.post.application.CardDates;
 import com.team.blog.post.application.PostCard;
 import com.team.blog.series.application.SeriesService;
 import com.team.blog.shared.error.NotFoundException;
-import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.HashMap;
@@ -33,28 +34,36 @@ public class SeriesController {
     private final BlogOwnerResolver owners;
     private final CurrentUserProvider currentUserProvider;
     private final Clock clock;
+    private final BlogHeaderModel header;
 
-    public SeriesController(SeriesService series, BlogOwnerResolver owners, CurrentUserProvider currentUserProvider, Clock clock) {
+    public SeriesController(SeriesService series, BlogOwnerResolver owners, CurrentUserProvider currentUserProvider, Clock clock,
+                            BlogHeaderModel header) {
+        this.header = header;
         this.series = series;
         this.owners = owners;
         this.currentUserProvider = currentUserProvider;
         this.clock = clock;
     }
 
+    /** 100 강성찬 개인 확장: 블로그의 시리즈 탭(머리말·탭은 홈과 같이, 비공개 계정은 프로필 윗부분만). */
     @GetMapping("/@{handle}/series")
-    public String list(@PathVariable("handle") String handle, Model model) {
+    public String list(@PathVariable("handle") String handle, HttpServletRequest request, Model model) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
-        boolean isOwner = currentUserProvider.current().map(CurrentUser::memberId).map(id -> id == owner.memberId()).orElse(false);
-        model.addAttribute("owner", owner);
-        model.addAttribute("seriesList", series.list(owner.memberId(), isOwner));
+        if (!header.fill(owner, "series", request, model)) {
+            return "blog/private";
+        }
+        model.addAttribute("seriesList", series.list(owner.memberId(), Boolean.TRUE.equals(model.getAttribute("isOwner"))));
         return "series/list";
     }
 
     @GetMapping("/@{handle}/series/{id}")
-    public String detail(@PathVariable("handle") String handle, @PathVariable("id") long id, Model model) {
+    public String detail(@PathVariable("handle") String handle, @PathVariable("id") long id, HttpServletRequest request,
+                         Model model) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
+        if (!header.fill(owner, "series", request, model)) {
+            return "blog/private";
+        }
         SeriesService.Series s = series.find(owner.memberId(), id).orElseThrow(NotFoundException::new);
-        model.addAttribute("owner", owner);
         model.addAttribute("series", s);
         // 067 후속: 홈과 같은 카드
         List<PostCard> cards = series.cards(id);
@@ -74,6 +83,14 @@ public class SeriesController {
         Long id = seriesId == null || seriesId.isBlank() || "new".equals(seriesId) ? null : Long.valueOf(seriesId);
         series.add(currentUserProvider.current(), postId, id, newTitle);
         return seeOther(safe(back));
+    }
+
+    /** 100 강성찬 개인 확장: 시리즈 화면에서 글 순서를 한 칸 앞(up)·뒤로. */
+    @PostMapping("/@{handle}/series/{id}/move")
+    public RedirectView move(@PathVariable("handle") String handle, @PathVariable("id") long id,
+                             @RequestParam("postId") long postId, @RequestParam("dir") String dir) {
+        series.move(currentUserProvider.current(), id, postId, "up".equals(dir));
+        return seeOther(com.team.blog.shared.web.BlogPaths.of(handle) + "/series/" + id);
     }
 
     @PostMapping("/posts/{postId}/series/remove")
