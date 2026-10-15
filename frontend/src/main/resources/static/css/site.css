@@ -1253,7 +1253,15 @@ main.list-page .home-cards { gap: 18px; }
 .post-body span[class^="md-bg-"] { padding: 0 3px; border-radius: 4px; }
 
 /* 060 보이는 대로 쓰기(강성찬 개인 확장): 글 화면과 같은 글꼴·제목·목록 모양으로 쓰는 칸 */
-.editor-mode { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.editor-mode { display: flex; justify-content: flex-end; margin: 14px 0 10px; }
+/* 085 후속: 글쓰기 칸 아래 안내(기능 · 쓰는 법 한 줄씩), 제목 칸은 겹선 대신 밑줄만 진하게 */
+.editor-help { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0 0; font-size: .88em; color: var(--color-text-muted); }
+.editor-help > div { display: contents; }
+.editor-help dt { font-weight: 600; color: var(--color-text); }
+.editor-help dd { margin: 0; }
+.editor-help kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; border: 1px solid var(--color-border); border-bottom-width: 2px; border-radius: 5px;
+    background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .9em; line-height: 1.5; text-align: center; }
+.editor #post-title:focus-visible { outline: none; border-bottom-color: var(--color-focus); box-shadow: 0 1px 0 var(--color-focus); }
 .visual-editor { position: relative; min-height: 60vh; margin-top: 0; padding: 16px 20px; border: 1px solid var(--color-control-border);
     border-radius: 16px; background: var(--color-surface); color: var(--color-text); outline: none; overflow-wrap: anywhere; }
 .visual-editor:focus { border-color: var(--color-focus); box-shadow: 0 0 0 1px var(--color-focus); }
