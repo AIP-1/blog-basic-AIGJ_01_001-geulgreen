@@ -24,7 +24,7 @@
         </li>
     </ul>
     <p th:if="${page.nextCursor() != null}"><a class="link-btn" th:href="@{${base}(cursor=${page.nextCursor()})}">더 보기</a></p>
-    <p class="follow-message help" role="status" hidden></p>
+    <p class="follow-message help" role="status" hidden data-toast></p>
     <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 </body>

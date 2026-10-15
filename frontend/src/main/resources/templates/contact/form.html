@@ -9,7 +9,7 @@
 <main class="settings">
     <h1>문의하기</h1>
     <p class="help">궁금한 점, 고장 난 곳, 바라는 기능을 알려 주세요. 관리자가 읽고 적어 주신 이메일로 답장해요.</p>
-    <p th:if="${error != null}" class="form-error" role="alert" th:text="${error}">오류</p>
+    <p th:if="${error != null}" class="form-error" role="alert" data-toast th:text="${error}">오류</p>
     <form method="post" action="/contact">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="field">

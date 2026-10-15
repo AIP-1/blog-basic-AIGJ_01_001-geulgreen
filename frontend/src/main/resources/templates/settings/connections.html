@@ -21,7 +21,7 @@
             <p><code id="new-key" th:text="${newKey}">ggk_…</code>
                 <button type="button" class="btn btn-sm" data-copy="#new-key">복사</button></p>
         </div>
-        <p th:if="${tooMany}" class="field-error" role="alert"
+        <p th:if="${tooMany}" class="field-error" role="alert" data-toast
            th:text="${'키는 ' + maxKeys + '개까지 만들 수 있어요. 안 쓰는 키를 끊고 다시 해 주세요.'}">키가 너무 많아요</p>
 
         <form method="post" action="/settings/connections/ai" class="inline-form">

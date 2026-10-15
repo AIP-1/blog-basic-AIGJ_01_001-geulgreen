@@ -38,7 +38,7 @@
                 <!-- 025·069 강성찬 개인 확장: 친한 친구 버튼(내가 주인을 팔로우할 때만) -->
                 <th:block th:replace="~{fragments/friend :: button(${owner.handle()}, ${friendStatus}, ${paths.blog(owner.handle())})}"></th:block>
             </p>
-            <p class="follow-message help" role="status" hidden></p>
+            <p class="follow-message help" role="status" hidden data-toast></p>
         </div>
     </header>
     <nav class="manage-tabs blog-tabs" aria-label="블로그 메뉴">

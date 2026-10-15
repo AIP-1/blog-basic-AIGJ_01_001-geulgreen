@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -73,23 +74,26 @@ public class AdminController {
     public RedirectView hideForm(@PathVariable long caseId, @RequestParam("reason") String reason,
                                  @RequestParam(value = "suspendPeriod", required = false) String period,
                                  @RequestParam(value = "suspendReason", required = false) String suspendReason,
-                                 @RequestParam(value = "authorId", required = false) Long authorId) {
+                                 @RequestParam(value = "authorId", required = false) Long authorId, RedirectAttributes flash) {
         moderation.hide(currentUserProvider.current(), caseId, reason);
         if (period != null && !period.isEmpty() && authorId != null) {
             suspension.suspend(currentUserProvider.current(), authorId, period, suspendReason);
         }
+        flash.addFlashAttribute("toast", "숨기고 신고를 처리했어요");
         return seeOther("/admin/reports");
     }
 
     @PostMapping("/admin/reports/{caseId}/reject")
-    public RedirectView rejectForm(@PathVariable long caseId) {
+    public RedirectView rejectForm(@PathVariable long caseId, RedirectAttributes flash) {
         moderation.reject(currentUserProvider.current(), caseId);
+        flash.addFlashAttribute("toast", "신고를 기각했어요");
         return seeOther("/admin/reports");
     }
 
     @PostMapping("/admin/reports/{caseId}/unhide")
-    public RedirectView unhideForm(@PathVariable long caseId) {
+    public RedirectView unhideForm(@PathVariable long caseId, RedirectAttributes flash) {
         moderation.unhide(currentUserProvider.current(), caseId);
+        flash.addFlashAttribute("toast", "숨김을 풀었어요");
         return seeOther("/admin/reports?tab=done");
     }
 
@@ -108,14 +112,16 @@ public class AdminController {
 
     @PostMapping("/admin/members/{memberId}/suspend")
     public RedirectView suspendForm(@PathVariable long memberId, @RequestParam("period") String period,
-                                    @RequestParam("reason") String reason) {
+                                    @RequestParam("reason") String reason, RedirectAttributes flash) {
         suspension.suspend(currentUserProvider.current(), memberId, period, reason);
+        flash.addFlashAttribute("toast", "회원을 정지했어요");
         return seeOther("/admin/members");
     }
 
     @PostMapping("/admin/members/{memberId}/lift")
-    public RedirectView liftForm(@PathVariable long memberId) {
+    public RedirectView liftForm(@PathVariable long memberId, RedirectAttributes flash) {
         suspension.lift(currentUserProvider.current(), memberId);
+        flash.addFlashAttribute("toast", "정지를 풀었어요");
         return seeOther("/admin/members");
     }
 

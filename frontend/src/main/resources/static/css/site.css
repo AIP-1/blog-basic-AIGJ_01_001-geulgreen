@@ -1412,9 +1412,16 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 :root[data-theme="dark"] .theme-switch .icon-sun { display: inline; }
 :root[data-theme="dark"] .theme-switch .icon-moon { display: none; }
 
-/* keep-scroll.js: 자리를 되살려 화면 밖이 된 위쪽 안내를 잠깐 띄운다 */
-.scroll-toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 32px);
-    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 12px;
-    padding: 10px 14px; box-shadow: 0 4px 16px var(--color-shadow); transition: opacity 0.5s; }
-.scroll-toast-out { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .scroll-toast { transition: none; } }
+/* toast.js: 결과 안내 상자(머리말 바로 아래, 3초). JS가 켜져 있으면 원래 안내 칸은 숨긴다 */
+.toast-source { display: none !important; }
+.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; max-width: min(480px, calc(100% - 32px));
+    padding: 10px 8px 10px 14px; border-radius: 12px; border: 1px solid var(--color-border); border-left-width: 4px;
+    color: var(--color-text); box-shadow: 0 4px 16px var(--color-shadow);
+    opacity: 0; transform: translate(-50%, -8px); transition: opacity .25s, transform .25s; }
+.toast-in { opacity: 1; transform: translate(-50%, 0); }
+.toast-success { background: var(--color-success-soft); border-left-color: var(--color-success); }
+.toast-error { background: var(--color-danger-soft); border-left-color: var(--color-danger); }
+.toast-close { flex: none; border: 0; background: none; color: var(--color-text-muted); font-size: 1.1em; line-height: 1; padding: 4px 6px; cursor: pointer; }
+.handle-input input[readonly] { background: var(--color-surface-muted); color: var(--color-text-muted); cursor: not-allowed; }
+.handle-prefix { color: var(--color-text-muted); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; transform: translate(-50%, 0); } }
