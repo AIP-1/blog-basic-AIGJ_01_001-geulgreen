@@ -19,7 +19,7 @@ public record AdminList<T>(List<T> rows, int page, int pages, long total, String
         Long counted = jdbc.queryForObject("SELECT count(*) FROM (" + sql + ") counted", Long.class, args);
         long total = counted == null ? 0 : counted;
         int pages = (int) Math.max(1, (total + SIZE - 1) / SIZE);
-        int p = Math.min(Math.max(page, 1), pages);
+        int p = Math.clamp(page, 1, pages);
         List<Object> all = new ArrayList<>(List.of(args));
         all.add((p - 1) * SIZE);
         List<T> rows = jdbc.query(sql + " ORDER BY " + orderBy + " LIMIT " + SIZE + " OFFSET ?", mapper, all.toArray());

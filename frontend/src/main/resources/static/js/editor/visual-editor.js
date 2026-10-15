@@ -471,7 +471,8 @@
 
   var adapter = {
     el: function () { return box; },
-    hasSelection: function () { var r = currentRange(); return !!r && !r.collapsed; },
+    // 글자를 고른 때만(사진만 골랐거나 빈칸만 고른 것은 아님: 사진을 올리거나 누른 뒤 서식 창이 뜨던 것)
+    hasSelection: function () { var r = currentRange(); return !!r && !r.collapsed && /\S/.test(r.toString()); },
     snapshot: function () { var r = currentRange(); return r ? r.cloneRange() : null; },
     same: function (x, y) {
       return !!x && !!y && x.compareBoundaryPoints(Range.START_TO_START, y) === 0 && x.compareBoundaryPoints(Range.END_TO_END, y) === 0;

@@ -50,6 +50,6 @@ public class RelatedPostsQuery {
                 LIMIT ?""", Long.class, postId, sourceId, sourceId, sourceId,
                 Timestamp.from(clock.instant().minus(POPULAR_WINDOW)), SIZE);
         Map<Long, PostCard> cards = listQuery.cardsByIds(ids);
-        return ids.stream().map(cards::get).filter(Objects::nonNull).toList();
+        return ids.stream().map(cards::get).filter(Objects::nonNull).toList(); // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
     }
 }

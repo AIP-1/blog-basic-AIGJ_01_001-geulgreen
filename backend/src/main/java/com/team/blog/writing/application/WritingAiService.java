@@ -39,6 +39,7 @@ public class WritingAiService {
     }
 
     private static final int MAX_FIXES = 50;
+    private static final String UNAVAILABLE = "WRITING_AI_UNAVAILABLE";
 
     public record Request(String text, String action, String ask, String visibility) {
     }
@@ -88,7 +89,7 @@ public class WritingAiService {
         }
         acquire(me);
         return client.rewrite(action == Action.ASK ? ask : action.instruction, text)
-                .orElseThrow(() -> new PostContentException("WRITING_AI_UNAVAILABLE"));
+                .orElseThrow(() -> new PostContentException(UNAVAILABLE));
     }
 
     /** 틀린 곳 하나: 본문에 그대로 있는 {@code before}를 {@code after}로. */
@@ -102,7 +103,7 @@ public class WritingAiService {
     /** 085 맞춤법 검사: 본문 앞 {@code checkMaxChars}자를 보내고 틀린 곳만 돌려준다(제안만, 저장하지 않음). 판정 순서는 {@link #rewrite}와 같다. */
     public Spelling spelling(Optional<CurrentUser> current, long postId, Request request) {
         if (!properties.checkEnabled()) {
-            throw new PostContentException("WRITING_AI_UNAVAILABLE");
+            throw new PostContentException(UNAVAILABLE);
         }
         CurrentUser me = guard(current, postId, request.visibility());
         String text = request.text() == null ? "" : request.text();
@@ -114,7 +115,7 @@ public class WritingAiService {
             text = text.substring(0, text.offsetByCodePoints(0, properties.checkMaxChars()));
         }
         acquire(me);
-        String answer = client.spelling(text).orElseThrow(() -> new PostContentException("WRITING_AI_UNAVAILABLE"));
+        String answer = client.spelling(text).orElseThrow(() -> new PostContentException(UNAVAILABLE));
         return new Spelling(parseFixes(answer, text), truncated);
     }
 
@@ -136,13 +137,13 @@ public class WritingAiService {
     }
 
     private static String unquote(String s) {
-        return s.strip().replaceAll("^[\"“'‘「]+|[\"”'’」]+$", "").strip();
+        return s.strip().replaceAll("(?:^[\"“'‘「]+)|(?:[\"”'’」]+$)", "").strip();
     }
 
     // 기능 꺼짐·키 없음 → 로그인·쓰기 가능 → 자기 글(404) → 전체 공개 글만 → 동의
     private CurrentUser guard(Optional<CurrentUser> current, long postId, String visibility) {
         if (!available()) {
-            throw new PostContentException("WRITING_AI_UNAVAILABLE");
+            throw new PostContentException(UNAVAILABLE);
         }
         CurrentUser me = accountGuard.requireWritable(current);
         record Owned(String status, String visibility) {
