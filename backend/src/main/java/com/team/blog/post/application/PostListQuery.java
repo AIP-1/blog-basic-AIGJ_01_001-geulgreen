@@ -1,5 +1,6 @@
 package com.team.blog.post.application;
 
+import com.team.blog.shared.error.PostContentException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -50,6 +51,24 @@ public class PostListQuery {
         return page(authorId, tagId, null, FeedCursor.decode(cursor), true, viewerId);
     }
 
+    /**
+     * 100 강성찬 개인 확장: 블로그 글 탭의 인기순(좋아요 많은 순 → 최신). 커서는 건너뛸 글 수(숫자).
+     * {@code friendViewer}가 있으면 블로그 최신순과 같이 친구·그룹 공개 글도.
+     * ponytail: 오프셋이라 보는 사이 좋아요가 바뀌면 한두 개가 겹치거나 빠질 수 있다(화면은 이미 받은 번호를 건너뛴다).
+     */
+    public CardPage blogPopular(long authorId, Long friendViewer, String cursor) {
+        int offset;
+        try {
+            offset = cursor == null || cursor.isEmpty() ? 0 : Integer.parseInt(cursor);
+        } catch (NumberFormatException e) {
+            throw new PostContentException(FeedCursor.INVALID);
+        }
+        if (offset < 0 || offset > 100_000) {
+            throw new PostContentException(FeedCursor.INVALID);
+        }
+        return page(authorId, null, null, Optional.empty(), friendViewer != null, friendViewer, offset);
+    }
+
     /** 013: 블로그 태그 필터. */
     public CardPage blogByTag(long authorId, long tagId, String cursor) {
         return blogByTag(authorId, tagId, cursor, false);
@@ -77,6 +96,12 @@ public class PostListQuery {
 
     private CardPage page(Long authorId, Long tagId, Long followerId, Optional<FeedCursor> cursor, boolean withFriends,
                           Long groupViewerId) {
+        return page(authorId, tagId, followerId, cursor, withFriends, groupViewerId, null);
+    }
+
+    /** {@code popularOffset}: null이면 최신순(커서), 아니면 인기순으로 그만큼 건너뛴다. */
+    private CardPage page(Long authorId, Long tagId, Long followerId, Optional<FeedCursor> cursor, boolean withFriends,
+                          Long groupViewerId, Integer popularOffset) {
         // 친구가 보는 블로그: 친구 공개 글에는 최초 공개 시각이 없으므로 발행 시각으로 대신한다(025 research R-2)
         String at = withFriends ? "COALESCE(p.first_public_at, p.published_at)" : "p.first_public_at";
         StringBuilder sql = new StringBuilder("SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt,"
@@ -113,12 +138,19 @@ public class PostListQuery {
             args.add(Timestamp.from(cursor.get().firstPublicAt()));
             args.add(cursor.get().id());
         }
-        sql.append(" ORDER BY ").append(at).append(" DESC, p.id DESC LIMIT ").append(PAGE_SIZE + 1);
+        sql.append(" ORDER BY ").append(popularOffset != null ? "p.like_count DESC, " : "").append(at)
+                .append(" DESC, p.id DESC LIMIT ").append(PAGE_SIZE + 1);
+        if (popularOffset != null) {
+            sql.append(" OFFSET ").append(popularOffset);
+        }
         List<PostCard> rows = jdbc.query(sql.toString(), PostListQuery::card, args.toArray());
         if (rows.size() <= PAGE_SIZE) {
             return new CardPage(rows, null);
         }
         List<PostCard> items = rows.subList(0, PAGE_SIZE);
+        if (popularOffset != null) {
+            return new CardPage(List.copyOf(items), String.valueOf(popularOffset + PAGE_SIZE));
+        }
         PostCard last = items.get(PAGE_SIZE - 1);
         return new CardPage(List.copyOf(items), new FeedCursor(last.firstPublicAt(), last.id()).encode());
     }

@@ -41,11 +41,16 @@ public class PostListApiController {
     @GetMapping("/api/members/{handle}/posts")
     public CardPage blog(@PathVariable("handle") String handle,
                          @RequestParam(value = "cursor", required = false) String cursor,
-                         @RequestParam(value = "tag", required = false) String tag) {
+                         @RequestParam(value = "tag", required = false) String tag,
+                         @RequestParam(value = "sort", required = false) String sort) {
         long ownerId = blogOwnerResolver.resolve(handle).orElseThrow(NotFoundException::new).memberId();
         // 025·069 강성찬 개인 확장: 블로그 주인이 나를 친구로 골랐으면 친구 공개 글도(블로그 화면과 같은 규칙)
         Long friendViewer = currentUserProvider.current().map(v -> v.memberId())
                 .filter(v -> friendQuery.hasFriend(ownerId, v)).orElse(null);
+        // 100 강성찬 개인 확장: 글 탭 인기순
+        if ("popular".equals(sort)) {
+            return listQuery.blogPopular(ownerId, friendViewer, cursor);
+        }
         if (tag == null || tag.isEmpty()) {
             return friendViewer != null ? listQuery.blogForFriend(ownerId, friendViewer, null, cursor) : listQuery.blog(ownerId, cursor);
         }

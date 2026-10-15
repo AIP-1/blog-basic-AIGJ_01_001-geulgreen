@@ -66,7 +66,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         // 남의 글에는 못 단다
         mockMvc.perform(post("/posts/{id}/category", a).param("categoryId", String.valueOf(dev))
                 .with(csrf()).with(TestAuth.member(other))).andExpect(status().isNotFound());
-        String blog = page("/catme");
+        String blog = page("/catme/posts");
         assertThat(blog).contains("개발 1").contains("자바 공부").contains("산책 일기");
         String filtered = page("/catme?category=" + dev);
         assertThat(filtered.substring(filtered.indexOf("id=\"card-grid\""))).contains("자바 공부").doesNotContain("산책 일기");

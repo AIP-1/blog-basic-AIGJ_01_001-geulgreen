@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${owner.handle() + ' 글 · 글그린'}">블로그</title>
+</head>
+<body>
+<main class="list-page">
+    <th:block th:replace="~{fragments/blog-header :: header}"></th:block>
+    <!-- 037 강성찬 개인 확장: 카테고리 -->
+    <nav th:if="${blogCategories != null and !blogCategories.isEmpty()}" class="blog-categories" aria-label="카테고리">
+        <a th:href="${postsPath}" th:class="${filterCategory == null ? 'category-link active' : 'category-link'}">전체</a>
+        <a th:each="c : ${blogCategories}" th:href="@{${postsPath}(category=${c.id()})}"
+           th:class="${filterCategory != null and filterCategory.id() == c.id() ? 'category-link active' : 'category-link'}"
+           th:text="${c.name() + ' ' + c.postCount()}">카테고리 3</a>
+    </nav>
+    <!-- 013 블로그 태그 줄(처음 10개 + 태그 더 보기)과 필터 -->
+    <nav class="blog-tags" th:unless="${blogTags.isEmpty()}" aria-label="이 블로그의 태그">
+        <th:block th:each="t, st : ${blogTags}" th:if="${st.index < 10}">
+            <a class="tag" th:href="@{${postsPath}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
+        </th:block>
+        <details th:if="${blogTags.size() > 10}">
+            <summary>태그 더 보기</summary>
+            <th:block th:each="t, st : ${blogTags}" th:if="${st.index >= 10}">
+                <a class="tag" th:href="@{${postsPath}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
+            </th:block>
+        </details>
+    </nav>
+    <p th:if="${filterCategory != null}" class="tag-filter">
+        <span th:text="${'📁 ' + filterCategory.name() + ' 글'}">카테고리 글</span>
+        <a th:href="${postsPath}">필터 해제</a>
+    </p>
+    <p th:if="${filterTag != null}" class="tag-filter">
+        <span th:text="${'#' + filterTag + ' 글'}">#태그 글</span>
+        <a th:href="${postsPath}">필터 해제</a>
+    </p>
+    <p th:if="${continued}"><a class="link-btn" th:href="${sort == 'popular' ? postsPath + '?sort=popular' : postsPath}">처음부터 보기</a></p>
+    <!-- 100 강성찬 개인 확장: 글 탭 정렬(필터 없을 때) -->
+    <nav class="manage-filter" aria-label="정렬" th:if="${filterTag == null and filterCategory == null}">
+        <a th:href="${postsPath}" th:attr="aria-current=${sort == 'latest' ? 'page' : null}">최신순</a>
+        <a th:href="${postsPath + '?sort=popular'}" th:attr="aria-current=${sort == 'popular' ? 'page' : null}">인기순</a>
+    </nav>
+    <th:block th:if="${cards.isEmpty() and !continued and filterTag == null and filterCategory == null}">
+        <p class="empty-state" th:unless="${isOwner}">아직 공개한 글이 없어요</p>
+        <div class="empty-state" th:if="${isOwner}">첫 글을 써 보세요
+            <form method="post" action="/write" class="inline-form">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit">글쓰기</button>
+            </form>
+        </div>
+    </th:block>
+    <div class="card-grid" id="card-grid">
+        <th:block th:each="card : ${cards}">
+            <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, false)}"></article>
+        </th:block>
+    </div>
+    <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, false, ${!cards.isEmpty()}, ${linkBase}, null)}"></div>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
+    <script th:src="@{/js/follow/follow.js}" defer></script>
+</main>
+</body>
+</html>
