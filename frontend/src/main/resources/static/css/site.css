@@ -1351,7 +1351,7 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 :root[data-theme="dark"] .theme-switch .icon-moon { display: none; }
 
 /* keep-scroll.js: 자리를 되살려 화면 밖이 된 위쪽 안내를 잠깐 띄운다 */
-.scroll-toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 100; max-width: calc(100% - 32px);
+.scroll-toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 32px);
     background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 12px;
     padding: 10px 14px; box-shadow: 0 4px 16px var(--color-shadow); transition: opacity 0.5s; }
 .scroll-toast-out { opacity: 0; }

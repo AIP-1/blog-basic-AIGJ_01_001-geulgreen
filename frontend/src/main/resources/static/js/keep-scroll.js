@@ -26,7 +26,7 @@
   if (saved.path !== location.pathname || location.hash || Date.now() - saved.at > FRESH_MS) { return; }
   // 위쪽 안내(저장됐어요·오류)가 화면 밖으로 밀렸으면 잠깐 위에 띄운다
   function surfaceMessage() {
-    var msgs = document.querySelectorAll('[role="status"], [role="alert"]');
+    var msgs = document.querySelectorAll('.notice[role="status"], .form-error[role="alert"]');
     for (var i = 0; i < msgs.length; i++) {
       var m = msgs[i];
       var text = m.textContent.trim();
