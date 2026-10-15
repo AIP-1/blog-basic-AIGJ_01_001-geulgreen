@@ -477,6 +477,24 @@ main:has(> article.post) { max-width: 808px; }
 .post-tags { margin: 28px 0 8px; }
 .reaction-row { padding: 16px 0; border-bottom: 1px solid var(--color-border); gap: 16px; }
 .author-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 20px; margin: 28px 0; }
+/* 097 강성찬 개인 확장: 작성자 카드 한 줄(아이콘 · 이름·소개·숫자 · 오른쪽 버튼). 휴대폰은 버튼이 글 아래 한 줄로 */
+.author-card { align-items: center; gap: 16px; flex-wrap: wrap; }
+.author-card-avatar { flex: none; line-height: 0; border-radius: 50%; }
+.author-card-text { display: flex; flex-direction: column; gap: 2px; }
+.author-card-text p { margin: 0; }
+.author-card-name { font-weight: 700; font-size: 1.08em; color: var(--color-text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-card-name:hover { text-decoration: underline; }
+.author-card-bio { color: var(--color-text-muted); font-size: .93em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.author-card-stats { font-size: .85em; }
+.author-card-stats a { color: inherit; text-decoration: none; }
+.author-card-stats a:hover { text-decoration: underline; }
+.author-card-actions { flex: none; display: flex; align-items: center; gap: 8px; }
+.author-card-actions .follow-form { margin: 0; }
+.author-card-actions .follow-button, .author-card-actions .btn { min-width: 96px; padding: 8px 18px; font-size: .93em; justify-content: center; }
+.author-card > .follow-message { flex-basis: 100%; margin: 0; }
+@media (max-width: 560px) { .author-card { padding: 16px; gap: 12px 14px; }
+    .author-card-actions { flex-basis: 100%; }
+    .author-card-actions .follow-form, .author-card-actions .follow-button, .author-card-actions > .btn { flex: 1; width: 100%; } }
 
 /* 댓글 */
 .comment { padding: 14px 0; }
