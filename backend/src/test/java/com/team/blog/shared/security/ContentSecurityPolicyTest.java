@@ -20,7 +20,7 @@ class ContentSecurityPolicyTest {
         String withKakao = new ContentSecurityPolicy(storage, profile, new ReadingProperties(true, true, true, true, "k")).value();
         String without = new ContentSecurityPolicy(storage, profile, new ReadingProperties(true, true, true, true, "")).value();
 
-        assertThat(withKakao).endsWith("form-action 'self' https://t.me https://sharer.kakao.com");
+        assertThat(withKakao).endsWith("form-action 'self' https://t.me https://sharer.kakao.com https://accounts.kakao.com");
         assertThat(without).endsWith("form-action 'self' https://t.me");
     }
 }

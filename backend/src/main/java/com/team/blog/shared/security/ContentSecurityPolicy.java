@@ -32,7 +32,7 @@ public class ContentSecurityPolicy {
                 + "img-src 'self' data: blob:" + join(storageOrigins) + join(socialHosts) + "; "
                 + "connect-src 'self'" + join(connectOrigins) + join(socialHosts) + (kakao ? " https://sharer.kakao.com https://kapi.kakao.com" : "") + "; "
                 + "style-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://t.me" // 096: [텔레그램 연결] 폼이 봇 링크로 303
-                + (kakao ? " https://sharer.kakao.com" : ""); // PC 카카오톡 공유는 SDK가 공유 창에 폼을 보낸다
+                + (kakao ? " https://sharer.kakao.com https://accounts.kakao.com" : ""); // PC 카카오톡 공유: SDK가 공유 창에 폼을 보내고, 로그아웃 상태면 카카오 로그인으로 넘어간다
     }
 
     public String value() {
