@@ -59,25 +59,18 @@
             <details th:if="${viewerIsAuthor}" class="sort-menu post-owner-menu">
                 <summary aria-label="글 관리">⋯</summary>
                 <div class="sort-menu-panel">
-                    <a th:href="@{/write/{id}(id=${post.id()})}">수정</a>
-                    <label class="menu-field">공개 범위
-                        <select id="visibility-select">
-                            <option value="PUBLIC" th:selected="${post.visibility() == 'PUBLIC'}">전체 공개</option>
-                            <option value="FRIENDS" th:selected="${post.visibility() == 'FRIENDS'}">친구 공개</option>
-                            <option value="LINK" th:selected="${post.visibility() == 'LINK'}">링크 공개</option>
-                            <option value="GROUP" th:selected="${post.visibility() == 'GROUP'}">그룹 공개</option>
-                            <option value="PRIVATE" th:selected="${post.visibility() == 'PRIVATE'}">나만 보기</option>
-                        </select>
-                    </label>
+                    <!-- 098 강성찬 개인 확장: 모든 줄이 같은 칸에 선 아이콘, 공개 범위는 그 자리에서 펼침, 삭제 앞 구분선 -->
+                    <a th:href="@{/write/{id}(id=${post.id()})}"><svg th:replace="~{fragments/icons :: pen}"></svg>수정</a>
+                    <details th:replace="~{fragments/owner-menu :: visibility(${post.id()}, ${post.visibility()})}"></details>
                     <!-- 054 강성찬 개인 확장: 글 고정(글쓴이만) -->
                     <form th:if="${pinnedHere != null}" class="pin-form" method="post"
                           th:action="${pinnedHere} ? @{/posts/{id}/unpin(id=${post.id()})} : @{/posts/{id}/pin(id=${post.id()})}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <input type="hidden" name="back" th:value="${post.url()}">
-                        <button type="submit" th:text="${pinnedHere} ? '📌 고정 해제' : '📌 블로그 맨 위에 고정'">고정</button>
+                        <button type="submit"><svg th:replace="~{fragments/icons :: pin}"></svg><span th:text="${pinnedHere} ? '고정 해제' : '블로그 맨 위에 고정'">고정</span></button>
                     </form>
-                    <button type="button" data-open-post-settings>⚙️ 글 설정</button>
-                    <button type="button" id="trash-post" class="menu-danger" data-trash-post>삭제</button>
+                    <button type="button" data-open-post-settings><svg th:replace="~{fragments/icons :: gear}"></svg>글 설정</button>
+                    <button type="button" id="trash-post" class="menu-danger" data-trash-post><svg th:replace="~{fragments/icons :: trash}"></svg>삭제</button>
                 </div>
             </details>
             </div>
@@ -338,6 +331,7 @@
     <script th:if="${shareEnabled and kakaoJsKey != null}" src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
             integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous" defer></script>
     <script th:if="${readProgressEnabled or shareEnabled}" th:src="@{/js/post/reading-extras.js}" defer></script>
+    <script th:if="${viewerIsAuthor}" th:src="@{/js/post/visibility-menu.js}" defer></script>
     <script th:src="@{/js/post/comments.js}" defer></script>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
