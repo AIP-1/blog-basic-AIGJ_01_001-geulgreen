@@ -46,8 +46,11 @@
   };
 
   // 삭제·복구·영구 삭제 뒤 탭 옆 글 수를 서버 값으로 다시 쓴다(빈 임시글은 휴지통을 거치지 않으므로 추측하지 않는다)
+  var countsSeq = 0;
   function refreshCounts() {
+    var seq = ++countsSeq;
     return call('GET', '/api/me/posts/counts').then(function (counts) {
+      if (seq !== countsSeq) { return; } // 늦게 온 옛 응답이 새 숫자를 덮지 않게
       Array.prototype.forEach.call(document.querySelectorAll('[data-count-tab]'), function (a) {
         var n = counts[a.dataset.countTab];
         if (typeof n === 'number') { a.textContent = a.dataset.countLabel + ' ' + n; }
