@@ -383,6 +383,10 @@
     var ta = document.getElementById('post-content');
     if (!ta) { return; }
     var aiEnabled = ta.dataset.writingAi === 'true';
+    // 글쓰기 칸 아래 단축키 안내: Mac·iPhone·iPad면 Ctrl 대신 ⌘
+    if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) {
+      Array.prototype.forEach.call(document.querySelectorAll('#format-hint .kbd-mod'), function (k) { k.textContent = '⌘'; });
+    }
     var composing = false, view = 'main', anchor = null, saved = null, consented = false, lastAi = null, aiText = '', aiBusy = false;
 
     var panel = el('div', 'format-panel');
