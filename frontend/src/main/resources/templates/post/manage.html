@@ -46,17 +46,21 @@
          067의 카드는 같은 줄 카드 높이를 맞추느라(card-rows.js) 짧은 글 카드 아래가 비어 보였다 -->
     <ul class="manage-list" id="post-rows">
         <li th:each="row : ${rows}" class="post-row" th:with="card=${cards.get(row.id())}" th:attr="data-post-id=${row.id()}">
+            <!-- 102: 오른쪽은 줄마다 같은 칸(태그 · 조회 · 좋아요 · 댓글 · 날짜 · ⋯). 태그가 없어도 칸은 남는다 -->
             <div class="manage-row">
-                <a class="manage-row-title" th:href="${tab == 'drafts' ? '/write/' + row.id() : card.url()}"
-                   th:text="${#strings.isEmpty(row.title()) and !#strings.isEmpty(card.excerpt()) ? card.excerpt() : card.title()}" th:title="${card.title()}">제목</a>
-                <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
-                   th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
-                <th:block th:replace="~{post/manage :: manageExtra}"></th:block>
-                <p class="manage-row-stats help">
-                    <span th:text="${'♡ ' + card.likeCount()}" th:attr="aria-label=${'좋아요 ' + card.likeCount()}">♡ 0</span>
-                    <span th:text="${'💬 ' + card.commentCount()}">💬 0</span>
-                    <time th:attr="datetime=${card.firstPublicAt()}" th:text="${cardLabels.get(row.id())}">2026.10.15</time>
-                </p>
+                <div class="manage-row-main">
+                    <a class="manage-row-title" th:href="${tab == 'drafts' ? '/write/' + row.id() : card.url()}"
+                       th:text="${#strings.isEmpty(row.title()) and !#strings.isEmpty(card.excerpt()) ? card.excerpt() : card.title()}" th:title="${card.title()}">제목</a>
+                    <th:block th:replace="~{post/manage :: manageBadges}"></th:block>
+                </div>
+                <span class="manage-row-tag"><a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
+                   th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}" th:title="${card.firstTag()}">태그</a></span>
+                <span class="manage-num" th:if="${tab == 'published'}" th:attr="aria-label=${'조회 ' + views.get(row.id())}"><svg th:replace="~{fragments/icons :: eye}"></svg><span th:text="${views.get(row.id())}">0</span></span>
+                <span class="manage-num" th:unless="${tab == 'published'}"></span>
+                <span class="manage-num" th:attr="aria-label=${'좋아요 ' + card.likeCount()}"><svg th:replace="~{fragments/icons :: heart}"></svg><span th:text="${card.likeCount()}">0</span></span>
+                <span class="manage-num" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">0</span></span>
+                <time class="manage-row-date" th:attr="datetime=${card.firstPublicAt()}" th:title="${cardLabels.get(row.id())}" th:text="${rowDates.get(row.id())}">2026.10.15</time>
+                <th:block th:replace="~{post/manage :: manageMenu}"></th:block>
             </div>
             <p class="row-error field-error" role="alert" hidden></p>
         </li>
@@ -69,8 +73,7 @@
 </main>
 
 <!-- 카드에 덧붙는 관리 부분(row·tab은 부르는 쪽 값) -->
-<th:block th:fragment="manageExtra">
-    <p class="manage-badges">
+<p th:fragment="manageBadges" class="manage-badges">
         <th:block th:if="${tab == 'drafts'}">
             <span class="badge">임시글</span>
             <span class="badge" th:if="${scheduleLabels != null and scheduleLabels.containsKey(row.id())}"
@@ -80,14 +83,13 @@
             <span th:replace="~{fragments/visibility :: badge(${row.visibility()})}"></span>
             <span class="badge badge-editing" th:if="${row.editing()}">수정 중</span>
             <span class="badge" th:if="${row.hidden()}" title="운영 정책에 따라 숨겨졌어요">숨김</span>
-            <span class="badge" th:text="${'조회 ' + views.get(row.id())}">조회</span>
         </th:block>
         <th:block th:if="${tab == 'trash'}">
             <span class="badge" th:text="${row.status().name() == 'DRAFT' ? '임시글' : '발행 글'}">발행 글</span>
             <span class="badge" th:text="${daysLeft.get(row.id()) == 0 ? '오늘 삭제' : daysLeft.get(row.id()) + '일 남음'}">29일 남음</span>
         </th:block>
-    </p>
-    <details class="sort-menu manage-menu">
+</p>
+<details th:fragment="manageMenu" class="sort-menu manage-menu">
         <summary aria-label="글 관리">⋯</summary>
         <div class="sort-menu-panel">
             <!-- 098 강성찬 개인 확장: 글 화면 ⋯ 메뉴와 같은 줄 모양(선 아이콘, 공개 범위는 그 자리에서 펼침) -->
@@ -113,6 +115,5 @@
             </th:block>
         </div>
     </details>
-</th:block>
 </body>
 </html>
