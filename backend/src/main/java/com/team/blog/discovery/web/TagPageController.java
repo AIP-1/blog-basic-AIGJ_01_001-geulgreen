@@ -79,7 +79,7 @@ public class TagPageController {
     static final int CARDS = 10;
 
     /**
-     * 태그 모아 보기. 강성찬 개인 확장(10-15, devlog 태그 화면 참고): 제목·전체 태그 수, 태그 검색, 인기순·이름순·최근순,
+     * 태그 모아 보기. 강성찬 개인 확장(10-15, devlog 태그 화면 참고): 제목·전체 태그 수, 태그 검색, 인기순·최근순(이름순은 10-15에 뺌),
      * 태그마다 가로로 넘기는 글 카드 줄. 처음 {@value #SECTIONS}개 묶음, 나머지는 끝에 가까워지면 {@code /tags/sections}로 이어 붙인다.
      */
     @GetMapping("/tags")
@@ -100,7 +100,7 @@ public class TagPageController {
     }
 
     private void fillSections(Model model, String sort, String q, int offset) {
-        String s = "name".equals(sort) || "recent".equals(sort) ? sort : "popular";
+        String s = "recent".equals(sort) ? sort : "popular"; // 이름순은 뺐다(10-15 chan), 예전 ?sort=name은 인기순
         String query = q == null ? "" : q.strip();
         if (query.length() > 30) {
             query = query.substring(0, 30);

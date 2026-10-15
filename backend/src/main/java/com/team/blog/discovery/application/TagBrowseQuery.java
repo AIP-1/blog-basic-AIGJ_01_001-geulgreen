@@ -31,12 +31,11 @@ public class TagBrowseQuery {
     }
 
     /**
-     * 정렬: popular = 글 수 → 최근 글, name = 이름, recent = 최근 글. {@code q}가 있으면 이름에 그 글자가 든 태그만.
+     * 정렬: popular = 글 수 → 최근 글, recent = 최근 글. {@code q}가 있으면 이름에 그 글자가 든 태그만.
      * 공용 목록 조건(공개 글·공개 계정) 글만 센다.
      */
     public List<Section> sections(String sort, String q, int offset, int limit) {
         String order = switch (sort) {
-            case "name" -> "t.name";
             case "recent" -> "latest DESC, t.name";
             default -> "n DESC, latest DESC, t.name";
         };

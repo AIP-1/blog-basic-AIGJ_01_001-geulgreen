@@ -2,6 +2,7 @@ package com.team.blog.tag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.team.blog.support.IntegrationTestBase;
 import com.team.blog.tag.application.icon.TagIconCatalog;
@@ -67,10 +68,12 @@ class TagIconIT extends IntegrationTestBase {
                 .contains("href=\"/tags\" aria-current=\"page\">태그</a>");
         assertThat(jdbc.queryForObject("SELECT icon FROM tag_icon ti JOIN tag t ON t.id = ti.tag_id WHERE t.name = 'docker'",
                 String.class)).isEqualTo("whale");
-        // 인기순은 글 수가 많은 docker 먼저, 이름순은 docker → 제주, 최근순은 마지막 글이 더 최근인 docker(b가 a보다 늦음) 먼저
+        // 인기순은 글 수가 많은 docker 먼저, 최근순은 마지막 글이 더 최근인 docker(b가 a보다 늦음) 먼저
         assertThat(html.indexOf("#docker")).isLessThan(html.indexOf("#제주"));
-        String byName = mockMvc.perform(get("/tags?sort=name")).andReturn().getResponse().getContentAsString();
-        assertThat(byName.indexOf("#docker")).isLessThan(byName.indexOf("#제주"));
+        // 이름순은 없다(10-15): 화면에 링크가 없고, 예전 ?sort=name 주소는 인기순으로
+        assertThat(html).doesNotContain("이름순");
+        String byName = mockMvc.perform(get("/tags?sort=name")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertThat(byName).contains("aria-current=\"page\">인기순</a>");
         String recent = mockMvc.perform(get("/tags?sort=recent")).andReturn().getResponse().getContentAsString();
         assertThat(recent.indexOf("#docker")).isLessThan(recent.indexOf("#제주"));
         // 검색은 이름에 그 글자가 든 태그만
