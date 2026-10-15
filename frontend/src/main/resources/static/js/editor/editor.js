@@ -58,7 +58,7 @@
       contentInput.dispatchEvent(new Event('blog:content-replaced')); // 060 보이는 대로 쓰기 칸이 다시 그린다
     }
 
-    function showNotice(text) { notice.textContent = text; notice.hidden = !text; }
+    function showNotice(text, kind) { if (kind) { notice.dataset.toast = kind; } notice.textContent = text; notice.hidden = !text; }
 
     function setStatus(kind, detail) {
       statusLine.textContent = '';
@@ -216,10 +216,10 @@
         body: JSON.stringify({ title: mine.title, contentMd: mine.contentMd }) })
         .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
         .then(function (r) {
-          if (!r.ok) { showNotice(r.data.message || '새 임시글을 만들지 못했어요. 내용은 이 기기에 남아 있어요.'); return; }
+          if (!r.ok) { showNotice(r.data.message || '새 임시글을 만들지 못했어요. 내용은 이 기기에 남아 있어요.', 'error'); return; }
           // 원래 글은 서버 내용 그대로. 이 탭의 못 보낸 내용은 새 글로 옮겼으니 지운다
           autosave.disable().then(function () { window.location.assign('/write/' + r.data.postId); });
-        }, function () { showNotice('연결되지 않아 새 임시글을 만들지 못했어요. 내용은 이 기기에 남아 있어요.'); });
+        }, function () { showNotice('연결되지 않아 새 임시글을 만들지 못했어요. 내용은 이 기기에 남아 있어요.', 'error'); });
     });
 
     // ----- 입력·버튼 -----
@@ -237,9 +237,9 @@
         if (!window.confirm('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?')) { return; }
         fetch('/api/posts/' + state.postId + '/working-copy', { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
           .then(function (res) {
-            if (res.status !== 204) { showNotice('변경을 취소하지 못했어요.'); return; }
+            if (res.status !== 204) { showNotice('변경을 취소하지 못했어요.', 'error'); return; }
             autosave.disable().then(function () { window.location.reload(); });
-          }, function () { showNotice('연결되지 않아 변경을 취소하지 못했어요.'); });
+          }, function () { showNotice('연결되지 않아 변경을 취소하지 못했어요.', 'error'); });
       });
     }
 

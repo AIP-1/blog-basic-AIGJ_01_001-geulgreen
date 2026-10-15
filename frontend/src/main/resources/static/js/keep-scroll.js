@@ -24,23 +24,6 @@
   if (!saved) { return; }
   try { sessionStorage.removeItem(KEY); } catch (e) { return; }
   if (saved.path !== location.pathname || location.hash || Date.now() - saved.at > FRESH_MS) { return; }
-  // 위쪽 안내(저장됐어요·오류)가 화면 밖으로 밀렸으면 잠깐 위에 띄운다
-  function surfaceMessage() {
-    var msgs = document.querySelectorAll('.notice[role="status"], .form-error[role="alert"]');
-    for (var i = 0; i < msgs.length; i++) {
-      var m = msgs[i];
-      var text = m.textContent.trim();
-      if (!text || !m.offsetParent || m.getBoundingClientRect().bottom > 0) { continue; }
-      var toast = document.createElement('div');
-      toast.className = 'scroll-toast';
-      toast.setAttribute('role', m.getAttribute('role'));
-      document.body.appendChild(toast);
-      setTimeout(function () { toast.textContent = text; }, 50); // 넣은 뒤 글을 채워야 화면 낭독기가 읽는다
-      setTimeout(function () { toast.classList.add('scroll-toast-out'); }, 4000);
-      setTimeout(function () { toast.remove(); }, 4600);
-      return;
-    }
-  }
-  function restore() { window.scrollTo(0, saved.y); surfaceMessage(); }
+  function restore() { window.scrollTo(0, saved.y); }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', restore); } else { restore(); }
 })();

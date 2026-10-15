@@ -8,7 +8,7 @@
 <main class="auth-page auth-page-single">
     <h1 th:text="${providerName} + ' 계정으로 가입 마무리'">가입 마무리</h1>
 
-    <section class="notice" th:if="${!sameEmailProviders.isEmpty()}" role="status">
+    <section class="notice" th:if="${!sameEmailProviders.isEmpty()}" role="status" data-toast-inline>
         <p>이 이메일로 가입한 계정이 이미 있어요.
             <span class="help" th:text="'(' + ${#strings.listJoin(sameEmailProviders, ', ')} + ')'">(이메일)</span></p>
         <form method="post" th:action="@{/signup/social/cancel}" style="display:inline">
@@ -67,7 +67,7 @@
 
         <fieldset class="field">
             <legend>약관 동의 (필수)</legend>
-            <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert"></p>
+            <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert" data-toast-inline></p>
             <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수)</label><br>
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label> <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
         </fieldset>
