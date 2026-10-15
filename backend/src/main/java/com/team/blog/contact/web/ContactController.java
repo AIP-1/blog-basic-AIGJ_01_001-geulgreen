@@ -8,7 +8,6 @@ import com.team.blog.shared.web.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import com.team.blog.shared.web.AdminList;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -79,11 +78,7 @@ public class ContactController {
         noStore(response, model);
         model.addAttribute("status", status);
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("list", AdminList.of(inquiries.list(currentUserProvider.current()), i -> switch (status) {
-            case "new" -> !i.done();
-            case "done" -> i.done();
-            default -> true;
-        } && AdminList.matches(q, i.title(), i.content(), i.email(), i.memberHandle()), page));
+        model.addAttribute("list", inquiries.list(currentUserProvider.current(), status, q, page));
         return "admin/inquiries";
     }
 

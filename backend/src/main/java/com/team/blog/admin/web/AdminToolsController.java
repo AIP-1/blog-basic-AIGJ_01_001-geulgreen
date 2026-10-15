@@ -7,7 +7,6 @@ import com.team.blog.admin.application.SamplePostsService;
 import com.team.blog.admin.application.SystemStatusService;
 import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.shared.security.CurrentUserProvider;
-import com.team.blog.shared.web.AdminList;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
@@ -82,9 +81,8 @@ public class AdminToolsController {
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("type", comments ? "comments" : "posts");
         model.addAttribute("status", hiddenOnly ? "hidden" : "all");
-        model.addAttribute("list", comments
-                ? AdminList.of(tools.comments(currentUserProvider.current(), q), r -> !hiddenOnly || r.hidden(), page)
-                : AdminList.of(tools.posts(currentUserProvider.current(), q), r -> !hiddenOnly || r.hidden(), page));
+        model.addAttribute("list", comments ? tools.comments(currentUserProvider.current(), q, hiddenOnly, page)
+                : tools.posts(currentUserProvider.current(), q, hiddenOnly, page));
         model.addAttribute("reasons", ReportReason.values());
         model.addAttribute("adminTab", "content");
         return "admin/content";
@@ -122,8 +120,7 @@ public class AdminToolsController {
         boolean secretOnly = "secret".equals(status);
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("status", secretOnly ? "secret" : "all");
-        model.addAttribute("list", AdminList.of(tools.guestbook(currentUserProvider.current()), e -> (!secretOnly || e.secret())
-                && AdminList.matches(q, e.content(), e.handle(), e.nickname(), e.ownerHandle()), page));
+        model.addAttribute("list", tools.guestbook(currentUserProvider.current(), q, secretOnly, page));
         model.addAttribute("adminTab", "guestbook");
         return "admin/guestbook";
     }
@@ -139,8 +136,7 @@ public class AdminToolsController {
                           @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("list", AdminList.of(tools.notices(currentUserProvider.current()),
-                n -> AdminList.matches(q, n.message(), n.linkUrl()), page));
+        model.addAttribute("list", tools.notices(currentUserProvider.current(), q, page));
         model.addAttribute("adminTab", "notices");
         return "admin/notices";
     }
@@ -165,8 +161,7 @@ public class AdminToolsController {
         noStore(response, model);
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("cat", cat);
-        model.addAttribute("list", AdminList.of(tools.logs(currentUserProvider.current()), l -> ("all".equals(cat)
-                || l.category().equals(cat)) && AdminList.matches(q, l.admin(), l.actionLabel(), l.target(), l.detail()), page));
+        model.addAttribute("list", tools.logs(currentUserProvider.current(), q, cat, page));
         model.addAttribute("adminTab", "logs");
         return "admin/logs";
     }

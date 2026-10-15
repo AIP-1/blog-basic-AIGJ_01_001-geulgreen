@@ -1,43 +1,39 @@
 package com.team.blog.shared.web;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
- * 098 후속 관리자 목록 한 쪽(강성찬 개인 확장): 걸러 낸 줄을 20줄씩 나누고, 이전·다음 쪽 주소는 지금 주소의 page만 바꿔 만든다.
- * ponytail: 목록은 각 조회의 최근 {@link #CAP}줄 안에서 메모리로 거르고 나눈다(학교 서버 규모). 더 많아지면 SQL OFFSET으로 바꾼다.
+ * 098 후속 관리자 목록 한 쪽(강성찬 개인 확장): 검색·필터는 각 조회의 WHERE로, 쪽은 LIMIT·OFFSET으로 DB에서 나누고 건수는 count로 센다.
+ * 이전·다음 쪽 주소는 지금 주소에서 page만 바꿔 만든다(검색·필터 유지).
  */
-public record AdminList<T>(List<T> rows, int page, int pages, int total, boolean capped, String prevUrl, String nextUrl) {
+public record AdminList<T>(List<T> rows, int page, int pages, long total, String prevUrl, String nextUrl) {
 
-    public static final int CAP = 500;
     static final int SIZE = 20;
 
-    public static <T> AdminList<T> of(List<T> all, Predicate<T> filter, int page) {
-        List<T> list = all.stream().filter(filter).toList();
-        int pages = Math.max(1, (list.size() + SIZE - 1) / SIZE);
+    /** {@code sql}은 ORDER BY·LIMIT 없는 SELECT(WHERE까지), {@code orderBy}는 정렬, {@code args}는 sql의 ? 값. */
+    public static <T> AdminList<T> query(JdbcTemplate jdbc, String sql, String orderBy, RowMapper<T> mapper, int page, Object... args) {
+        Long counted = jdbc.queryForObject("SELECT count(*) FROM (" + sql + ") counted", Long.class, args);
+        long total = counted == null ? 0 : counted;
+        int pages = (int) Math.max(1, (total + SIZE - 1) / SIZE);
         int p = Math.min(Math.max(page, 1), pages);
-        List<T> rows = list.subList((p - 1) * SIZE, Math.min(p * SIZE, list.size()));
-        return new AdminList<>(rows, p, pages, list.size(), all.size() >= CAP, p > 1 ? url(p - 1) : null, p < pages ? url(p + 1) : null);
+        List<Object> all = new ArrayList<>(List.of(args));
+        all.add((p - 1) * SIZE);
+        List<T> rows = jdbc.query(sql + " ORDER BY " + orderBy + " LIMIT " + SIZE + " OFFSET ?", mapper, all.toArray());
+        return new AdminList<>(rows, p, pages, total, p > 1 ? url(p - 1) : null, p < pages ? url(p + 1) : null);
+    }
+
+    /** ILIKE ... ESCAPE '\' 용 패턴(빈 값이면 모두). */
+    public static String like(String q) {
+        return "%" + (q == null ? "" : q.strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")) + "%";
     }
 
     private static String url(int page) {
         var u = ServletUriComponentsBuilder.fromCurrentRequest().replaceQueryParam("page", page).build();
         return u.getPath() + "?" + u.getQuery(); // 호스트 없이(프록시 뒤 http/https 섞임 방지)
-    }
-
-    /** 찾을 말(q)이 비었거나 어느 칸에든 들어 있으면 참(대소문자 무시). */
-    public static boolean matches(String q, String... fields) {
-        if (q == null || q.isBlank()) {
-            return true;
-        }
-        String needle = q.strip().toLowerCase(java.util.Locale.ROOT);
-        for (String f : fields) {
-            if (f != null && f.toLowerCase(java.util.Locale.ROOT).contains(needle)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public boolean empty() {

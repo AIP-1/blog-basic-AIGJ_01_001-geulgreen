@@ -6,7 +6,6 @@ import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.moderation.application.SuspensionService;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.security.CurrentUserProvider;
-import com.team.blog.shared.web.AdminList;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -54,9 +53,7 @@ public class AdminController {
         model.addAttribute("tab", done ? "done" : "pending");
         model.addAttribute("type", target);
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("list", AdminList.of(done ? query.done(currentUserProvider.current()) : query.pending(currentUserProvider.current()),
-                c -> ("all".equals(target) || target.equals(c.targetType())) && AdminList.matches(q, c.snapshotTitle(), c.snapshotContent()),
-                page));
+        model.addAttribute("list", query.cases(currentUserProvider.current(), done, target, q, page));
         model.addAttribute("adminTab", "reports");
         model.addAttribute("pageNoindex", true);
         return "admin/reports";
@@ -103,11 +100,7 @@ public class AdminController {
         response.setHeader("Cache-Control", "private, no-store");
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("status", status);
-        model.addAttribute("list", AdminList.of(query.members(currentUserProvider.current(), q), m -> switch (status) {
-            case "suspended" -> m.suspended();
-            case "admin" -> "ADMIN".equals(m.role());
-            default -> true;
-        }, page));
+        model.addAttribute("list", query.members(currentUserProvider.current(), q, status, page));
         model.addAttribute("adminTab", "members");
         model.addAttribute("pageNoindex", true);
         return "admin/members";
