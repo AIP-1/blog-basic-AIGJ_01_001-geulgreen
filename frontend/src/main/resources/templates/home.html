@@ -9,7 +9,7 @@
     <!-- 067 첫 배너 사진은 css를 읽기 전에 미리 받기 시작(강성찬 개인 확장) -->
     <link th:if="${heroPhoto and !continued}" rel="preload" as="image" th:href="@{/images/hero.webp}" media="(prefers-color-scheme: light)" fetchpriority="high">
     <link th:if="${heroPhoto and !continued}" rel="preload" as="image" th:href="@{/images/hero-night.webp}" media="(prefers-color-scheme: dark)" fetchpriority="high">
-    <p th:if="${welcomeBack != null}" class="notice" role="status">다시 오신 걸 환영해요</p>
+    <p th:if="${welcomeBack != null}" class="notice" role="status" data-toast="success">다시 오신 걸 환영해요</p>
     <!-- 시안(10-08) 소개 영역: 첫 화면에만, 화면 폭 전체. 사진(static/images/hero.webp)이 있으면 배경, 없으면 고양이 그림 -->
     <section class="hero" th:unless="${continued}" th:classappend="${heroPhoto} ? 'hero-photo'" aria-label="소개">
         <div class="hero-inner">

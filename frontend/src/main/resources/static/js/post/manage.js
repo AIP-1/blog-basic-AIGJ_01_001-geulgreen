@@ -98,6 +98,7 @@
       badge.dataset.visibility = v;
       badge.querySelector('.vis-label').textContent = label;
       badge.title = label;
+      notice('공개 범위를 ' + e.detail.label + '(으)로 바꿨어요');
     });
     document.addEventListener('visibility-failed', function (e) {
       var row = rowOf(e.target);

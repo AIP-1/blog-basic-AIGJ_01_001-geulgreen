@@ -20,10 +20,11 @@
     btn.setAttribute('aria-pressed', String(following));
   }
 
-  function message(btn, text) {
+  function message(btn, text, kind) {
     var scope = btn.closest('main') || document;
     var box = scope.querySelector('.follow-message');
     if (!box) { return; }
+    if (kind) { box.dataset.toast = kind; }
     box.textContent = text;
     box.hidden = !text;
   }
@@ -60,7 +61,7 @@
         return r.json().then(function (res) { sync(handle, res.following, res.requested); });
       }).catch(function () {
         sync(handle, was && !wasRequested, wasRequested);
-        message(btn, '잠시 후 다시 시도해 주세요');
+        message(btn, '잠시 후 다시 시도해 주세요', 'error');
       }).then(function () { btn.dataset.busy = 'false'; });
     });
   });

@@ -35,6 +35,9 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
     .js .site-nav[data-open] .menu-main, .js .site-nav[data-open] .menu-account { flex-direction: column; align-items: stretch; }
     .js .site-nav[data-open] .site-menu a, .js .site-nav[data-open] .site-menu button { text-align: left; }
     .js .site-nav[data-open] .menu-account { border-top: 1px solid var(--color-border); padding-top: 8px; }
+    /* 휴대폰: 종에 붙인 알림 펼침이 화면 왼쪽 밖으로 잘려서, 머리글 너비에 맞춰 연다 */
+    .site-header .notif-bell-wrap { position: static; }
+    .site-header .notif-panel { left: 12px; right: 12px; width: auto; max-height: 70vh; overflow-y: auto; }
 }
 .site-header form { margin: 0; }
 .auth-form .field { margin: 16px 0; }
@@ -1412,12 +1415,19 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 :root[data-theme="dark"] .theme-switch .icon-sun { display: inline; }
 :root[data-theme="dark"] .theme-switch .icon-moon { display: none; }
 
-/* keep-scroll.js: 자리를 되살려 화면 밖이 된 위쪽 안내를 잠깐 띄운다 */
-.scroll-toast { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 40; max-width: calc(100% - 32px);
-    background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: 12px;
-    padding: 10px 14px; box-shadow: 0 4px 16px var(--color-shadow); transition: opacity 0.5s; }
-.scroll-toast-out { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .scroll-toast { transition: none; } }
+/* toast.js: 결과 안내 상자(머리말 바로 아래, 3초). JS가 켜져 있으면 원래 안내 칸은 숨긴다 */
+.toast-source { display: none !important; }
+.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; max-width: min(480px, calc(100% - 32px));
+    padding: 10px 8px 10px 14px; border-radius: 12px; border: 1px solid var(--color-border); border-left-width: 4px;
+    color: var(--color-text); box-shadow: 0 4px 16px var(--color-shadow);
+    opacity: 0; transform: translate(-50%, -8px); transition: opacity .25s, transform .25s; }
+.toast-in { opacity: 1; transform: translate(-50%, 0); }
+.toast-success { background: var(--color-success-soft); border-left-color: var(--color-success); }
+.toast-error { background: var(--color-danger-soft); border-left-color: var(--color-danger); }
+.toast-close { flex: none; border: 0; background: none; color: var(--color-text-muted); font-size: 1.1em; line-height: 1; padding: 4px 6px; cursor: pointer; }
+.handle-input input[readonly] { background: var(--color-surface-muted); color: var(--color-text-muted); cursor: not-allowed; }
+.handle-prefix { color: var(--color-text-muted); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; transform: translate(-50%, 0); } }
 
 /* 098 강성찬 개인 확장: 내 글 ⋯ 메뉴(글 화면·내 글 카드) — 모든 줄 같은 높이, 같은 칸의 16px 선 아이콘, 공개 범위는 그 자리에서 펼침, 삭제 앞 구분선 */
 .post-owner-menu .sort-menu-panel, .manage-menu .sort-menu-panel { min-width: 230px; gap: 2px; padding: 6px; }

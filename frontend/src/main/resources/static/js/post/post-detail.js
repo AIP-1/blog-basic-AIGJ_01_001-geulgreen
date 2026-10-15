@@ -24,7 +24,7 @@
       status.textContent = NOTE[e.detail.visibility] || (e.detail.label + '로 바꿨어요.');
       window.location.reload();
     });
-    document.addEventListener('visibility-failed', function (e) { status.textContent = e.detail.message; });
+    document.addEventListener('visibility-failed', function (e) { status.dataset.toast = 'error'; status.textContent = e.detail.message; });
     var trash = document.getElementById('trash-post');
     if (trash) {
       trash.addEventListener('click', function () {
@@ -34,7 +34,7 @@
             if (!res.ok) { throw new Error(String(res.status)); }
             window.location.assign('/manage/posts?tab=trash');
           })
-          .catch(function () { status.textContent = '삭제하지 못했어요.'; });
+          .catch(function () { status.dataset.toast = 'error'; status.textContent = '삭제하지 못했어요.'; });
       });
     }
     // 075 강성찬 개인 확장: ⋯ 메뉴의 [글 설정]이 카테고리·시리즈·카드 한 줄 소개 창을 연다. 소개 저장·AI 제안 뒤(#teaser)엔 다시 연다

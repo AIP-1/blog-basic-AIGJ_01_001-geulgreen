@@ -30,6 +30,8 @@ class KeepScrollTemplateTest {
 
     @Test
     void layoutLoadsKeepScroll() throws IOException {
-        assertThat(Files.readString(TEMPLATES.resolve("layout/base.html"))).contains("/js/keep-scroll.js");
+        assertThat(Files.readString(TEMPLATES.resolve("layout/base.html"))).contains("/js/keep-scroll.js").contains("/js/toast.js");
+        // 설정의 저장 결과 줄은 결과 상자로 뜬다
+        assertThat(Files.readString(TEMPLATES.resolve("settings/settings.html"))).contains("id=\"profile-status\" aria-live=\"polite\" data-toast");
     }
 }
