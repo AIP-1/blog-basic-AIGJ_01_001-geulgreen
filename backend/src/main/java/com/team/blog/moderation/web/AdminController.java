@@ -6,6 +6,7 @@ import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.moderation.application.SuspensionService;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.security.CurrentUserProvider;
+import com.team.blog.shared.web.AdminList;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -42,12 +43,21 @@ public class AdminController {
     }
 
     @GetMapping("/admin/reports")
-    public String reports(@RequestParam(value = "tab", defaultValue = "pending") String tab, Model model,
+    public String reports(@RequestParam(value = "tab", defaultValue = "pending") String tab,
+                          @RequestParam(value = "type", defaultValue = "all") String type,
+                          @RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model,
                           HttpServletResponse response) {
         response.setHeader("Cache-Control", "private, no-store");
         boolean done = "done".equals(tab);
+        String target = "POST".equals(type) || "COMMENT".equals(type) ? type : "all";
         model.addAttribute("tab", done ? "done" : "pending");
-        model.addAttribute("cases", done ? query.done(currentUserProvider.current()) : query.pending(currentUserProvider.current()));
+        model.addAttribute("type", target);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", AdminList.of(done ? query.done(currentUserProvider.current()) : query.pending(currentUserProvider.current()),
+                c -> ("all".equals(target) || target.equals(c.targetType())) && AdminList.matches(q, c.snapshotTitle(), c.snapshotContent()),
+                page));
+        model.addAttribute("adminTab", "reports");
         model.addAttribute("pageNoindex", true);
         return "admin/reports";
     }
@@ -87,10 +97,18 @@ public class AdminController {
     }
 
     @GetMapping("/admin/members")
-    public String members(@RequestParam(value = "q", required = false) String q, Model model, HttpServletResponse response) {
+    public String members(@RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "status", defaultValue = "all") String status,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         response.setHeader("Cache-Control", "private, no-store");
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("members", query.members(currentUserProvider.current(), q));
+        model.addAttribute("status", status);
+        model.addAttribute("list", AdminList.of(query.members(currentUserProvider.current(), q), m -> switch (status) {
+            case "suspended" -> m.suspended();
+            case "admin" -> "ADMIN".equals(m.role());
+            default -> true;
+        }, page));
+        model.addAttribute("adminTab", "members");
         model.addAttribute("pageNoindex", true);
         return "admin/members";
     }

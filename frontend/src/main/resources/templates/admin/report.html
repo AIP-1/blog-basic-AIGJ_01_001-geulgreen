@@ -6,58 +6,68 @@
 </head>
 <body>
 <main class="list-page admin-page" th:with="c=${detail.row()}, a=${detail.author()}">
-    <p><a class="link-btn back" href="/admin/reports">신고 목록</a></p>
     <h1 th:text="${(c.targetType() == 'POST' ? '글' : '댓글') + ' 신고 ' + c.reportCount() + '건'}">글 신고 3건</h1>
     <nav th:replace="~{fragments/admin-nav :: nav('reports')}"></nav>
-    <!-- 신고 시점 복사본만(지금 원문은 열지 않음) -->
-    <section aria-labelledby="snapshot-heading">
-        <h2 id="snapshot-heading">신고 시점 내용</h2>
-        <p th:if="${c.snapshotTitle() != null}"><strong th:text="${c.snapshotTitle()}">제목</strong></p>
-        <pre class="snapshot" th:text="${c.snapshotContent() != null ? c.snapshotContent() : '(보관 기간이 지나 지워졌어요)'}">내용</pre>
-        <p th:text="${'지금 상태: ' + detail.currentState()}">지금 상태: 공개</p>
-    </section>
-    <section aria-labelledby="reports-heading">
-        <h2 id="reports-heading">신고 사유</h2>
-        <ul>
-            <li th:each="r : ${detail.reports()}">
-                <span th:text="${r.reasonLabel()}">스팸</span>
-                <span th:if="${r.detail() != null}" th:text="${' · ' + r.detail()}"> · 설명</span>
-            </li>
-        </ul>
-    </section>
-    <section aria-labelledby="author-heading">
-        <h2 id="author-heading">작성자</h2>
-        <p><span th:text="${a.nickname() != null ? a.nickname() : '탈퇴한 사용자'}">닉네임</span>
-            <span th:text="${'@' + a.handle()}">@주소</span></p>
-        <p class="help" th:text="${'가입 ' + a.joinedLabel() + ' · 숨김 ' + a.hiddenCount() + '건 · 정지 ' + a.suspensions().size() + '번'}">가입일</p>
-    </section>
-    <section th:if="${c.status() == 'PENDING'}" aria-labelledby="action-heading">
-        <h2 id="action-heading">처리</h2>
-        <form method="post" th:action="@{/admin/reports/{id}/hide(id=${c.id()})}">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" name="authorId" th:value="${a.id()}">
-            <label for="hide-reason">숨김 사유</label>
-            <select id="hide-reason" name="reason">
-                <option th:each="r : ${reasons}" th:value="${r.name()}" th:text="${r.label()}">스팸</option>
-            </select>
-            <fieldset>
-                <legend>작성자 정지(선택)</legend>
-                <select name="suspendPeriod" aria-label="정지 기간">
-                    <option value="">정지 안 함</option>
-                    <option value="1">1일</option>
-                    <option value="7">7일</option>
-                    <option value="30">30일</option>
-                    <option value="PERMANENT">영구</option>
-                </select>
-                <input type="text" name="suspendReason" maxlength="200" placeholder="정지 사유(정지할 때 필수)" aria-label="정지 사유">
-            </fieldset>
-            <button type="submit">숨기기</button>
-        </form>
-        <form method="post" th:action="@{/admin/reports/{id}/reject(id=${c.id()})}">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit">문제없음</button>
-        </form>
-    </section>
+    <p class="admin-back"><a class="link-btn back" href="/admin/reports">신고 목록</a></p>
+    <div class="admin-detail">
+        <div class="admin-detail-main">
+            <!-- 신고 시점 복사본만(지금 원문은 열지 않음) -->
+            <section class="admin-panel" aria-labelledby="snapshot-heading">
+                <h2 id="snapshot-heading">신고 시점 내용 <span class="st st-muted" th:text="${'지금 상태: ' + detail.currentState()}">지금 상태: 공개</span></h2>
+                <p class="admin-detail-title" th:if="${c.snapshotTitle() != null}" th:text="${c.snapshotTitle()}">제목</p>
+                <pre class="snapshot" th:text="${c.snapshotContent() != null ? c.snapshotContent() : '(보관 기간이 지나 지워졌어요)'}">내용</pre>
+            </section>
+            <section class="admin-panel" aria-labelledby="reports-heading">
+                <h2 id="reports-heading">신고 사유 <span class="panel-sub" th:text="${detail.reports().size() + '건'}">3건</span></h2>
+                <ul class="admin-rows">
+                    <li th:each="r : ${detail.reports()}" class="admin-row">
+                        <div class="admin-row-main">
+                            <p class="admin-row-title"><span class="st st-new" th:text="${r.reasonLabel()}">스팸</span></p>
+                            <p class="admin-row-text" th:if="${r.detail() != null}" th:text="${r.detail()}">설명</p>
+                            <p class="admin-row-meta"><span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(r.createdAt())}">시각</span></p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </div>
+        <div class="admin-detail-side">
+            <section class="admin-panel" aria-labelledby="author-heading">
+                <h2 id="author-heading">작성자</h2>
+                <dl class="admin-server">
+                    <div><dt>이름</dt><dd th:text="${a.nickname() != null ? a.nickname() : '탈퇴한 사용자'}">닉네임</dd></div>
+                    <div><dt>아이디</dt><dd th:text="${'@' + a.handle()}">@아이디</dd></div>
+                    <div><dt>가입</dt><dd th:text="${a.joinedLabel()}">가입일</dd></div>
+                    <div><dt>숨김 이력</dt><dd th:text="${a.hiddenCount() + '건'}">0건</dd></div>
+                    <div><dt>정지 이력</dt><dd th:text="${a.suspensions().size() + '번'}">0번</dd></div>
+                </dl>
+            </section>
+            <section class="admin-panel" th:if="${c.status() == 'PENDING'}" aria-labelledby="action-heading">
+                <h2 id="action-heading">처리</h2>
+                <form method="post" th:action="@{/admin/reports/{id}/hide(id=${c.id()})}" class="admin-form">
+                    <input th:replace="~{fragments/admin-list :: csrf}">
+                    <input type="hidden" name="authorId" th:value="${a.id()}">
+                    <label for="hide-reason">숨김 사유</label>
+                    <select id="hide-reason" name="reason">
+                        <option th:each="r : ${reasons}" th:value="${r.name()}" th:text="${r.label()}">스팸</option>
+                    </select>
+                    <label for="suspend-period">작성자 정지(선택)</label>
+                    <select id="suspend-period" name="suspendPeriod">
+                        <option value="">정지 안 함</option>
+                        <option value="1">1일</option>
+                        <option value="7">7일</option>
+                        <option value="30">30일</option>
+                        <option value="PERMANENT">영구</option>
+                    </select>
+                    <input type="text" name="suspendReason" maxlength="200" placeholder="정지 사유(정지할 때 필수)" aria-label="정지 사유">
+                    <div class="admin-form-bar"><button type="submit" class="btn btn-sm btn-danger">숨기기</button></div>
+                </form>
+                <form method="post" th:action="@{/admin/reports/{id}/reject(id=${c.id()})}" class="admin-form-bar">
+                    <input th:replace="~{fragments/admin-list :: csrf}">
+                    <button type="submit" class="btn btn-sm">문제없음</button>
+                </form>
+            </section>
+        </div>
+    </div>
 </main>
 </body>
 </html>

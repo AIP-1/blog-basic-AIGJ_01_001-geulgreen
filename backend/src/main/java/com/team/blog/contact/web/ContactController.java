@@ -8,6 +8,7 @@ import com.team.blog.shared.web.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.team.blog.shared.web.AdminList;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,9 +73,17 @@ public class ContactController {
     }
 
     @GetMapping("/admin/inquiries")
-    public String inbox(Model model, HttpServletResponse response) {
+    public String inbox(@RequestParam(value = "status", defaultValue = "all") String status,
+                        @RequestParam(value = "q", required = false) String q,
+                        @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("inquiries", inquiries.list(currentUserProvider.current()));
+        model.addAttribute("status", status);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", AdminList.of(inquiries.list(currentUserProvider.current()), i -> switch (status) {
+            case "new" -> !i.done();
+            case "done" -> i.done();
+            default -> true;
+        } && AdminList.matches(q, i.title(), i.content(), i.email(), i.memberHandle()), page));
         return "admin/inquiries";
     }
 

@@ -73,6 +73,19 @@ class AdminToolsIT extends IntegrationTestBase {
     }
 
     @Test
+    void adminListsPageTwentyRowsAndKeepFiltersInPageLinks() throws Exception {
+        long admin = member("boss11");
+        for (int i = 1; i <= 25; i++) {
+            jdbc.update("INSERT INTO site_notice (message, active, created_by) VALUES (?, false, ?)", "점검 공지 " + i, admin);
+        }
+        String first = page("/admin/notices?q=점검", TestAuth.admin(admin));
+        assertThat(first).contains("1 / 2쪽").contains("점검 공지 25").doesNotContain("점검 공지 5<").contains("page=2");
+        String second = page("/admin/notices?q=점검&page=2", TestAuth.admin(admin));
+        assertThat(second).contains("2 / 2쪽").contains("점검 공지 5<").doesNotContain("점검 공지 25");
+        assertThat(page("/admin/notices?q=없는말", TestAuth.admin(admin))).contains("아직 올린 공지가 없어요");
+    }
+
+    @Test
     void hideAndUnhideWithoutReportIsLogged() throws Exception {
         long user = member("writer1");
         long admin = member("boss2");

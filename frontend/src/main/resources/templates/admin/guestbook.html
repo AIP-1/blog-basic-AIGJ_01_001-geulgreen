@@ -8,21 +8,43 @@
 <main class="list-page admin-page">
     <h1>방명록 관리</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
-    <p class="help">모든 블로그의 최근 방명록 100개예요. 비밀글도 관리자에게는 보여요.</p>
-    <p th:if="${entries.isEmpty()}" class="empty-state">아직 방명록이 없어요</p>
-    <ul class="post-rows">
-        <li th:each="e : ${entries}" class="post-row">
-            <div class="row-main">
-                <p class="comment-content" th:text="${e.content()}">내용</p>
-                <span class="help" th:text="${e.nickname() + ' @' + e.handle() + ' → '}">쓴 사람</span><a th:href="${paths.blog(e.ownerHandle()) + '/guestbook'}" th:text="${'@' + e.ownerHandle()}">블로그</a>
-                <span class="badge" th:if="${e.secret()}">비밀글</span>
+    <section class="admin-panel admin-list" aria-label="방명록 목록">
+        <form method="get" action="/admin/guestbook" class="admin-toolbar">
+            <div class="admin-search">
+                <label for="guestbook-q" class="visually-hidden">내용·닉네임·아이디</label>
+                <input id="guestbook-q" type="search" name="q" th:value="${q}" placeholder="내용·닉네임·아이디">
+                <input type="hidden" name="status" th:value="${status}">
+                <button type="submit" class="btn btn-sm">찾기</button>
             </div>
-            <form method="post" th:action="@{/admin/guestbook/{id}/delete(id=${e.id()})}" class="row-actions">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit">지우기</button>
-            </form>
-        </li>
-    </ul>
+            <nav class="admin-chips" aria-label="비밀글 여부">
+                <a th:href="@{/admin/guestbook(q=${q})}" th:attr="aria-current=${status == 'all'} ? 'true'">전체</a>
+                <a th:href="@{/admin/guestbook(q=${q},status='secret')}" th:attr="aria-current=${status == 'secret'} ? 'true'">비밀글</a>
+            </nav>
+            <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
+        </form>
+        <p class="help admin-list-note">모든 블로그의 방명록이에요. 비밀글도 관리자에게는 보여요.</p>
+        <p th:if="${list.empty()}" class="panel-empty">조건에 맞는 방명록이 없어요.</p>
+        <ul class="admin-rows" th:unless="${list.empty()}">
+            <li th:each="e : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span class="st st-muted" th:if="${e.secret()}">비밀글</span>
+                        <span class="row-text-title" th:text="${e.content()}">내용</span>
+                    </p>
+                    <p class="admin-row-meta"><span th:text="${e.nickname() + ' @' + e.handle()}">쓴 사람</span>
+                        <a class="row-url" th:href="${paths.blog(e.ownerHandle()) + '/guestbook'}" th:text="${'→ @' + e.ownerHandle() + ' 방명록'}">블로그</a>
+                        <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(e.createdAt())}">시각</span></p>
+                </div>
+                <div class="admin-row-actions">
+                    <form method="post" th:action="@{/admin/guestbook/{id}/delete(id=${e.id()})}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm btn-danger">지우기</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <nav th:replace="~{fragments/admin-list :: pager(${list})}"></nav>
+    </section>
 </main>
 </body>
 </html>

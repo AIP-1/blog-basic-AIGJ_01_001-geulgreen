@@ -8,28 +8,47 @@
 <main class="list-page admin-page">
     <h1>사이트 공지</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
-    <p class="help">켠 공지는 모든 화면 위에 띠로 보여요. 새 공지를 올리면 예전 공지는 꺼져요.</p>
-    <form method="post" action="/admin/notices" class="note-form">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <label for="notice-message">공지 (200자)</label>
-        <input id="notice-message" name="message" type="text" maxlength="200" required placeholder="예: 10월 20일 새벽 2시에 잠깐 점검해요">
-        <label for="notice-link">링크 (선택, /로 시작하거나 https)</label>
-        <input id="notice-link" name="linkUrl" type="text" maxlength="300" placeholder="/아이디/posts/1">
-        <div class="note-form-bar"><button type="submit" class="btn btn-primary btn-sm">공지 올리기</button></div>
-    </form>
-    <ul class="post-rows">
-        <li th:each="n : ${notices}" class="post-row">
-            <div class="row-main">
-                <span th:text="${n.message()}">공지</span>
-                <span class="badge" th:if="${n.active()}">켜짐</span>
-                <span class="help" th:if="${n.linkUrl() != null}" th:text="${n.linkUrl()}">링크</span>
+    <section class="admin-panel" aria-labelledby="notice-new-heading">
+        <h2 id="notice-new-heading">새 공지 올리기 <span class="panel-sub">켠 공지는 모든 화면 위에 띠로 보이고, 새로 올리면 예전 공지는 꺼져요</span></h2>
+        <form method="post" action="/admin/notices" class="admin-form">
+            <input th:replace="~{fragments/admin-list :: csrf}">
+            <label for="notice-message">공지 (200자)</label>
+            <input id="notice-message" name="message" type="text" maxlength="200" required placeholder="예: 10월 20일 새벽 2시에 잠깐 점검해요">
+            <label for="notice-link">링크 (선택, /로 시작하거나 https)</label>
+            <input id="notice-link" name="linkUrl" type="text" maxlength="300" placeholder="/아이디/posts/1">
+            <div class="admin-form-bar"><button type="submit" class="btn btn-primary btn-sm">공지 올리기</button></div>
+        </form>
+    </section>
+    <section class="admin-panel admin-list" aria-label="공지 목록">
+        <form method="get" action="/admin/notices" class="admin-toolbar">
+            <div class="admin-search">
+                <label for="notice-q" class="visually-hidden">공지 내용·링크</label>
+                <input id="notice-q" type="search" name="q" th:value="${q}" placeholder="공지 내용·링크">
+                <button type="submit" class="btn btn-sm">찾기</button>
             </div>
-            <form method="post" th:action="@{/admin/notices/{id}/off(id=${n.id()})}" th:if="${n.active()}" class="row-actions">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit">끄기</button>
-            </form>
-        </li>
-    </ul>
+            <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
+        </form>
+        <p th:if="${list.empty()}" class="panel-empty">아직 올린 공지가 없어요.</p>
+        <ul class="admin-rows" th:unless="${list.empty()}">
+            <li th:each="n : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span th:class="${n.active()} ? 'st st-ok' : 'st st-muted'" th:text="${n.active()} ? '켜짐' : '꺼짐'">켜짐</span>
+                        <span class="row-text-title" th:text="${n.message()}">공지</span>
+                    </p>
+                    <p class="admin-row-meta"><span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(n.createdAt())}">시각</span>
+                        <span th:if="${n.linkUrl() != null}" class="row-url" th:text="${n.linkUrl()}">링크</span></p>
+                </div>
+                <div class="admin-row-actions" th:if="${n.active()}">
+                    <form method="post" th:action="@{/admin/notices/{id}/off(id=${n.id()})}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm">끄기</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+        <nav th:replace="~{fragments/admin-list :: pager(${list})}"></nav>
+    </section>
 </main>
 </body>
 </html>

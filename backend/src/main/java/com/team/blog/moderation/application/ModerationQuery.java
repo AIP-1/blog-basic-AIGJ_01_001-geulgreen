@@ -75,13 +75,13 @@ public class ModerationQuery {
 
     public List<CaseRow> pending(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
-        return jdbc.query(CASE_SELECT + " WHERE c.status = 'PENDING' ORDER BY cnt DESC, last_at DESC, c.id DESC LIMIT 100",
+        return jdbc.query(CASE_SELECT + " WHERE c.status = 'PENDING' ORDER BY cnt DESC, last_at DESC, c.id DESC LIMIT 500",
                 (rs, n) -> row(rs));
     }
 
     public List<CaseRow> done(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
-        return jdbc.query(CASE_SELECT + " WHERE c.status <> 'PENDING' ORDER BY c.closed_at DESC NULLS LAST, c.id DESC LIMIT 100",
+        return jdbc.query(CASE_SELECT + " WHERE c.status <> 'PENDING' ORDER BY c.closed_at DESC NULLS LAST, c.id DESC LIMIT 500",
                 (rs, n) -> row(rs));
     }
 
@@ -136,7 +136,7 @@ public class ModerationQuery {
                                    AND (x.ends_at IS NULL OR x.ends_at > now()) ORDER BY started_at DESC LIMIT 1) s ON TRUE
                 WHERE m.deleted_at IS NULL AND (m.handle ILIKE ? ESCAPE '\\' OR m.nickname ILIKE ? ESCAPE '\\'
                       OR EXISTS (SELECT 1 FROM auth_identity a WHERE a.member_id = m.id AND a.email ILIKE ? ESCAPE '\\'))
-                ORDER BY m.id DESC LIMIT 50
+                ORDER BY m.id DESC LIMIT 500
                 """, (rs, n) -> new MemberRow(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("role"),
                 rs.getTimestamp("created_at").toInstant(), rs.getObject("sid") != null,
                 rs.getTimestamp("ends_at") == null ? null : rs.getTimestamp("ends_at").toInstant(),

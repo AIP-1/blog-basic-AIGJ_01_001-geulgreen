@@ -8,20 +8,40 @@
 <main class="list-page admin-page">
     <h1>관리 기록</h1>
     <nav th:replace="~{fragments/admin-nav :: nav(${adminTab})}"></nav>
-    <p class="help">신고 처리·회원 정지·글/댓글 숨기기·방명록 삭제·공지를 누가 언제 했는지 최근 100개예요.</p>
-    <p th:if="${logs.isEmpty()}" class="empty-state">아직 기록이 없어요</p>
-    <table class="stats-table admin-log-table" th:unless="${logs.isEmpty()}">
-        <thead><tr><th scope="col">시각</th><th scope="col">관리자</th><th scope="col">한 일</th><th scope="col">대상</th><th scope="col">내용</th></tr></thead>
-        <tbody>
-        <tr th:each="l : ${logs}">
-            <td th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(l.at())}">시각</td>
-            <td th:text="${l.admin()}">관리자</td>
-            <td th:text="${l.action()}">동작</td>
-            <td th:text="${l.target()}">대상</td>
-            <td th:text="${l.detail()}">내용</td>
-        </tr>
-        </tbody>
-    </table>
+    <section class="admin-panel admin-list" aria-label="관리 기록">
+        <form method="get" action="/admin/logs" class="admin-toolbar">
+            <div class="admin-search">
+                <label for="log-q" class="visually-hidden">관리자·대상·내용</label>
+                <input id="log-q" type="search" name="q" th:value="${q}" placeholder="관리자·대상·내용">
+                <input type="hidden" name="cat" th:value="${cat}">
+                <button type="submit" class="btn btn-sm">찾기</button>
+            </div>
+            <nav class="admin-chips" aria-label="한 일 종류">
+                <a th:href="@{/admin/logs(q=${q})}" th:attr="aria-current=${cat == 'all'} ? 'true'">전체</a>
+                <a th:href="@{/admin/logs(q=${q},cat='report')}" th:attr="aria-current=${cat == 'report'} ? 'true'">신고</a>
+                <a th:href="@{/admin/logs(q=${q},cat='member')}" th:attr="aria-current=${cat == 'member'} ? 'true'">회원</a>
+                <a th:href="@{/admin/logs(q=${q},cat='content')}" th:attr="aria-current=${cat == 'content'} ? 'true'">글·댓글·방명록</a>
+                <a th:href="@{/admin/logs(q=${q},cat='notice')}" th:attr="aria-current=${cat == 'notice'} ? 'true'">공지</a>
+            </nav>
+            <p th:replace="~{fragments/admin-list :: count(${list})}"></p>
+        </form>
+        <p th:if="${list.empty()}" class="panel-empty">조건에 맞는 기록이 없어요.</p>
+        <ul class="admin-rows" th:unless="${list.empty()}">
+            <li th:each="l : ${list.rows()}" class="admin-row">
+                <div class="admin-row-main">
+                    <p class="admin-row-title">
+                        <span th:class="${'st ' + (l.category() == 'report' ? 'st-new' : l.category() == 'member' ? 'st-bad' : l.category() == 'notice' ? 'st-ok' : 'st-info')}"
+                              th:text="${l.actionLabel()}" th:title="${l.action()}">글 숨김</span>
+                        <span class="row-text-title" th:text="${l.target()}">대상</span>
+                    </p>
+                    <p class="admin-row-text" th:if="${l.detail() != null}" th:text="${l.detail()}">내용</p>
+                    <p class="admin-row-meta"><span th:text="${l.admin()}">관리자</span>
+                        <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(l.at())}">시각</span></p>
+                </div>
+            </li>
+        </ul>
+        <nav th:replace="~{fragments/admin-list :: pager(${list})}"></nav>
+    </section>
 </main>
 </body>
 </html>

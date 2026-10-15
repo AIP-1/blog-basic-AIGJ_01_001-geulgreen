@@ -117,7 +117,7 @@ public class InquiryService {
     /** 관리자 문의함: 새 문의 먼저, 그 안에서 최신순. */
     public List<Inquiry> list(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
-        return jdbc.query(SELECT + " ORDER BY i.status = 'DONE', i.id DESC LIMIT 200", ROW);
+        return jdbc.query(SELECT + " ORDER BY i.status = 'DONE', i.id DESC LIMIT 500", ROW);
     }
 
     public Inquiry get(Optional<CurrentUser> current, long id) {

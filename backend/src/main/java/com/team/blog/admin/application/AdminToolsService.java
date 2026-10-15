@@ -147,6 +147,31 @@ public class AdminToolsService {
     }
 
     public record LogRow(Instant at, String admin, String action, String target, String detail) {
+
+        private static final Map<String, String[]> LABELS = Map.ofEntries(
+                Map.entry("POST_HIDE", new String[] {"글 숨김", "content"}), Map.entry("POST_UNHIDE", new String[] {"글 숨김 해제", "content"}),
+                Map.entry("COMMENT_HIDE", new String[] {"댓글 숨김", "content"}),
+                Map.entry("COMMENT_UNHIDE", new String[] {"댓글 숨김 해제", "content"}),
+                Map.entry("GUESTBOOK_DELETE", new String[] {"방명록 삭제", "content"}),
+                Map.entry("NOTICE_POST", new String[] {"공지 올림", "notice"}), Map.entry("NOTICE_OFF", new String[] {"공지 끔", "notice"}),
+                Map.entry("REPORT_HIDDEN", new String[] {"신고 숨김 처리", "report"}),
+                Map.entry("REPORT_REJECTED", new String[] {"신고 반려", "report"}),
+                Map.entry("REPORT_CLOSED_NO_TARGET", new String[] {"신고 닫음(대상 없음)", "report"}),
+                Map.entry("SUSPEND", new String[] {"회원 정지", "member"}),
+                Map.entry("SAMPLE_POSTS_SEED", new String[] {"테스트 글 넣기", "etc"}),
+                Map.entry("SAMPLE_POSTS_REMOVE", new String[] {"테스트 글 지우기", "etc"}));
+
+        /** 화면에 보일 한국어 이름(모르는 코드는 그대로). */
+        public String actionLabel() {
+            String[] v = LABELS.get(action);
+            return v == null ? action : v[0];
+        }
+
+        /** 필터 묶음: content·notice·report·member·etc. */
+        public String category() {
+            String[] v = LABELS.get(action);
+            return v == null ? "etc" : v[1];
+        }
     }
 
     private final JdbcTemplate jdbc;
@@ -296,7 +321,7 @@ public class AdminToolsService {
                 FROM post p JOIN member m ON m.id = p.author_id
                 WHERE p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND (p.title ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
                       OR m.nickname ILIKE ? ESCAPE '\\')
-                ORDER BY p.published_at DESC, p.id DESC LIMIT 50
+                ORDER BY p.published_at DESC, p.id DESC LIMIT 500
                 """, (rs, i) -> new PostRow(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getString("nickname"),
                 rs.getString("visibility"), rs.getTimestamp("published_at").toInstant(), rs.getTimestamp("hidden_at") != null,
                 rs.getString("hidden_reason"), rs.getLong("view_count"), rs.getInt("comment_count")),
@@ -310,7 +335,7 @@ public class AdminToolsService {
                 FROM comment c JOIN post p ON p.id = c.post_id JOIN member pm ON pm.id = p.author_id JOIN member m ON m.id = c.author_id
                 WHERE c.deleted_at IS NULL AND p.deleted_at IS NULL AND (c.content ILIKE ? ESCAPE '\\' OR m.handle ILIKE ? ESCAPE '\\'
                       OR m.nickname ILIKE ? ESCAPE '\\')
-                ORDER BY c.created_at DESC, c.id DESC LIMIT 50
+                ORDER BY c.created_at DESC, c.id DESC LIMIT 500
                 """, (rs, i) -> new CommentRow(rs.getLong("id"), rs.getLong("post_id"), rs.getString("title"),
                 rs.getString("post_handle"), rs.getString("content"), rs.getString("handle"), rs.getString("nickname"),
                 rs.getTimestamp("created_at").toInstant(), rs.getTimestamp("hidden_at") != null), like(q), like(q), like(q));
@@ -376,7 +401,7 @@ public class AdminToolsService {
         return jdbc.query("""
                 SELECT g.id, o.handle AS owner_handle, g.content, g.secret, m.handle, m.nickname, g.created_at
                 FROM guestbook_entry g JOIN member o ON o.id = g.owner_id JOIN member m ON m.id = g.author_id
-                ORDER BY g.id DESC LIMIT 100
+                ORDER BY g.id DESC LIMIT 500
                 """, (rs, i) -> new GuestbookRow(rs.getLong("id"), rs.getString("owner_handle"), rs.getString("content"),
                 rs.getBoolean("secret"), rs.getString("handle"), rs.getString("nickname"), rs.getTimestamp("created_at").toInstant()));
     }
@@ -394,7 +419,7 @@ public class AdminToolsService {
 
     public List<Notice> notices(Optional<CurrentUser> current) {
         adminGuard.requireAdmin(current);
-        return jdbc.query("SELECT id, message, link_url, active, created_at FROM site_notice ORDER BY id DESC LIMIT 50",
+        return jdbc.query("SELECT id, message, link_url, active, created_at FROM site_notice ORDER BY id DESC LIMIT 500",
                 (rs, i) -> new Notice(rs.getLong("id"), rs.getString("message"), rs.getString("link_url"), rs.getBoolean("active"),
                         rs.getTimestamp("created_at").toInstant()));
     }
@@ -448,7 +473,7 @@ public class AdminToolsService {
                   UNION ALL
                   SELECT s.started_at, a.nickname, 'SUSPEND', '@' || m.handle, s.reason
                   FROM member_suspension s JOIN member m ON m.id = s.member_id JOIN member a ON a.id = s.suspended_by
-                ) x ORDER BY at DESC LIMIT 100
+                ) x ORDER BY at DESC LIMIT 500
                 """, (rs, i) -> new LogRow(rs.getTimestamp("at").toInstant(), rs.getString("admin"), rs.getString("action"),
                 rs.getString("target"), rs.getString("detail")));
     }

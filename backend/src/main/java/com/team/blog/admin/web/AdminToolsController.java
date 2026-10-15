@@ -7,6 +7,7 @@ import com.team.blog.admin.application.SamplePostsService;
 import com.team.blog.admin.application.SystemStatusService;
 import com.team.blog.moderation.application.ReportReason;
 import com.team.blog.shared.security.CurrentUserProvider;
+import com.team.blog.shared.web.AdminList;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
@@ -71,13 +72,19 @@ public class AdminToolsController {
 
     @GetMapping("/admin/content")
     public String content(@RequestParam(value = "q", required = false) String q,
-                          @RequestParam(value = "type", defaultValue = "posts") String type, Model model,
+                          @RequestParam(value = "type", defaultValue = "posts") String type,
+                          @RequestParam(value = "status", defaultValue = "all") String status,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model,
                           HttpServletResponse response) {
         noStore(response, model);
         boolean comments = "comments".equals(type);
+        boolean hiddenOnly = "hidden".equals(status);
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("type", comments ? "comments" : "posts");
-        model.addAttribute("rows", comments ? tools.comments(currentUserProvider.current(), q) : tools.posts(currentUserProvider.current(), q));
+        model.addAttribute("status", hiddenOnly ? "hidden" : "all");
+        model.addAttribute("list", comments
+                ? AdminList.of(tools.comments(currentUserProvider.current(), q), r -> !hiddenOnly || r.hidden(), page)
+                : AdminList.of(tools.posts(currentUserProvider.current(), q), r -> !hiddenOnly || r.hidden(), page));
         model.addAttribute("reasons", ReportReason.values());
         model.addAttribute("adminTab", "content");
         return "admin/content";
@@ -108,9 +115,15 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/guestbook")
-    public String guestbook(Model model, HttpServletResponse response) {
+    public String guestbook(@RequestParam(value = "q", required = false) String q,
+                            @RequestParam(value = "status", defaultValue = "all") String status,
+                            @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("entries", tools.guestbook(currentUserProvider.current()));
+        boolean secretOnly = "secret".equals(status);
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("status", secretOnly ? "secret" : "all");
+        model.addAttribute("list", AdminList.of(tools.guestbook(currentUserProvider.current()), e -> (!secretOnly || e.secret())
+                && AdminList.matches(q, e.content(), e.handle(), e.nickname(), e.ownerHandle()), page));
         model.addAttribute("adminTab", "guestbook");
         return "admin/guestbook";
     }
@@ -122,9 +135,12 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/notices")
-    public String notices(Model model, HttpServletResponse response) {
+    public String notices(@RequestParam(value = "q", required = false) String q,
+                          @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("notices", tools.notices(currentUserProvider.current()));
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("list", AdminList.of(tools.notices(currentUserProvider.current()),
+                n -> AdminList.matches(q, n.message(), n.linkUrl()), page));
         model.addAttribute("adminTab", "notices");
         return "admin/notices";
     }
@@ -143,9 +159,14 @@ public class AdminToolsController {
     }
 
     @GetMapping("/admin/logs")
-    public String logs(Model model, HttpServletResponse response) {
+    public String logs(@RequestParam(value = "q", required = false) String q,
+                       @RequestParam(value = "cat", defaultValue = "all") String cat,
+                       @RequestParam(value = "page", defaultValue = "1") int page, Model model, HttpServletResponse response) {
         noStore(response, model);
-        model.addAttribute("logs", tools.logs(currentUserProvider.current()));
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("cat", cat);
+        model.addAttribute("list", AdminList.of(tools.logs(currentUserProvider.current()), l -> ("all".equals(cat)
+                || l.category().equals(cat)) && AdminList.matches(q, l.admin(), l.actionLabel(), l.target(), l.detail()), page));
         model.addAttribute("adminTab", "logs");
         return "admin/logs";
     }
