@@ -199,6 +199,8 @@ main.list-page { max-width: var(--page-wide); }
 /* 067 후속(강성찬 개인 확장): 무한 스크롤이면 [더 보기]는 숨기고(화면 낭독용으로만 남김) 불러오는 동안만 작게 알림 */
 .list-more.infinite .more-button { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .list-more.infinite.loading::before { content: "불러오는 중…"; color: var(--color-text-muted); font-size: .9em; }
+/* 110: 릴리스 노트는 버전마다 section(설정 화면 section의 위 줄은 빼고, #v1.60.0으로 올 때 머리글에 가리지 않게) */
+.release-notes section.release { border-top: 0; padding: 0; scroll-margin-top: calc(var(--header-h, 72px) + 16px); }
 .inline-form { display: inline; }
 /* 010 글 상세 */
 .post-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
