@@ -7,11 +7,10 @@
     });
   });
   var copy = document.getElementById('club-invite-copy');
-  var input = document.getElementById('club-invite');
-  if (copy && input && navigator.clipboard) {
+  if (copy && navigator.clipboard) {
     copy.hidden = false;
     copy.addEventListener('click', function () {
-      navigator.clipboard.writeText(input.value).then(function () { copy.textContent = '복사했어요'; });
+      navigator.clipboard.writeText(copy.dataset.inviteUrl).then(function () { copy.lastChild.textContent = '복사했어요'; });
     });
   }
 })();

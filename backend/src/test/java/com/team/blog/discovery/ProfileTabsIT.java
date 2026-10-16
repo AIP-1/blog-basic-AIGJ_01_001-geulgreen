@@ -186,6 +186,26 @@ class ProfileTabsIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE id IN (?, ?, ?) AND deleted_at IS NULL", Integer.class, a, b, c)).isEqualTo(3);
     }
 
+    /** 10-16: 글 넣기는 고른 순서(화면은 최신 글이 위)가 아니라 공개한 순서대로 뒤에 붙는다. 관리 탭 버튼은 늘 같은 자리. */
+    @Test
+    void addingManyPostsKeepsPublishOrder() throws Exception {
+        long me = member("taborder2");
+        long day1 = posts.published(me, "1일차", "본문", 1, T);
+        long day2 = posts.published(me, "2일차", "본문", 1, T.plusSeconds(60));
+        long day3 = posts.published(me, "3일차", "본문", 1, T.plusSeconds(120));
+        mockMvc.perform(post("/manage/series").param("newTitle", "제작기").param("postIds", String.valueOf(day3), String.valueOf(day1))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        mockMvc.perform(post("/manage/series/{id}/add", sid).param("postIds", String.valueOf(day2))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForList("SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position", Long.class, sid))
+                .containsExactly(day1, day3, day2);
+        String manage = page("/manage/series", me);
+        // 첫 줄의 앞으로·끝 줄의 뒤로는 숨기지 않고 비활성
+        assertThat(manage).contains("aria-label=\"1일차 앞으로\" disabled=\"disabled\"").contains("aria-label=\"2일차 뒤로\" disabled=\"disabled\"")
+                .contains("aria-label=\"3일차 앞으로\">");
+    }
+
     @Test
     void postsTabSortsByLikesWhenAsked() throws Exception {
         long me = member("tabpop");

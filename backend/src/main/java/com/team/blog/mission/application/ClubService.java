@@ -38,10 +38,14 @@ public class ClubService {
     public record Period(int index, int total, LocalDate start, LocalDate end) {
     }
 
-    public record Member(long memberId, String handle, String nickname, boolean wrote, boolean owner) {
+    public record Member(long memberId, String handle, String nickname, String profileImageUrl, boolean wrote, boolean owner) {
 
         public String name() {
             return nickname == null ? handle : nickname;
+        }
+
+        public com.team.blog.account.application.ProfileAvatar avatar() {
+            return new com.team.blog.account.application.ProfileAvatar(handle, nickname, profileImageUrl);
         }
     }
 
@@ -146,9 +150,9 @@ public class ClubService {
                 WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date BETWEEN ? AND ?",
                 Long.class, clubId, Date.valueOf(period.start()), Date.valueOf(period.end())).stream().collect(Collectors.toSet());
         List<Member> members = jdbc.query("""
-                SELECT mb.id, mb.handle, mb.nickname FROM writing_club_member m JOIN member mb ON mb.id = m.member_id
+                SELECT mb.id, mb.handle, mb.nickname, mb.profile_image_url FROM writing_club_member m JOIN member mb ON mb.id = m.member_id
                 WHERE m.club_id = ? ORDER BY m.joined_at, mb.id
-                """, (rs, i) -> new Member(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"),
+                """, (rs, i) -> new Member(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url"),
                 wrote.contains(rs.getLong("id")), rs.getLong("id") == club.ownerId()), clubId);
         List<Long> postIds = jdbc.queryForList("""
                 SELECT p.id FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
