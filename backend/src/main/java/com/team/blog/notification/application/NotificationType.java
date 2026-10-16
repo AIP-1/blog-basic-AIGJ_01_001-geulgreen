@@ -14,7 +14,9 @@ public enum NotificationType {
     /** 비공개 계정에 팔로우 요청(073, 강성찬 개인 확장): 처리해야 하는 요청이라 끌 수 없다. */
     FOLLOW_REQUEST,
     /** 새 문의(090, 강성찬 개인 확장): 관리자에게. 처리해야 하는 일이라 끌 수 없다. */
-    INQUIRY;
+    INQUIRY,
+    /** 내 문의에 답장이 옴(099, 강성찬 개인 확장): 보낸 회원에게. 끌 수 없다. */
+    INQUIRY_REPLIED;
 
     public static final List<NotificationType> MUTABLE = List.of(COMMENT, REPLY, LIKE, FOLLOW, NEW_POST);
 

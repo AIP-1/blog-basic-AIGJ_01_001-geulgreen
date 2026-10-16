@@ -10,6 +10,7 @@ import com.team.blog.post.application.PostProperties;
 import com.team.blog.post.application.SaveCommand;
 import com.team.blog.post.domain.PostStatus;
 import com.team.blog.post.markdown.MarkdownProperties;
+import com.team.blog.series.application.SeriesService;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.tag.application.PostTagService;
 import com.team.blog.tag.domain.TagNormalizer;
@@ -35,6 +36,8 @@ public class McpTools {
     private static final String KEY_CONTENT_MD = "content_md";
     private static final String KEY_POST_ID = "post_id";
     private static final String KEY_CATEGORY_ID = "category_id";
+    private static final String KEY_SERIES_ID = "series_id";
+    private static final String KEY_SERIES_TITLE = "series_title";
     private static final String KEY_DESCRIPTION = "description";
     private static final String TYPE_STRING = "string";
 
@@ -54,18 +57,24 @@ public class McpTools {
             KEY_DESCRIPTION, "태그(10개까지, # 없이). 주면 글의 태그를 이 목록으로 바꿔요");
     private static final Map<String, Object> CATEGORY = Map.of("type", "integer",
             KEY_DESCRIPTION, "카테고리 번호(list_tags_and_categories로 확인)");
+    private static final Map<String, Object> SERIES_ID = Map.of("type", "integer",
+            KEY_DESCRIPTION, "넣을 내 시리즈 번호(list_tags_and_categories로 확인)");
+    private static final Map<String, Object> SERIES_TITLE = Map.of("type", TYPE_STRING, KEY_DESCRIPTION,
+            "넣을 시리즈 이름(60자까지). 같은 이름의 내 시리즈가 있으면 거기에, 없으면 새로 만들어 넣어요. series_id와 함께 쓰지 않아요");
     private static final Map<String, Object> POST_ID = Map.of("type", "integer", KEY_DESCRIPTION, "임시글 번호");
 
     public static final List<Tool> TOOLS = List.of(
             new Tool("create_draft", "글그린 블로그에 새 임시글을 만들어요. 공개되지 않고, 글쓴이가 글쓰기 화면에서 읽고 직접 발행해요."
                     + " 나눈 이야기나 한 작업을 블로그 글로 정리할 때 써요. 비밀번호·토큰·개인 정보는 넣지 마세요.",
-                    schema(Map.of(KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS, KEY_CATEGORY_ID, CATEGORY),
+                    schema(Map.of(KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS, KEY_CATEGORY_ID, CATEGORY,
+                            KEY_SERIES_ID, SERIES_ID, KEY_SERIES_TITLE, SERIES_TITLE),
                             List.of(KEY_TITLE, KEY_CONTENT_MD))),
-            new Tool("update_draft", "내 임시글을 고쳐요. 준 칸만 바뀌어요. 발행한 글은 고칠 수 없어요.",
-                    schema(Map.of(KEY_POST_ID, POST_ID, KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS), List.of(KEY_POST_ID))),
+            new Tool("update_draft", "내 임시글을 고쳐요. 준 칸만 바뀌어요(시리즈를 주면 그 시리즈로 옮겨요). 발행한 글은 고칠 수 없어요.",
+                    schema(Map.of(KEY_POST_ID, POST_ID, KEY_TITLE, TITLE, KEY_CONTENT_MD, CONTENT, "tags", TAGS,
+                            KEY_SERIES_ID, SERIES_ID, KEY_SERIES_TITLE, SERIES_TITLE), List.of(KEY_POST_ID))),
             new Tool("list_drafts", "내 임시글 목록(최근에 고친 순)을 봐요. 이어 쓸 글을 찾을 때 써요.",
                     schema(Map.of("cursor", Map.of("type", TYPE_STRING, KEY_DESCRIPTION, "다음 쪽(앞 응답의 next_cursor)")), List.of())),
-            new Tool("list_tags_and_categories", "내가 쓴 태그(많이 쓴 순)와 내 카테고리 목록을 봐요. 태그를 고를 때 있는 이름을 먼저 써요.",
+            new Tool("list_tags_and_categories", "내가 쓴 태그(많이 쓴 순), 내 카테고리, 내 시리즈 목록을 봐요. 태그·시리즈를 고를 때 있는 이름을 먼저 써요.",
                     schema(Map.of(), List.of())));
 
     private final PostDraftService drafts;
@@ -73,18 +82,20 @@ public class McpTools {
     private final PostTagService tagService;
     private final TagNormalizer tagNormalizer;
     private final CategoryService categories;
+    private final SeriesService series;
     private final PostProperties postProperties;
     private final MarkdownProperties markdownProperties;
     private final JdbcTemplate jdbc;
 
     public McpTools(PostDraftService drafts, PostManageQuery manageQuery, PostTagService tagService, TagNormalizer tagNormalizer,
-                    CategoryService categories, PostProperties postProperties, MarkdownProperties markdownProperties,
+                    CategoryService categories, SeriesService series, PostProperties postProperties, MarkdownProperties markdownProperties,
                     JdbcTemplate jdbc) {
         this.drafts = drafts;
         this.manageQuery = manageQuery;
         this.tagService = tagService;
         this.tagNormalizer = tagNormalizer;
         this.categories = categories;
+        this.series = series;
         this.postProperties = postProperties;
         this.markdownProperties = markdownProperties;
         this.jdbc = jdbc;
@@ -107,6 +118,7 @@ public class McpTools {
         if (categoryId != null && user.isPresent() && categories.find(user.get().memberId(), categoryId).isEmpty()) {
             throw new ToolException("CATEGORY_NOT_FOUND");
         }
+        SeriesChoice seriesChoice = seriesChoice(user, args);
         long postId = drafts.create(user, required(args, KEY_TITLE), required(args, KEY_CONTENT_MD));
         if (tags != null) {
             tagService.replace(postId, tags);
@@ -114,6 +126,7 @@ public class McpTools {
         if (categoryId != null) {
             categories.assign(user, postId, categoryId);
         }
+        addToSeries(user, postId, seriesChoice);
         return draft(postId, drafts.editing(user, postId));
     }
 
@@ -127,6 +140,7 @@ public class McpTools {
         if (current.status() != PostStatus.DRAFT) {
             throw new ToolException("NOT_A_DRAFT");
         }
+        SeriesChoice seriesChoice = seriesChoice(user, args);
         String title = text(args, KEY_TITLE);
         String content = text(args, KEY_CONTENT_MD);
         if (title != null || content != null) {
@@ -136,7 +150,42 @@ public class McpTools {
         if (tags != null) {
             tagService.replace(postId, tags);
         }
+        addToSeries(user, postId, seriesChoice);
         return draft(postId, drafts.editing(user, postId));
+    }
+
+    /** 시리즈 칸(번호 또는 이름). 둘 다 없으면 null(바꾸지 않음). 임시글을 건드리기 전에 검사한다. */
+    private record SeriesChoice(Long id, String title) {
+    }
+
+    private SeriesChoice seriesChoice(Optional<CurrentUser> user, JsonNode args) { // NOSONAR null은 "시리즈를 바꾸지 않음"
+        Long id = number(args, KEY_SERIES_ID);
+        String title = text(args, KEY_SERIES_TITLE);
+        if (id == null && title == null) {
+            return null;
+        }
+        if (!series.enabled()) {
+            throw new ToolException("SERIES_DISABLED");
+        }
+        if (id != null && title != null) {
+            throw new ToolException(INVALID_REQUEST);
+        }
+        if (id != null && user.isPresent() && series.find(user.get().memberId(), id).isEmpty()) {
+            throw new ToolException("SERIES_NOT_FOUND");
+        }
+        if (title != null) {
+            title = title.strip();
+            if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
+                throw new ToolException("SERIES_TITLE_INVALID");
+            }
+        }
+        return new SeriesChoice(id, title);
+    }
+
+    private void addToSeries(Optional<CurrentUser> user, long postId, SeriesChoice choice) {
+        if (choice != null) {
+            series.add(user, postId, choice.id(), choice.title());
+        }
     }
 
     private Map<String, Object> listDrafts(Optional<CurrentUser> user, JsonNode args) {
@@ -163,7 +212,10 @@ public class McpTools {
                 (rs, i) -> Map.<String, Object>of("name", rs.getString("name"), "posts", rs.getLong("n")), me);
         List<Map<String, Object>> cats = categories.enabled() ? categories.list(me).stream()
                 .map(c -> Map.<String, Object>of(KEY_CATEGORY_ID, c.id(), "name", c.name())).toList() : List.of();
-        return Map.of("tags", tags, "categories", cats);
+        List<Map<String, Object>> mySeries = series.enabled() ? series.list(me, true).stream()
+                .map(x -> Map.<String, Object>of(KEY_SERIES_ID, x.id(), KEY_TITLE, x.title(), "public_posts", x.postCount())).toList()
+                : List.of();
+        return Map.of("tags", tags, "categories", cats, "series", mySeries);
     }
 
     private Map<String, Object> draft(long postId, EditingContent c) {
@@ -172,6 +224,8 @@ public class McpTools {
         out.put("status", "DRAFT");
         out.put(KEY_TITLE, c.title());
         out.put("tags", tagService.tagsOf(postId));
+        out.put("series", !series.enabled() ? null : series.ofPost(postId)
+                .map(x -> Map.<String, Object>of(KEY_SERIES_ID, x.id(), KEY_TITLE, x.title())).orElse(null));
         out.put("edit_url", editUrl(postId));
         out.put("note", "임시글이에요. 글쓴이가 이 주소에서 읽고 직접 발행해요.");
         return out;

@@ -9,6 +9,7 @@ import com.team.blog.shared.event.CommentLiked;
 import com.team.blog.shared.event.CommentUnliked;
 import com.team.blog.shared.event.FollowRequested;
 import com.team.blog.shared.event.InquiryReceived;
+import com.team.blog.shared.event.InquiryReplied;
 import com.team.blog.shared.event.MemberFollowed;
 import com.team.blog.shared.event.MemberUnfollowed;
 import com.team.blog.shared.event.PostLiked;
@@ -93,6 +94,12 @@ public class NotificationListeners {
         dispatcher.submit("inquiry " + e.inquiryId(), () -> jdbc.queryForList(
                 "SELECT id FROM member WHERE role = 'ADMIN' AND withdrawn_at IS NULL", Long.class)
                 .forEach(admin -> writer.operational(admin, NotificationType.INQUIRY, null, null, null, null)));
+    }
+
+    /** 099 강성찬 개인 확장: 문의 답장 → 보낸 회원에게. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(InquiryReplied e) {
+        dispatcher.submit("inquiry replied " + e.inquiryId(), () -> writer.inquiryReplied(e.memberId(), e.inquiryId()));
     }
 
     /** 057 강성찬 개인 확장: 오늘의 미션 글 → 친구에게. */
