@@ -56,6 +56,31 @@ public class SeriesService {
         return includeEmpty ? all : all.stream().filter(s -> s.postCount() > 0).toList();
     }
 
+    /** 탐색 시리즈 탭에 보일 한 줄: 누구의 시리즈인지와 공개 글 수. */
+    public record Browse(long id, String title, String handle, long postCount) {
+
+        public String url() {
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/series/" + id;
+        }
+    }
+
+    static final int BROWSE_LIMIT = 60;
+
+    /**
+     * 104 강성찬 개인 확장: 모든 블로그의 시리즈(공용 목록 조건 글이 1편 이상). popular = 좋아요 합 → 글 수 → 최근 글,
+     * recent = 최근에 글이 공개된 순. ponytail: 앞 {@value #BROWSE_LIMIT}개만, 시리즈가 많아지면 더 보기를 붙인다.
+     */
+    public List<Browse> browse(String sort) {
+        String order = "recent".equals(sort) ? "latest DESC, s.id DESC" : "likes DESC, cnt DESC, latest DESC, s.id DESC";
+        return jdbc.query("SELECT s.id, s.title, owner.handle, count(*) AS cnt, sum(p.like_count) AS likes,"
+                        + " max(COALESCE(p.first_public_at, p.published_at)) AS latest FROM series s"
+                        + " JOIN member owner ON owner.id = s.member_id JOIN series_post sp ON sp.series_id = s.id"
+                        + " JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id WHERE "
+                        + accessPolicy.publicListingCondition("p", "m")
+                        + " GROUP BY s.id, s.title, owner.handle ORDER BY " + order + " LIMIT " + BROWSE_LIMIT,
+                (rs, i) -> new Browse(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("cnt")));
+    }
+
     public Optional<Series> find(long memberId, long seriesId) {
         return list(memberId, true).stream().filter(s -> s.id() == seriesId).findFirst();
     }

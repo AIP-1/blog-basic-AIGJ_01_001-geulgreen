@@ -8,6 +8,7 @@ import com.team.blog.post.application.CardPage;
 import com.team.blog.post.application.FeedCursor;
 import com.team.blog.post.application.PostCard;
 import com.team.blog.post.application.PostListQuery;
+import com.team.blog.series.application.SeriesService;
 import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.error.SnapshotExpiredException;
 import com.team.blog.shared.security.CurrentUser;
@@ -39,10 +40,12 @@ public class ExploreController {
     private final PostListQuery listQuery;
     private final CurrentUserProvider currentUserProvider;
     private final Clock clock;
+    private final SeriesService seriesService;
 
     public ExploreController(RecommendedPostQuery recommendedPostQuery, RecommendedBlogQuery recommendedBlogQuery,
                              NewcomerQuery newcomerQuery, TrendingService trendingService, PostListQuery listQuery,
-                             CurrentUserProvider currentUserProvider, Clock clock) {
+                             CurrentUserProvider currentUserProvider, Clock clock, SeriesService seriesService) {
+        this.seriesService = seriesService;
         this.recommendedPostQuery = recommendedPostQuery;
         this.recommendedBlogQuery = recommendedBlogQuery;
         this.newcomerQuery = newcomerQuery;
@@ -55,7 +58,18 @@ public class ExploreController {
     @GetMapping("/explore")
     public String explore(@RequestParam(value = "cursor", required = false) String cursor,
                           @RequestParam(value = "tab", required = false) String tab,
-                          @RequestParam(value = "expired", required = false) String expired, Model model) {
+                          @RequestParam(value = "expired", required = false) String expired,
+                          @RequestParam(value = "sort", required = false) String sort, Model model) {
+        model.addAttribute("seriesTab", seriesService.enabled());
+        if ("series".equals(tab) && seriesService.enabled()) {
+            // 104 강성찬 개인 확장: 모든 블로그의 시리즈를 골라 보는 탭(정렬은 태그 모아 보기와 같은 인기순·최근순)
+            String s = "recent".equals(sort) ? sort : "popular";
+            model.addAttribute("tab", "series");
+            model.addAttribute("sort", s);
+            model.addAttribute("seriesList", seriesService.browse(s));
+            model.addAttribute("people", List.of());
+            return "explore";
+        }
         long viewer = viewer();
         boolean trending = "trending".equals(tab);
         boolean snapshotExpired = expired != null;
