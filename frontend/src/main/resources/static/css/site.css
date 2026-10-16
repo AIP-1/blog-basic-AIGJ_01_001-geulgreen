@@ -1523,3 +1523,15 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .stats-top-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--color-brand-fill); }
 @media (max-width: 560px) { .stats-top-bar { width: 48px; } }
 
+/* 104 강성찬 개인 확장(velog식 카드): (사진) · 제목 · 요약 · 회색 줄 "날짜 · N개의 댓글 · 첫 태그" · 가는 선 · by 글쓴이 ……… ♥ N.
+   색·글꼴·선 아이콘은 글그린 것 그대로 */
+.card-meta { margin: 4px 0 0; display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--color-text-muted); font-size: .8em; }
+.card-meta .card-date { margin: 0; flex: none; }
+.card-meta .card-comments { display: inline; font-weight: 400; flex: none; }
+.card-meta .card-tag { margin-left: 4px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-card > .card-foot { margin: 0 -18px -14px; padding: 10px 18px; border-top: 1px solid var(--color-border); gap: 10px; font-size: .85em; }
+.card-foot .card-author { flex: 0 1 auto; min-width: 0; gap: 6px; font-size: 1em; }
+.card-foot .card-by { color: var(--color-text-muted); font-weight: 400; }
+.card-foot .card-likes { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.card-likes.is-liked svg path { fill: currentColor; }
+

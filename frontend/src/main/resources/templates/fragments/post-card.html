@@ -11,28 +11,28 @@
 <article th:fragment="cardWith(card, date, showAuthor, extra)" class="post-card" th:attr="data-post-id=${card.id()}">
     <div class="card-body">
         <th:block th:replace="${extra}"></th:block>
-        <!-- 084 강성찬 개인 확장: 머리 줄은 늘 두고(비면 CSS가 숨김, 옆 카드에 있으면 같은 높이로 자리) -->
-        <p class="card-top">
-            <a th:if="${showAuthor}" class="card-author" th:href="${paths.blog(card.author().handle())}">
-                <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
-                <span th:text="${card.author().handle()}">아이디</span></a>
-            <!-- 시안(10-08): 첫 태그를 카드 머리에(색은 태그 길이로 4가지 중 하나) -->
-            <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
-               th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
-        </p>
         <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${card.title()}">제목</a></h2>
         <p class="card-excerpt" th:if="${snippetHtml == null}" th:text="${card.excerpt()}">요약</p>
         <!-- 검색(086): 서버가 이스케이프하고 검색어에만 <mark>를 붙인 미리보기 -->
         <p class="card-excerpt" th:if="${snippetHtml != null}" th:utext="${snippetHtml}">미리보기</p>
+        <!-- 104 강성찬 개인 확장(velog식): 요약 아래 작은 회색 줄 "날짜 · N개의 댓글 · 첫 태그" -->
+        <p class="card-meta">
+            <time class="card-date" th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2026.10.02</time>
+            <span class="card-comments" th:text="${'· ' + card.commentCount() + '개의 댓글'}">· 3개의 댓글</span>
+            <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
+               th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
+        </p>
     </div>
     <!-- 시안(10-08): 사진이 없으면 빈 칸을 두지 않는다 -->
     <div class="card-thumb" th:if="${card.thumbnailUrl() != null}">
         <img th:src="${card.thumbnailUrl()}" th:alt="${card.title()}" loading="lazy">
     </div>
+    <!-- 104(velog식): 가는 선 아래 맨 아래 줄 — 왼쪽 by 글쓴이, 오른쪽 좋아요 -->
     <p class="card-foot">
-        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}" th:text="${'♡ ' + card.likeCount()}">♡ 12</span>
-        <span class="card-comments" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">3</span></span>
-        <time class="card-date" th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2026.10.02</time>
+        <a th:if="${showAuthor}" class="card-author" th:href="${paths.blog(card.author().handle())}"><span class="card-by">by</span>
+            <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
+            <span th:text="${card.author().handle()}">아이디</span></a>
+        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}"><svg th:replace="~{fragments/icons :: heart}"></svg><span th:text="${card.likeCount()}">12</span></span>
     </p>
 </article>
 
