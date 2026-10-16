@@ -65,7 +65,9 @@
     <!-- 007 미리보기: 서버 렌더러와 같은 결과(12 §7-6) -->
     <section id="check-panel" class="preview-panel check-panel" aria-labelledby="check-heading" hidden th:if="${writeCheck}">
         <h2 id="check-heading" class="field-label">서식 추천</h2>
-        <ul id="check-hints" role="status"></ul>
+        <button type="button" id="hint-run" class="btn btn-sm">서식 추천받기</button>
+        <p id="hint-status" class="help" role="status"></p>
+        <ul id="check-hints"></ul>
         <h2 class="field-label">맞춤법 검사</h2>
         <th:block th:if="${writingAi}">
             <button type="button" id="spell-run" class="btn btn-sm">맞춤법 검사하기</button>

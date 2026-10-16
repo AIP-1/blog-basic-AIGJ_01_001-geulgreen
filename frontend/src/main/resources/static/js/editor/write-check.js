@@ -1,7 +1,7 @@
 /*
  * 085 글 점검(강성찬 개인 확장): 보이는 대로 쓰기로 쓰면서 바로 보이니 미리보기 대신 [글 점검]을 둔다.
  * 서식 추천은 이 기기에서 규칙으로만 본다(AI 없음): 소제목 없음·소제목 아래가 김, 긴 문단·문장, 겹친 낱말, 같은 말로 시작하는 문장,
- * 목록처럼 쓴 줄, 굵은 한 줄 소제목, 설명 없는 사진, 긴 제목(085 후속). 추천마다 [적용] 버튼이 있다(085 후속 2): 바로 바꾸거나,
+ * 목록처럼 쓴 줄, 굵은 한 줄 소제목, 설명 없는 사진, 긴 제목(085 후속). [서식 추천받기]를 눌러야 보인다(085 후속 3). 추천마다 [적용] 버튼이 있다(085 후속 2): 바로 바꾸거나,
  * 소제목·사진 설명처럼 글쓴이만 아는 것은 물어보고 넣고, 긴 문장·긴 제목은 AI로 고친다(AI가 있을 때만).
  * 맞춤법 검사는 059 AI로 고치기와 같은 동의·전체 공개 규칙으로 본문을 보내고, 틀린 곳만 받아 [바꾸기]를 눌러야 바뀐다.
  * 바꾸면 숨은 Markdown 칸(#post-content)을 고치고 입력 이벤트를 보내므로 보이는 대로 쓰기 칸·자동 저장이 그대로 따라온다.
@@ -256,6 +256,8 @@
     var ta = document.getElementById('post-content'), title = document.getElementById('post-title');
     if (!toggle || !panel || !ta) { return; }
     var hintList = document.getElementById('check-hints'), spellRun = document.getElementById('spell-run');
+    // 085 후속 3: 서식 추천도 맞춤법 검사처럼 [서식 추천받기]를 눌러야 보이고, 그다음부터는 글을 고칠 때마다 다시 본다
+    var hintRun = document.getElementById('hint-run'), hintStatus = document.getElementById('hint-status'), hintsOn = false;
     var spellStatus = document.getElementById('spell-status'), fixList = document.getElementById('spell-fixes');
     var consentBox = document.getElementById('spell-consent'), consented = null, timer = null, afterConsent = null;
 
@@ -309,7 +311,9 @@
     function renderHints() {
       var md = current(), list = hints(md, title ? title.value : '');
       hintList.textContent = '';
-      if (!list.length) { hintList.appendChild(el('li', '살펴본 것(' + CHECKED + ')에서 고칠 곳을 찾지 못했어요 👍')); }
+      hintsOn = true;
+      hintRun.textContent = '다시 추천받기';
+      hintStatus.textContent = list.length ? '추천 ' + list.length + '개' : '추천할 서식이 없어요. 살펴본 것: ' + CHECKED;
       list.forEach(function (h) {
         var li = el('li', h.text + ' ');
         // AI 추천(긴 문장·긴 제목)은 AI가 연결돼 있을 때만 버튼을 보인다
@@ -369,9 +373,10 @@
       panel.hidden = !panel.hidden;
       toggle.setAttribute('aria-expanded', String(!panel.hidden));
       toggle.textContent = panel.hidden ? '글 점검' : '글 점검 닫기';
-      if (!panel.hidden) { renderHints(); panel.scrollIntoView({ block: 'nearest' }); }
+      if (!panel.hidden) { panel.scrollIntoView({ block: 'nearest' }); }
     });
-    function later() { if (!panel.hidden) { clearTimeout(timer); timer = setTimeout(renderHints, 500); } }
+    hintRun.addEventListener('click', renderHints);
+    function later() { if (!panel.hidden && hintsOn) { clearTimeout(timer); timer = setTimeout(renderHints, 500); } }
     ta.addEventListener('input', later);
     if (title) { title.addEventListener('input', later); }
 
