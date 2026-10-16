@@ -62,7 +62,10 @@ class ManagePostsIT extends IntegrationTestBase {
         assertThat(published).contains("공개 발행").contains("비공개 발행").contains("수정 중").contains("이어서 수정")
                 .contains("변경 취소").contains(">숨김</span>").contains("조회 1.2만").contains("수정됨")
                 .contains(">공개<").contains(">비공개<").doesNotContain("버린 글")
-                .contains("class=\"manage-row\"").contains("manage-menu"); // 101: 한 글 한 줄 + ⋯ 메뉴
+                .contains("class=\"manage-row\"").contains("manage-menu") // 101: 한 글 한 줄 + ⋯ 메뉴
+                // 109: 여러 글 골라 한 번에(줄마다 체크 칸, 발행 글 탭은 휴지통으로·공개 범위 바꾸기)
+                .contains("class=\"row-check\"").contains("data-bulk-all").contains("data-bulk-action=\"trash\"")
+                .contains("data-bulk-visibility=\"PRIVATE\"").doesNotContain("data-bulk-action=\"purge\"");
         String onlyPrivate = mockMvc.perform(get("/manage/posts").param("tab", "published").param("visibility", "private")
                 .with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(onlyPrivate).contains("비공개 발행").doesNotContain(">공개 발행</a>");

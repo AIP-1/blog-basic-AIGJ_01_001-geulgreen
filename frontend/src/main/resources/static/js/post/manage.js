@@ -87,6 +87,8 @@
       });
     });
 
+    initBulk();
+
     // 098: 공개 범위는 ⋯ 메뉴의 펼치는 줄(js/post/visibility-menu.js)이 저장하고, 여기서는 카드의 공개 범위 표시만 바꾼다
     document.addEventListener('visibility-changed', function (e) {
       var row = rowOf(e.target);
@@ -116,6 +118,92 @@
         }).catch(function () { fail(row, '변경을 취소하지 못했어요.'); });
       });
     });
+  }
+
+  // 109 강성찬 개인 확장: 여러 글 골라 한 번에. 줄마다 쓰는 API를 차례로 부르고, 된 줄은 지우거나(휴지통·복원·영구 삭제) 표시를 바꾼다
+  var LABELS = { PUBLIC: '전체 공개', FRIENDS: '친구 공개', LINK: '링크 공개', GROUP: '그룹 공개', PRIVATE: '나만 보기' };
+  var DONE = { trash: '개를 휴지통으로 옮겼어요', restore: '개를 복원했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요', purge: '개를 영구 삭제했어요' };
+
+  function initBulk() {
+    var bar = document.querySelector('.bulk-bar');
+    if (!bar) { return; }
+    bar.hidden = false;
+    document.getElementById('manage').classList.add('bulk-on');
+    var all = bar.querySelector('[data-bulk-all]');
+    var count = bar.querySelector('.bulk-count');
+    var actions = bar.querySelector('.bulk-actions');
+    function checks() { return Array.prototype.slice.call(document.querySelectorAll('#post-rows .row-check')); }
+    function picked() { return checks().filter(function (c) { return c.checked; }); }
+    function update() {
+      var n = picked().length, total = checks().length;
+      count.textContent = n ? n + '개 선택됨' : '';
+      actions.hidden = n === 0;
+      all.checked = total > 0 && n === total;
+      all.indeterminate = n > 0 && n < total;
+    }
+    document.getElementById('post-rows').addEventListener('change', function (e) { if (e.target.matches('.row-check')) { update(); } });
+    all.addEventListener('change', function () { checks().forEach(function (c) { c.checked = all.checked; }); update(); });
+
+    // 줄마다 차례로(동시에 많이 보내지 않게). ok(row, data) 뒤 성공 수를 돌려준다
+    function each(rows, request, ok) {
+      var done = 0;
+      return rows.reduce(function (p, row) {
+        return p.then(function () {
+          return request(row.dataset.postId).then(function (data) { done++; ok(row, data); })
+            .catch(function (err) { fail(row, (err.data && err.data.message) || '처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.'); });
+        });
+      }, Promise.resolve()).then(function () { return done; });
+    }
+
+    function busy(on) { Array.prototype.forEach.call(bar.querySelectorAll('button, input'), function (b) { b.disabled = on; }); }
+
+    Array.prototype.forEach.call(bar.querySelectorAll('[data-bulk-action]'), function (button) {
+      button.addEventListener('click', function () {
+        var action = button.dataset.bulkAction;
+        var rows = picked().map(rowOf);
+        if (!rows.length) { return; }
+        var ask = action === 'trash' ? rows.length + '개를 휴지통으로 옮길까요? 30일 뒤 완전히 삭제돼요'
+          : action === 'purge' ? rows.length + '개를 영구 삭제할까요? 되돌릴 수 없어요. 댓글·좋아요도 함께 지워져요' : null;
+        if (ask && !window.confirm(ask)) { return; }
+        busy(true);
+        each(rows, function (id) {
+          return action === 'trash' ? call('DELETE', '/api/posts/' + id)
+            : action === 'restore' ? call('POST', '/api/posts/' + id + '/restore')
+            : call('DELETE', '/api/posts/' + id + '/permanent');
+        }, function (row) { row.remove(); }).then(function (done) {
+          busy(false);
+          if (done) { notice(done + DONE[action]); refreshCounts(); }
+          update();
+        });
+      });
+    });
+
+    Array.prototype.forEach.call(bar.querySelectorAll('[data-bulk-visibility]'), function (button) {
+      button.addEventListener('click', function () {
+        var to = button.dataset.bulkVisibility;
+        var rows = picked().map(rowOf);
+        button.closest('details').open = false;
+        if (!rows.length) { return; }
+        if (to === 'PUBLIC' && !window.confirm(rows.length + '개를 모든 사람이 볼 수 있게 바꿀까요?')) { return; }
+        busy(true);
+        each(rows, function (id) { return call('PATCH', '/api/posts/' + id + '/visibility', { visibility: to }); }, function (row, data) {
+          var v = (data && data.visibility) || to;
+          // 줄의 ⋯ 메뉴 값도 맞추고, 카드 표시는 visibility-changed를 받는 아래 처리가 바꾼다
+          var menu = row.querySelector('.visibility-menu');
+          if (!menu) { return; }
+          menu.dataset.visibility = v;
+          menu.querySelector('[data-visibility-label]').textContent = LABELS[v] || v;
+          Array.prototype.forEach.call(menu.querySelectorAll('[data-visibility-option]'), function (b) {
+            b.setAttribute('aria-pressed', String(b.dataset.visibilityOption === v));
+          });
+          menu.dispatchEvent(new CustomEvent('visibility-changed', { bubbles: true, detail: { visibility: v, label: LABELS[v] || v } }));
+        }).then(function (done) {
+          busy(false);
+          if (done) { notice(done + '개의 공개 범위를 ' + (LABELS[to] || to) + '(으)로 바꿨어요'); }
+        });
+      });
+    });
+    update();
   }
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }

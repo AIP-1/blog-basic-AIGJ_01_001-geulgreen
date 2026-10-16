@@ -46,11 +46,34 @@
 
     <!-- 101 강성찬 개인 확장: 한 글 한 줄(제목 · 태그·공개 범위·배지 · 조회·좋아요·댓글 · 날짜 · ⋯ 메뉴). 휴대폰은 두 줄.
          067의 카드는 같은 줄 카드 높이를 맞추느라(card-rows.js) 짧은 글 카드 아래가 비어 보였다 -->
+    <!-- 109 강성찬 개인 확장: 여러 글 골라 한 번에(발행 글·임시글: 휴지통으로·공개 범위, 휴지통: 복원·영구 삭제).
+         글마다 쓰는 API를 차례로 부른다. 스크립트가 켜져야 보인다(manage.js가 hidden을 푼다) -->
+    <div class="bulk-bar" th:unless="${rows.isEmpty()}" hidden>
+        <label class="bulk-all"><input type="checkbox" data-bulk-all> 전체 선택</label>
+        <span class="bulk-count" role="status" aria-live="polite"></span>
+        <span class="bulk-actions" hidden>
+            <th:block th:unless="${tab == 'trash'}">
+                <details th:if="${tab == 'published'}" class="sort-menu bulk-visibility">
+                    <summary>공개 범위 바꾸기</summary>
+                    <div class="sort-menu-panel">
+                        <button type="button" th:each="o : ${ {'PUBLIC','FRIENDS','LINK','GROUP','PRIVATE'} }" th:attr="data-bulk-visibility=${o}"
+                                th:text="${o == 'PRIVATE' ? '나만 보기' : (o == 'FRIENDS' ? '친구 공개' : (o == 'LINK' ? '링크 공개' : (o == 'GROUP' ? '그룹 공개' : '전체 공개')))}">전체 공개</button>
+                    </div>
+                </details>
+                <button type="button" class="btn btn-sm btn-danger" data-bulk-action="trash"><svg th:replace="~{fragments/icons :: trash}"></svg>휴지통으로</button>
+            </th:block>
+            <th:block th:if="${tab == 'trash'}">
+                <button type="button" class="btn btn-sm" data-bulk-action="restore"><svg th:replace="~{fragments/icons :: restore}"></svg>복원</button>
+                <button type="button" class="btn btn-sm btn-danger" data-bulk-action="purge"><svg th:replace="~{fragments/icons :: trash}"></svg>영구 삭제</button>
+            </th:block>
+        </span>
+    </div>
     <ul class="manage-list" id="post-rows">
         <li th:each="row : ${rows}" class="post-row" th:with="card=${cards.get(row.id())}" th:attr="data-post-id=${row.id()}">
             <!-- 102: 오른쪽은 줄마다 같은 칸(태그 · 조회 · 좋아요 · 댓글 · 날짜 · ⋯). 태그가 없어도 칸은 남는다 -->
             <div class="manage-row">
                 <div class="manage-row-main">
+                    <input type="checkbox" class="row-check" th:attr="aria-label=${'선택: ' + card.title()}">
                     <a class="manage-row-title" th:href="${tab == 'drafts' ? '/write/' + row.id() : card.url()}"
                        th:text="${#strings.isEmpty(row.title()) and !#strings.isEmpty(card.excerpt()) ? card.excerpt() : card.title()}" th:title="${card.title()}">제목</a>
                     <th:block th:replace="~{post/manage :: manageBadges}"></th:block>
