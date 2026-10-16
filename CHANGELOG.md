@@ -7,6 +7,87 @@
 
 ---
 
+## [1.66.0] — 2026-10-16 · 개인 확장 (여러 개 선택, 함께 쓰기, 처음 온 사람 안내, 첫 댓글을 기다리는 글, 썸네일 만들기, 릴리스 노트 나눠 불러오기)
+
+- **109 여러 개 선택**: 내 글에서 골라 한 번에 휴지통·공개 범위 바꾸기, 휴지통에서 한 번에 복원·영구 삭제
+- **111 함께 쓰기**: 미션 [함께 쓰기] 탭, 초대 링크로만 참여, "N일에 1편" 진행표
+- **처음 온 사람 안내**: 홈 소개 한 줄, 글 없는 사람에게 시작하기 3단계, 인증 완료 화면에 첫 글 쓰기
+- **103 후속**: 사진 카드 요약 4줄
+- **첫 댓글을 기다리는 글**: 탐색 [추천] 맨 위, 최근 7일·댓글 0개 글 4개까지
+- **110 썸네일 만들기**: 발행 설정에서 제목·배경 4가지로 대표 사진 만들기
+- **112 릴리스 노트 나눠 불러오기**: 처음 10개, 내리면 10개씩
+- DB: V27 함께 쓰기 테이블 두 개 새로 만듦(더하기만)
+
+#### 전/후 사진
+
+**내 글 여러 개 골라 한 번에**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-manage-after.png) |
+
+**함께 쓰기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-missions-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-missions-after.png) |
+
+*모임 화면*
+
+![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-club-after.png)
+
+*모임 화면(휴대폰)*
+
+![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-club-m-after.png)
+
+**처음 온 사람 안내와 사진 카드 요약 4줄**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-home-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-home-m-after.png) |
+
+**첫 댓글을 기다리는 글**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-explore-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-explore-m-after.png) |
+
+**썸네일 만들기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-publish-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-publish-after.png) |
+
+*썸네일 만들기 창*
+
+![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-thumb-after.png)
+
+**릴리스 노트 조금씩 불러오기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-releases-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-releases-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-releases-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.0/v1660-releases-m-after.png) |
+
+---
+
 ## [1.65.4] — 2026-10-16 · 개인 확장 (릴리스 노트 화면 사진)
 
 - 사이트 릴리스 노트 화면에서 전/후 사진이 "[이미지]" 글자로 나오던 것 고침: GitHub Release 첨부를 /releases/img/{태그}/{파일}로 받아 보여 줌(CSP 그대로)
