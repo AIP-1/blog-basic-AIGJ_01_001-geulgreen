@@ -7,6 +7,8 @@ import com.team.blog.account.infra.RedisRateLimiter;
 import com.team.blog.moderation.application.AdminGuard;
 import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.event.InquiryReceived;
+import com.team.blog.shared.event.InquiryReplied;
+import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.web.AdminList;
 import java.sql.Timestamp;
@@ -65,9 +67,12 @@ public class InquiryService {
     private final MailSender mailSender;
     private final ApplicationEventPublisher events;
     private final Clock clock;
+    private final AccountGuard accountGuard;
 
     public InquiryService(JdbcTemplate jdbc, RedisRateLimiter rateLimiter, ContactProperties properties, AdminGuard adminGuard,
-                          MailSender mailSender, ApplicationEventPublisher events, Clock clock) {
+                          MailSender mailSender, ApplicationEventPublisher events, Clock clock,
+                          AccountGuard accountGuard) {
+        this.accountGuard = accountGuard;
         this.jdbc = jdbc;
         this.rateLimiter = rateLimiter;
         this.properties = properties;
@@ -141,8 +146,23 @@ public class InquiryService {
         }
         jdbc.update("UPDATE inquiry SET status = 'DONE', reply = ?, replied_by = ?, replied_at = ? WHERE id = ?", reply,
                 admin.memberId(), Timestamp.from(clock.instant()), id);
+        jdbc.queryForList("SELECT member_id FROM inquiry WHERE id = ? AND member_id IS NOT NULL", Long.class, id)
+                .forEach(memberId -> events.publishEvent(new InquiryReplied(id, memberId)));
         mailSender.send(inquiry.email(), "[글그린] 문의에 답장드려요: " + inquiry.title(), "mail/inquiry-reply",
                 Map.of("title", inquiry.title(), "content", inquiry.content(), "reply", reply));
+    }
+
+    /** 099 내 문의: 로그인한 회원이 보낸 문의(최신순). */
+    public List<Inquiry> mine(Optional<CurrentUser> current) {
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        return jdbc.query(SELECT + " WHERE i.member_id = ? ORDER BY i.id DESC LIMIT 100", ROW, me.memberId());
+    }
+
+    /** 099 내 문의 하나. 남의 문의는 없는 주소와 같은 404. */
+    public Inquiry mine(Optional<CurrentUser> current, long id) {
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        return jdbc.query(SELECT + " WHERE i.id = ? AND i.member_id = ?", ROW, id, me.memberId()).stream().findFirst()
+                .orElseThrow(NotFoundException::new);
     }
 
     public void purgeWithdrawn(long memberId) {
