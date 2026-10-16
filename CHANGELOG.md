@@ -7,6 +7,27 @@
 
 ---
 
+## [1.61.0] — 2026-10-16 · 개인 확장 (탐색 시리즈 탭)
+
+- **104 탐색 시리즈 탭**: 탐색에 "시리즈" 탭, 모든 블로그의 공개 시리즈를 인기순·최근순으로
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**탐색 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.61.0/v1610-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.61.0/v1610-explore-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.61.0/v1610-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.61.0/v1610-explore-m-after.png) |
+
+---
+
 ## [1.60.0] — 2026-10-16 · 개인 확장 (자체 Nginx로 무중단 배포)
 
 - 8300에 우리 Nginx 컨테이너, 앱 두 대는 8301·8302(공용 Nginx 손대지 않고 무중단), 우리 Nginx가 안 뜨면 예전 방식으로, 처음 전환 때 몇 초 끊길 수 있음
