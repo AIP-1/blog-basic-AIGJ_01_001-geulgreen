@@ -80,4 +80,19 @@ class ExploreIT extends IntegrationTestBase {
         assertThat(recent.indexOf("최근 시리즈")).isLessThan(recent.indexOf("인기 시리즈"));
         assertThat(recent).contains("href=\"/serb/series/");
     }
+
+    /** 108 강성찬 개인 확장: 탐색 시리즈 탭 60개씩 더 보기, 카드에 최근 업데이트 날짜. */
+    @Test
+    void seriesTabPagesBySixty() throws Exception {
+        clock.set(NOW);
+        long a = members.localMember("sermore", "더보기", "sermore@example.com", "Blog#2026ok", true);
+        for (int i = 0; i < 61; i++) {
+            series(a, "더보기 시리즈 " + i, posts.published(a, "더보기 글 " + i, "본문", 1, NOW.minus(Duration.ofDays(100 - i))));
+        }
+        String first = mockMvc.perform(get("/explore?tab=series&sort=recent")).andReturn().getResponse().getContentAsString();
+        assertThat(first).contains("더보기 시리즈 60<").contains("더보기 시리즈 1<").doesNotContain("더보기 시리즈 0<")
+                .contains("offset=60").contains("업데이트");
+        String next = mockMvc.perform(get("/explore?tab=series&sort=recent&offset=60")).andReturn().getResponse().getContentAsString();
+        assertThat(next).contains("더보기 시리즈 0<").doesNotContain("더보기 시리즈 1<").doesNotContain("offset=120").contains("처음부터 보기");
+    }
 }

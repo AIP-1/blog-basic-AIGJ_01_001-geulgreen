@@ -7,6 +7,27 @@
 
 ---
 
+## [1.65.0] — 2026-10-16 · 개인 확장 (시리즈 최근 업데이트)
+
+- **108 시리즈 최근 업데이트**: 시리즈 카드에 "글 N편 · 날짜 업데이트", 블로그 시리즈 목록은 최근 업데이트 순, 탐색 시리즈 탭 60개 넘으면 더 보기, 팔로워 새 글 알림이 시리즈 글이면 "시리즈 「이름」 새 편"
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**블로그의 시리즈 목록**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.0/v1650-list-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.0/v1650-list-after.png) |
+
+**탐색 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.0/v1650-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.0/v1650-explore-after.png) |
+
+---
+
 ## [1.64.0] — 2026-10-16 · 개인 확장 (시리즈 관리, 설명·대표 사진)
 
 - **106 시리즈 관리**: 내 글에 시리즈 탭(만들기, 글 넣기·빼기, 순서), 글쓰기 발행 설정에 시리즈 칸, 공개 시리즈 화면의 순서 버튼은 시리즈 관리로

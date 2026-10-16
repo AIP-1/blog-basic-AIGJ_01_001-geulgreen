@@ -84,7 +84,7 @@ class ProfileTabsIT extends IntegrationTestBase {
                         .contains("게시물 1");
             }
         }
-        assertThat(page("/tabperm/series")).contains("글 1편");
+        assertThat(page("/tabperm/series")).contains("글 1편 · ").contains(" 업데이트");
         assertThat(page("/tabperm")).contains("id=\"shelf-series\"").contains("탭 시리즈");
         // 글 화면 시리즈 위치·이전/다음도 보이는 글만
         assertThat(page("/tabperm/posts/" + open)).contains("(1/1)").doesNotContain("다음편");

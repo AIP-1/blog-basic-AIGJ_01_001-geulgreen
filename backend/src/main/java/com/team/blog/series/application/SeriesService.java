@@ -21,7 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeriesService {
 
     /** 107: {@code coverUrl}은 화면에 쓸 사진(고른 것, 없으면 1편부터 첫 사진), {@code pickedCover}는 주인이 고른 것(관리 탭). */
-    public record Series(long id, String title, long postCount, String description, String coverUrl, String pickedCover) {
+    public record Series(long id, String title, long postCount, String description, String coverUrl, String pickedCover,
+                         String latestLabel) {
+
+        /** 108: 카드 아래 줄 "글 3편 · 2026.10.14 업데이트". */
+        public String meta() {
+            return "글 " + postCount + "편" + (latestLabel == null || latestLabel.isEmpty() ? "" : " · " + latestLabel + " 업데이트");
+        }
     }
 
     public record Item(long id, String title, String handle) {
@@ -35,9 +41,11 @@ public class SeriesService {
     private final AccountGuard accountGuard;
     private final PostAccessPolicy accessPolicy;
     private final SeriesProperties properties;
+    private final java.time.Clock clock;
 
     public SeriesService(JdbcTemplate jdbc, AccountGuard accountGuard, PostAccessPolicy accessPolicy,
-                         SeriesProperties properties) {
+                         SeriesProperties properties, java.time.Clock clock) {
+        this.clock = clock;
         this.jdbc = jdbc;
         this.accountGuard = accountGuard;
         this.accessPolicy = accessPolicy;
@@ -61,28 +69,35 @@ public class SeriesService {
         List<Series> all = jdbc.query("SELECT s.id, s.title, s.description, s.cover_url, " + coverSql(accessPolicy.blogListingCondition("cpost", "cm"))
                         + ", (SELECT count(*) FROM series_post sp JOIN post p ON p.id = sp.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = s.id AND "
-                        + accessPolicy.blogListingCondition("p", "m") + ") AS cnt FROM series s WHERE s.member_id = ?"
-                        + " ORDER BY s.id DESC",
+                        + accessPolicy.blogListingCondition("p", "m") + ") AS cnt, (SELECT max(COALESCE(p.first_public_at, p.published_at))"
+                        + " FROM series_post sp JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id WHERE sp.series_id = s.id AND "
+                        + accessPolicy.blogListingCondition("p", "m") + ") AS latest FROM series s WHERE s.member_id = ?"
+                        + " ORDER BY latest DESC NULLS LAST, s.id DESC", // 108: 최근에 글이 올라온 시리즈부터
                 (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), rs.getLong("cnt"), rs.getString("description"),
-                        rs.getString("cover"), rs.getString("cover_url")), memberId);
+                        rs.getString("cover"), rs.getString("cover_url"), label(rs.getTimestamp("latest"))), memberId);
         return includeEmpty ? all : all.stream().filter(s -> s.postCount() > 0).toList();
     }
 
     /** 탐색 시리즈 탭에 보일 한 줄: 누구의 시리즈인지와 공개 글 수. */
-    public record Browse(long id, String title, String handle, long postCount, String description, String coverUrl) {
+    public record Browse(long id, String title, String handle, long postCount, String description, String coverUrl,
+                         String latestLabel) {
+
+        public String meta() {
+            return handle + " · 글 " + postCount + "편" + (latestLabel == null || latestLabel.isEmpty() ? "" : " · " + latestLabel + " 업데이트");
+        }
 
         public String url() {
             return com.team.blog.shared.web.BlogPaths.of(handle) + "/series/" + id;
         }
     }
 
-    static final int BROWSE_LIMIT = 60;
+    public static final int BROWSE_PAGE = 60;
 
     /**
      * 104 강성찬 개인 확장: 모든 블로그의 시리즈(공용 목록 조건 글이 1편 이상). popular = 좋아요 합 → 글 수 → 최근 글,
-     * recent = 최근에 글이 공개된 순. ponytail: 앞 {@value #BROWSE_LIMIT}개만, 시리즈가 많아지면 더 보기를 붙인다.
+     * recent = 최근에 글이 공개된 순. 108: {@code offset}부터 {@code limit}개(더 보기).
      */
-    public List<Browse> browse(String sort) {
+    public List<Browse> browse(String sort, int offset, int limit) {
         String order = "recent".equals(sort) ? "latest DESC, s.id DESC" : "likes DESC, cnt DESC, latest DESC, s.id DESC";
         return jdbc.query("SELECT s.id, s.title, s.description, " + coverSql(accessPolicy.publicListingCondition("cpost", "cm"))
                         + ", owner.handle, count(*) AS cnt, sum(p.like_count) AS likes,"
@@ -90,9 +105,9 @@ public class SeriesService {
                         + " JOIN member owner ON owner.id = s.member_id JOIN series_post sp ON sp.series_id = s.id"
                         + " JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id WHERE "
                         + accessPolicy.publicListingCondition("p", "m")
-                        + " GROUP BY s.id, s.title, s.description, s.cover_url, owner.handle ORDER BY " + order + " LIMIT " + BROWSE_LIMIT,
+                        + " GROUP BY s.id, s.title, s.description, s.cover_url, owner.handle ORDER BY " + order + " OFFSET ? LIMIT ?",
                 (rs, i) -> new Browse(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("cnt"),
-                        rs.getString("description"), rs.getString("cover")));
+                        rs.getString("description"), rs.getString("cover"), label(rs.getTimestamp("latest"))), offset, limit);
     }
 
     public Optional<Series> find(long memberId, long seriesId) {
@@ -129,7 +144,7 @@ public class SeriesService {
     /** 글이 든 시리즈(없으면 빈 값). */
     public Optional<Series> ofPost(long postId) {
         return jdbc.query("SELECT s.id, s.title FROM series_post sp JOIN series s ON s.id = sp.series_id WHERE sp.post_id = ?",
-                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0, null, null, null), postId).stream().findFirst();
+                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0, null, null, null, null), postId).stream().findFirst();
     }
 
     /**
@@ -280,6 +295,10 @@ public class SeriesService {
         CurrentUser me = accountGuard.requireWritable(current);
         requireMySeries(me, seriesId);
         jdbc.update("DELETE FROM series WHERE id = ?", seriesId);
+    }
+
+    private String label(java.sql.Timestamp at) {
+        return at == null ? null : com.team.blog.post.application.CardDates.label(at.toInstant(), clock.instant());
     }
 
     /** 106: 관리 탭에서 내 시리즈 화면 주소를 만들 때. */
