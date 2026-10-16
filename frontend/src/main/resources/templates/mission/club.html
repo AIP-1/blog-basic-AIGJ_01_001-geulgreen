@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${board.club().name() + ' · 모임 · 글그린'}">모임 · 글그린</title>
+    <title th:text="${board.club().name() + ' · 함께 쓰기 · 글그린'}">함께 쓰기 · 글그린</title>
 </head>
 <body>
 <main class="list-page mission-page">
@@ -11,7 +11,7 @@
     <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
     <section class="mission-panel" aria-labelledby="club-heading" th:with="c=${board.club()}, p=${board.period()}">
         <p class="mission-eyebrow" th:text="${c.everyDays() + '일에 1편 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')}">7일에 1편</p>
-        <h1 id="club-heading" th:text="${c.name()}">모임</h1>
+        <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
         <p th:if="${!c.intro().isEmpty()}" class="mission-lead" th:text="${c.intro()}">소개</p>
         <div class="mission-panel-head club-period">
             <h2 th:text="${board.ended() ? '마지막 기간' : board.notStarted() ? '첫 기간' : '이번 기간'}">이번 기간</h2>
@@ -19,8 +19,8 @@
             <span class="count-chip" th:text="${wroteCount + '/' + board.members().size() + '명 썼어요'}">0명</span>
         </div>
         <p th:if="${!board.members().isEmpty() and wroteCount == board.members().size()}" class="club-all-done"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>이번 기간 모두 썼어요!</p>
-        <p th:if="${board.notStarted()}" class="help">아직 모임이 시작되지 않았어요. 시작 날짜부터 세요</p>
-        <p th:if="${board.ended()}" class="help">모임이 끝났어요. 마지막 기간의 기록이에요</p>
+        <p th:if="${board.notStarted()}" class="help">아직 함께 쓰기가 시작되지 않았어요. 시작 날짜부터 세요</p>
+        <p th:if="${board.ended()}" class="help">함께 쓰기가 끝났어요. 마지막 기간의 기록이에요</p>
         <ul class="club-board">
             <li th:each="m : ${board.members()}" th:classappend="${m.wrote()} ? 'is-done'">
                 <a th:href="${paths.blog(m.handle())}" class="club-member"><span th:text="${m.name()}">이름</span>
@@ -28,7 +28,7 @@
                 <span class="club-state"><th:block th:if="${m.wrote()}"><th:block th:replace="~{fragments/icons :: check}"></th:block>썼어요</th:block><th:block th:unless="${m.wrote()}"><th:block th:replace="~{fragments/icons :: clock}"></th:block>아직이에요</th:block></span>
                 <form th:if="${board.isOwner() and !m.owner()}" class="inline-form" method="post"
                       th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
-                      th:attr="data-confirm=${m.name() + ' 님을 모임에서 내보낼까요?'}">
+                      th:attr="data-confirm=${m.name() + ' 님을 함께 쓰기에서 내보낼까요?'}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <button type="submit" class="btn btn-sm">내보내기</button>
                 </form>
@@ -46,21 +46,21 @@
     </section>
     <section class="mission-feed" aria-labelledby="club-posts-heading">
         <h2 id="club-posts-heading"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>멤버들이 쓴 글</h2>
-        <p th:if="${cards.isEmpty()}" class="empty-state">아직 모임 기간에 올라온 글이 없어요</p>
+        <p th:if="${cards.isEmpty()}" class="empty-state">아직 기간에 올라온 글이 없어요</p>
         <ul class="card-grid home-cards mission-posts">
             <li th:each="card : ${cards}" class="mission-card"><article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article></li>
         </ul>
     </section>
     <section class="club-actions">
         <form th:if="${!board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/leave(id=${board.club().id()})}"
-              data-confirm="모임에서 나갈까요? 다시 들어오려면 초대 링크가 필요해요.">
+              data-confirm="함께 쓰기에서 나갈까요? 다시 들어오려면 초대 링크가 필요해요.">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit" class="btn btn-sm">모임 나가기</button>
+            <button type="submit" class="btn btn-sm">함께 쓰기에서 나가기</button>
         </form>
         <form th:if="${board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/delete(id=${board.club().id()})}"
-              data-confirm="모임을 지울까요? 멤버들의 글은 그대로 남아요. 되돌릴 수 없어요.">
+              data-confirm="함께 쓰기를 지울까요? 멤버들의 글은 그대로 남아요. 되돌릴 수 없어요.">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit" class="btn btn-sm btn-danger">모임 삭제</button>
+            <button type="submit" class="btn btn-sm btn-danger">함께 쓰기 삭제</button>
         </form>
     </section>
     <script th:src="@{/js/mission/club.js}" defer></script>

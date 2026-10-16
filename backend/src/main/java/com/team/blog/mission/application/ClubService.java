@@ -70,7 +70,7 @@ public class ClubService {
     /** 잘못된 값이면 화면에 보여 줄 문장. 맞으면 빈 값. */
     public static Optional<String> problem(Form f) {
         if (f.name() == null || f.name().isBlank() || f.name().strip().length() > 30) {
-            return Optional.of("모임 이름은 1~30자로 써 주세요");
+            return Optional.of("이름은 1~30자로 써 주세요");
         }
         if (f.intro() != null && f.intro().strip().length() > 100) {
             return Optional.of("한 줄 소개는 100자까지예요");
@@ -82,7 +82,7 @@ public class ClubService {
             return Optional.of("끝 날짜는 시작 날짜와 같거나 뒤여야 해요");
         }
         if (ChronoUnit.DAYS.between(f.startDate(), f.endDate()) > 366) {
-            return Optional.of("모임 기간은 1년까지예요");
+            return Optional.of("기간은 1년까지예요");
         }
         return Optional.empty();
     }

@@ -142,7 +142,7 @@
 <!-- 111 후보: 미션 화면 탭(오늘의 미션 · 모임). 모임은 로그인한 사람에게만 -->
 <nav th:fragment="missionTabs(tab)" class="manage-tabs mission-tabs" aria-label="미션 메뉴">
     <a href="/missions" th:attr="aria-current=${tab == 'today' ? 'page' : null}">오늘의 미션</a>
-    <a th:if="${currentMemberId != null}" href="/missions/clubs" th:attr="aria-current=${tab == 'clubs' ? 'page' : null}">모임</a>
+    <a th:if="${currentMemberId != null}" href="/missions/clubs" th:attr="aria-current=${tab == 'clubs' ? 'page' : null}">함께 쓰기</a>
 </nav>
 <!-- 미션 글 한 줄: 제목·요약·주제·글쓴이, 댓글 달러 가기(파라미터 이름은 부르는 쪽 반복 변수와 다르게) -->
 <!-- 홈 글 카드(fragments/post-card)와 같은 모양: 글쓴이·주제 → 제목 → 요약 → 반응·댓글 달기 -->

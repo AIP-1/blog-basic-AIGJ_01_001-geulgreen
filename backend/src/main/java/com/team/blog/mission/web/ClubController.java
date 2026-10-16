@@ -65,7 +65,7 @@ public class ClubController {
             return seeOther("/missions/clubs");
         }
         long id = clubs.create(currentUserProvider.current(), form);
-        flash.addFlashAttribute("clubNotice", "모임을 만들었어요. 초대 링크를 친구들에게 보내 주세요");
+        flash.addFlashAttribute("clubNotice", "함께 쓰기를 만들었어요. 초대 링크를 친구들에게 보내 주세요");
         return seeOther("/missions/clubs/" + id);
     }
 
@@ -97,14 +97,14 @@ public class ClubController {
     @PostMapping("/missions/clubs/join/{code}")
     public RedirectView join(@PathVariable("code") String code, RedirectAttributes flash) {
         long id = clubs.join(currentUserProvider.current(), code);
-        flash.addFlashAttribute("clubNotice", "모임에 들어왔어요");
+        flash.addFlashAttribute("clubNotice", "함께 쓰기에 들어왔어요");
         return seeOther("/missions/clubs/" + id);
     }
 
     @PostMapping("/missions/clubs/{id}/leave")
     public RedirectView leave(@PathVariable("id") long id, RedirectAttributes flash) {
         clubs.leave(currentUserProvider.current(), id);
-        flash.addFlashAttribute("clubNotice", "모임에서 나왔어요");
+        flash.addFlashAttribute("clubNotice", "함께 쓰기에서 나왔어요");
         return seeOther("/missions/clubs");
     }
 
@@ -118,7 +118,7 @@ public class ClubController {
     @PostMapping("/missions/clubs/{id}/delete")
     public RedirectView delete(@PathVariable("id") long id, RedirectAttributes flash) {
         clubs.delete(currentUserProvider.current(), id);
-        flash.addFlashAttribute("clubNotice", "모임을 지웠어요");
+        flash.addFlashAttribute("clubNotice", "함께 쓰기를 지웠어요");
         return seeOther("/missions/clubs");
     }
 
