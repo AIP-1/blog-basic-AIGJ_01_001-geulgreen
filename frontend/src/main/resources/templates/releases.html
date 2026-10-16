@@ -7,7 +7,18 @@
 <body>
 <main class="settings">
     <h1>릴리스 노트</h1>
-    <div class="post-body release-notes" th:utext="${releaseHtml}"></div>
+    <div class="post-body release-notes">
+        <div th:utext="${releaseIntro}"></div>
+        <div id="release-list" th:utext="${releaseHtml}"></div>
+    </div>
+    <!-- 110 강성찬 개인 확장: 스크롤하면 10개씩 더. 스크립트가 없으면 [더 보기]가 ?upto=로 더 많이 그린다 -->
+    <div class="list-more">
+        <a th:if="${releaseNext != null}" class="more-button"
+           th:href="@{/releases(upto=${releaseNext + 10})} + '#' + ${releaseNextId}" th:attr="data-from=${releaseNext}">더 보기</a>
+        <p th:unless="${releaseNext != null}" class="help list-end">모든 릴리스를 다 봤어요</p>
+        <p class="list-error" role="alert" hidden>불러오지 못했어요 <button type="button" class="list-retry">다시 시도</button></p>
+    </div>
+    <script th:src="@{/js/releases-more.js}" defer></script>
 </main>
 </body>
 </html>

@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.CacheControl;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,9 +39,17 @@ public class ReleaseNotesController {
             "!\\[\\]\\(" + Pattern.quote(ASSET_BASE) + "(v\\d+\\.\\d+\\.\\d+)/([A-Za-z0-9._-]+\\.(?:png|jpg))\\)");
     private static final Pattern TOKEN = Pattern.compile("RELIMG-(v\\d+\\.\\d+\\.\\d+)-([A-Za-z0-9._-]+\\.(?:png|jpg))-RELIMG");
 
+    private static final Pattern VERSION = Pattern.compile("\\A## \\[([0-9.]+)]");
+    /** 처음과 한 번 더 불러올 때 보여 줄 버전 수(110, 강성찬 개인 확장). */
+    static final int PAGE = 10;
+
     private final ContentRenderer renderer;
     private final RestClient github;
-    private volatile String html; // 배포마다 jar가 바뀌므로 처음 한 번만 렌더링
+    private volatile Notes notes; // 배포마다 jar가 바뀌므로 처음 한 번만 렌더링
+
+    /** 머리말과 버전마다 하나씩 그린 조각(id="v1.60.0"인 section). */
+    record Notes(String intro, List<String> versions, List<String> sections) {
+    }
 
     public ReleaseNotesController(ContentRenderer renderer) {
         this.renderer = renderer;
@@ -47,18 +60,56 @@ public class ReleaseNotesController {
         this.github = RestClient.builder().requestFactory(factory).baseUrl(ASSET_BASE).build();
     }
 
+    /**
+     * 110 강성찬 개인 확장: 처음에는 최신 {@value #PAGE}개만 그리고, 나머지는 스크롤하면 {@code /releases/more}로 붙인다.
+     * 스크립트가 없으면 [더 보기]가 {@code ?upto=}로 더 많이 그린다.
+     */
     @GetMapping("/releases")
-    public String releases(Model model) {
-        if (html == null) {
+    public String releases(@RequestParam(defaultValue = "" + PAGE) int upto, Model model) {
+        Notes n = notes();
+        int shown = Math.min(Math.max(PAGE, upto), n.sections().size());
+        model.addAttribute("releaseIntro", n.intro());
+        model.addAttribute("releaseHtml", String.join("", n.sections().subList(0, shown)));
+        model.addAttribute("releaseNext", shown < n.sections().size() ? shown : null);
+        // 스크립트 없이 [더 보기]를 누르면 새로 보인 첫 버전으로 내려간다
+        model.addAttribute("releaseNextId", shown < n.sections().size() ? "v" + n.versions().get(shown) : null);
+        return "releases";
+    }
+
+    /** 다음 묶음(조각 HTML). 끝이면 빈 글. */
+    @GetMapping(value = "/releases/more", produces = "text/html;charset=UTF-8")
+    @ResponseBody
+    public String more(@RequestParam int from) {
+        List<String> sections = notes().sections();
+        int start = Math.max(0, Math.min(from, sections.size()));
+        return String.join("", sections.subList(start, Math.min(start + PAGE, sections.size())));
+    }
+
+    private Notes notes() {
+        if (notes == null) {
             // 제목(# 릴리스 노트)은 화면이 h1로 따로 둔다. "025~036" 같은 범위가 취소선이 되지 않게 ~를 글자로 바꾼다.
             // ponytail: CHANGELOG에 취소선(~~)이나 코드 속 ~를 쓰기 시작하면 이 치환을 다시 볼 것
             String md = readChangelog().replaceFirst("\\A# [^\\n]*\\n", "").replace("~", "\\~");
-            md = ASSET_IMAGE.matcher(md).replaceAll("RELIMG-$1-$2-RELIMG");
-            html = TOKEN.matcher(renderer.render(md).html())
-                    .replaceAll("<img src=\"/releases/img/$1/$2\" alt=\"\" loading=\"lazy\">");
+            String[] parts = md.split("(?m)^(?=## \\[)");
+            String intro = parts[0].startsWith("## [") ? "" : render(parts[0]);
+            List<String> versions = new ArrayList<>();
+            List<String> sections = new ArrayList<>();
+            for (String part : parts) {
+                Matcher v = VERSION.matcher(part);
+                if (v.find()) {
+                    versions.add(v.group(1));
+                    sections.add("<section class=\"release\" id=\"v" + v.group(1) + "\">" + render(part) + "</section>");
+                }
+            }
+            notes = new Notes(intro, List.copyOf(versions), List.copyOf(sections));
         }
-        model.addAttribute("releaseHtml", html);
-        return "releases";
+        return notes;
+    }
+
+    private String render(String md) {
+        String withTokens = ASSET_IMAGE.matcher(md).replaceAll("RELIMG-$1-$2-RELIMG");
+        return TOKEN.matcher(renderer.render(withTokens).html())
+                .replaceAll("<img src=\"/releases/img/$1/$2\" alt=\"\" loading=\"lazy\">");
     }
 
     /** 릴리스 첨부 사진. 태그·파일 이름은 위 모양만 받는다(다른 주소로 못 가게). 한 번 올린 첨부는 바뀌지 않아 오래 캐시한다. */
