@@ -12,6 +12,8 @@
     <meta name="_csrf_parameter" th:if="${_csrf != null}" th:content="${_csrf.parameterName}">
     <meta name="_csrf_header" th:if="${_csrf != null}" th:content="${_csrf.headerName}">
     <title th:replace="${title}">글그린</title>
+    <!-- 검색 결과에 도메인 대신 사이트 이름(글그린)이 뜨도록 모든 화면에 -->
+    <meta property="og:site_name" content="글그린">
     <!-- 탭 아이콘: 발바닥 로고(svg), 옛 브라우저는 32px png, iOS 홈 화면은 180px. /images/ 아래라 지문·1년 보관 -->
     <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
     <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}">
@@ -30,15 +32,17 @@
     <meta name="robots" content="noindex" th:if="${pageNoindex != null and pageNoindex}">
     <!-- 글 화면(pageMeta)·볼 수 없는 글(notFoundPage)·검색 제외 화면(pageNoindex, 예: 비공개 글)이 아닌 화면의 기본 SEO 메타 -->
     <th:block th:if="${pageMeta == null and (notFoundPage == null or !notFoundPage) and (pageNoindex == null or !pageNoindex)}">
-        <meta name="description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
+        <th:block th:with="home=${currentPath == '/'}">
+        <meta name="description" th:content="${home} ? '좋은 글이 머무는 곳, 글그린. 매일 쓴 글이 잔디처럼 쌓이는 블로그예요. 시리즈로 글을 묶고, 미션으로 꾸준히 쓰고, AI 맞춤법 검사로 다듬어 보세요.' : '좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들'">
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="글그린">
-        <meta property="og:title" content="글그린">
-        <meta property="og:description" content="좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들">
+        <meta property="og:title" th:content="${home} ? '글그린 블로그 - 매일 쓴 글이 잔디처럼 자라는 곳' : '글그린'">
+        <meta property="og:description" th:content="${home} ? '좋은 글이 머무는 곳, 글그린. 매일 쓴 글이 잔디처럼 쌓이는 블로그예요. 시리즈로 글을 묶고, 미션으로 꾸준히 쓰고, AI 맞춤법 검사로 다듬어 보세요.' : '좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들'">
+        </th:block>
         <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
             <link rel="canonical" th:href="${siteOrigin + canonicalPath}">
             <meta property="og:url" th:content="${siteOrigin + canonicalPath}">
             <meta property="og:image" th:content="${siteOrigin + '/images/og-default.png'}">
+            <script type="application/ld+json" th:if="${currentPath == '/'}" th:inline="javascript">{"@context":"https://schema.org","@type":"WebSite","name":"글그린","alternateName":"글그린 블로그","url":[[${siteOrigin + '/'}]]}</script>
         </th:block>
     </th:block>
     <th:block th:if="${notFoundPage != null and notFoundPage}">
