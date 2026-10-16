@@ -7,6 +7,21 @@
 
 ---
 
+## [1.66.1] — 2026-10-16 · 개인 확장 (AI 연결 썸네일)
+
+- **110 후속**: AI에 연결하기에 make_thumbnail(임시글만, 1600×1000 PNG를 카드 대표 사진으로), Pretendard 글꼴(OFL) 포함, 실행 이미지에 fontconfig·libfreetype6
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**AI 연결로 만든 썸네일**(전에는 없던 도구)
+
+| 초록 | 먹색 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.1/v1661-thumb-forest.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.1/v1661-thumb-ink.png) |
+
+---
+
 ## [1.66.0] — 2026-10-16 · 개인 확장 (여러 개 선택, 함께 쓰기, 처음 온 사람 안내, 첫 댓글을 기다리는 글, 썸네일 만들기, 릴리스 노트 나눠 불러오기)
 
 - **109 여러 개 선택**: 내 글에서 골라 한 번에 휴지통·공개 범위 바꾸기, 휴지통에서 한 번에 복원·영구 삭제

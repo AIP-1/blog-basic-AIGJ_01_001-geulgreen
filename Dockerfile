@@ -18,8 +18,9 @@ RUN groupadd --system blog && useradd --system --gid blog --home /app blog
 WORKDIR /app
 COPY --from=build /app.jar /app/app.jar
 # 사진 저장 디렉터리(운영 첫 저장 방식: 서버 디스크). Docker 볼륨이 이 소유권을 이어받는다.
+# 110: 썸네일 그림(Java2D 글자 그리기)에 fontconfig·freetype. 글꼴 자체는 앱에 든 Pretendard
 RUN mkdir -p /app/data && chown -R blog:blog /app/data \
-    && apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+    && apt-get update && apt-get install -y --no-install-recommends curl fontconfig libfreetype6 && rm -rf /var/lib/apt/lists/*
 USER blog
 ENV SPRING_PROFILES_ACTIVE=prod \
     APP_VERSION=${APP_VERSION} \
