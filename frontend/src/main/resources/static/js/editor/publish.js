@@ -258,7 +258,7 @@
     function showSchedule(sch) {
       if (!scheduleField) { return; }
       if (sch) {
-        scheduleStatus.textContent = '⏰ ' + new Date(sch.publishAt).toLocaleString('ko-KR') + '에 발행될 예정이에요';
+        scheduleStatus.textContent = new Date(sch.publishAt).toLocaleString('ko-KR') + '에 발행될 예정이에요';
         scheduleCancel.hidden = false;
       } else {
         scheduleStatus.textContent = '';
