@@ -115,8 +115,13 @@ class ProfileTabsIT extends IntegrationTestBase {
         String list = page("/tabord/series/" + sid, me);
         assertThat(list.indexOf("순서 하나")).isLessThan(list.indexOf("순서 셋"));
         assertThat(list.indexOf("순서 셋")).isLessThan(list.indexOf("순서 둘"));
-        assertThat(list).contains("순서 셋 앞으로");
-        assertThat(page("/tabord/series/" + sid)).doesNotContain("앞으로</button>");
+        // 105: 앞으로·뒤로는 주인의 [순서 바꾸기](?edit) 안에만, 읽는 화면은 1편부터·최신 글부터
+        assertThat(list).contains(">순서 바꾸기</a>").contains("1편부터").doesNotContain("앞으로</button>");
+        assertThat(page("/tabord/series/" + sid + "?edit=1", me)).contains("순서 셋 앞으로");
+        assertThat(page("/tabord/series/" + sid + "?edit=1")).doesNotContain("앞으로</button>").doesNotContain(">순서 바꾸기</a>");
+        String latest = page("/tabord/series/" + sid + "?order=latest");
+        assertThat(latest.indexOf("순서 둘")).isLessThan(latest.indexOf("순서 하나"));
+        assertThat(latest).contains(">3편<");
         assertThat(page("/tabord/posts/" + p3)).contains("(2/3)").contains("이전편: 순서 하나").contains("다음편: 순서 둘");
         // 맨 앞에서 더 앞으로는 그대로, 남은 못 바꾼다
         mockMvc.perform(post(move).param("postId", String.valueOf(p1)).param("dir", "up").with(csrf()).with(TestAuth.member(me)))
