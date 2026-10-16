@@ -224,8 +224,8 @@ public class McpTools {
         out.put("status", "DRAFT");
         out.put(KEY_TITLE, c.title());
         out.put("tags", tagService.tagsOf(postId));
-        out.put("series", series.ofPost(postId).map(x -> Map.<String, Object>of(KEY_SERIES_ID, x.id(), KEY_TITLE, x.title()))
-                .orElse(null));
+        out.put("series", !series.enabled() ? null : series.ofPost(postId)
+                .map(x -> Map.<String, Object>of(KEY_SERIES_ID, x.id(), KEY_TITLE, x.title())).orElse(null));
         out.put("edit_url", editUrl(postId));
         out.put("note", "임시글이에요. 글쓴이가 이 주소에서 읽고 직접 발행해요.");
         return out;
