@@ -1556,3 +1556,21 @@ main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) 
 .series-card { display: flex; }
 .series-card a { flex: 1; }
 .series-settings .field input { width: 100%; max-width: 480px; }
+
+/* 109 강성찬 개인 확장: 내 글 여러 개 골라 한 번에. 스크립트가 켜졌을 때만(.bulk-on) 체크 칸이 보인다 */
+.row-check { display: none; flex: none; margin: 0; }
+#manage.bulk-on .row-check { display: inline-block; }
+.bulk-bar { position: sticky; top: var(--header-h, 64px); z-index: 5; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px;
+    min-height: 44px; margin: 12px 0 0; padding: 6px 8px; background: var(--color-bg); border-bottom: 1px solid var(--color-border); }
+.bulk-all { display: inline-flex; align-items: center; gap: 8px; font-size: .9em; font-weight: 600; cursor: pointer; }
+.bulk-count { font-size: .9em; font-weight: 700; color: var(--color-brand); }
+.bulk-actions { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.bulk-actions[hidden] { display: none; }
+.bulk-actions .btn .icon { width: 15px; height: 15px; }
+.bulk-visibility summary { padding: 6px 14px; font-size: .88em; font-weight: 600; }
+.bulk-visibility .sort-menu-panel { min-width: 150px; }
+.bulk-visibility .sort-menu-panel button { all: unset; padding: 8px 12px; border-radius: 8px; color: var(--color-text); font-size: .92em; cursor: pointer; }
+.bulk-visibility .sort-menu-panel button:hover, .bulk-visibility .sort-menu-panel button:focus-visible { background: var(--color-surface-muted); }
+.bulk-bar + .manage-list { margin-top: 0; border-top: 0; }
+
+.sort-menu.bulk-visibility summary::before { content: none; }
