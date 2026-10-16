@@ -57,7 +57,7 @@
     function render() {
       var images = bodyImages();
       box.textContent = '';
-      box.appendChild(choice('자동 (본문 첫 사진)', null, !current, function () { if (current) { clearCover(); } }));
+      box.appendChild(choice('자동', null, !current, function () { if (current) { clearCover(); } }));
       if (current && images.indexOf(current.imageUrl) < 0) {
         box.appendChild(choice('따로 올린 대표 사진', current.thumbUrl || current.imageUrl, true, function () {}));
       }
@@ -65,7 +65,7 @@
         var selected = !!current && current.imageUrl === url;
         box.appendChild(choice('본문 ' + (i + 1) + '번째 사진', url, selected, function () { if (!selected) { setCover(url); } }));
       });
-      box.appendChild(choice('＋ 새 사진 올리기', null, false, function () { fileInput.click(); }));
+      box.appendChild(choice('＋ 사진 올리기', null, false, function () { fileInput.click(); }));
     }
 
     function setCover(url) {
