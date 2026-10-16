@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>내 문의</title>
+</head>
+<body>
+<!-- 099 강성찬 개인 확장: 내가 보낸 문의와 답장 상태 -->
+<main class="settings">
+    <h1>문의하기</h1>
+    <nav th:replace="~{contact/tabs :: tabs('mine')}"></nav>
+    <p th:if="${inquiries.isEmpty()}" class="empty-state">아직 보낸 문의가 없어요. <a href="/contact">문의하기</a></p>
+    <ul class="post-rows" th:unless="${inquiries.isEmpty()}">
+        <li th:each="i : ${inquiries}" class="post-row">
+            <div class="row-main">
+                <span class="badge" th:text="${i.done()} ? '답변 완료' : '답변 대기'">답변 대기</span>
+                <a th:href="@{/contact/mine/{id}(id=${i.id()})}" th:text="${i.title()}">제목</a>
+                <span class="help" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(i.createdAt())}">시각</span>
+            </div>
+        </li>
+    </ul>
+</main>
+</body>
+</html>

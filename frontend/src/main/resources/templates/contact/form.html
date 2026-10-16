@@ -8,6 +8,7 @@
 <!-- 090 강성찬 개인 확장: 사이트 안 문의 양식(스크립트 없는 폼) -->
 <main class="settings">
     <h1>문의하기</h1>
+    <nav th:replace="~{contact/tabs :: tabs('form')}"></nav>
     <p class="help">궁금한 점, 고장 난 곳, 바라는 기능을 알려 주세요. 관리자가 읽고 적어 주신 이메일로 답장해요.</p>
     <p th:if="${error != null}" class="form-error" role="alert" data-toast="error" th:text="${error}">오류</p>
     <form method="post" action="/contact">

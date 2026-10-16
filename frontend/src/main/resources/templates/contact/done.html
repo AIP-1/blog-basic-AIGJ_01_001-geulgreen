@@ -8,7 +8,7 @@
 <main class="settings">
     <h1>문의를 보냈어요</h1>
     <p>알려 주셔서 고마워요. 관리자가 읽고 적어 주신 이메일로 답장할게요.</p>
-    <p><a href="/" class="btn btn-primary">홈으로</a> <a href="/contact" class="btn">다른 문의 보내기</a></p>
+    <p><a href="/" class="btn btn-primary">홈으로</a> <a href="/contact" class="btn">다른 문의 보내기</a> <a th:if="${currentMemberId != null}" href="/contact/mine" class="btn">내 문의 보기</a></p>
 </main>
 </body>
 </html>

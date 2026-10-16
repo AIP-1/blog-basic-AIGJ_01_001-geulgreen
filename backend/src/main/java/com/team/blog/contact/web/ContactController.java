@@ -71,6 +71,23 @@ public class ContactController {
         return "contact/done";
     }
 
+    /** 099 내 문의(강성찬 개인 확장): 보낸 문의와 답장. 회원만, 본인 것만. */
+    @GetMapping("/contact/mine")
+    public String mine(Model model, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
+        model.addAttribute("pageNoindex", true);
+        model.addAttribute("inquiries", inquiries.mine(currentUserProvider.current()));
+        return "contact/mine";
+    }
+
+    @GetMapping("/contact/mine/{id}")
+    public String mineOne(@PathVariable long id, Model model, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
+        model.addAttribute("pageNoindex", true);
+        model.addAttribute("inquiry", inquiries.mine(currentUserProvider.current(), id));
+        return "contact/mine-detail";
+    }
+
     @GetMapping("/admin/inquiries")
     public String inbox(@RequestParam(value = "status", defaultValue = "all") String status,
                         @RequestParam(value = "q", required = false) String q,
