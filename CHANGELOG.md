@@ -7,6 +7,27 @@
 
 ---
 
+## [1.65.4] — 2026-10-16 · 개인 확장 (릴리스 노트 화면 사진)
+
+- 사이트 릴리스 노트 화면에서 전/후 사진이 "[이미지]" 글자로 나오던 것 고침: GitHub Release 첨부를 /releases/img/{태그}/{파일}로 받아 보여 줌(CSP 그대로)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**릴리스 노트 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.4/v1654-releases-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.4/v1654-releases-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.4/v1654-releases-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.4/v1654-releases-m-after.png) |
+
+---
+
 ## [1.65.3] — 2026-10-16 · 개인 확장 (링크 미리보기 고양이 그림)
 
 - 링크 미리보기(og:image) 기본 그림을 첫 화면 고양이 그림으로(블로그 주소, 사진 없는 글 포함)
