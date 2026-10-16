@@ -1,14 +1,12 @@
 package com.team.blog.post.web;
 
 import com.team.blog.post.application.CardDates;
-import com.team.blog.post.application.ManagePage;
 import com.team.blog.post.application.PostCard;
 import com.team.blog.post.application.ManageRow;
 import com.team.blog.post.application.ManageTab;
 import com.team.blog.post.application.PostManageQuery;
 import com.team.blog.post.application.PostTrashService;
 import com.team.blog.post.application.ViewCountFormat;
-import com.team.blog.shared.error.PostContentException;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.KoreanDateFormatter;
 import java.time.Clock;
@@ -47,17 +45,17 @@ public class ManagePostsController {
     @GetMapping("/manage/posts")
     public String myPosts(@RequestParam(value = "tab", required = false) String tabParam,
                           @RequestParam(value = "visibility", required = false) String visibility,
-                          @RequestParam(value = "cursor", required = false) String cursor, Model model) {
+                          @RequestParam(value = "page", required = false, defaultValue = "1") String pageParam, Model model) {
         ManageTab tab = ManageTab.of(tabParam);
-        ManagePage page;
+        // 110 강성찬 개인 확장: [더 보기] 대신 쪽 번호(?page=2). 숫자가 아니면 1쪽, 끝 쪽보다 크면 끝 쪽
+        int pageNumber;
         try {
-            page = manageQuery.page(currentUserProvider.current(), tab, visibility, cursor);
-        } catch (PostContentException e) {
-            page = manageQuery.page(currentUserProvider.current(), tab, visibility, null);
-            cursor = null;
+            pageNumber = Integer.parseInt(pageParam);
+        } catch (NumberFormatException e) {
+            pageNumber = 1;
         }
-        Map<String, Long> counts = page.counts() != null ? page.counts()
-                : manageQuery.counts(currentUserProvider.current().orElseThrow().memberId());
+        PostManageQuery.NumberedPage page = manageQuery.numbered(currentUserProvider.current(), tab, visibility, pageNumber);
+        Map<String, Long> counts = page.counts();
         Instant now = clock.instant();
         Map<Long, String> savedLabels = new HashMap<>();
         Map<Long, String> dates = new HashMap<>();
@@ -89,8 +87,8 @@ public class ManagePostsController {
         model.addAttribute("visibility", visibility == null ? "" : visibility.toLowerCase(java.util.Locale.ROOT));
         model.addAttribute("rows", page.items());
         model.addAttribute("counts", counts);
-        model.addAttribute("nextCursor", page.nextCursor());
-        model.addAttribute("continued", cursor != null && !cursor.isEmpty());
+        model.addAttribute("currentPage", page.page());
+        model.addAttribute("totalPages", page.totalPages());
         model.addAttribute("savedLabels", savedLabels);
         model.addAttribute("dates", dates);
         model.addAttribute("views", views);

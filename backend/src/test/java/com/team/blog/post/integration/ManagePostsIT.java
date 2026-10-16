@@ -110,4 +110,23 @@ class ManagePostsIT extends IntegrationTestBase {
         mockMvc.perform(get("/api/me/posts").param("cursor", "bad!").with(TestAuth.member(me))).andExpect(status().isBadRequest());
         mockMvc.perform(get("/api/me/posts")).andExpect(status().isUnauthorized());
     }
+
+    /** 110 강성찬 개인 확장: 내 글은 쪽 번호(20개씩), 끝 쪽보다 크거나 숫자가 아니면 끝 쪽·1쪽. */
+    @Test
+    void numberedPages() throws Exception {
+        long me = writer(members, "managepages");
+        for (int i = 0; i < 45; i++) {
+            long id = posts.published(me, "쪽 글 " + i, "본문", 1, T.plusSeconds(i));
+            touch(id, T.plusSeconds(i));
+        }
+        String first = mockMvc.perform(get("/manage/posts").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        assertThat(first).contains("aria-current=\"page\">1<").contains("page=3").doesNotContain("class=\"more-button\"")
+                .contains("쪽 글 44").doesNotContain("쪽 글 24<");
+        String second = mockMvc.perform(get("/manage/posts").param("page", "2").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        assertThat(second).contains("aria-current=\"page\">2<").contains("쪽 글 24").doesNotContain("쪽 글 44<").doesNotContain("쪽 글 4<");
+        String last = mockMvc.perform(get("/manage/posts").param("page", "9").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        assertThat(last).contains("aria-current=\"page\">3<").contains("쪽 글 0<").contains("쪽 글 4<");
+        assertThat(mockMvc.perform(get("/manage/posts").param("page", "x").with(TestAuth.member(me))).andReturn().getResponse()
+                .getContentAsString()).contains("aria-current=\"page\">1<");
+    }
 }

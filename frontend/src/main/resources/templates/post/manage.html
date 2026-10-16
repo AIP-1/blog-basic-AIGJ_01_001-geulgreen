@@ -5,7 +5,7 @@
     <title>내 글 · 글그린</title>
 </head>
 <body>
-<main id="manage" class="list-page" th:attr="data-tab=${tab},data-visibility=${visibility}">
+<main id="manage" class="list-page" th:attr="data-tab=${tab},data-visibility=${visibility},data-page=${currentPage}">
     <div class="manage-head">
         <h1>내 글</h1>
         <form method="post" action="/write">
@@ -41,13 +41,13 @@
         <noscript><label><input type="checkbox" required> <span th:text="${'글 ' + counts.get('trash') + '개를 영구 삭제해요. 되돌릴 수 없어요.'}">확인</span></label></noscript>
         <button type="submit" class="btn btn-danger btn-sm">휴지통 비우기</button>
     </form>
-    <p th:if="${continued}"><a class="link-btn" th:href="@{/manage/posts(tab=${tab})}">처음부터 보기</a></p>
     <p th:if="${rows.isEmpty()}" class="help">아직 글이 없어요.</p>
 
     <!-- 101 강성찬 개인 확장: 한 글 한 줄(제목 · 태그·공개 범위·배지 · 조회·좋아요·댓글 · 날짜 · ⋯ 메뉴). 휴대폰은 두 줄.
          067의 카드는 같은 줄 카드 높이를 맞추느라(card-rows.js) 짧은 글 카드 아래가 비어 보였다 -->
     <!-- 109 강성찬 개인 확장: 여러 글 골라 한 번에(발행 글·임시글: 휴지통으로·공개 범위, 휴지통: 복원·영구 삭제).
          글마다 쓰는 API를 차례로 부른다. 스크립트가 켜져야 보인다(manage.js가 hidden을 푼다) -->
+    <span id="list-top" class="list-anchor"></span>
     <div class="bulk-bar" th:unless="${rows.isEmpty()}" hidden>
         <label class="bulk-all"><input type="checkbox" data-bulk-all> 전체 선택</label>
         <span class="bulk-count" role="status" aria-live="polite"></span>
@@ -90,8 +90,24 @@
             <p class="row-error field-error" role="alert" hidden></p>
         </li>
     </ul>
-    <p class="list-more"><a th:if="${nextCursor != null}" class="more-button" th:attr="data-cursor=${nextCursor}"
-          th:href="@{/manage/posts(tab=${tab},visibility=${visibility},cursor=${nextCursor})}">더 보기</a></p>
+    <!-- 110 강성찬 개인 확장: [더 보기] 대신 쪽 번호. 처음·끝 쪽과 지금 쪽 앞뒤 2쪽(휴대폰은 앞뒤 1쪽), 사이는 …. 옮기면 목록 시작으로(#list-top) -->
+    <nav class="pager" th:if="${totalPages > 1}" aria-label="쪽 번호"
+         th:with="vis=${visibility == '' ? null : visibility}">
+        <a th:if="${currentPage > 1}" class="pager-step" th:href="@{/manage/posts(tab=${tab},visibility=${vis},page=${currentPage - 1})} + '#list-top'"
+           aria-label="이전 쪽"><svg th:replace="~{fragments/icons :: chevron-left}"></svg></a>
+        <span th:unless="${currentPage > 1}" class="pager-step is-off" aria-hidden="true"><svg th:replace="~{fragments/icons :: chevron-left}"></svg></span>
+        <th:block th:each="n : ${#numbers.sequence(1, totalPages)}"
+                  th:with="near=${n == 1 or n == totalPages or (n >= currentPage - 2 and n <= currentPage + 2)},
+                           close=${n == 1 or n == totalPages or (n >= currentPage - 1 and n <= currentPage + 1)}">
+            <a th:if="${near and n != currentPage}" th:href="@{/manage/posts(tab=${tab},visibility=${vis},page=${n})} + '#list-top'"
+               th:class="${close ? 'pager-num' : 'pager-num pager-far'}" th:text="${n}">2</a>
+            <span th:if="${n == currentPage}" class="pager-num is-current" aria-current="page" th:text="${n}">1</span>
+            <span th:if="${(n == 2 and currentPage - 2 > 2) or (n == totalPages - 1 and currentPage + 2 < totalPages - 1)}" class="pager-gap" aria-hidden="true">…</span>
+        </th:block>
+        <a th:if="${currentPage < totalPages}" class="pager-step" th:href="@{/manage/posts(tab=${tab},visibility=${vis},page=${currentPage + 1})} + '#list-top'"
+           aria-label="다음 쪽"><svg th:replace="~{fragments/icons :: chevron}"></svg></a>
+        <span th:unless="${currentPage < totalPages}" class="pager-step is-off" aria-hidden="true"><svg th:replace="~{fragments/icons :: chevron}"></svg></span>
+    </nav>
     <p id="manage-notice" class="notice" role="status" data-toast="success" th:hidden="${manageNotice == null}" th:text="${manageNotice}"></p>
     <script th:src="@{/js/post/visibility-menu.js}" defer></script>
     <script th:src="@{/js/post/manage.js}" defer></script>
