@@ -61,7 +61,7 @@ public class ReleaseNotesController {
     }
 
     /**
-     * 110 강성찬 개인 확장: 처음에는 최신 {@value #PAGE}개만 그리고, 나머지는 스크롤하면 {@code /releases/more}로 붙인다.
+     * 112 강성찬 개인 확장: 처음에는 최신 {@value #PAGE}개만 그리고, 나머지는 스크롤하면 {@code /releases/more}로 붙인다.
      * 스크립트가 없으면 [더 보기]가 {@code ?upto=}로 더 많이 그린다.
      */
     @GetMapping("/releases")

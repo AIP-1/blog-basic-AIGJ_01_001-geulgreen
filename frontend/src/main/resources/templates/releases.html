@@ -11,7 +11,7 @@
         <div th:utext="${releaseIntro}"></div>
         <div id="release-list" th:utext="${releaseHtml}"></div>
     </div>
-    <!-- 110 강성찬 개인 확장: 스크롤하면 10개씩 더. 스크립트가 없으면 [더 보기]가 ?upto=로 더 많이 그린다 -->
+    <!-- 112 강성찬 개인 확장: 스크롤하면 10개씩 더. 스크립트가 없으면 [더 보기]가 ?upto=로 더 많이 그린다 -->
     <div class="list-more">
         <a th:if="${releaseNext != null}" class="more-button"
            th:href="@{/releases(upto=${releaseNext + 10})} + '#' + ${releaseNextId}" th:attr="data-from=${releaseNext}">더 보기</a>
