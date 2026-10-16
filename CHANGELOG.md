@@ -7,6 +7,27 @@
 
 ---
 
+## [1.66.5] — 2026-10-16 · 개인 확장 (내 글 쪽 번호)
+
+- **113 내 글 쪽 번호**: 내 글 목록을 한 쪽 20개와 쪽 번호로([더 보기] 대신)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**내 글 목록 아래**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.5/v1665-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.5/v1665-manage-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.5/v1665-manage-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.5/v1665-manage-m-after.png) |
+
+---
+
 ## [1.66.4] — 2026-10-16 · 개인 확장 (함께 쓰기 첫 화면, 멤버 목록 접기)
 
 - **111 후속**: 함께 쓰기 첫 화면을 누르는 카드(내 이번 기간 상태)로, 만들기 폼은 버튼으로 열기, 빈 화면, 960px
