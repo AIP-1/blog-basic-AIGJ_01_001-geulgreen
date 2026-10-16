@@ -1584,3 +1584,11 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: center; }
+/* 강성찬 개인 확장(10-16): 탐색 [추천] 맨 위 "첫 댓글을 기다리는 글" — 2칸(넓으면 4칸) 한 묶음 */
+.waiting-comments { margin: 0 0 24px; padding: 16px; border-radius: 16px; background: var(--color-brand-soft); }
+.waiting-comments h2 { margin: 0 0 4px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
+.waiting-comments h2 .icon-inline { color: var(--color-brand); }
+.waiting-comments .help { margin: 0 0 12px; }
+.waiting-grid { gap: 14px; }
+@media (min-width: 640px) { main.list-page .waiting-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1300px) { main.list-page .waiting-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
