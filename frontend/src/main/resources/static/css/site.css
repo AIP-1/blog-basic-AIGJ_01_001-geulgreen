@@ -1585,6 +1585,9 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: center; }
 
+/* 103 후속(10-16 chan "4줄로"): 사진 카드 요약은 4줄 + …(사진 16:10은 그대로). 사진 없는 카드는 그대로(같은 줄 높이만큼 채움) */
+.card-grid .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 4; line-clamp: 4; }
+
 /* 109 강성찬 개인 확장: 내 글 여러 개 골라 한 번에. 스크립트가 켜졌을 때만(.bulk-on) 체크 칸이 보인다 */
 .row-check { display: none; flex: none; margin: 0; }
 #manage.bulk-on .row-check { display: inline-block; }
