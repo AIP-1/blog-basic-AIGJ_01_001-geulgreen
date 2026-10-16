@@ -7,6 +7,34 @@
 
 ---
 
+## [1.63.0] — 2026-10-16 · 개인 확장 (글 카드 좁히기, 요약 끊김)
+
+- **103 후속 글 카드**: 카드 최소 250px(1440에서 5칸), 사진은 위 끝까지, 한 줄 제목 아래 빈 줄 없음, 사진 카드 요약 3줄과 "…", 글만 있는 카드는 딱 맞는 줄 수
+- 잘린 요약 끝에 "…"(렌더링 버전 5, 켜질 때 다시 렌더링, 실행 잠금으로 한 대만)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**1440 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-1440-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-1440-after.png) |
+
+**1920 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-1920-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-1920-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.63.0/v1630-home-m-after.png) |
+
+---
+
 ## [1.62.0] — 2026-10-16 · 개인 확장 (시리즈 읽는 순서)
 
 - **105 시리즈 읽는 순서**: 시리즈 화면에 1편부터·최신 글부터 정렬, 주인의 앞으로·뒤로는 [순서 바꾸기]를 눌렀을 때만
