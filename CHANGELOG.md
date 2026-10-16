@@ -7,6 +7,25 @@
 
 ---
 
+## [1.66.3] — 2026-10-16 · 개인 확장 (서식 추천받기 버튼)
+
+- **085 후속**: 글 점검의 서식 추천을 [서식 추천받기] 버튼으로, 결과 아래에 살펴본 항목, [다시 추천받기]
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**글 점검 창**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.3/v1663-check-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.3/v1663-check-after.png) |
+
+*[서식 추천받기]를 누른 뒤*
+
+![](https://github.com/practicech/blog/releases/download/v1.66.3/v1663-check-run-after.png)
+
+---
+
 ## [1.66.2] — 2026-10-16 · 개인 확장 (시리즈 관리 묶음 보기, 함께 쓰기 화면 정리)
 
 - **106 후속**: 내 글 > 시리즈 탭을 시리즈마다 접힌 묶음으로, ↑↓ 버튼 자리 고정, 여러 글을 넣을 때 순서가 거꾸로 되던 것 고침
