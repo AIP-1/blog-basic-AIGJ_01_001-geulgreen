@@ -7,6 +7,40 @@
 
 ---
 
+## [1.66.2] — 2026-10-16 · 개인 확장 (시리즈 관리 묶음 보기, 함께 쓰기 화면 정리)
+
+- **106 후속**: 내 글 > 시리즈 탭을 시리즈마다 접힌 묶음으로, ↑↓ 버튼 자리 고정, 여러 글을 넣을 때 순서가 거꾸로 되던 것 고침
+- **111 후속**: 함께 쓰기 화면, 기간 정보 한 줄, 진행 막대와 "N/N명 썼어요", 멤버 줄에 프로필 사진·상태, 초대는 버튼으로, 위쪽 960px
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**내 글 > 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-mseries-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-mseries-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-mseries-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-mseries-m-after.png) |
+
+**함께 쓰기 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-club-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.2/v1662-club-m-after.png) |
+
+---
+
 ## [1.66.1] — 2026-10-16 · 개인 확장 (AI 연결 썸네일)
 
 - **110 후속**: AI에 연결하기에 make_thumbnail(임시글만, 1600×1000 PNG를 카드 대표 사진으로), Pretendard 글꼴(OFL) 포함, 실행 이미지에 fontconfig·libfreetype6
