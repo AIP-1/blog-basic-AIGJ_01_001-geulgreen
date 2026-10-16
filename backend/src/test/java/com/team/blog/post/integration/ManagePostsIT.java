@@ -111,7 +111,7 @@ class ManagePostsIT extends IntegrationTestBase {
         mockMvc.perform(get("/api/me/posts")).andExpect(status().isUnauthorized());
     }
 
-    /** 110 강성찬 개인 확장: 내 글은 쪽 번호(20개씩), 끝 쪽보다 크거나 숫자가 아니면 끝 쪽·1쪽. */
+    /** 113 강성찬 개인 확장: 내 글은 쪽 번호(20개씩), 끝 쪽보다 크거나 숫자가 아니면 끝 쪽·1쪽. */
     @Test
     void numberedPages() throws Exception {
         long me = writer(members, "managepages");

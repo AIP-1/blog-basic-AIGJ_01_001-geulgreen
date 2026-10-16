@@ -47,7 +47,7 @@ public class ManagePostsController {
                           @RequestParam(value = "visibility", required = false) String visibility,
                           @RequestParam(value = "page", required = false, defaultValue = "1") String pageParam, Model model) {
         ManageTab tab = ManageTab.of(tabParam);
-        // 110 강성찬 개인 확장: [더 보기] 대신 쪽 번호(?page=2). 숫자가 아니면 1쪽, 끝 쪽보다 크면 끝 쪽
+        // 113 강성찬 개인 확장: [더 보기] 대신 쪽 번호(?page=2). 숫자가 아니면 1쪽, 끝 쪽보다 크면 끝 쪽
         int pageNumber;
         try {
             pageNumber = Integer.parseInt(pageParam);

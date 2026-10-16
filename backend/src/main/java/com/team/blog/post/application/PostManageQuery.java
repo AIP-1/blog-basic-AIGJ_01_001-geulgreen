@@ -110,7 +110,7 @@ public class PostManageQuery {
     }
 
     /**
-     * 110 강성찬 개인 확장: 내 글 화면은 [더 보기] 대신 쪽 번호. 한 쪽은 {@code managePageSize}개, 정렬은 커서 조회와 같다.
+     * 113 강성찬 개인 확장: 내 글 화면은 [더 보기] 대신 쪽 번호. 한 쪽은 {@code managePageSize}개, 정렬은 커서 조회와 같다.
      * 쪽이 끝 쪽보다 크면 끝 쪽을(휴지통으로 옮겨 쪽이 비었을 때 앞 쪽으로). 커서 조회(API·MCP)는 그대로 둔다.
      */
     public NumberedPage numbered(Optional<CurrentUser> currentUser, ManageTab tab, String visibility, int page) {
@@ -129,7 +129,7 @@ public class PostManageQuery {
         return new NumberedPage(List.copyOf(rows), shown, totalPages, counts(user.memberId()));
     }
 
-    /** 쪽 번호 조회 결과(110). */
+    /** 쪽 번호 조회 결과(113). */
     public record NumberedPage(List<ManageRow> items, int page, int totalPages, Map<String, Long> counts) {
     }
 

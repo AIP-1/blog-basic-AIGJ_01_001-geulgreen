@@ -34,7 +34,7 @@
       });
   }
 
-  // 110: 지운 뒤 이 쪽에 남은 줄이 없으면 앞 쪽으로(1쪽이면 새로 불러 뒤 글이 올라오게)
+  // 113: 지운 뒤 이 쪽에 남은 줄이 없으면 앞 쪽으로(1쪽이면 새로 불러 뒤 글이 올라오게)
   function afterRemove() {
     if (document.querySelector('#post-rows .post-row')) { return; }
     var url = new URL(window.location.href);

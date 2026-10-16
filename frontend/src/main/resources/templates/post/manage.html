@@ -90,7 +90,7 @@
             <p class="row-error field-error" role="alert" hidden></p>
         </li>
     </ul>
-    <!-- 110 강성찬 개인 확장: [더 보기] 대신 쪽 번호. 처음·끝 쪽과 지금 쪽 앞뒤 2쪽(휴대폰은 앞뒤 1쪽), 사이는 …. 옮기면 목록 시작으로(#list-top) -->
+    <!-- 113 강성찬 개인 확장: [더 보기] 대신 쪽 번호. 처음·끝 쪽과 지금 쪽 앞뒤 2쪽(휴대폰은 앞뒤 1쪽), 사이는 …. 옮기면 목록 시작으로(#list-top) -->
     <nav class="pager" th:if="${totalPages > 1}" aria-label="쪽 번호"
          th:with="vis=${visibility == '' ? null : visibility}">
         <a th:if="${currentPage > 1}" class="pager-step" th:href="@{/manage/posts(tab=${tab},visibility=${vis},page=${currentPage - 1})} + '#list-top'"
