@@ -13,12 +13,44 @@
 - 통계: "날짜별 숫자 보기" 펼침·표를 화면에서 뺌(화면 읽기용은 유지), 휴대폰에서 막대를 누르면 "날짜 · N회"
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**내 글 줄 정리**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.2/v1582-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.2/v1582-manage-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.58.2/v1582-manage-phone.png)
+
+**통계**
+
+| 전(PC) | 후(휴대폰에서 막대 누름) |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.2/v1582-stats-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.2/v1582-stats-phone.png) |
+
 ---
 
 ## [1.58.1] — 2026-10-15 · 개인 확장 (프로필 버튼·선 아이콘)
 
 - 프로필 방명록·RSS를 선 아이콘이 든 작은 테두리 버튼으로, "오늘 N · 전체 N" 앞 그래프 아이콘, 프로필 화면 남은 이모지를 선 아이콘으로(새 이모지는 테스트가 막음)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**프로필 방명록·RSS 버튼과 선 아이콘**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-pc-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-pc-light-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-pc-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-pc-dark-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-phone-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-header-phone-light-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-guestbook-pc-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-guestbook-pc-light-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-home-pc-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.1/v1581-home-pc-light-after.png) |
 
 ---
 
@@ -28,12 +60,41 @@
 - 통계: 막대에 날짜·숫자 말풍선, "날짜별 숫자 보기"는 작은 펼침(최신이 위), 많이 읽힌 글은 순위·제목·길이 막대
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**내 글은 한 줄 목록으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-manage-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-manage-phone.png)
+
+**통계 다듬기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-stats-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-stats-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.58.0/v1580-stats-phone.png)
+
 ---
 
 ## [1.57.2] — 2026-10-15 · 개인 확장 (목차 위치)
 
 - 목차를 누르면 제목이 머리말 아래 16px에 보임(가려지지 않음), 지금 읽는 부분을 목차에 표시(PC·휴대폰)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**목차 누르면 제목이 머리말 아래에**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.2/v1572-toc-pc-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.2/v1572-toc-pc-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.57.2/v1572-toc-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.2/v1572-toc-m-after.png) |
 
 ---
 
@@ -43,6 +104,17 @@
 - (1.57.0에 함께 들어감) 휴대폰 알림 창이 왼쪽으로 잘리던 것 고침
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**내 글 "…" 메뉴 새 모양**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.1/v1571-om-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.1/v1571-om-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.57.1/v1571-om-phone.png) ![](https://github.com/practicech/blog/releases/download/v1.57.1/v1571-om-manage.png)
+
 ---
 
 ## [1.57.0] — 2026-10-15 · 개인 확장 (결과 알림 토스트, 블로그 주소 칸)
@@ -50,6 +122,37 @@
 - 설정·알림·내 글·글 화면·로그인·문의·관리 화면의 결과를 머리말 아래 3초 토스트로(성공 초록·오류 빨강), 칸별 오류는 칸 옆 그대로
 - 블로그 주소 칸 앞에 실제 사이트 주소, 다음 바꿀 수 있는 날까지 잠김
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**결과 알림을 머리말 아래 토스트로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-saved-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-saved-light-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-saved-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-saved-dark-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-login-error-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-login-error-light-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-login-error-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-login-error-dark-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-nochange-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-settings-nochange-light-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-admin-hide-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-admin-hide-after.png) |
+
+**블로그 주소 칸**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-handle-locked-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-handle-locked-after.png) |
+
+**휴대폰 알림 창이 잘리지 않게**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-before-bell-light.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-after-bell-light.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-before-bell-dark.png) | ![](https://github.com/practicech/blog/releases/download/v1.57.0/v1570-after-bell-dark.png) |
 
 ---
 
@@ -60,6 +163,16 @@
 - Google Search Console 사이트 확인 메타 태그(네이버 태그 유지), sitemap.xml에서 테스트 계정 빼기, 블로그 주소 화면의 대표 주소·공유 주소에 /@ 대신 새 주소
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**머리말 메뉴 순서**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.56.1/v1561-nav-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.56.1/v1561-nav-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.56.1/v1561-nav-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.56.1/v1561-nav-m-after.png) |
+
 ---
 
 ## [1.56.0] — 2026-10-15 · 개인 확장 (글쓰기 도움말, 코드 품질)
@@ -67,6 +180,17 @@
 - 글쓰기 도움말을 줄별로(서식 창·제목·목록·인용·넣기 메뉴·단축키), 누를 글자는 키 모양, [Markdown으로 쓰기] 간격과 제목 칸 밑줄 다듬음
 - SonarQube 새 코드 28가지 정리(동작 그대로)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**글쓰기 도움말 정리**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.56.0/v1560-help-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.56.0/v1560-help-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.56.0/v1560-help-phone.png)
 
 ---
 
@@ -77,6 +201,22 @@
 - SonarQube 버그 8개·작은 문제 9개 고침
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**서식 창은 글자를 골랐을 때만**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-format-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-format-after.png) |
+
+**큰 GIF 안내와 지난 실패 안내 지우기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-gif-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-gif-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-notice-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.55.0/v1550-notice-after.png) |
+
 ---
 
 ## [1.54.0] — 2026-10-15 · 개인 확장 (테스트 글 그림, 스크롤 유지)
@@ -85,6 +225,13 @@
 - 같은 화면으로 돌아오는 버튼을 눌러도 스크롤 자리 유지, 화면 밖 "저장했어요" 안내는 머리말 아래 4초
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**테스트용 긴 글에 그림 8편 더**
+
+![](https://github.com/practicech/blog/releases/download/v1.54.0/v1540-sample-posts.png)
+
 ---
 
 ## [1.53.0] — 2026-10-15 · 개인 확장 (프로필 탭, 꼬리말 줄바꿈)
@@ -92,6 +239,26 @@
 - **프로필 홈·글·시리즈 탭**: 홈(/주소)은 고정 글·기록 잔디·짧은 기록·최근 글 4개·시리즈 4개 선반과 "모두 보기", 글(/주소/posts)은 최신순·인기순과 분류·태그 거르기, 시리즈(/주소/series)는 주인이 순서 바꾸기, 예전 /주소?tag= 주소는 글 탭으로
 - 휴대폰 꼬리말 링크가 낱말 중간에서 끊기지 않고 통째로 줄바꿈
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**프로필 홈·글·시리즈 탭**
+
+| 전 | 후(홈) |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-profile-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-profile-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-profile-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-profile-m-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-posts.png)
+![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-series.png)
+
+**휴대폰 꼬리말 줄바꿈**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-foot-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-foot-dark-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-foot-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.53.0/v1530-foot-light-after.png) |
 
 ---
 
@@ -102,12 +269,38 @@
 - 내 글 탭(발행 글·임시글·휴지통) 숫자가 휴지통 옮기기·되돌리기·완전 삭제 뒤 바로 맞게
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**탐색 화면 정리**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-explore-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-explore-m-after.png) |
+
+**글 아래 작가 카드 한 줄**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-card-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-card-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-card-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.52.0/v1520-card-m-after.png) |
+
 ---
 
 ## [1.51.1] — 2026-10-15 · 개인 확장 (태그 정렬 정리)
 
 - 태그 화면 정렬에서 이름순을 빼고 인기순·최근순만(예전 이름순 주소는 인기순으로)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**태그 화면 정렬에서 이름순 빼기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.51.1/v1511-tags-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.1/v1511-tags-after.png) |
 
 ---
 
@@ -117,6 +310,26 @@
 - **휴지통 비우기**: 휴지통에 글이 있을 때만 [휴지통 비우기] 버튼(개수와 되돌릴 수 없음을 묻는 확인 창, 내 글만, 하나씩 완전 삭제와 같은 정리), 휴지통 카드에 "임시글" 표시·"N일 남음"·제목 없는 글은 본문 앞부분, 좋아요·댓글 수는 숨김
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**머리말 테마 버튼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-pc-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-pc-dark-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-pc-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-pc-light-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-m-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-m-dark-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-m-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-hdr-m-light-after.png) |
+
+**휴지통 비우기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-trash-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.51.0/v1510-trash-after.png) |
+
 ---
 
 ## [1.50.0] — 2026-10-15 · 개인 확장 (관리 목록 통일, 태그 화면)
@@ -125,12 +338,46 @@
 - **태그 화면 새 모양**: 태그 수·태그 찾기·정렬(인기·이름·최근), 태그마다 글 카드를 가로 한 줄로(화살표·밀어 넘기기), 10개씩 더 보기, 공개 글만. 머리말에 "태그" 메뉴
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**관리 화면 목록 통일**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-members-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-members-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-reports-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-reports-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-inquiries-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-inquiries-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-notices-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-notices-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-logs-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-logs-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-content-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-content-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-guestbook-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-guestbook-after.png) |
+
+**태그 화면 새 모양**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-tags-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-tags-dark-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-tags-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.50.0/v1500-tags-light-after.png) |
+
 ---
 
 ## [1.49.3] — 2026-10-15 · 개인 확장 (다크 모드 밤 그림)
 
 - 다크 모드에서 홈 사진 배너와 고양이 그림이 밤 그림으로 바뀜(시스템 테마와 사이트 테마 설정 모두 따름, 어둡게 덮지 않음)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**다크 모드는 밤 그림**
+
+| 전(다크) | 후(다크) |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.49.3/v1493-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.49.3/v1493-home-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.49.3/v1493-login-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.49.3/v1493-login-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.49.3/v1493-home-light.png)
 
 ---
 
@@ -140,6 +387,17 @@
 - 글 화면 위 읽기 진행 막대가 부드럽게 움직임(짧은 글도), 움직임 줄이기 설정을 따름
 - 메일 제목 7가지를 "[글그린] …"으로, 코드 입력·인증 화면에 스팸함 확인 안내
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**메일 제목 "[글그린]"과 스팸함 안내**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.49.2/v1492-signup-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.49.2/v1492-signup-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.49.2/v1492-mail-subjects.png)
 
 ---
 
@@ -157,6 +415,21 @@
 - 아래 카드 정리, 왼쪽 메뉴에서 묶음 제목과 누를 수 있는 항목을 구분
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**관리자 대시보드 다듬기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.49.0/v1490-admin-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.49.0/v1490-admin-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.49.0/v1490-admin-light.png)
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.49.0/v1490-admin-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.49.0/v1490-admin-m-after.png) |
+
 ---
 
 ## [1.48.0] — 2026-10-14 · 개인 확장 (관리자 시스템 화면)
@@ -164,6 +437,13 @@
 - **098 관리자 시스템 화면**: 앱 두 대의 상태(30초마다 신호, 90초 없으면 "응답 없음"), 배포 버전(커밋 7자리)과 켜진 시각, 외부 연동 설정 여부(키 값은 안 보임), 기능 스위치(읽기 전용)
 - 배포 이미지에 커밋 해시를 버전으로 넣고, 컨테이너 이름을 호스트 이름으로
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**관리자 시스템 화면(새 화면)**
+
+![](https://github.com/practicech/blog/releases/download/v1.48.0/v1480-system.png)
 
 ---
 
@@ -181,6 +461,27 @@
 - **AI 연결 키 경고**: 새 연결 키 화면에 "키를 채팅이나 다른 곳에 붙이지 마세요" 한 줄
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**관리자 대시보드 개편**
+
+| 전 | 후(다크) |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-admin-pc-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-admin-dark-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-admin-light-after.png)
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-admin-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-admin-m-after.png) |
+
+**AI 연결 키 경고**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-key-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.47.0/v1470-key-after.png) |
+
 ---
 
 ## [1.46.0] — 2026-10-14 · 개인 확장 (AI 연결, 텔레그램 알림, 선 아이콘)
@@ -189,6 +490,20 @@
 - **096 텔레그램 알림**: 관리자에게 새 문의·가입·신고, 배포 결과 알림(`TELEGRAM_BOT_TOKEN`이 없으면 꺼짐)
 - **공개 범위 선 아이콘**: 전체 공개는 표시 없음, 비공개·친구·그룹·링크만 선 아이콘, 카드 💬·비밀 🔒·미션 👥도 선 아이콘
 - DB: V22 `telegram_link`, V23 `ai_key`(표 추가만)
+
+
+#### 전/후 사진
+
+**AI에 연결하기(새 화면)**
+
+![](https://github.com/practicech/blog/releases/download/v1.46.0/v1460-connect.png)
+
+**공개 범위 표시를 선 아이콘으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.46.0/v1460-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.46.0/v1460-manage-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.46.0/v1460-secret-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.46.0/v1460-secret-after.png) |
 
 ---
 
@@ -201,6 +516,37 @@
 - 글이 아닌 화면에도 SEO 메타(설명·공유 미리보기·대표 주소), 검색 제외 화면은 빼고
 - 키보드로 검색칸·검색 버튼에 가면 테두리 보임
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**오류 화면도 사이트 디자인으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-405-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-405-after.png) |
+
+**404 화면의 로그인 상태**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-404-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-404-after.png) |
+
+**휴대폰 홈 배너**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-mhome-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-mhome-after.png) |
+
+**빈 방명록의 회색 줄**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-guestbook-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-guestbook-after.png) |
+
+**카카오톡 공유**
+
+![](https://github.com/practicech/blog/releases/download/v1.45.0/v1450-kakao.png)
 
 ---
 
@@ -217,12 +563,64 @@
 - Nginx 설정 예시 HTTP/2를 1.18 형식으로
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**검색 오타 고침·비슷한 글**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-search-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-search-after.png) |
+
+**밑줄 링크를 알약 버튼으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-explore-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-series-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-series-after.png) |
+
+**공유하기 메뉴 정리**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-share-pc-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-share-pc-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-share-mobile-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-share-mobile-after.png) |
+
+**글 아래 관련 글 4개**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-related-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-related-after.png) |
+
+**표 여백·미션 화면 대비**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-table-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-table-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-mission-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-mission-after.png) |
+
+**비밀번호 규칙 표시·프로필 잔디**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-password-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-password-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-grass-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.44.0/v1440-grass-after.png) |
+
 ---
 
 ## [1.43.0] — 2026-10-14 · 개인 확장 (좋아요한 글 빨간 하트)
 
 - **088 고침 좋아요한 글 하트**: 로그인한 사람이 좋아요한 글은 모든 목록 카드의 하트가 빨갛게(화면의 카드 번호를 `GET /api/likes/mine`로 한 번에 물음, 회원 화면에만)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**좋아요한 글은 빨간 하트**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.43.0/v1430-likes-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.43.0/v1430-likes-after.png) |
 
 ---
 
@@ -243,6 +641,27 @@
 - **글 화면 넓게**: 본문 칸 768px(휴대폰은 꽉 참), 본문 17.6px·줄 간격 1.8, 사진 크게 가운데, ····공유하기 버튼의 ⇅·⌄ 뺌, 조회수 안내문은 마우스를 올릴 때만
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**카드 높이 맞춤**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-cards-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-cards-after.png) |
+
+**내 블로그에 "친구 N"**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-blog-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-blog-after.png) |
+
+**글 화면 넓게**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.41.0/v1410-post-after.png) |
+
 ---
 
 ## [1.40.0] — 2026-10-14 · 개인 확장 (사진 칸 줄마다, 목록 넓게)
@@ -250,6 +669,21 @@
 - **빈 사진 칸 고침(088 후속)**: 같은 줄에 사진 카드가 있을 때만 빈 사진 칸, 화면 크기가 바뀌거나 더 불러오면 줄마다 다시 계산
 - **목록 넓게**: 홈·피드·탐색·검색·태그·블로그·머리말·꼬리말 1440px, 홈은 1280px부터 4개씩(읽기·글쓰기·설정·약관은 그대로)
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**빈 사진 칸은 사진 있는 줄에만**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.40.0/v1400-slots-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.40.0/v1400-slots-after.png) |
+
+**목록 화면을 넓게**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.40.0/v1400-wide-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.40.0/v1400-wide-after.png) |
 
 ---
 
@@ -259,6 +693,15 @@
 - **091 무한 스크롤은 내려갔을 때만**: 목록 끝 반 화면 안으로 내려가면 한 묶음씩, 한 번에 한 요청, 첫 화면은 모자랄 때만 채움
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**홈을 한 칸으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.39.0/v1390-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.39.0/v1390-home-after.png) |
+
 ---
 
 ## [1.38.0] — 2026-10-14 · 개인 확장 (댓글 좋아요, 문의하기)
@@ -267,6 +710,23 @@
 - **090 문의하기**: 사이트 안 문의 양식(/contact)과 관리자 문의함, 문의 링크에 관리자 개인 주소를 쓰지 않음(`blog.contact.enabled`)
 - **배포 기록에 메일 로그인 확인**: 배포할 때 메일 계정으로 로그인되는지 한 줄로 남김
 - DB: V20 댓글 좋아요, V21 문의(표 추가만)
+
+
+#### 전/후 사진
+
+**댓글·답글 좋아요**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.38.0/v1380-comments-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.38.0/v1380-comments-after.png) |
+
+**문의하기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.38.0/v1380-footer-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.38.0/v1380-footer-after.png) |
+
+![](https://github.com/practicech/blog/releases/download/v1.38.0/v1380-contact.png)
 
 ---
 
@@ -278,6 +738,36 @@
 - **프로필 사진 자르기**: 둥근 안내선과 어두운 모서리, 초록 확대 막대
 - DB 바뀜 없음
 
+
+#### 전/후 사진
+
+**GitHub 링크**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-footer-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-footer-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-home-side-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-home-side-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-settings-links-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-settings-links-after.png) |
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-mobile-menu-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-mobile-menu-after.png) |
+
+**댓글 아바타**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-comments-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-comments-after.png) |
+
+**프로필 사진 자르기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-cropper-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.37.0/v1370-cropper-after.png) |
+
 ---
 
 ## [1.36.1] — 2026-10-14 · 개인 확장 (네이버 사이트 확인, 가입 고침)
@@ -286,6 +776,15 @@
 - **가입 화면 순서 고침**: 코드 확인 전 이메일 칸에서 Enter를 누르면 [인증 코드 받기]가 눌리고 가입 폼은 보내지 않음, 서버도 화면 순서대로 검사(약관 안내는 약관 칸 바로 위)
 - **메일 보낸 사람 이름**: 인증 메일이 "글그린"으로 보임
 - DB 바뀜 없음
+
+
+#### 전/후 사진
+
+**가입 화면에서 Enter를 눌렀을 때**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.36.1/v1361-signup-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.36.1/v1361-signup-after.png) |
 
 ---
 
