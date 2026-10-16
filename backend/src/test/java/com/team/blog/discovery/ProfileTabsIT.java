@@ -159,9 +159,18 @@ class ProfileTabsIT extends IntegrationTestBase {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/manage/series?error=SERIES_POSTS_REQUIRED"));
         assertThat(page("/manage/series?error=SERIES_POSTS_REQUIRED", me)).contains("넣을 글을 하나 이상 골라 주세요");
+        // 이름 바꾸기(같은 이름은 안내), 삭제는 묶음만 풀고 글은 남는다
+        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "새 이름 시리즈").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForObject("SELECT title FROM series WHERE id = ?", String.class, sid)).isEqualTo("새 이름 시리즈");
+        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "x").with(csrf()).with(TestAuth.member(other)))
+                .andExpect(status().isNotFound());
         // 글쓰기 발행 설정에 시리즈 칸(이 글이 든 시리즈가 골라져 있다)
         assertThat(page("/write/" + c, me)).contains("id=\"series-pick\"").contains("+ 새 시리즈 만들기")
-                .containsPattern("value=\"" + sid + "\" selected=\"selected\">관리 시리즈");
+                .containsPattern("value=\"" + sid + "\" selected=\"selected\">새 이름 시리즈");
+        mockMvc.perform(post("/manage/series/{id}/delete", sid).with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ?", Integer.class, sid)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE id IN (?, ?, ?) AND deleted_at IS NULL", Integer.class, a, b, c)).isEqualTo(3);
     }
 
     @Test

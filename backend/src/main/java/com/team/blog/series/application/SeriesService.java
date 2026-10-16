@@ -225,6 +225,31 @@ public class SeriesService {
         return target;
     }
 
+    /** 106: 이름 바꾸기. 1~60자, 내 다른 시리즈와 같은 이름이면 안 된다. */
+    @Transactional
+    public void rename(Optional<CurrentUser> current, long seriesId, String newTitle) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        String title = newTitle == null ? "" : newTitle.strip();
+        if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
+            throw new PostContentException("SERIES_TITLE_INVALID");
+        }
+        Integer taken = jdbc.queryForObject("SELECT count(*) FROM series WHERE member_id = ? AND title = ? AND id <> ?", Integer.class,
+                me.memberId(), title, seriesId);
+        if (taken != null && taken > 0) {
+            throw new PostContentException("SERIES_TITLE_TAKEN");
+        }
+        jdbc.update("UPDATE series SET title = ? WHERE id = ?", title, seriesId);
+    }
+
+    /** 106: 시리즈 묶음만 지운다(글은 그대로, series_post는 CASCADE). */
+    @Transactional
+    public void delete(Optional<CurrentUser> current, long seriesId) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        jdbc.update("DELETE FROM series WHERE id = ?", seriesId);
+    }
+
     /** 106: 관리 탭에서 내 시리즈 화면 주소를 만들 때. */
     public String handle(long memberId) {
         return jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, memberId);

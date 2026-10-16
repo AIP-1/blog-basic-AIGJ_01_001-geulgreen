@@ -67,6 +67,21 @@
             </li>
         </ol>
         <p th:if="${items.size() == 1}" class="help">마지막 글을 빼면 시리즈도 없어져요</p>
+        <details class="series-settings">
+            <summary>이름 바꾸기·삭제</summary>
+            <form class="inline-form" method="post" th:action="@{/manage/series/{id}/rename(id=${s.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <label th:for="${'series-title-' + s.id()}" class="visually-hidden">새 이름</label>
+                <input th:id="${'series-title-' + s.id()}" name="title" type="text" maxlength="60" required th:value="${s.title()}">
+                <button type="submit" class="btn btn-sm">이름 바꾸기</button>
+            </form>
+            <form class="inline-form" method="post" th:action="@{/manage/series/{id}/delete(id=${s.id()})}"
+                  data-confirm="시리즈를 지울까요? 글은 그대로 남아요.">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-sm">시리즈 삭제</button>
+                <span class="help">글은 지우지 않고 묶음만 풀어요</span>
+            </form>
+        </details>
         <form th:unless="${freePosts.isEmpty()}" method="post" th:action="@{/manage/series/{id}/add(id=${s.id()})}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <details>
@@ -80,6 +95,7 @@
             </details>
         </form>
     </section>
+    <script th:src="@{/js/series/manage.js}" defer></script>
 </main>
 </body>
 </html>

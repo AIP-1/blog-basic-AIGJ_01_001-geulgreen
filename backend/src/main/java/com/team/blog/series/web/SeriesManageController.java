@@ -27,7 +27,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class SeriesManageController {
 
     private static final String PAGE = "/manage/series";
-    private static final Set<String> ERRORS = Set.of("SERIES_TITLE_INVALID", "SERIES_POSTS_REQUIRED");
+    private static final Set<String> ERRORS = Set.of("SERIES_TITLE_INVALID", "SERIES_POSTS_REQUIRED", "SERIES_TITLE_TAKEN");
 
     private final SeriesService series;
     private final CurrentUserProvider currentUserProvider;
@@ -66,6 +66,22 @@ public class SeriesManageController {
     public RedirectView move(@PathVariable("id") long id, @RequestParam("postId") long postId, @RequestParam("dir") String dir) {
         series.move(currentUserProvider.current(), id, postId, "up".equals(dir));
         return seeOther(PAGE + "#series-" + id);
+    }
+
+    @PostMapping(PAGE + "/{id}/rename")
+    public RedirectView rename(@PathVariable("id") long id, @RequestParam("title") String title) {
+        try {
+            series.rename(currentUserProvider.current(), id, title);
+            return seeOther(PAGE + "#series-" + id);
+        } catch (PostContentException e) {
+            return seeOther(PAGE + "?error=" + e.getCode());
+        }
+    }
+
+    @PostMapping(PAGE + "/{id}/delete")
+    public RedirectView delete(@PathVariable("id") long id) {
+        series.delete(currentUserProvider.current(), id);
+        return seeOther(PAGE);
     }
 
     private RedirectView addAll(List<Long> postIds, Long seriesId, String newTitle) {
