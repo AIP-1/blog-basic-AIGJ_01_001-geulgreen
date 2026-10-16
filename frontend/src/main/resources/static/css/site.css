@@ -1584,3 +1584,22 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: center; }
+/* 강성찬 개인 확장(10-16): 처음 온 사람 안내 — 배너 아래 한 줄, 첫 글 전 "시작하기 3단계", 인증 완료 다음 단추 */
+.home-intro { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
+    margin: -16px 0 24px; padding: 12px 18px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.home-intro p { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--color-text); }
+.home-intro .icon-inline { color: var(--color-brand); width: 1.2em; height: 1.2em; }
+.start-guide { margin: 0 0 24px; padding: 16px 18px; border-radius: 16px; background: var(--color-brand-soft); }
+.start-guide h2 { margin: 0 0 12px; font-size: 1.05em; }
+.start-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 720px) { .start-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.start-steps form { margin: 0; }
+.start-steps a, .start-steps button { all: unset; box-sizing: border-box; width: 100%; height: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); cursor: pointer; }
+.start-steps a:hover, .start-steps button:hover { border-color: var(--color-brand); }
+.start-steps a:focus-visible, .start-steps button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.start-steps strong { display: block; }
+.start-steps .help { display: block; font-size: .85em; }
+.start-no { flex: none; width: 28px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--color-brand-fill); color: var(--color-on-fill); font-weight: 700; }
+.verify-next { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

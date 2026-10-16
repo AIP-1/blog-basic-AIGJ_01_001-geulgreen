@@ -61,7 +61,7 @@ class EmailVerificationIT extends IntegrationTestBase {
     @Test
     void validLinkVerifiesOnceAndReuseShowsExpired() throws Exception {
         String token = latestToken(1);
-        assertThat(visit(token)).contains("인증이 완료됐어요");
+        assertThat(visit(token)).contains("인증이 완료됐어요").contains("오늘의 주제로 첫 글 쓰기").contains("href=\"/missions\"");
         assertThat(verified()).isTrue();
         assertThat(visit(token)).contains("링크가 만료됐어요").contains("인증 메일 다시 보내기");
     }
