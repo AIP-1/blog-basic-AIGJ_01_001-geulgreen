@@ -84,7 +84,7 @@ public class PostDetailController {
         model.addAttribute("canonicalUrl", origin + post.url());
         String image = post.firstImageUrl();
         model.addAttribute("ogImage", image != null ? (image.startsWith("/") ? origin + image : image)
-                : origin + "/images/og-default.png");
+                : origin + "/images/og-cat.jpg");
         if (post.isPublic()) {
             model.addAttribute("pageMeta", new com.team.blog.shared.web.PageMeta(post.title(), post.description(),
                     origin + post.url(), (String) model.getAttribute("ogImage"), String.valueOf(post.firstPublicAt()),

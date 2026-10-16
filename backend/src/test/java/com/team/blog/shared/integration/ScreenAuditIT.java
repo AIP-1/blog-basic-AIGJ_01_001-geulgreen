@@ -25,7 +25,7 @@ class ScreenAuditIT extends IntegrationTestBase {
         assertThat(html).contains("아직 방명록이 없어요").doesNotContain("class=\"note-list\"");
         String terms = mockMvc.perform(get("/terms")).andReturn().getResponse().getContentAsString();
         assertThat(terms).contains("<meta name=\"description\"").contains("<meta property=\"og:title\" content=\"글그린\">")
-                .contains("/terms\">").contains("og-default.png").contains("naver-site-verification");
+                .contains("/terms\">").contains("og-cat.jpg").contains("naver-site-verification");
     }
 
     @Test
