@@ -137,6 +137,22 @@
             <p id="alt-summary" class="help"></p>
             <div id="alt-fields"></div>
         </div>
+        <!-- 106 강성찬 개인 확장: 시리즈(고르면 바로 저장, 발행과 따로). 새 시리즈는 이 글과 함께 만든다 -->
+        <div class="field series-field" th:if="${editorSeries != null}" th:attr="data-post-id=${post.postId()}">
+            <label for="series-pick">시리즈</label>
+            <select id="series-pick">
+                <option value="">시리즈에 넣지 않음</option>
+                <option th:each="sr : ${editorSeries}" th:value="${sr.id()}" th:text="${sr.title()}"
+                        th:selected="${editorSeriesId == sr.id()}">시리즈</option>
+                <option value="new">+ 새 시리즈 만들기</option>
+            </select>
+            <div id="series-new-row" class="inline-form" hidden>
+                <label for="series-new-title" class="visually-hidden">새 시리즈 이름</label>
+                <input id="series-new-title" type="text" maxlength="60" placeholder="새 시리즈 이름">
+                <button type="button" id="series-new-save" class="btn btn-sm">만들기</button>
+            </div>
+            <p class="help" id="series-status" role="status"></p>
+        </div>
         <!-- 055 강성찬 개인 확장: 카드 대표 사진(고르면 바로 저장, 발행과 따로) -->
         <div class="field cover-field" th:if="${coverEnabled}" th:attr="data-post-id=${post.postId()}">
             <p class="field-label" id="cover-label">카드 대표 사진</p>
@@ -203,6 +219,7 @@
     <script th:src="@{/js/editor/write-check.js}" defer th:if="${writeCheck}"></script>
     <script th:src="@{/js/editor/publish.js}" defer></script>
     <script th:src="@{/js/editor/ai-tags.js}" defer></script>
+    <script th:src="@{/js/editor/series.js}" defer></script>
     <script th:src="@{/js/editor/image-upload.js}" defer></script>
     <script th:if="${coverEnabled}" th:src="@{/js/editor/cover.js}" defer></script>
     <script th:src="@{/js/gif-play.js}" defer></script>

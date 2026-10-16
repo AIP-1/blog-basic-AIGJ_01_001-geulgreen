@@ -1530,3 +1530,13 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
 
+/* 106 강성찬 개인 확장: 내 글 관리 [시리즈] 탭 */
+.series-pick { border: 0; padding: 0; margin: 12px 0; display: grid; gap: 6px; max-height: 280px; overflow-y: auto; }
+.series-pick legend { margin-bottom: 6px; }
+.series-pick label { display: flex; gap: 8px; align-items: baseline; }
+.series-manage .manage-head h2 { margin: 0; }
+.series-manage-items { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.series-manage-items li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.series-manage-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-manage-items form { margin: 0; }
+.series-field select, .series-field input { margin-top: 6px; }

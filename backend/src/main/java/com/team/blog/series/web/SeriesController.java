@@ -58,8 +58,7 @@ public class SeriesController {
 
     @GetMapping("/@{handle}/series/{id}")
     public String detail(@PathVariable("handle") String handle, @PathVariable("id") long id,
-                         @RequestParam(value = "order", required = false) String order,
-                         @RequestParam(value = "edit", required = false) String edit, HttpServletRequest request,
+                         @RequestParam(value = "order", required = false) String order, HttpServletRequest request,
                          Model model) {
         BlogOwner owner = owners.resolve(handle).orElseThrow(NotFoundException::new);
         if (!header.fill(owner, "series", request, model)) {
@@ -70,10 +69,8 @@ public class SeriesController {
         // 067 후속: 홈과 같은 카드
         List<PostCard> cards = series.cards(id);
         // 105 강성찬 개인 확장: 1편부터(기본)·최신 글부터. 편 번호는 그대로(화면이 total로 거꾸로 센다).
-        // 앞으로·뒤로는 주인이 [순서 바꾸기]를 눌렀을 때만(1편부터 순서로)
-        boolean editing = edit != null && Boolean.TRUE.equals(model.getAttribute("isOwner"));
-        boolean latest = !editing && "latest".equals(order);
-        model.addAttribute("editing", editing);
+        // 106: 순서 바꾸기는 내 글 관리 [시리즈] 탭으로 옮겼다
+        boolean latest = "latest".equals(order);
         model.addAttribute("order", latest ? "latest" : "first");
         model.addAttribute("total", cards.size());
         if (latest) {
@@ -97,14 +94,6 @@ public class SeriesController {
         return seeOther(safe(back));
     }
 
-
-    /** 100 강성찬 개인 확장: 시리즈 화면에서 글 순서를 한 칸 앞(up)·뒤로. 105: 순서 바꾸기 화면(?edit)으로 돌아간다. */
-    @PostMapping("/@{handle}/series/{id}/move")
-    public RedirectView move(@PathVariable("handle") String handle, @PathVariable("id") long id,
-                             @RequestParam("postId") long postId, @RequestParam("dir") String dir) {
-        series.move(currentUserProvider.current(), id, postId, "up".equals(dir));
-        return seeOther(com.team.blog.shared.web.BlogPaths.of(handle) + "/series/" + id + "?edit=1");
-    }
 
     @PostMapping("/posts/{postId}/series/remove")
     public RedirectView remove(@PathVariable("postId") long postId, @RequestParam(value = "back", required = false) String back) {
