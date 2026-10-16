@@ -7,6 +7,49 @@
 
 ---
 
+## [1.65.3] — 2026-10-16 · 개인 확장 (링크 미리보기 고양이 그림)
+
+- 링크 미리보기(og:image) 기본 그림을 첫 화면 고양이 그림으로(블로그 주소, 사진 없는 글 포함)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**링크 미리보기 기본 그림**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.3/v1653-og-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.3/v1653-og-after.jpg) |
+
+---
+
+## [1.65.2] — 2026-10-16 · 개인 확장 (검색 결과 문구)
+
+- 홈 title "글그린 블로그 - 매일 쓴 글이 잔디처럼 자라는 곳"과 새 meta description, 모든 화면에 og:site_name=글그린, 홈에 WebSite 구조화 데이터(JSON-LD)
+- 화면 바뀜 없음(사진 없음), DB 바뀜 없음
+
+---
+
+## [1.65.1] — 2026-10-16 · 개인 확장 (발행 설정 창 정리)
+
+- 발행 설정 창: 칸 제목 통일과 구분선, 공개 범위 둥근 버튼, 이모지 대신 선 아이콘, 시리즈는 목록 하나("새 시리즈 만들기"일 때만 이름 칸), 대표 사진 버튼 한 줄, 취소·발행 오른쪽 아래 고정
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**발행 설정 창**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-m-after.png) |
+
+---
+
 ## [1.65.0] — 2026-10-16 · 개인 확장 (시리즈 최근 업데이트)
 
 - **108 시리즈 최근 업데이트**: 시리즈 카드에 "글 N편 · 날짜 업데이트", 블로그 시리즈 목록은 최근 업데이트 순, 탐색 시리즈 탭 60개 넘으면 더 보기, 팔로워 새 글 알림이 시리즈 글이면 "시리즈 「이름」 새 편"

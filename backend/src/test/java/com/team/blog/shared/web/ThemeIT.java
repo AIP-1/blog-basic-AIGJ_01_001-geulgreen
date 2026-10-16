@@ -59,7 +59,8 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"").contains("id=\"theme-switch\"")
                 .containsPattern("/js/theme-switch-[0-9a-f]{32}\\.js")
                 .doesNotContain("<style>").doesNotContainPattern("<script>(?!</script>)");
-        assertThat(Pattern.compile("<script(?![^>]*\\ssrc=)[^>]*>").matcher(html).find()).as(path + " 인라인 스크립트").isFalse();
+        // 검색용 구조화 데이터(JSON-LD)는 실행되지 않는 자료라 예외
+        assertThat(Pattern.compile("<script(?![^>]*\\ssrc=)(?![^>]*application/ld\\+json)[^>]*>").matcher(html).find()).as(path + " 인라인 스크립트").isFalse();
     }
 
     @Test

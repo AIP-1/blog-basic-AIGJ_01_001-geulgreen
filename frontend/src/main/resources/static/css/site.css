@@ -1552,10 +1552,38 @@ main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) 
 .series-manage-items li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
 .series-manage-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .series-manage-items form { margin: 0; }
-.series-field select, .series-field input { margin-top: 6px; }
 .series-card { display: flex; }
 .series-card a { flex: 1; }
 .series-settings .field input { width: 100%; max-width: 480px; }
+/* 10-16 발행 설정 정리(강성찬 개인 확장): 칸마다 같은 제목(굵은 작은 글씨)·구분선·간격, 버튼은 오른쪽 아래에 고정 */
+dialog.publish-panel { padding: 20px 24px 0; }
+dialog.publish-panel h2#publish-heading { margin: 0 0 4px; }
+dialog.publish-panel > fieldset, dialog.publish-panel > .field { border: 0; border-top: 1px solid var(--color-border); border-radius: 0;
+    margin: 0; padding: 16px 0; min-width: 0; }
+dialog.publish-panel > fieldset:first-of-type { border-top: 0; }
+dialog.publish-panel legend, dialog.publish-panel > .field > label:first-child, dialog.publish-panel .field-label {
+    display: block; float: left; width: 100%; margin: 0 0 10px; padding: 0; font-weight: 600; font-size: .95em; color: var(--color-text); }
+dialog.publish-panel legend + *, dialog.publish-panel > .field > label:first-child + *, dialog.publish-panel .field-label + * { clear: both; }
+dialog.publish-panel .help { margin: 6px 0 0; }
+.pp-visibility label { display: inline-flex; align-items: center; gap: 6px; margin: 0 6px 8px 0; padding: 6px 14px;
+    border: 1px solid var(--color-border); border-radius: 999px; cursor: pointer; }
+.pp-visibility label:has(input:checked) { border-color: var(--color-brand); color: var(--color-brand); font-weight: 600; }
+.pp-visibility input { margin: 0; accent-color: var(--color-brand); }
+dialog.publish-panel .ai-tags { margin-top: 10px; }
+dialog.publish-panel #ai-suggest { display: inline-flex; align-items: center; gap: 6px; }
+dialog.publish-panel #ai-suggest .icon, dialog.publish-panel .check-row .icon { width: 18px; height: 18px; }
+dialog.publish-panel .check-row { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.series-field select { width: 100%; }
+.series-new-row { display: flex; gap: 8px; margin-top: 8px; }
+.series-new-row input { flex: 1; min-width: 0; }
+dialog.publish-panel .cover-choice { width: 88px; height: 64px; font-size: .85em; }
+.pp-actions { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 8px; margin: 0 -24px; padding: 14px 24px 18px;
+    background: var(--color-surface); border-top: 1px solid var(--color-border); }
+dialog.publish-panel #publish-errors:empty { display: none; }
+.series-new-row[hidden] { display: none; }
+.pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
+dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
+.series-new-row { align-items: center; }
 
 /* 109 강성찬 개인 확장: 내 글 여러 개 골라 한 번에. 스크립트가 켜졌을 때만(.bulk-on) 체크 칸이 보인다 */
 .row-check { display: none; flex: none; margin: 0; }

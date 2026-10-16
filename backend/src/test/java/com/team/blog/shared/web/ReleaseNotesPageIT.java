@@ -15,7 +15,16 @@ class ReleaseNotesPageIT extends IntegrationTestBase {
         String html = mockMvc.perform(get("/releases")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("<h1>릴리스 노트</h1>").contains("[1.0.0]")
                 .contains("025~036").doesNotContain("<del>");
+        // 전/후 사진(GitHub Release 첨부)은 우리 주소의 <img>로, 외부 이미지 대체글([이미지])로 바뀌지 않는다
+        assertThat(html).contains("<img src=\"/releases/img/v1.59.0/v1590-home-before.png\"")
+                .doesNotContain("[이미지] https://github.com/practicech/blog/releases/download/");
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("href=\"/releases\"");
+    }
+
+    @Test
+    void releaseImageOnlyAcceptsTagAndFileShapes() throws Exception {
+        mockMvc.perform(get("/releases/img/latest/x.png")).andExpect(status().isNotFound());
+        mockMvc.perform(get("/releases/img/v1.0.0/x.gif")).andExpect(status().isNotFound());
     }
 
     @Test
