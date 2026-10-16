@@ -7,6 +7,29 @@
 
 ---
 
+## [1.59.0] — 2026-10-16 · 개인 확장 (글 카드 요약, 내 문의, AI 연결 시리즈)
+
+- **103 글 카드 빈 칸 채우기**: 목록 요약을 600자까지 저장해 사진 카드 옆 글 카드의 빈 칸을 요약으로 채움(기존 글은 다시 렌더링 작업이 채움)
+- **099 내 문의**: 문의하기에 "내 문의" 탭, 보낸 문의와 답장 보기, 답장이 오면 알림
+- AI에 연결하기: 임시글을 시리즈에 넣기(이름·번호, 없으면 새로 만듦)
+- DB: V24 글 요약 600자로 넓힘, V25 알림에 문의 번호 칸(더하기만)
+
+#### 전/후 사진
+
+**사진 카드 옆 글 카드의 빈 칸 채우기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.59.0/v1590-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.59.0/v1590-home-after.png) |
+
+**내 문의**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.59.0/v1590-contact-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.59.0/v1590-contact-after.png) |
+
+---
+
 ## [1.58.3] — 2026-10-16 · 문서
 
 - CHANGELOG의 1.36.1~1.58.2 항목에 릴리스 노트와 같은 전/후 사진을 붙임(앱 바뀜 없음)
