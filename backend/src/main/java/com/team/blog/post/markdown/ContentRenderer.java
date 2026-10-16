@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 public class ContentRenderer {
 
     /** 렌더링 규칙 버전. 렌더러·변환·정화 규칙을 바꾸면 올리고 다시 렌더링 배치를 돌린다(12 §7-7). */
-    public static final int RENDER_VERSION = 4; // 2: 008 GIF 정지 장면 규칙, 3: 058 밑줄·글자 색(강성찬 개인 확장), 4: 103 요약 600자
+    public static final int RENDER_VERSION = 5; // 2: 008 GIF 정지 장면 규칙, 3: 058 밑줄·글자 색(강성찬 개인 확장), 4: 103 요약 600자, 5: 104 잘린 요약 끝에 …
 
     private static final List<Extension> EXTENSIONS = List.of(TablesExtension.create(), StrikethroughExtension.create(),
             TaskListItemsExtension.create(), AutolinkExtension.create());

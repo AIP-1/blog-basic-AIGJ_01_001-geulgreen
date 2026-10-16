@@ -134,10 +134,10 @@ class ContentRendererSyntaxTest {
     }
 
     @Test
-    void excerptIsCutBeforeWordAt600() {
-        String md = "가".repeat(595) + " 다섯글자단어 끝";
+    void excerptIsCutBeforeWordWithEllipsis() {
+        String md = "가".repeat(594) + " 다섯글자단어 끝";
         String excerpt = RENDERER.render(md).excerpt();
-        assertThat(excerpt).isEqualTo("가".repeat(595));
+        assertThat(excerpt).isEqualTo("가".repeat(594) + "…"); // 104: 잘리면 …, …까지 600자 안
         assertThat(RENDERER.render("짧은 글").excerpt()).isEqualTo("짧은 글");
         assertThat(RENDERER.render("").excerpt()).isEmpty();
     }

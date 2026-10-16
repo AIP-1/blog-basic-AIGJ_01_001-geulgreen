@@ -22,7 +22,7 @@ import org.commonmark.node.Text;
  */
 final class ExcerptExtractor extends AbstractVisitor {
 
-    static final int MAX = 600;
+    static final int MAX = 599; // 잘리면 …까지 600자(V24 칸)
 
     private final StringBuilder out = new StringBuilder();
 
@@ -37,11 +37,12 @@ final class ExcerptExtractor extends AbstractVisitor {
             return text;
         }
         int end = text.offsetByCodePoints(0, MAX);
+        // 104: 잘린 요약은 끝에 …(카드가 글 끝까지 다 보여 줄 때도 문장 중간에서 뚝 끊겨 보이지 않게)
         if (Character.isWhitespace(text.charAt(end))) {
-            return text.substring(0, end).strip();
+            return text.substring(0, end).strip() + "…";
         }
         int lastSpace = text.lastIndexOf(' ', end);
-        return (lastSpace > 0 ? text.substring(0, lastSpace) : text.substring(0, end)).strip();
+        return (lastSpace > 0 ? text.substring(0, lastSpace) : text.substring(0, end)).strip() + "…";
     }
 
     @Override
