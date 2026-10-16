@@ -56,13 +56,24 @@
     return span;
   }
 
-  // 104: fragments/icons :: heart와 같은 선 아이콘(고정 문자열이라 innerHTML이어도 안전)
-  var HEART = '<svg class="icon icon-inline" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.2-8.8C1.3 8.1 3.2 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3.1 1.7-1.9 3.2-3.1 5.3-3.1 3.5 0 5.4 3.6 3.9 6.7C19 15.6 12 20 12 20z"/></svg>';
-
   function card(item, showAuthor) {
     var article = el('article', 'post-card');
     article.dataset.postId = item.id;
     var body = el('div', 'card-body');
+    { // 084: 머리 줄은 늘 둔다(비면 CSS가 숨김)
+      var top = el('p', 'card-top');
+      if (showAuthor) {
+        var a = el('a', 'card-author'); a.href = item.author.blogUrl || '/' + item.author.handle; // 076: 새 주소(서버가 정함)
+        a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.handle || ''));
+        top.appendChild(a);
+      }
+      if (item.firstTag) {
+        var tag = el('a', 'card-tag chip' + (item.firstTag.length % 4), item.firstTag);
+        tag.href = '/tags/' + encodeURIComponent(item.firstTag);
+        top.appendChild(tag);
+      }
+      body.appendChild(top);
+    }
     var h2 = el('h2', 'card-title'); var link = el('a', 'card-link', item.title); link.href = item.url; link.title = item.title;
     h2.appendChild(link); body.appendChild(h2);
     var excerpt = el('p', 'card-excerpt');
@@ -73,17 +84,6 @@
       excerpt.textContent = item.excerpt || '';
     }
     body.appendChild(excerpt);
-    // 104(velog식): 요약 아래 회색 줄 "날짜 · N개의 댓글 · 첫 태그"(fragments/post-card.html과 같은 모양)
-    var meta = el('p', 'card-meta');
-    var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
-    meta.appendChild(time);
-    meta.appendChild(el('span', 'card-comments', '· ' + item.commentCount + '개의 댓글'));
-    if (item.firstTag) {
-      var tag = el('a', 'card-tag chip' + (item.firstTag.length % 4), item.firstTag);
-      tag.href = '/tags/' + encodeURIComponent(item.firstTag);
-      meta.appendChild(tag);
-    }
-    body.appendChild(meta);
     article.appendChild(body);
     // 시안(10-08): 사진이 없으면 빈 칸을 두지 않는다
     if (item.thumbnailUrl) {
@@ -92,14 +92,11 @@
       article.appendChild(thumb);
     }
     var foot = el('p', 'card-foot');
-    if (showAuthor) {
-      var a = el('a', 'card-author'); a.href = item.author.blogUrl || '/' + item.author.handle; // 076: 새 주소(서버가 정함)
-      a.appendChild(el('span', 'card-by', 'by')); a.appendChild(avatar(item.author)); a.appendChild(el('span', null, item.author.handle || ''));
-      foot.appendChild(a);
-    }
-    var likes = el('span', 'card-likes'); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount);
-    likes.innerHTML = HEART; likes.appendChild(el('span', null, String(item.likeCount)));
-    foot.appendChild(likes);
+    var likes = el('span', 'card-likes', '♡ ' + item.likeCount); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount); foot.appendChild(likes);
+    var comments = el('span', 'card-comments'); comments.setAttribute('aria-label', '댓글 ' + item.commentCount);
+    comments.appendChild(lineIcon('<path d="M20 12a7.5 7.5 0 0 1-11.1 6.6L4 20l1.4-4.5A7.5 7.5 0 1 1 20 12z"/>')); comments.appendChild(el('span', null, String(item.commentCount))); foot.appendChild(comments);
+    var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
+    foot.appendChild(time);
     article.appendChild(foot);
     return article;
   }

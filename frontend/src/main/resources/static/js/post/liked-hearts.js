@@ -26,8 +26,7 @@
           if (!set[c.dataset.postId]) { return; }
           var el = c.querySelector('.card-likes');
           el.classList.add('is-liked');
-          // 104: 선 아이콘 하트는 CSS가 채운다(글자 하트 ♡가 남은 카드만 글자를 바꾼다)
-          if (!el.querySelector('svg')) { el.textContent = el.textContent.replace('♡', '♥'); }
+          el.textContent = el.textContent.replace('♡', '♥');
           el.setAttribute('aria-label', (el.getAttribute('aria-label') || '좋아요') + ', 내가 좋아요 함');
         });
       })

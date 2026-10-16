@@ -177,12 +177,14 @@ main.list-page { max-width: var(--page-wide); }
 .card-excerpt { margin: 0; color: var(--color-text-muted); font-size: .93em; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3;
                 -webkit-box-orient: vertical; overflow: hidden; }
 /* 084: 두 칸 이상 나란할 때는 제목 2줄 자리를 늘 잡아 요약·사진·반응 줄의 높이를 옆 카드와 맞춘다 */
-@media (min-width: 640px) { .card-grid .card-title { min-height: calc(2em * 1.45); } }
+/* 104: 한 줄 제목 아래 빈 줄을 두지 않는다(줄 높이는 card-rows.js가 맞춘다) */
 .card-thumb { aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: var(--color-thumb-empty); }
 /* 085 강성찬 개인 확장: 세로 카드 사진은 맨 위 같은 비율(벨로그처럼). 두 칸 이상이고 같은 목록에 사진 카드가 있으면
    사진 없는 카드도 같은 자리에 빈 사진 칸(색 역할)을 둬 빈 공간 없이 줄을 맞춘다(요약은 최대 160자라 글로는 못 채움).
    088: 홈·미션·내 글·시리즈(.home-cards)도 같은 세로 카드(사진을 왼쪽에 두던 가로 카드 없앰) */
 .card-grid .card-thumb { order: -1; }
+/* 104 강성찬 개인 확장(velog식): 사진은 카드 위쪽 끝까지 꽉(안쪽 여백 없이, 위 모서리만 둥글게) */
+.card-grid .post-card > .card-thumb { margin: -18px -18px 0; border-radius: 17px 17px 0 0; }
 /* 088 후속: 빈 사진 칸은 두지 않는다. 두 칸 이상 나란한 목록은 js/post/card-rows.js가 모든 줄을 가장 큰 카드 높이로 맞추고,
    사진 없는 카드(.row-thumb)는 요약 칸이 남는 높이를 차지해 그 높이에 맞는 줄 수로 자른다. 반응 줄은 맨 아래 */
 .card-grid .post-card.row-thumb:not(:has(.card-thumb)) .card-excerpt { flex: 1 1 0; min-height: 0; }
@@ -1523,15 +1525,8 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .stats-top-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--color-brand-fill); }
 @media (max-width: 560px) { .stats-top-bar { width: 48px; } }
 
-/* 104 강성찬 개인 확장(velog식 카드): (사진) · 제목 · 요약 · 회색 줄 "날짜 · N개의 댓글 · 첫 태그" · 가는 선 · by 글쓴이 ……… ♥ N.
-   색·글꼴·선 아이콘은 글그린 것 그대로 */
-.card-meta { margin: 4px 0 0; display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--color-text-muted); font-size: .8em; }
-.card-meta .card-date { margin: 0; flex: none; }
-.card-meta .card-comments { display: inline; font-weight: 400; flex: none; }
-.card-meta .card-tag { margin-left: 4px; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.post-card > .card-foot { margin: 0 -18px -14px; padding: 10px 18px; border-top: 1px solid var(--color-border); gap: 10px; font-size: .85em; }
-.card-foot .card-author { flex: 0 1 auto; min-width: 0; gap: 6px; font-size: 1em; }
-.card-foot .card-by { color: var(--color-text-muted); font-weight: 400; }
-.card-foot .card-likes { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex: none; }
-.card-likes.is-liked svg path { fill: currentColor; }
+/* 104 후속(chan "가로가 큰 느낌"): 카드는 velog처럼 폭 250~300px. 들어가는 만큼 칸을 채워 넓은 화면은 칸 수가 늘고(4칸 고정이 아님),
+   카드가 넓게 늘어나지 않는다. 휴대폰(한 칸이 250px 안 될 때)은 한 칸. 글 아래 관련 글(2칸)은 그대로 */
+main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
 

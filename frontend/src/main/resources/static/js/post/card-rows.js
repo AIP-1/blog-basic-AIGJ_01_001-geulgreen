@@ -27,7 +27,7 @@
       if (!c) { return; }
       c.classList.remove('row-thumb');
       var ex = c.querySelector('.card-excerpt');
-      if (ex) { ex.style.webkitLineClamp = ''; ex.style.lineClamp = ''; }
+      if (ex) { ex.style.webkitLineClamp = ''; ex.style.lineClamp = ''; ex.style.maxHeight = ''; }
     });
     var cardItems = items.filter(function (n, i) { return cards[i]; });
     if (!sideBySide(cardItems.map(function (n) { return n.getBoundingClientRect().top; }))) { return; }
@@ -39,8 +39,11 @@
       var ex = c.querySelector('.card-excerpt');
       c.classList.add('row-thumb');
       if (!ex) { return; }
-      var n = fitLines(ex.clientHeight, parseFloat(getComputedStyle(ex).lineHeight));
+      var lh = parseFloat(getComputedStyle(ex).lineHeight);
+      var n = fitLines(ex.clientHeight, lh);
       ex.style.webkitLineClamp = String(n); ex.style.lineClamp = String(n);
+      // 104: 칸이 n줄보다 조금 높으면 n+1째 줄 윗부분이 … 아래로 비쳐 문장이 중간에서 끊겨 보였다. 칸을 딱 n줄 높이로
+      if (lh > 0) { ex.style.maxHeight = (n * lh) + 'px'; }
     });
   }
 
