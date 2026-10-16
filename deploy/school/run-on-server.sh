@@ -2,8 +2,9 @@
 # 학교 공용 서버 배포(서버 배포 설명서 10-08): GitHub Actions가 이미지 파일과 함께 이 스크립트를 서버로 보내 실행한다.
 # - DB는 Crowfoot PostgreSQL(밖), Nginx는 서버 공용 Nginx(~/nginx/<도메인>.conf → APP_PORT)
 # - 이 스크립트는 우리 것만 띄운다: Redis 컨테이너 + 앱 컨테이너(APP_PORT로만 열림), 사진은 Docker 볼륨
-# - 무중단 배포(093): 앱을 두 대(APP_PORT, APP_PORT2=APP_PORT+1) 띄우고 Nginx upstream이 둘에 나눠 보낸다.
-#   한 대씩 갈아끼우고, 새 컨테이너가 건강 확인을 통과해야 다음 대로 넘어간다. 그동안 다른 한 대가 요청을 받는다.
+# - 무중단 배포(093): 공용 Nginx는 그대로 APP_PORT(8300)만 보고, 8300에는 우리 전용 작은 Nginx(proxy.conf)를 둔다.
+#   그 뒤에 앱 두 대(APP_PORT+1, APP_PORT+2)를 붙여 한 대씩 갈아끼운다. 새 컨테이너가 건강 확인을 통과해야 다음 대로 넘어가고,
+#   그동안 다른 한 대가 요청을 받는다. 강사님이 공용 Nginx 설정을 바꿀 필요가 없다.
 # - 자동 되돌리기(1.15.0): 새 버전이 3분 안에 안 켜지면 그 대만 전 이미지(team-blog:previous)로 다시 켠다.
 #   마이그레이션은 "추가만" 하므로 새 버전이 DB를 바꾼 뒤에도 옛 버전이 같이 돈다(093 롤링 중에도 마찬가지).
 # - 비밀값은 Actions가 환경 변수로 넘겨주고, 서버에는 0600 권한 env 파일로만 남긴다(다시 시작할 때 필요)
@@ -11,7 +12,8 @@
 #   MAIL_USERNAME MAIL_PASSWORD GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET
 #   (선택) GEMINI_API_KEY, KAKAO_JS_KEY, ADMIN_EMAILS, TELEGRAM_BOT_TOKEN
 set -euo pipefail
-APP_PORT2="${APP_PORT2:-$((${APP_PORT:-8300} + 1))}"
+APP_PORT1="$((${APP_PORT:-8300} + 1))"
+APP_PORT2="$((${APP_PORT:-8300} + 2))"
 
 APP_NAME="${APP_NAME:-team-blog}"
 WORK="${HOME}/${APP_NAME}"
@@ -20,6 +22,8 @@ NET="${APP_NAME}-net"
 REDIS="${APP_NAME}-redis"
 APP="${APP_NAME}-app"
 APP2="${APP_NAME}-app-2"
+PROXY="${APP_NAME}-proxy"
+PROXY_IMAGE="nginx:1.28-alpine"
 APP_MEMORY="${APP_MEMORY:-1g}" # 공용 서버: 한 대당 메모리 상한(JVM은 이것의 75%를 힙으로 씀)
 
 for v in APP_PORT APP_DOMAIN DB_ADDRESS DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_SCHEMA \
@@ -99,7 +103,7 @@ if ! ${DOCKER} ps --format '{{.Names}}' | grep -qx "${REDIS}"; then
 fi
 
 run_app() { # $1 = 컨테이너 이름, $2 = 포트, $3 = 이미지
-  # rm -f는 바로 죽이므로 먼저 stop: 받던 요청을 끝낼 시간(Spring 우아한 종료)을 준다. 새 요청은 Nginx가 다른 대로 보낸다
+  # rm -f는 바로 죽이므로 먼저 stop: 받던 요청을 끝낼 시간(Spring 우아한 종료)을 준다. 새 요청은 우리 Nginx가 다른 대로 보낸다
   ${DOCKER} stop -t 30 "$1" > /dev/null 2>&1 || true
   ${DOCKER} rm -f "$1" > /dev/null 2>&1 || true
   ${DOCKER} run -d --name "$1" --hostname "$1" --network "${NET}" --restart unless-stopped \
@@ -159,6 +163,53 @@ check_telegram() {
   esac
 }
 
+# 우리 전용 Nginx: 공용 Nginx → 127.0.0.1:APP_PORT → 앱 두 대. 호스트 네트워크라 앱 포트(127.0.0.1)를 그대로 본다
+start_proxy() {
+  # 바인드한 파일을 같은 inode로 덮어써야 컨테이너가 새 내용을 본다(mv 금지)
+  cat > "${WORK}/proxy.conf" <<CONF
+map \$http_upgrade \$conn_upgrade {
+    default upgrade;
+    ''      '';
+}
+upstream app {
+    # 한 번 실패하면 10초 동안 빼 둔다(배포 중 꺼진 대를 빨리 피함)
+    server 127.0.0.1:${APP_PORT1} max_fails=1 fail_timeout=10s;
+    server 127.0.0.1:${APP_PORT2} max_fails=1 fail_timeout=10s;
+    keepalive 16;
+}
+server {
+    listen 127.0.0.1:${APP_PORT};
+    client_max_body_size 20M;
+    server_tokens off;
+    location / {
+        proxy_pass http://app;
+        # 한 대가 꺼져 있으면 다른 대로 한 번만 다시 보낸다(POST는 앱에 닿기 전 실패일 때만, Nginx 기본)
+        proxy_next_upstream error timeout http_502 http_503;
+        proxy_next_upstream_tries 2;
+        proxy_next_upstream_timeout 10s;
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 60s;
+        proxy_http_version 1.1;
+        # 공용 Nginx가 붙인 원래 정보를 그대로 넘긴다(앱은 127.0.0.1을 믿을 프록시로 보고 맨 앞 IP를 씀)
+        proxy_set_header Host              \$host;
+        proxy_set_header X-Real-IP         \$http_x_real_ip;
+        proxy_set_header X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$http_x_forwarded_proto;
+        proxy_set_header Upgrade    \$http_upgrade;
+        proxy_set_header Connection \$conn_upgrade;
+    }
+}
+CONF
+  if ${DOCKER} ps --format '{{.Names}}' | grep -qx "${PROXY}"; then
+    ${DOCKER} exec "${PROXY}" nginx -s reload > /dev/null
+    return
+  fi
+  ${DOCKER} rm -f "${PROXY}" > /dev/null 2>&1 || true
+  ${DOCKER} run -d --name "${PROXY}" --network host --restart unless-stopped --memory 64m \
+    -v "${WORK}/proxy.conf:/etc/nginx/conf.d/default.conf:ro" --log-opt max-size=10m --log-opt max-file=3 \
+    "${PROXY_IMAGE}" > /dev/null
+}
+
 # 한 대 교체. 실패하면 그 대만 전 버전으로 되돌리고 1을 돌려준다(다른 대는 손대지 않았으니 사이트는 계속 돈다)
 roll() { # $1 = 컨테이너 이름, $2 = 포트
   # 되돌릴 이미지는 이 대가 지금 쓰는 것(지난 배포가 중간에 멈춰 두 대의 이미지가 다를 수 있음). 처음 띄우는 대면 1번 것
@@ -185,16 +236,35 @@ roll() { # $1 = 컨테이너 이름, $2 = 포트
 echo "== 지금 메모리(공용 서버 확인용)"
 free -m 2>/dev/null | head -2 || true
 nginx -v 2>&1 || true # 1.25.1 이상이면 Nginx 설정의 http2 on;을 켤 수 있다
-${DOCKER} stats --no-stream --format '{{.Name}} {{.MemUsage}}' "${APP}" "${APP2}" 2>/dev/null || true
+${DOCKER} stats --no-stream --format '{{.Name}} {{.MemUsage}}' "${APP}" "${APP2}" "${PROXY}" 2>/dev/null || true
 
-# 2번 대부터: 처음 093을 배포할 때 2번은 아직 Nginx에 없으니 안전하게 먼저 확인된다.
-# 실패하면 1번은 건드리지 않고 멈춘다(빨간 X)
+# 우리 Nginx 이미지는 앱을 건드리기 전에 받아 둔다(못 받으면 아무것도 바꾸지 않고 멈춤)
+${DOCKER} pull -q "${PROXY_IMAGE}" > /dev/null || { echo "${PROXY_IMAGE}를 받지 못했어요. 아무것도 바꾸지 않았어요" >&2; exit 1; }
+
+# 2번 대부터(1번이 계속 받는 동안). 실패하면 1번은 건드리지 않고 멈춘다(빨간 X)
 roll "${APP2}" "${APP_PORT2}" || exit 1
-# Nginx는 실패한 대를 10초(fail_timeout) 동안 빼 두므로, 2번이 다시 받기 시작한 뒤에 1번을 내린다
-sleep 15
-roll "${APP}" "${APP_PORT}" || exit 1
 
-echo "앱 두 대가 켜졌어요: 127.0.0.1:${APP_PORT}, 127.0.0.1:${APP_PORT2} → https://${APP_DOMAIN}"
+# 우리 Nginx로 처음 바꿀 때만: 1번이 쥐고 있던 APP_PORT를 비우고 그 자리에 우리 Nginx를 띄운다(1번이 받던 요청을 마치는 동안만 겹침, 몇 초 끊길 수 있음)
+if ! ${DOCKER} ps --format '{{.Names}}' | grep -qx "${PROXY}"; then
+  echo "== ${APP_PORT}에 우리 Nginx 띄우기(처음 한 번)"
+  ${DOCKER} stop -t 30 "${APP}" > /dev/null 2>&1 || true
+  ${DOCKER} rm -f "${APP}" > /dev/null 2>&1 || true
+  if ! start_proxy || ! wait_healthy "${APP_PORT}"; then
+    echo "우리 Nginx가 켜지지 않았어요. 1번을 ${APP_PORT}에 예전 방식으로 다시 켜요" >&2
+    ${DOCKER} logs --tail 30 "${PROXY}" >&2 || true
+    ${DOCKER} rm -f "${PROXY}" > /dev/null 2>&1 || true
+    run_app "${APP}" "${APP_PORT}" "${PREV_ID:-${APP_NAME}:latest}"
+    wait_healthy "${APP_PORT}" || true
+    exit 1
+  fi
+else
+  start_proxy # 설정이 바뀌었을 수 있으니 다시 읽힌다
+  # 우리 Nginx는 실패한 대를 10초(fail_timeout) 동안 빼 두므로, 2번이 다시 받기 시작한 뒤에 1번을 내린다
+  sleep 15
+fi
+roll "${APP}" "${APP_PORT1}" || exit 1
+
+echo "앱 두 대가 켜졌어요: 127.0.0.1:${APP_PORT}(우리 Nginx) → ${APP_PORT1}, ${APP_PORT2} → https://${APP_DOMAIN}"
 check_gemini
 check_mail
 check_telegram
