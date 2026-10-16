@@ -134,10 +134,10 @@ class ContentRendererSyntaxTest {
     }
 
     @Test
-    void excerptIsCutBeforeWordAt200() {
-        String md = "가".repeat(195) + " 다섯글자단어 끝";
+    void excerptIsCutBeforeWordAt600() {
+        String md = "가".repeat(595) + " 다섯글자단어 끝";
         String excerpt = RENDERER.render(md).excerpt();
-        assertThat(excerpt).isEqualTo("가".repeat(195));
+        assertThat(excerpt).isEqualTo("가".repeat(595));
         assertThat(RENDERER.render("짧은 글").excerpt()).isEqualTo("짧은 글");
         assertThat(RENDERER.render("").excerpt()).isEmpty();
     }
