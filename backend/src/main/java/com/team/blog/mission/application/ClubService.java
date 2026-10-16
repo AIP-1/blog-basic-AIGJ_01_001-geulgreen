@@ -118,6 +118,17 @@ public class ClubService {
                 (rs, i) -> club(rs), memberId);
     }
 
+    /** 목록 카드의 "썼어요/아직이에요": 이번 기간에 내가 처음 전체 공개한 글이 있는 함께 쓰기 id. */
+    public Set<Long> wroteThisPeriod(long memberId, List<Club> clubs) {
+        LocalDate today = today();
+        return clubs.stream().filter(c -> {
+            Period p = period(c, today);
+            return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS (SELECT 1 FROM post p WHERE p.author_id = ? AND " + PUBLIC
+                    + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date BETWEEN ? AND ?)", Boolean.class,
+                    memberId, Date.valueOf(p.start()), Date.valueOf(p.end())));
+        }).map(Club::id).collect(Collectors.toSet());
+    }
+
     public Optional<Club> byInvite(String code) {
         return jdbc.query(SELECT + " WHERE c.invite_code = ?", (rs, i) -> club(rs), code).stream().findFirst();
     }

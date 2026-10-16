@@ -44,7 +44,9 @@ public class ClubController {
     @GetMapping("/missions/clubs")
     public String list(Model model) {
         CurrentUser me = currentUserProvider.current().orElseThrow(LoginRequiredException::new);
-        model.addAttribute("clubs", clubs.mine(me.memberId()));
+        java.util.List<ClubService.Club> mine = clubs.mine(me.memberId());
+        model.addAttribute("clubs", mine);
+        model.addAttribute("wrote", clubs.wroteThisPeriod(me.memberId(), mine));
         model.addAttribute("today", clubs.today());
         if (!model.containsAttribute("form")) {
             LocalDate today = clubs.today();
