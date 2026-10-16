@@ -1664,3 +1664,25 @@ main.list-page:not(.search-page) .card-grid.waiting-grid:not(.related-cards) { g
 /* 휴대폰: 4장을 세로로 쌓으면 추천 글이 너무 밀리니 가로로 넘기는 한 줄 */
 @media (max-width: 639px) { main.list-page:not(.search-page) .card-grid.waiting-grid:not(.related-cards) { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82%;
     overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; } main.list-page .card-grid.waiting-grid > * { scroll-snap-align: start; } }
+/* 110 강성찬 개인 확장: 썸네일 만들기 창 */
+dialog.thumb-dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; padding: 20px 24px 0;
+    border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); color: var(--color-text); }
+dialog.thumb-dialog::backdrop { background: var(--color-overlay); }
+dialog.thumb-dialog h2 { margin: 0 0 12px; }
+.thumb-canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 12px; border: 1px solid var(--color-border); }
+dialog.thumb-dialog .field { margin: 16px 0 0; }
+dialog.thumb-dialog .field label { display: block; font-weight: 600; font-size: .95em; margin-bottom: 8px; }
+dialog.thumb-dialog textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 0; height: auto; font: inherit; }
+.thumb-themes { border: 0; padding: 0; margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.thumb-themes legend { float: left; width: 100%; padding: 0; margin: 0 0 8px; font-weight: 600; font-size: .95em; }
+.thumb-swatch { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; border: 1px solid var(--color-border);
+    border-radius: 999px; cursor: pointer; font-size: .92em; }
+.thumb-swatch input { position: absolute; opacity: 0; pointer-events: none; }
+.thumb-swatch::before { content: ""; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--color-border); }
+.thumb-forest::before { background: var(--thumb-forest-bg); }
+.thumb-cream::before { background: var(--thumb-cream-bg); }
+.thumb-sunset::before { background: var(--thumb-sunset-bg); }
+.thumb-ink::before { background: var(--thumb-ink-bg); }
+.thumb-swatch:has(input:checked) { border-color: var(--color-brand); color: var(--color-brand); font-weight: 600; }
+.thumb-swatch:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+dialog.thumb-dialog .pp-actions { margin: 16px -24px 0; }
