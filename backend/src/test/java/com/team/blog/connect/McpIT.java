@@ -129,4 +129,37 @@ class McpIT extends IntegrationTestBase {
         assertThat(page).contains("5개까지");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ai_key WHERE member_id = ?", Integer.class, me)).isEqualTo(5);
     }
+
+    @Test
+    void draftsGoIntoMySeriesByNameOrNumber() throws Exception {
+        long me = member("mcpseries");
+        long other = member("mcpseriesx");
+        String key = issueKey(me);
+        jdbc.update("INSERT INTO series (member_id, title) VALUES (?, ?)", other, "남의 시리즈");
+        long othersSeries = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, other);
+
+        // 이름으로: 없으면 만들고, 같은 이름이면 같은 시리즈에
+        String first = call(key, "create_draft", "{\"title\":\"제작기 1\",\"content_md\":\"본문\",\"series_title\":\"글그린 제작기\"}");
+        assertThat(first).contains("\"isError\":false").contains("글그린 제작기");
+        call(key, "create_draft", "{\"title\":\"제작기 2\",\"content_md\":\"본문\",\"series_title\":\" 글그린 제작기 \"}");
+        long seriesId = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM series_post WHERE series_id = ?", Integer.class, seriesId)).isEqualTo(2);
+        assertThat(call(key, "list_tags_and_categories", "{}")).contains("\"series_id\":" + seriesId).contains("글그린 제작기");
+
+        // 번호로 옮기기, 남의 시리즈·둘 다 주기·너무 긴 이름은 거절(임시글을 새로 만들지 않음)
+        long postId = jdbc.queryForObject("SELECT id FROM post WHERE author_id = ? AND title = '제작기 2'", Long.class, me);
+        call(key, "update_draft", "{\"post_id\":" + postId + ",\"series_title\":\"다른 시리즈\"}");
+        assertThat(call(key, "update_draft", "{\"post_id\":" + postId + ",\"series_id\":" + seriesId + "}"))
+                .contains("\"isError\":false").contains("글그린 제작기");
+        int before = jdbc.queryForObject("SELECT count(*) FROM post WHERE author_id = ?", Integer.class, me);
+        assertThat(call(key, "create_draft", "{\"title\":\"x\",\"content_md\":\"y\",\"series_id\":" + othersSeries + "}"))
+                .contains("SERIES_NOT_FOUND");
+        assertThat(call(key, "create_draft", "{\"title\":\"x\",\"content_md\":\"y\",\"series_id\":" + seriesId
+                + ",\"series_title\":\"a\"}")).contains("INVALID_REQUEST");
+        assertThat(call(key, "create_draft", "{\"title\":\"x\",\"content_md\":\"y\",\"series_title\":\"" + "가".repeat(61) + "\"}"))
+                .contains("SERIES_TITLE_INVALID");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE author_id = ?", Integer.class, me)).isEqualTo(before);
+        // 임시글로 남는다(발행은 사람이)
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE author_id = ? AND status <> 'DRAFT'", Integer.class, me)).isZero();
+    }
 }
