@@ -27,7 +27,8 @@ import org.springframework.web.servlet.view.RedirectView;
 public class SeriesManageController {
 
     private static final String PAGE = "/manage/series";
-    private static final Set<String> ERRORS = Set.of("SERIES_TITLE_INVALID", "SERIES_POSTS_REQUIRED", "SERIES_TITLE_TAKEN");
+    private static final Set<String> ERRORS = Set.of("SERIES_TITLE_INVALID", "SERIES_POSTS_REQUIRED", "SERIES_TITLE_TAKEN",
+            "SERIES_DESCRIPTION_TOO_LONG");
 
     private final SeriesService series;
     private final CurrentUserProvider currentUserProvider;
@@ -68,10 +69,13 @@ public class SeriesManageController {
         return seeOther(PAGE + "#series-" + id);
     }
 
-    @PostMapping(PAGE + "/{id}/rename")
-    public RedirectView rename(@PathVariable("id") long id, @RequestParam("title") String title) {
+    /** 107: 이름·설명 한 줄·대표 사진(이 시리즈 글의 사진 중, 비우면 자동). */
+    @PostMapping(PAGE + "/{id}/edit")
+    public RedirectView edit(@PathVariable("id") long id, @RequestParam("title") String title,
+                             @RequestParam(value = "description", required = false) String description,
+                             @RequestParam(value = "coverUrl", required = false) String coverUrl) {
         try {
-            series.rename(currentUserProvider.current(), id, title);
+            series.update(currentUserProvider.current(), id, title, description, coverUrl);
             return seeOther(PAGE + "#series-" + id);
         } catch (PostContentException e) {
             return seeOther(PAGE + "?error=" + e.getCode());

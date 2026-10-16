@@ -26,8 +26,8 @@
                 <input id="series-new-title" name="newTitle" type="text" maxlength="60" required placeholder="예: 스프링 부트 입문">
             </div>
             <fieldset class="series-pick">
-                <legend>넣을 글 <span class="help">(고른 순서가 아니라 아래 목록 순서로 1편부터 들어가요)</span></legend>
-                <p th:if="${myPosts.isEmpty()}" class="help">발행한 글이 있어야 시리즈를 만들 수 있어요</p>
+                <legend>넣을 글 <span class="help">(골라도 되고 나중에 넣어도 돼요. 아래 목록 순서로 1편부터 들어가요)</span></legend>
+                <p th:if="${myPosts.isEmpty()}" class="help">아직 발행한 글이 없어요. 글 없이 먼저 만들어 둘 수 있어요</p>
                 <label th:each="p : ${myPosts}"><input type="checkbox" name="postIds" th:value="${p.id()}">
                     <span th:text="${p.title()}">글 제목</span>
                     <span th:if="${p.seriesId() != null}" class="help">다른 시리즈에서 옮겨 와요</span></label>
@@ -40,7 +40,12 @@
     <section th:each="entry : ${seriesItems}" th:with="s=${entry.key}, items=${entry.value}" class="stats-card"
              th:id="${'series-' + s.id()}" th:attr="aria-label=${s.title()}">
         <div class="manage-head">
-            <h2 class="title-with-icon"><svg th:replace="~{fragments/icons :: i-book}"></svg> <span th:text="${s.title()}">시리즈</span></h2>
+            <div class="series-head">
+                <img th:if="${s.coverUrl() != null}" class="series-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
+                <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+                <div><h2 th:text="${s.title()}">시리즈</h2>
+                    <p class="help" th:text="${s.description() != null ? s.description() : '설명이 아직 없어요'}">설명</p></div>
+            </div>
             <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}"
                th:if="${s.postCount() > 0}">시리즈 화면</a>
         </div>
@@ -66,14 +71,31 @@
                 </form>
             </li>
         </ol>
-        <p th:if="${items.size() == 1}" class="help">마지막 글을 빼면 시리즈도 없어져요</p>
+        <p th:if="${items.isEmpty()}" class="help">아직 넣은 글이 없어요. 아래 [글 넣기]로 넣어 보세요</p>
         <details class="series-settings">
-            <summary>이름 바꾸기·삭제</summary>
-            <form class="inline-form" method="post" th:action="@{/manage/series/{id}/rename(id=${s.id()})}">
+            <summary>이름·설명·대표 사진 고치기, 삭제</summary>
+            <form method="post" th:action="@{/manage/series/{id}/edit(id=${s.id()})}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <label th:for="${'series-title-' + s.id()}" class="visually-hidden">새 이름</label>
-                <input th:id="${'series-title-' + s.id()}" name="title" type="text" maxlength="60" required th:value="${s.title()}">
-                <button type="submit" class="btn btn-sm">이름 바꾸기</button>
+                <div class="field">
+                    <label th:for="${'series-title-' + s.id()}">이름</label>
+                    <input th:id="${'series-title-' + s.id()}" name="title" type="text" maxlength="60" required th:value="${s.title()}">
+                </div>
+                <div class="field">
+                    <label th:for="${'series-desc-' + s.id()}">설명 한 줄</label>
+                    <input th:id="${'series-desc-' + s.id()}" name="description" type="text" maxlength="100"
+                           th:value="${s.description()}" placeholder="예: 처음 배우는 사람을 위한 5편짜리 입문">
+                </div>
+                <!-- 대표 사진은 이 시리즈 글의 사진 중에서(비우면 1편부터 첫 사진) -->
+                <fieldset class="series-covers">
+                    <legend>대표 사진</legend>
+                    <label class="series-cover-choice"><input type="radio" name="coverUrl" value=""
+                            th:checked="${s.pickedCover() == null}">
+                        <span>자동 (1편부터 첫 사진)</span></label>
+                    <label th:each="it : ${items}" th:if="${it.thumb() != null}" class="series-cover-choice">
+                        <input type="radio" name="coverUrl" th:value="${it.thumb()}" th:checked="${it.thumb() == s.pickedCover()}">
+                        <img th:src="${it.thumb()}" th:alt="${it.title()}" loading="lazy"></label>
+                </fieldset>
+                <button type="submit" class="btn btn-sm">저장</button>
             </form>
             <form class="inline-form" method="post" th:action="@{/manage/series/{id}/delete(id=${s.id()})}"
                   data-confirm="시리즈를 지울까요? 글은 그대로 남아요.">

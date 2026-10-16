@@ -7,7 +7,13 @@
 <body>
 <main class="notes-page list-page">
     <p class="help"><a th:href="${paths.blog(owner.handle()) + '/series'}" th:text="${owner.handle() + '님의 시리즈'}">시리즈</a></p>
-    <h1 class="title-with-icon"><svg th:replace="~{fragments/icons :: i-book}"></svg> <span th:text="${series.title()}">시리즈</span></h1>
+    <!-- 107 강성찬 개인 확장: 대표 사진·설명 한 줄 -->
+    <div class="series-head">
+        <img th:if="${series.coverUrl() != null}" class="series-cover series-cover-lg" th:src="${series.coverUrl()}" alt="">
+        <span th:unless="${series.coverUrl() != null}" class="series-cover series-cover-lg series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+        <div><h1 th:text="${series.title()}">시리즈</h1>
+            <p th:if="${series.description() != null}" class="series-desc" th:text="${series.description()}">설명</p></div>
+    </div>
     <p class="help" th:unless="${cards.isEmpty()}" th:text="${'글 ' + cards.size() + '편 · 앞에서부터 차례대로 읽어 보세요'}">글 3편</p>
     <!-- 105 강성찬 개인 확장: 처음부터 읽을지 최신 글부터 볼지. 106: 주인의 편 순서·글 넣기는 내 글 관리 [시리즈] 탭 -->
     <div th:if="${cards.size() > 1}" class="home-tabs-row">

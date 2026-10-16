@@ -155,16 +155,29 @@ class ProfileTabsIT extends IntegrationTestBase {
         // 남의 글은 넣지 못하고, 글 없이·이름 없이 만들면 안내
         mockMvc.perform(post("/manage/series/{id}/add", sid).param("postIds", String.valueOf(theirs))
                 .with(csrf()).with(TestAuth.member(me))).andExpect(status().isNotFound());
+        // 107: 글 없이도 만든다(빈 시리즈는 공개 화면에 안 보임). 있는 시리즈에 아무것도 안 고르면 안내
         mockMvc.perform(post("/manage/series").param("newTitle", "빈 시리즈").with(csrf()).with(TestAuth.member(me)))
-                .andExpect(status().is3xxRedirection())
+                .andExpect(status().is3xxRedirection());
+        assertThat(page("/manage/series", me)).contains("빈 시리즈");
+        assertThat(page("/tabmng/series")).doesNotContain("빈 시리즈");
+        mockMvc.perform(post("/manage/series/{id}/add", sid).with(csrf()).with(TestAuth.member(me)))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/manage/series?error=SERIES_POSTS_REQUIRED"));
         assertThat(page("/manage/series?error=SERIES_POSTS_REQUIRED", me)).contains("넣을 글을 하나 이상 골라 주세요");
         // 이름 바꾸기(같은 이름은 안내), 삭제는 묶음만 풀고 글은 남는다
-        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "새 이름 시리즈").with(csrf()).with(TestAuth.member(me)))
-                .andExpect(status().is3xxRedirection());
-        assertThat(jdbc.queryForObject("SELECT title FROM series WHERE id = ?", String.class, sid)).isEqualTo("새 이름 시리즈");
-        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "x").with(csrf()).with(TestAuth.member(other)))
+        // 107: 이름·설명·대표 사진. 사진은 이 시리즈 글의 사진만(다른 주소는 자동으로), 없으면 1편부터 첫 사진
+        jdbc.update("UPDATE post SET thumbnail_url = '/media/c.webp' WHERE id = ?", c);
+        assertThat(page("/tabmng/series")).contains("src=\"/media/c.webp\"");
+        mockMvc.perform(post("/manage/series/{id}/edit", sid).param("title", "새 이름 시리즈").param("description", "한 줄 설명")
+                .param("coverUrl", "https://evil.example/x.png").with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForMap("SELECT title, description, cover_url FROM series WHERE id = ?", sid))
+                .containsEntry("title", "새 이름 시리즈").containsEntry("description", "한 줄 설명").containsEntry("cover_url", null);
+        mockMvc.perform(post("/manage/series/{id}/edit", sid).param("title", "새 이름 시리즈").param("description", "한 줄 설명").param("coverUrl", "/media/c.webp")
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForObject("SELECT cover_url FROM series WHERE id = ?", String.class, sid)).isEqualTo("/media/c.webp");
+        mockMvc.perform(post("/manage/series/{id}/edit", sid).param("title", "x").with(csrf()).with(TestAuth.member(other)))
                 .andExpect(status().isNotFound());
+        assertThat(page("/tabmng/series/" + sid)).contains("한 줄 설명");
+        assertThat(mockMvc.perform(get("/explore?tab=series")).andReturn().getResponse().getContentAsString()).contains("한 줄 설명");
         // 글쓰기 발행 설정에 시리즈 칸(이 글이 든 시리즈가 골라져 있다)
         assertThat(page("/write/" + c, me)).contains("id=\"series-pick\"").contains("+ 새 시리즈 만들기")
                 .containsPattern("value=\"" + sid + "\" selected=\"selected\">새 이름 시리즈");
