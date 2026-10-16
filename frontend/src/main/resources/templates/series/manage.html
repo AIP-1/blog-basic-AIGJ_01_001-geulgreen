@@ -17,8 +17,10 @@
     </nav>
     <p th:if="${error != null}" class="notice field-error" role="alert" th:text="#{${'error.' + error}}">오류</p>
 
-    <section class="stats-card" aria-labelledby="series-new-heading">
-        <h2 id="series-new-heading">새 시리즈 만들기</h2>
+    <!-- 10-16: 새 시리즈 만들기도 접어 둔다(목록이 먼저 보이게) -->
+    <details class="stats-card series-group series-settings series-new" th:open="${seriesItems.isEmpty()}">
+        <summary><svg th:replace="~{fragments/icons :: pen}"></svg>새 시리즈 만들기<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
+        <div class="series-new-body">
         <form method="post" action="/manage/series">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="field">
@@ -34,20 +36,26 @@
             </fieldset>
             <button type="submit" class="btn">만들기</button>
         </form>
-    </section>
+        </div>
+    </details>
 
     <p th:if="${seriesItems.isEmpty()}" class="empty-state">아직 묶어 둔 시리즈가 없어요</p>
-    <section th:each="entry : ${seriesItems}" th:with="s=${entry.key}, items=${entry.value}" class="stats-card"
-             th:id="${'series-' + s.id()}" th:attr="aria-label=${s.title()}">
-        <div class="manage-head">
-            <div class="series-head">
-                <img th:if="${s.coverUrl() != null}" class="series-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
-                <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
-                <div><h2 th:text="${s.title()}">시리즈</h2>
-                    <p class="help" th:text="${s.description() != null ? s.description() : '설명이 아직 없어요'}">설명</p></div>
-            </div>
-            <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}"
-               th:if="${s.postCount() > 0}">시리즈 화면</a>
+    <details th:each="entry : ${seriesItems}" th:with="s=${entry.key}, items=${entry.value}" class="stats-card series-group"
+             name="series-group" th:id="${'series-' + s.id()}">
+        <!-- 10-16(강성찬 개인 확장): 시리즈마다 접힌 한 줄(사진·이름·글 수·업데이트), 누르면 그 자리에서 펼침. 한 번에 하나만(details name) -->
+        <summary class="series-group-head">
+            <img th:if="${s.coverUrl() != null}" class="series-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
+            <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+            <span class="series-group-text">
+                <strong th:text="${s.title()}">시리즈</strong>
+                <span class="help" th:text="${'글 ' + items.size() + '편' + (s.latestLabel() != null ? ' · ' + s.latestLabel() + ' 업데이트' : '')}">글 3편</span>
+            </span>
+            <svg th:replace="~{fragments/icons :: chevron}"></svg>
+        </summary>
+        <div class="series-group-body">
+        <div class="series-group-tools">
+            <p class="help" th:text="${s.description() != null ? s.description() : '설명이 아직 없어요'}">설명</p>
+            <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}" th:if="${s.postCount() > 0}">시리즈 화면</a>
         </div>
         <ol class="series-manage-items">
             <!-- 10-16 가독성(강성찬 개인 확장): 번호 칸 너비 고정, 위·아래 화살표는 늘 같은 자리(끝 줄은 비활성), 빼기는 끝에 옅게 -->
@@ -121,7 +129,8 @@
                 <button type="submit" class="btn btn-sm">골라서 넣기</button>
             </details>
         </form>
-    </section>
+    </div>
+    </details>
     <script th:src="@{/js/series/manage.js}" defer></script>
 </main>
 </body>

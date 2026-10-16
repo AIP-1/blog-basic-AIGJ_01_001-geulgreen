@@ -1710,3 +1710,22 @@ dialog.thumb-dialog .pp-actions { margin: 16px -24px 0; }
     .series-manage-items li { flex-wrap: wrap; row-gap: 4px; }
     .series-manage-title { flex: 1 1 calc(100% - 4.5em); white-space: normal; }
 }
+/* 10-16 시리즈 관리 탭: 시리즈마다 접힌 묶음 한 줄 */
+.series-group { padding: 0; margin: 0 0 12px; }
+.series-group-head { list-style: none; display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; border-radius: 18px; }
+.series-group-head::-webkit-details-marker { display: none; }
+.series-group-head:hover { background: var(--color-surface-muted); }
+.series-group-head .series-cover { width: 56px; height: 56px; }
+.series-group-text { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.series-group-text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-group-head .menu-chevron { flex: none; color: var(--color-text-muted); transition: transform .15s; }
+.series-group[open] > .series-group-head .menu-chevron { transform: rotate(90deg); }
+.series-group[open] > .series-group-head { border-bottom: 1px solid var(--color-border); border-radius: 18px 18px 0 0; }
+.series-group-body { padding: 4px 18px 14px; }
+.series-group-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 0; }
+.series-group-tools p { margin: 0; }
+.series-row-actions .icon-btn { padding: 0; min-height: 0; }
+.series-row-actions .icon-btn .icon { flex: none; width: 18px; height: 18px; }
+.series-new > summary { padding: 14px 18px; }
+.series-new[open] > summary { border-bottom: 1px solid var(--color-border); }
+.series-new .series-new-body { padding: 4px 18px 16px; }
