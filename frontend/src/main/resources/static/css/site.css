@@ -1610,4 +1610,6 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .club-invite input { flex: 1; min-width: 0; }
 .club-actions { display: flex; justify-content: flex-end; }
 .club-join .btn { margin-top: 8px; }
+.club-all-done, .club-state, #club-posts-heading { display: flex; align-items: center; gap: 6px; }
 .club-all-done { margin: 12px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--color-grass-2); font-weight: 700; }
+.club-all-done .icon, .club-state .icon, #club-posts-heading .icon { width: 1.1em; height: 1.1em; flex: none; }

@@ -18,14 +18,14 @@
             <p class="help" th:text="${#temporals.format(p.start(), 'M월 d일') + ' ~ ' + #temporals.format(p.end(), 'M월 d일') + ' · ' + p.index() + '/' + p.total() + '번째'}">기간</p>
             <span class="count-chip" th:text="${wroteCount + '/' + board.members().size() + '명 썼어요'}">0명</span>
         </div>
-        <p th:if="${!board.members().isEmpty() and wroteCount == board.members().size()}" class="club-all-done">🎉 이번 기간 모두 썼어요!</p>
+        <p th:if="${!board.members().isEmpty() and wroteCount == board.members().size()}" class="club-all-done"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>이번 기간 모두 썼어요!</p>
         <p th:if="${board.notStarted()}" class="help">아직 모임이 시작되지 않았어요. 시작 날짜부터 세요</p>
         <p th:if="${board.ended()}" class="help">모임이 끝났어요. 마지막 기간의 기록이에요</p>
         <ul class="club-board">
             <li th:each="m : ${board.members()}" th:classappend="${m.wrote()} ? 'is-done'">
                 <a th:href="${paths.blog(m.handle())}" class="club-member"><span th:text="${m.name()}">이름</span>
                     <span class="help" th:text="${m.handle()}">아이디</span><span th:if="${m.owner()}" class="badge">만든 사람</span></a>
-                <span class="club-state" th:text="${m.wrote() ? '✅ 썼어요' : '⏳ 아직이에요'}">아직이에요</span>
+                <span class="club-state"><th:block th:if="${m.wrote()}"><th:block th:replace="~{fragments/icons :: check}"></th:block>썼어요</th:block><th:block th:unless="${m.wrote()}"><th:block th:replace="~{fragments/icons :: clock}"></th:block>아직이에요</th:block></span>
                 <form th:if="${board.isOwner() and !m.owner()}" class="inline-form" method="post"
                       th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
                       th:attr="data-confirm=${m.name() + ' 님을 모임에서 내보낼까요?'}">
@@ -45,7 +45,7 @@
         </div>
     </section>
     <section class="mission-feed" aria-labelledby="club-posts-heading">
-        <h2 id="club-posts-heading">✨ 멤버들이 쓴 글</h2>
+        <h2 id="club-posts-heading"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>멤버들이 쓴 글</h2>
         <p th:if="${cards.isEmpty()}" class="empty-state">아직 모임 기간에 올라온 글이 없어요</p>
         <ul class="card-grid home-cards mission-posts">
             <li th:each="card : ${cards}" class="mission-card"><article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article></li>
