@@ -277,6 +277,10 @@ class NotificationIT extends IntegrationTestBase {
         // 082: 알림의 이름은 아이디(지금 아이디로)
         jdbc.update("UPDATE member SET handle = 'renamedid' WHERE id = ?", a);
         assertThat(list(f1)).contains("renamedid님이 새 글을 올렸어요");
+        // 108: 시리즈에 든 글이면 "새 편"으로(알림을 읽을 때 본다)
+        long sid = jdbc.queryForObject("INSERT INTO series (member_id, title) VALUES (?, '알림 시리즈') RETURNING id", Long.class, a);
+        jdbc.update("INSERT INTO series_post (post_id, series_id, position) VALUES (?, ?, 1)", p, sid);
+        assertThat(list(f1)).contains("renamedid님의 시리즈 「알림 시리즈」 새 편: 「새글」");
         jdbc.update("UPDATE member SET status = 'WITHDRAWN', withdrawn_at = ? WHERE id = ?", Timestamp.from(T), a);
         assertThat(list(f1)).contains("볼 수 없는 글이에요").doesNotContain("renamedid님");
     }

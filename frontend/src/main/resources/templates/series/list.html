@@ -17,7 +17,7 @@
 </main>
 <!-- 시리즈 카드 목록(시리즈 탭·홈 선반) -->
 <ul th:fragment="seriesCards(items)" class="series-list" th:unless="${items.isEmpty()}">
-    <th:block th:each="s : ${items}"><li th:replace="~{series/list :: seriesCard(${paths.blog(owner.handle()) + '/series/' + s.id()}, ${s}, ${'글 ' + s.postCount() + '편'})}"></li></th:block>
+    <th:block th:each="s : ${items}"><li th:replace="~{series/list :: seriesCard(${paths.blog(owner.handle()) + '/series/' + s.id()}, ${s}, ${s.meta()})}"></li></th:block>
 </ul>
 <!-- 107 강성찬 개인 확장: 시리즈 카드 한 장(대표 사진·이름·설명 한 줄·글 수). 블로그 시리즈 탭·홈 선반·탐색 시리즈 탭이 같이 쓴다 -->
 <li th:fragment="seriesCard(href, s, meta)" class="series-card">

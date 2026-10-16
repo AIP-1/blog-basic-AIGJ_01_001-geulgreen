@@ -59,14 +59,20 @@ public class ExploreController {
     public String explore(@RequestParam(value = "cursor", required = false) String cursor,
                           @RequestParam(value = "tab", required = false) String tab,
                           @RequestParam(value = "expired", required = false) String expired,
-                          @RequestParam(value = "sort", required = false) String sort, Model model) {
+                          @RequestParam(value = "sort", required = false) String sort,
+                          @RequestParam(value = "offset", required = false) Integer offset, Model model) {
         model.addAttribute("seriesTab", seriesService.enabled());
         if ("series".equals(tab) && seriesService.enabled()) {
             // 104 강성찬 개인 확장: 모든 블로그의 시리즈를 골라 보는 탭(정렬은 태그 모아 보기와 같은 인기순·최근순)
             String s = "recent".equals(sort) ? sort : "popular";
             model.addAttribute("tab", "series");
             model.addAttribute("sort", s);
-            model.addAttribute("seriesList", seriesService.browse(s));
+            // 108: 더 보기(60개씩, 하나 더 읽어 다음이 있는지 안다)
+            int from = offset == null || offset < 0 ? 0 : offset;
+            List<SeriesService.Browse> rows = seriesService.browse(s, from, SeriesService.BROWSE_PAGE + 1);
+            model.addAttribute("seriesList", rows.stream().limit(SeriesService.BROWSE_PAGE).toList());
+            model.addAttribute("seriesNext", rows.size() > SeriesService.BROWSE_PAGE ? from + SeriesService.BROWSE_PAGE : null);
+            model.addAttribute("seriesFrom", from);
             model.addAttribute("people", List.of());
             return "explore";
         }
