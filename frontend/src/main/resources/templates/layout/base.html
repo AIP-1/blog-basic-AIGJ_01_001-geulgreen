@@ -41,7 +41,7 @@
         <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
             <link rel="canonical" th:href="${siteOrigin + canonicalPath}">
             <meta property="og:url" th:content="${siteOrigin + canonicalPath}">
-            <meta property="og:image" th:content="${siteOrigin + '/images/og-default.png'}">
+            <meta property="og:image" th:content="${siteOrigin + '/images/og-cat.jpg'}">
             <script type="application/ld+json" th:if="${currentPath == '/'}" th:inline="javascript">{"@context":"https://schema.org","@type":"WebSite","name":"글그린","alternateName":"글그린 블로그","url":[[${siteOrigin + '/'}]]}</script>
         </th:block>
     </th:block>
