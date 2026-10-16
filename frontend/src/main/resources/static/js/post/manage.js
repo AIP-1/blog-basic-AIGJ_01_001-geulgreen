@@ -34,6 +34,16 @@
       });
   }
 
+  // 113: 지운 뒤 이 쪽에 남은 줄이 없으면 앞 쪽으로(1쪽이면 새로 불러 뒤 글이 올라오게)
+  function afterRemove() {
+    if (document.querySelector('#post-rows .post-row')) { return; }
+    var url = new URL(window.location.href);
+    var page = parseInt(document.getElementById('manage').dataset.page || '1', 10);
+    url.searchParams.set('page', String(Math.max(1, page - 1)));
+    url.hash = 'list-top';
+    if (url.toString() === window.location.href) { window.location.reload(); } else { window.location.assign(url.toString()); }
+  }
+
   function notice(text) {
     var box = document.getElementById('manage-notice');
     box.textContent = text;
@@ -81,6 +91,7 @@
           if (action === 'restore') { notice('복구했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요'); }
           row.remove();
           refreshCounts();
+          afterRemove();
         }).catch(function (err) {
           fail(row, (err.data && err.data.message) || '처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
         });
@@ -174,6 +185,7 @@
           busy(false);
           if (done) { notice(done + DONE[action]); refreshCounts(); }
           update();
+          afterRemove();
         });
       });
     });
@@ -203,6 +215,15 @@
         });
       });
     });
+    var PAGE_NOTE = 'manage-page-note';
+    Array.prototype.forEach.call(document.querySelectorAll('.pager a'), function (a) {
+      a.addEventListener('click', function () {
+        if (picked().length) { try { sessionStorage.setItem(PAGE_NOTE, '1'); } catch (e) { /* 알림만 못 띄움 */ } }
+      });
+    });
+    try {
+      if (sessionStorage.getItem(PAGE_NOTE)) { sessionStorage.removeItem(PAGE_NOTE); notice('쪽을 옮겨서 고른 글 선택이 풀렸어요'); }
+    } catch (e) { /* 저장소를 못 쓰면 알림 없이 */ }
     update();
   }
 
