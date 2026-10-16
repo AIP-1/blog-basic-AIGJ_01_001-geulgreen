@@ -1,7 +1,7 @@
 # 학교 공용 서버 배포 (서버 배포 설명서 10-08)
 
 `main`에 올리면 GitHub Actions가 **테스트 → 도커 이미지 생성 → SSH로 서버에 보내 `run-on-server.sh` 실행**까지 한다.
-서버에는 우리 앱 컨테이너 두 대(`APP_PORT`, `APP_PORT`+1)와 Redis 컨테이너만 뜬다(093 무중단 배포). DB는 Crowfoot PostgreSQL, HTTPS·도메인은 서버의 공용 Nginx가 맡는다.
+서버에는 우리 전용 Nginx 컨테이너(`APP_PORT`), 앱 컨테이너 두 대(`APP_PORT`+1, +2), Redis 컨테이너만 뜬다(093 무중단 배포). DB는 Crowfoot PostgreSQL, HTTPS·도메인은 서버의 공용 Nginx가 맡는다.
 
 ## 0. 워크플로 파일 넣기
 
@@ -16,7 +16,7 @@
 | `SSH_PORT` | `8822` |
 | `SSH_ID` | 문서에서 자기 계정 |
 | `SSH_PASSWORD` | 문서 최상단 공용 비밀번호 |
-| `APP_PORT` | 받은 포트 번호(예: 8300). 두 번째 앱은 자동으로 +1(8301), Nginx upstream에 둘 다 적는다 |
+| `APP_PORT` | 받은 포트 번호(예: 8300). 공용 Nginx는 이 포트 하나만 보고, 앱 두 대는 자동으로 +1·+2(8301·8302)에 뜬다 |
 | `APP_DOMAIN` | 받은 도메인(예: `blogcabin.java21.net`, https 없이) |
 | `DB_ADDRESS` | Crowfoot 데이터베이스 탭 맨 위 주소에서 `:숫자`를 뺀 부분 |
 | `DB_PORT` | 그 주소 뒤의 숫자 |
@@ -35,10 +35,11 @@
 
 ## 2. 서버의 Nginx 설정 파일
 
-`~/nginx/<도메인>.conf`를 이 폴더의 `geulgreen.java21.net.conf`로 바꾼다(다른 도메인이면 `server_name`·인증서 경로·로그 경로·upstream 포트를 바꿈). 바꾼 뒤 `nginx -t`로 확인하고 reload한다.
-- upstream에 앱 두 대(8300, 8301)를 묶고, 한 대가 꺼져 있으면 다른 대로 한 번만 다시 보낸다(`proxy_next_upstream_tries 2`, 연결은 3초에 포기).
-- `map`·`upstream` 이름에 `geulgreen_`을 붙인 것은 공용 Nginx에서 다른 팀 설정과 이름이 겹치면 `nginx -t`가 실패하기 때문이다.
-- HTTP/2를 켠다. 서버 Nginx가 1.18.0(10-14 배포 로그)이라 `listen 443 ssl http2;` 형식으로 쓴다.
+공용 Nginx(`~/nginx/<도메인>.conf`)는 `proxy_pass http://127.0.0.1:<APP_PORT>;` 하나면 된다. 무중단 배포를 위해 바꿀 필요가 없다(093 보강).
+앱 두 대로 나눠 보내는 일은 `APP_PORT`에 뜬 우리 전용 Nginx 컨테이너(`team-blog-proxy`, 설정은 `run-on-server.sh`가 `~/team-blog/proxy.conf`로 씀)가 맡는다.
+- 우리 Nginx는 호스트 네트워크로 `127.0.0.1:APP_PORT`에서 듣고, 앱 두 대(+1, +2)에 나눠 보내며, 한 대가 꺼져 있으면 다른 대로 한 번만 다시 보낸다(`proxy_next_upstream_tries 2`, 연결은 3초에 포기). 응답에 Nginx 버전을 숨긴다.
+- 설정을 바꾸면 다음 배포가 우리 Nginx만 `nginx -s reload`한다(강사님 손 안 거침).
+- `geulgreen.java21.net.conf`는 강사님이 언젠가 공용 설정을 손볼 때 쓰면 좋은 선택 사항이다(HTTP/2, 공용 Nginx 버전 숨기기). `proxy_pass`는 8300 하나로 둔다.
 - HSTS·`X-Content-Type-Options`는 앱(Spring Security)이 이미 보내므로 Nginx에서 또 붙이지 않는다.
 
 앱은 `X-Forwarded-Proto`·`X-Forwarded-For`를 믿으므로(https 판단·접속 IP), 설정에 아래 줄이 없으면 `location /` 안에 넣는다.
@@ -60,7 +61,7 @@ Google·GitHub 개발자 콘솔에 운영 주소를 추가한다.
 
 - 자동: `main`에 push. 수동: GitHub Actions → deploy → Run workflow(급하면 테스트 건너뛰기).
 - 서버에서 상태: `docker ps`, 로그: `docker logs --tail 100 team-blog-app`(두 번째 대는 `team-blog-app-2`)
-- **무중단 배포(093)**: 2번 대(`team-blog-app-2`)를 먼저 새 버전으로 바꿔 `/actuator/health`가 답할 때까지 기다리고, 15초 뒤(Nginx가 2번을 다시 쓰기 시작한 뒤) 1번 대를 바꾼다. 내릴 때는 `docker stop -t 30`으로 받던 요청을 끝내게 하고, 새 요청은 Nginx가 다른 대로 보낸다. 컨테이너는 `127.0.0.1`에만 열고 한 대당 메모리 1GB(`APP_MEMORY`)로 묶는다.
+- **무중단 배포(093)**: 2번 대(`team-blog-app-2`, +2)를 먼저 새 버전으로 바꿔 `/actuator/health`가 답할 때까지 기다리고, 15초 뒤(우리 Nginx가 2번을 다시 쓰기 시작한 뒤) 1번 대(`team-blog-app`, +1)를 바꾼다. 내릴 때는 `docker stop -t 30`으로 받던 요청을 끝내게 하고, 새 요청은 우리 Nginx가 다른 대로 보낸다. 앱 컨테이너는 `127.0.0.1`에만 열고 한 대당 메모리 1GB(`APP_MEMORY`)로 묶는다. 우리 Nginx로 처음 바꾸는 배포에서만 1번이 쥐던 8300을 비우고 우리 Nginx를 띄우느라 몇 초 끊길 수 있다(우리 Nginx가 안 켜지면 1번을 8300에 예전 방식으로 되돌리고 빨간 X).
 - **자동 되돌리기(1.15.0)**: 배포 직전에 돌고 있던 앱 이미지를 `team-blog:previous`로 표시해 두고, 새 버전이 3분 안에 답하지 않으면 그 대만 교체 직전에 쓰던 이미지로 다시 켜고 멈춘다(다른 대는 손대지 않음). Actions는 빨간 X로 알린다(로그에 새 버전의 마지막 80줄).
 - **두 대가 같이 돌 때**: 예약 작업은 Redis 잠금(`JobLock`)으로 한 대에서만 돈다. 세션·조회수·요청 제한은 Redis에 있어 어느 대가 받아도 같다. 교체 중에는 새 버전이 마이그레이션한 DB에서 옛 버전이 잠깐 같이 돌므로, 마이그레이션은 지금처럼 "추가만" 한다(컬럼·테이블 삭제나 이름 바꾸기는 다음 릴리스로 미룬다).
 - 손으로 전 버전으로 돌리기: `docker rm -f team-blog-app` 후 스크립트의 `docker run`과 같은 옵션으로 이미지 이름만 `team-blog:previous`로 바꿔 실행. 보통은 GitHub에서 문제 커밋을 `git revert`하는 PR을 머지해 다시 배포하는 편이 낫다.
