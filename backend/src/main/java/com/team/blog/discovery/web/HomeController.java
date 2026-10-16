@@ -23,10 +23,12 @@ public class HomeController {
 
     private final PostListQuery listQuery;
     private final Clock clock;
+    private final com.team.blog.shared.security.CurrentUserProvider currentUserProvider;
 
-    public HomeController(PostListQuery listQuery, Clock clock) {
+    public HomeController(PostListQuery listQuery, Clock clock, com.team.blog.shared.security.CurrentUserProvider currentUserProvider) {
         this.listQuery = listQuery;
         this.clock = clock;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/")
@@ -47,6 +49,8 @@ public class HomeController {
         model.addAttribute("continued", cursor != null && !cursor.isEmpty());
         model.addAttribute("listApi", "/api/posts");
         model.addAttribute("heroPhoto", HERO_PHOTO);
+        // 강성찬 개인 확장(10-16): 로그인했고 발행한 글이 없으면 "시작하기 3단계"
+        model.addAttribute("showStartGuide", currentUserProvider.current().map(u -> !listQuery.hasPublished(u.memberId())).orElse(false));
         return "home";
     }
 }

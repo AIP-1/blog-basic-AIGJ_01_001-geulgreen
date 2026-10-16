@@ -96,6 +96,15 @@ public class ExploreController {
         model.addAttribute("moreLinkBase", trending ? "?tab=trending&cursor=" : "?cursor=");
         boolean firstRecommended = !trending && !continued;
         model.addAttribute("people", firstRecommended ? people(viewer) : List.of());
+        // 강성찬 개인 확장(10-16): [추천] 맨 위 "첫 댓글을 기다리는 글"(없으면 칸을 숨긴다)
+        List<Long> waitingIds = firstRecommended ? recommendedPostQuery.waitingFirstComment(viewer, WAITING) : List.of();
+        Map<Long, PostCard> waitingCards = listQuery.cardsByIds(waitingIds);
+        List<PostCard> waiting = waitingIds.stream().map(waitingCards::get).filter(Objects::nonNull).toList();
+        java.util.Map<Long, String> dates = new java.util.HashMap<>(java.util.Objects.requireNonNullElse(
+                (java.util.Map<Long, String>) model.getAttribute("cardDates"), java.util.Map.of()));
+        waiting.forEach(c -> dates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), clock.instant())));
+        model.addAttribute("cardDates", dates);
+        model.addAttribute("waiting", waiting);
         return "explore";
     }
 
@@ -149,6 +158,8 @@ public class ExploreController {
         return currentUserProvider.current().map(CurrentUser::memberId).orElse(-1L);
     }
 
+    static final int WAITING = 4;
+
     private CardPage page(long viewer, String cursor) {
         int offset = 0;
         if (cursor != null && !cursor.isEmpty()) {
@@ -161,7 +172,9 @@ public class ExploreController {
                 throw new PostContentException(FeedCursor.INVALID);
             }
         }
-        List<Long> ids = recommendedPostQuery.pool(viewer);
+        // 위 "첫 댓글을 기다리는 글"에 나온 글은 아래 추천 글에서 뺀다(같은 글이 두 번 보이지 않게)
+        java.util.Set<Long> waiting = new java.util.HashSet<>(recommendedPostQuery.waitingFirstComment(viewer, WAITING));
+        List<Long> ids = recommendedPostQuery.pool(viewer).stream().filter(id -> !waiting.contains(id)).toList();
         int end = Math.min(offset + PostListQuery.PAGE_SIZE, ids.size());
         List<Long> slice = offset >= end ? List.of() : ids.subList(offset, end);
         Map<Long, PostCard> cards = listQuery.cardsByIds(slice);

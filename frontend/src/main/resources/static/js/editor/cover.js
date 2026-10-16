@@ -66,6 +66,12 @@
         box.appendChild(choice('본문 ' + (i + 1) + '번째 사진', url, selected, function () { if (!selected) { setCover(url); } }));
       });
       box.appendChild(choice('＋ 사진 올리기', null, false, function () { fileInput.click(); }));
+      // 110: 제목·시리즈·날짜로 썸네일을 그려 올린다(올린 사진과 같은 길)
+      if (window.blogThumbnail) {
+        box.appendChild(choice('썸네일 만들기', null, false, function () {
+          window.blogThumbnail.open().then(function (file) { if (file) { uploadAndSet(file); } });
+        }));
+      }
     }
 
     function setCover(url) {
@@ -95,11 +101,15 @@
       if (!file) { return; }
       var uploader = window.blogImageUpload;
       if (!uploader || uploader.types.indexOf(file.type) < 0) { say('jpg·png·gif·webp 사진만 올릴 수 있어요'); return; }
+      uploadAndSet(file);
+    });
+
+    function uploadAndSet(file) {
       say('사진을 올리는 중…');
-      uploader.upload(file).then(function (data) { setCover(data.url); }, function (e) {
+      window.blogImageUpload.upload(file).then(function (data) { setCover(data.url); }, function (e) {
         say((e && e.final) || '사진을 올리지 못했어요. 다시 시도해 주세요');
       });
-    });
+    }
 
     var opener = document.getElementById('publish-open');
     if (opener) { opener.addEventListener('click', render); }
