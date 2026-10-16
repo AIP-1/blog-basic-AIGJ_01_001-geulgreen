@@ -6,55 +6,69 @@
 </head>
 <body>
 <main class="list-page mission-page">
-    <!-- 111 후보(강성찬 개인 확장): 내 모임과 모임 만들기. 모임은 초대 링크로만 들어와요 -->
+    <!-- 111 강성찬 개인 확장: 참여 중인 함께 쓰기(누르는 카드)와 만들기. 만들기 폼은 버튼을 눌러야 열린다(스크립트가 없거나 오류가 있으면 펼친 채) -->
     <nav th:replace="~{mission/today :: missionTabs('clubs')}"></nav>
     <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
-    <section class="mission-panel" aria-labelledby="clubs-heading">
-        <div class="mission-panel-head">
-            <h2 id="clubs-heading">참여 중인 함께 쓰기</h2>
-            <p class="help">친구들과 규칙을 정하고 같이 꾸준히 써요. 초대 링크를 받은 사람만 들어올 수 있어요</p>
-        </div>
-        <p th:if="${clubs.isEmpty()}" class="empty-state">아직 참여 중인 함께 쓰기가 없어요. 아래에서 만들거나 친구에게 초대 링크를 받아 보세요</p>
-        <ul class="club-list" th:unless="${clubs.isEmpty()}">
-            <li th:each="c : ${clubs}" class="club-row">
-                <a class="club-name" th:href="@{/missions/clubs/{id}(id=${c.id()})}" th:text="${c.name()}">함께 쓰기</a>
-                <span class="help" th:text="${c.everyDays() + '일에 1편 · ' + c.memberCount() + '명 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')}">7일에 1편</span>
-                <span th:if="${today.isAfter(c.endDate())}" class="badge">끝남</span>
-                <p th:if="${!c.intro().isEmpty()}" class="help club-intro" th:text="${c.intro()}">소개</p>
-            </li>
-        </ul>
-    </section>
-    <section class="mission-panel" aria-labelledby="club-new-heading">
-        <h2 id="club-new-heading">함께 쓰기 만들기</h2>
-        <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
-        <form method="post" action="/missions/clubs" class="club-form">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <div class="field">
-                <label for="club-name">이름</label>
-                <input id="club-name" name="name" type="text" maxlength="30" required th:value="${form.name()}" placeholder="예: 3반 함께 쓰기">
+    <div class="club-top">
+        <section class="mission-panel" aria-labelledby="clubs-heading">
+            <div class="club-list-head">
+                <h2 id="clubs-heading">참여 중인 함께 쓰기</h2>
+                <a th:unless="${clubs.isEmpty()}" href="#club-new" class="btn btn-primary btn-sm" data-open-club-form>함께 쓰기 만들기</a>
             </div>
-            <div class="field">
-                <label for="club-intro">한 줄 소개 <span class="help">(선택)</span></label>
-                <input id="club-intro" name="intro" type="text" maxlength="100" th:value="${form.intro()}" placeholder="예: 매주 한 편씩 같이 써요">
+            <p class="help club-list-lead">친구들과 규칙을 정하고 같이 꾸준히 써요. 초대 링크를 받은 사람만 들어올 수 있어요</p>
+            <div th:if="${clubs.isEmpty()}" class="club-empty">
+                <p>아직 참여 중인 함께 쓰기가 없어요</p>
+                <p class="help">직접 만들거나, 친구에게 초대 링크를 받아 들어오세요</p>
+                <a href="#club-new" class="btn btn-primary btn-sm" data-open-club-form>함께 쓰기 만들기</a>
             </div>
-            <div class="field club-rule">
-                <label for="club-every">규칙</label>
-                <span><input id="club-every" name="everyDays" type="number" min="1" max="30" required th:value="${form.everyDays()}"> 일에 1편</span>
-            </div>
-            <div class="club-dates">
-                <div class="field">
-                    <label for="club-start">시작 날짜</label>
-                    <input id="club-start" name="startDate" type="date" required th:value="${form.startDate()}">
+            <ul class="club-list" th:unless="${clubs.isEmpty()}">
+                <li th:each="c : ${clubs}">
+                    <a class="club-card" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
+                        <span class="club-card-top">
+                            <strong class="club-card-name" th:text="${c.name()}">함께 쓰기</strong>
+                            <span th:if="${today.isAfter(c.endDate())}" class="badge">끝남</span>
+                            <span th:unless="${today.isAfter(c.endDate())}" class="club-state" th:classappend="${wrote.contains(c.id())} ? 'is-done'"><th:block
+                                    th:if="${wrote.contains(c.id())}"><th:block th:replace="~{fragments/icons :: check}"></th:block>썼어요</th:block><th:block
+                                    th:unless="${wrote.contains(c.id())}">아직이에요</th:block></span>
+                        </span>
+                        <span th:if="${!c.intro().isEmpty()}" class="club-card-intro" th:text="${c.intro()}">소개</span>
+                        <span class="help" th:text="${c.everyDays() + '일에 1편 · 멤버 ' + c.memberCount() + '명 · '
+                                + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')}">7일에 1편</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <section id="club-new" class="mission-panel" aria-labelledby="club-new-heading" data-club-form
+                 th:attr="data-keep-open=${clubError != null}">
+            <h2 id="club-new-heading">함께 쓰기 만들기</h2>
+            <p class="help club-list-lead">기간 안에 전체 공개로 발행한 글이 자동으로 1편으로 세져요. 따로 고를 것은 없어요</p>
+            <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
+            <form method="post" action="/missions/clubs" class="club-form">
+                <div class="club-form-row">
+                    <label for="club-name">이름</label>
+                    <input id="club-name" name="name" type="text" maxlength="30" required th:value="${form.name()}" placeholder="예: 3반 함께 쓰기">
                 </div>
-                <div class="field">
-                    <label for="club-end">끝 날짜</label>
-                    <input id="club-end" name="endDate" type="date" required th:value="${form.endDate()}">
+                <div class="club-form-row">
+                    <label for="club-intro">한 줄 소개 <span class="help">(선택)</span></label>
+                    <input id="club-intro" name="intro" type="text" maxlength="100" th:value="${form.intro()}" placeholder="예: 매주 한 편씩 같이 써요">
                 </div>
-            </div>
-            <p class="help">기간 안에 전체 공개로 발행한 글이 자동으로 1편으로 세져요. 따로 고를 것은 없어요</p>
-            <button type="submit" class="btn btn-primary">함께 쓰기 만들기</button>
-        </form>
-    </section>
+                <div class="club-form-row">
+                    <label for="club-every">규칙</label>
+                    <span class="club-inline"><input id="club-every" name="everyDays" type="number" min="1" max="30" required th:value="${form.everyDays()}"> 일에 1편</span>
+                </div>
+                <div class="club-form-row">
+                    <label for="club-start">기간</label>
+                    <span class="club-inline"><input id="club-start" name="startDate" type="date" required th:value="${form.startDate()}"
+                            aria-label="시작 날짜"> ~ <input id="club-end" name="endDate" type="date" required th:value="${form.endDate()}" aria-label="끝 날짜"></span>
+                </div>
+                <div class="club-form-actions">
+                    <button type="button" class="btn btn-sm" data-close-club-form hidden>닫기</button>
+                    <button type="submit" class="btn btn-primary btn-sm">만들기</button>
+                </div>
+            </form>
+        </section>
+    </div>
+    <script th:src="@{/js/mission/club.js}" defer></script>
 </main>
 </body>
 </html>
