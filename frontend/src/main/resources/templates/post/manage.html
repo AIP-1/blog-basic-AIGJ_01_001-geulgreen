@@ -21,6 +21,8 @@
            th:text="${'임시글 ' + counts.get('drafts')}">임시글 0</a>
         <a data-count-tab="trash" data-count-label="휴지통" th:href="@{/manage/posts(tab='trash')}" th:attr="aria-current=${tab == 'trash' ? 'page' : null}"
            th:text="${'휴지통 ' + counts.get('trash')}">휴지통 0</a>
+        <!-- 106 강성찬 개인 확장: 시리즈 만들기·넣기·순서 -->
+        <a th:if="${seriesEnabled}" href="/manage/series">시리즈</a>
         <!-- 032 강성찬 개인 확장: 작성자 통계 -->
         <a href="/manage/stats">통계</a>
     </nav>

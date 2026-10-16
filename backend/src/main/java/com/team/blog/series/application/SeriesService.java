@@ -165,32 +165,101 @@ public class SeriesService {
     }
 
     /**
-     * 100 강성찬 개인 확장: 내 시리즈에서 글을 보이는 목록({@link #items})의 바로 앞·뒤 글과 자리를 바꾼다.
-     * 숨은 글(비공개 등)은 제자리. 끝에서 더 못 가면 그대로. 자리 번호는 1부터 다시 매긴다.
+     * 100 강성찬 개인 확장: 내 시리즈에서 글을 바로 앞·뒤 글과 자리를 바꾼다. 106: 관리 탭은 비공개 글까지 보여 주므로
+     * 넣은 글 전체 순서({@link #ownerItems})에서 바꾼다. 끝에서 더 못 가면 그대로. 자리 번호는 1부터 다시 매긴다.
      */
     @Transactional
     public void move(Optional<CurrentUser> current, long seriesId, long postId, boolean up) {
         CurrentUser me = accountGuard.requireWritable(current);
-        Integer mine = jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ? AND member_id = ?", Integer.class,
-                seriesId, me.memberId());
-        if (mine == null || mine == 0) {
-            throw new NotFoundException();
-        }
-        // 먼저 잠그고 나서 보이는 순서를 읽는다(사이에 글이 빠지거나 옮겨지지 않게)
+        requireMySeries(me, seriesId);
+        // 잠그고 읽는다(사이에 글이 빠지거나 옮겨지지 않게)
         List<Long> all = new java.util.ArrayList<>(jdbc.queryForList(
                 "SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position, post_id FOR UPDATE", Long.class, seriesId));
-        List<Long> visible = items(seriesId).stream().map(Item::id).toList();
-        int at = visible.indexOf(postId);
+        int at = all.indexOf(postId);
         int to = up ? at - 1 : at + 1;
         if (at < 0) {
             throw new NotFoundException();
         }
-        if (to < 0 || to >= visible.size()) {
+        if (to < 0 || to >= all.size()) {
             return;
         }
-        java.util.Collections.swap(all, all.indexOf(postId), all.indexOf(visible.get(to)));
+        java.util.Collections.swap(all, at, to);
         for (int i = 0; i < all.size(); i++) {
             jdbc.update("UPDATE series_post SET position = ? WHERE post_id = ?", i + 1, all.get(i));
+        }
+    }
+
+    /** 106 관리 탭 한 줄: 내 글(임시글 빼고, 지운 글 빼고)과 지금 든 시리즈. */
+    public record MyPost(long id, String title, String visibility, Long seriesId) {
+    }
+
+    /** 106 강성찬 개인 확장: 시리즈 관리 탭용 내 발행 글(최근 순). */
+    public List<MyPost> myPosts(Optional<CurrentUser> current) {
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        return jdbc.query("SELECT p.id, p.title, p.visibility, sp.series_id FROM post p LEFT JOIN series_post sp ON sp.post_id = p.id"
+                        + " WHERE p.author_id = ? AND p.deleted_at IS NULL AND p.status = 'PUBLISHED'"
+                        + " ORDER BY COALESCE(p.first_public_at, p.published_at) DESC NULLS LAST, p.id DESC",
+                (rs, i) -> new MyPost(rs.getLong("id"), rs.getString("title"), rs.getString("visibility"),
+                        rs.getObject("series_id") == null ? null : rs.getLong("series_id")), me.memberId());
+    }
+
+    /** 106: 주인이 보는 시리즈 글 전체(비공개 포함, 넣은 순서). */
+    public List<MyPost> ownerItems(long seriesId) {
+        return jdbc.query("SELECT p.id, p.title, p.visibility, sp.series_id FROM series_post sp JOIN post p ON p.id = sp.post_id"
+                        + " WHERE sp.series_id = ? AND p.deleted_at IS NULL ORDER BY sp.position, p.id",
+                (rs, i) -> new MyPost(rs.getLong("id"), rs.getString("title"), rs.getString("visibility"), rs.getLong("series_id")),
+                seriesId);
+    }
+
+    /**
+     * 106: 여러 글을 한 번에 넣는다. {@code seriesId}가 없으면 {@code newTitle}로 새 시리즈(첫 글과 함께 만든다).
+     * 글이 하나도 없으면 시리즈를 만들 수 없다(빈 시리즈는 지우는 규칙).
+     */
+    @Transactional
+    public long addAll(Optional<CurrentUser> current, List<Long> postIds, Long seriesId, String newTitle) {
+        if (postIds == null || postIds.isEmpty()) {
+            throw new PostContentException("SERIES_POSTS_REQUIRED");
+        }
+        long target = add(current, postIds.get(0), seriesId, newTitle);
+        postIds.stream().skip(1).forEach(id -> add(current, id, target, null));
+        return target;
+    }
+
+    /** 106: 이름 바꾸기. 1~60자, 내 다른 시리즈와 같은 이름이면 안 된다. */
+    @Transactional
+    public void rename(Optional<CurrentUser> current, long seriesId, String newTitle) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        String title = newTitle == null ? "" : newTitle.strip();
+        if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
+            throw new PostContentException("SERIES_TITLE_INVALID");
+        }
+        Integer taken = jdbc.queryForObject("SELECT count(*) FROM series WHERE member_id = ? AND title = ? AND id <> ?", Integer.class,
+                me.memberId(), title, seriesId);
+        if (taken != null && taken > 0) {
+            throw new PostContentException("SERIES_TITLE_TAKEN");
+        }
+        jdbc.update("UPDATE series SET title = ? WHERE id = ?", title, seriesId);
+    }
+
+    /** 106: 시리즈 묶음만 지운다(글은 그대로, series_post는 CASCADE). */
+    @Transactional
+    public void delete(Optional<CurrentUser> current, long seriesId) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        jdbc.update("DELETE FROM series WHERE id = ?", seriesId);
+    }
+
+    /** 106: 관리 탭에서 내 시리즈 화면 주소를 만들 때. */
+    public String handle(long memberId) {
+        return jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, memberId);
+    }
+
+    private void requireMySeries(CurrentUser me, long seriesId) {
+        Integer mine = jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ? AND member_id = ?", Integer.class,
+                seriesId, me.memberId());
+        if (mine == null || mine == 0) {
+            throw new NotFoundException();
         }
     }
 

@@ -108,17 +108,17 @@ class ProfileTabsIT extends IntegrationTestBase {
         long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
         addToSeries(me, p2, String.valueOf(sid));
         addToSeries(me, p3, String.valueOf(sid));
-        String move = "/tabord/series/" + sid + "/move";
+        String move = "/manage/series/" + sid + "/move"; // 106: 순서 바꾸기는 내 글 관리 [시리즈] 탭
         // 셋을 앞으로 → 하나, 셋, 둘
         mockMvc.perform(post(move).param("postId", String.valueOf(p3)).param("dir", "up").with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
         String list = page("/tabord/series/" + sid, me);
         assertThat(list.indexOf("순서 하나")).isLessThan(list.indexOf("순서 셋"));
         assertThat(list.indexOf("순서 셋")).isLessThan(list.indexOf("순서 둘"));
-        // 105: 앞으로·뒤로는 주인의 [순서 바꾸기](?edit) 안에만, 읽는 화면은 1편부터·최신 글부터
-        assertThat(list).contains(">순서 바꾸기</a>").contains("1편부터").doesNotContain("앞으로</button>");
-        assertThat(page("/tabord/series/" + sid + "?edit=1", me)).contains("순서 셋 앞으로");
-        assertThat(page("/tabord/series/" + sid + "?edit=1")).doesNotContain("앞으로</button>").doesNotContain(">순서 바꾸기</a>");
+        // 106: 읽는 화면은 1편부터·최신 글부터만, 주인에게는 관리 탭 링크. 앞으로·뒤로는 관리 탭에
+        assertThat(list).contains(">시리즈 관리</a>").contains("1편부터").doesNotContain("앞으로</button>");
+        assertThat(page("/tabord/series/" + sid)).doesNotContain(">시리즈 관리</a>");
+        assertThat(page("/manage/series", me)).contains("순서 셋 앞으로").contains("순서 둘 시리즈에서 빼기");
         String latest = page("/tabord/series/" + sid + "?order=latest");
         assertThat(latest.indexOf("순서 둘")).isLessThan(latest.indexOf("순서 하나"));
         assertThat(latest).contains(">3편<");
@@ -130,6 +130,47 @@ class ProfileTabsIT extends IntegrationTestBase {
                 .andExpect(status().isNotFound());
         assertThat(jdbc.queryForList("SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position", Long.class, sid))
                 .containsExactly(p1, p3, p2);
+    }
+
+    /** 106 강성찬 개인 확장: 관리 탭에서 새 시리즈를 글 여러 개와 함께 만들고, 더 넣고, 비공개 글도 보인다. 글쓰기에 시리즈 칸. */
+    @Test
+    void manageTabCreatesSeriesWithManyPosts() throws Exception {
+        long me = member("tabmng");
+        long other = member("tabmng2");
+        long a = posts.published(me, "관리 가", "본문", 1, T);
+        long b = posts.published(me, "관리 나", "본문", 1, T.plusSeconds(1));
+        long c = posts.published(me, "관리 다", "본문", 1, T.plusSeconds(2));
+        long theirs = posts.published(other, "남의 글", "본문", 1, T);
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE' WHERE id = ?", b);
+        assertThat(page("/manage/posts", me)).contains("href=\"/manage/series\"");
+        mockMvc.perform(post("/manage/series").param("newTitle", "관리 시리즈").param("postIds", String.valueOf(a), String.valueOf(b))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        mockMvc.perform(post("/manage/series/{id}/add", sid).param("postIds", String.valueOf(c))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForList("SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position", Long.class, sid))
+                .containsExactly(a, b, c);
+        String manage = page("/manage/series", me);
+        assertThat(manage).contains("관리 시리즈").contains("관리 나").contains("공개 안 됨").contains("3편");
+        // 남의 글은 넣지 못하고, 글 없이·이름 없이 만들면 안내
+        mockMvc.perform(post("/manage/series/{id}/add", sid).param("postIds", String.valueOf(theirs))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().isNotFound());
+        mockMvc.perform(post("/manage/series").param("newTitle", "빈 시리즈").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/manage/series?error=SERIES_POSTS_REQUIRED"));
+        assertThat(page("/manage/series?error=SERIES_POSTS_REQUIRED", me)).contains("넣을 글을 하나 이상 골라 주세요");
+        // 이름 바꾸기(같은 이름은 안내), 삭제는 묶음만 풀고 글은 남는다
+        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "새 이름 시리즈").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForObject("SELECT title FROM series WHERE id = ?", String.class, sid)).isEqualTo("새 이름 시리즈");
+        mockMvc.perform(post("/manage/series/{id}/rename", sid).param("title", "x").with(csrf()).with(TestAuth.member(other)))
+                .andExpect(status().isNotFound());
+        // 글쓰기 발행 설정에 시리즈 칸(이 글이 든 시리즈가 골라져 있다)
+        assertThat(page("/write/" + c, me)).contains("id=\"series-pick\"").contains("+ 새 시리즈 만들기")
+                .containsPattern("value=\"" + sid + "\" selected=\"selected\">새 이름 시리즈");
+        mockMvc.perform(post("/manage/series/{id}/delete", sid).with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ?", Integer.class, sid)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE id IN (?, ?, ?) AND deleted_at IS NULL", Integer.class, a, b, c)).isEqualTo(3);
     }
 
     @Test
