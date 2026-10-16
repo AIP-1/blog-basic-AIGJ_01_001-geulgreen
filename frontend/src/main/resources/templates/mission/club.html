@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${board.club().name() + ' · 함께 쓰기 · 글그린'}">함께 쓰기 · 글그린</title>
+</head>
+<body>
+<main class="list-page mission-page">
+    <!-- 111 후보(강성찬 개인 확장): 모임 화면(멤버만). 이번 기간 진행표, 멤버들의 글, 초대 링크 -->
+    <nav th:replace="~{mission/today :: missionTabs('clubs')}"></nav>
+    <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
+    <section class="mission-panel" aria-labelledby="club-heading" th:with="c=${board.club()}, p=${board.period()}">
+        <p class="mission-eyebrow" th:text="${c.everyDays() + '일에 1편 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')}">7일에 1편</p>
+        <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
+        <p th:if="${!c.intro().isEmpty()}" class="mission-lead" th:text="${c.intro()}">소개</p>
+        <div class="mission-panel-head club-period">
+            <h2 th:text="${board.ended() ? '마지막 기간' : board.notStarted() ? '첫 기간' : '이번 기간'}">이번 기간</h2>
+            <p class="help" th:text="${#temporals.format(p.start(), 'M월 d일') + ' ~ ' + #temporals.format(p.end(), 'M월 d일') + ' · ' + p.index() + '/' + p.total() + '번째'}">기간</p>
+            <span class="count-chip" th:text="${wroteCount + '/' + board.members().size() + '명 썼어요'}">0명</span>
+        </div>
+        <p th:if="${!board.members().isEmpty() and wroteCount == board.members().size()}" class="club-all-done"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>이번 기간 모두 썼어요!</p>
+        <p th:if="${board.notStarted()}" class="help">아직 함께 쓰기가 시작되지 않았어요. 시작 날짜부터 세요</p>
+        <p th:if="${board.ended()}" class="help">함께 쓰기가 끝났어요. 마지막 기간의 기록이에요</p>
+        <ul class="club-board">
+            <li th:each="m : ${board.members()}" th:classappend="${m.wrote()} ? 'is-done'">
+                <a th:href="${paths.blog(m.handle())}" class="club-member"><span th:text="${m.name()}">이름</span>
+                    <span class="help" th:text="${m.handle()}">아이디</span><span th:if="${m.owner()}" class="badge">만든 사람</span></a>
+                <span class="club-state"><th:block th:if="${m.wrote()}"><th:block th:replace="~{fragments/icons :: check}"></th:block>썼어요</th:block><th:block th:unless="${m.wrote()}"><th:block th:replace="~{fragments/icons :: clock}"></th:block>아직이에요</th:block></span>
+                <form th:if="${board.isOwner() and !m.owner()}" class="inline-form" method="post"
+                      th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
+                      th:attr="data-confirm=${m.name() + ' 님을 함께 쓰기에서 내보낼까요?'}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-sm">내보내기</button>
+                </form>
+            </li>
+        </ul>
+    </section>
+    <section class="mission-panel" aria-labelledby="club-invite-heading" th:if="${!board.ended()}">
+        <h2 id="club-invite-heading">친구 초대하기</h2>
+        <p class="help">이 링크를 받은 사람만 들어올 수 있어요. 탐색에는 보이지 않아요</p>
+        <div class="club-invite">
+            <label for="club-invite" class="visually-hidden">초대 링크</label>
+            <input id="club-invite" type="text" readonly th:value="${siteOrigin + '/missions/clubs/join/' + board.club().inviteCode()}">
+            <button type="button" id="club-invite-copy" class="btn btn-sm" hidden>링크 복사</button>
+        </div>
+    </section>
+    <section class="mission-feed" aria-labelledby="club-posts-heading">
+        <h2 id="club-posts-heading"><th:block th:replace="~{fragments/icons :: sparkle}"></th:block>멤버들이 쓴 글</h2>
+        <p th:if="${cards.isEmpty()}" class="empty-state">아직 기간에 올라온 글이 없어요</p>
+        <ul class="card-grid home-cards mission-posts">
+            <li th:each="card : ${cards}" class="mission-card"><article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article></li>
+        </ul>
+    </section>
+    <section class="club-actions">
+        <form th:if="${!board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/leave(id=${board.club().id()})}"
+              data-confirm="함께 쓰기에서 나갈까요? 다시 들어오려면 초대 링크가 필요해요.">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-sm">함께 쓰기에서 나가기</button>
+        </form>
+        <form th:if="${board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/delete(id=${board.club().id()})}"
+              data-confirm="함께 쓰기를 지울까요? 멤버들의 글은 그대로 남아요. 되돌릴 수 없어요.">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" class="btn btn-sm btn-danger">함께 쓰기 삭제</button>
+        </form>
+    </section>
+    <script th:src="@{/js/mission/club.js}" defer></script>
+</main>
+</body>
+</html>

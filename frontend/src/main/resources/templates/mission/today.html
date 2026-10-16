@@ -6,6 +6,7 @@
 </head>
 <body>
 <main class="list-page mission-page">
+    <nav th:replace="~{mission/today :: missionTabs('today')}"></nav>
     <!-- 057 강성찬 개인 확장: 오늘의 미션. 시안(10-13): 소개+내 기록 3칸 → 오늘의 주제 3칸 → 성장 기록 달력·배지 → 친구들·모두의 글 -->
     <section class="mission-panel mission-hero" aria-labelledby="mission-title">
         <div class="mission-hero-text">
@@ -138,6 +139,11 @@
         </ul>
     </section>
 </main>
+<!-- 111 후보: 미션 화면 탭(오늘의 미션 · 모임). 모임은 로그인한 사람에게만 -->
+<nav th:fragment="missionTabs(tab)" class="manage-tabs mission-tabs" aria-label="미션 메뉴">
+    <a href="/missions" th:attr="aria-current=${tab == 'today' ? 'page' : null}">오늘의 미션</a>
+    <a th:if="${currentMemberId != null}" href="/missions/clubs" th:attr="aria-current=${tab == 'clubs' ? 'page' : null}">함께 쓰기</a>
+</nav>
 <!-- 미션 글 한 줄: 제목·요약·주제·글쓴이, 댓글 달러 가기(파라미터 이름은 부르는 쪽 반복 변수와 다르게) -->
 <!-- 홈 글 카드(fragments/post-card)와 같은 모양: 글쓴이·주제 → 제목 → 요약 → 반응·댓글 달기 -->
 <!-- 086: 공용 카드 위에 붙는 미션 줄(주제·친구/내 글·댓글 달기). 모든 미션 카드에 있어 줄이 맞는다 -->

@@ -54,6 +54,16 @@
         <th:block th:if="${tab == 'trending'}">아직 트렌딩 글이 없어요 <a href="/">최신 글 보기</a></th:block>
         <th:block th:unless="${tab == 'trending'}">아직 둘러볼 글이 없어요 <a href="/">홈으로</a></th:block>
     </div>
+    <!-- 강성찬 개인 확장(10-16): 첫 댓글을 기다리는 글(최근 7일·댓글 0개·전체 공개, 내 글 제외, 최대 4개) -->
+    <section th:if="${waiting != null and !waiting.isEmpty()}" class="waiting-comments" aria-labelledby="waiting-heading">
+        <h2 id="waiting-heading"><th:block th:replace="~{fragments/icons :: comment}"></th:block> 첫 댓글을 기다리는 글</h2>
+        <p class="help">아직 댓글이 없는 최근 글이에요. 한마디 남겨 주면 글쓴이에게 큰 힘이 돼요.</p>
+        <div class="card-grid waiting-grid">
+            <th:block th:each="card : ${waiting}">
+                <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
+            </th:block>
+        </div>
+    </section>
     <div class="card-grid home-cards" id="card-grid">
         <th:block th:each="card : ${cards}">
             <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>

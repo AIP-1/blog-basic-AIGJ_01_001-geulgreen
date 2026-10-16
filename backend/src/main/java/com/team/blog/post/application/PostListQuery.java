@@ -90,6 +90,12 @@ public class PostListQuery {
         return count == null ? 0 : count;
     }
 
+    /** 강성찬 개인 확장(10-16): 발행한 글이 하나라도 있는지(공개 범위 상관없이, 휴지통 제외). 홈 "시작하기" 칸에 쓴다. */
+    public boolean hasPublished(long authorId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM post WHERE author_id = ? AND status = 'PUBLISHED' AND deleted_at IS NULL)", Boolean.class, authorId));
+    }
+
     private CardPage page(Long authorId, Long tagId, Long followerId, Optional<FeedCursor> cursor, boolean withFriends) {
         return page(authorId, tagId, followerId, cursor, withFriends, null);
     }
