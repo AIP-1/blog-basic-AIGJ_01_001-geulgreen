@@ -17,11 +17,12 @@ import org.commonmark.node.Text;
 
 /**
  * 요약(10 §2-1): 코드 블록·이미지·표를 빼고 제목·문단·목록의 글자만(인라인 코드·링크 글자는 남김), 공백을 하나로,
- * 앞 200자(단어 중간이면 그 단어 앞에서). 변환을 마친 AST에서 뽑는다 — 정화된 HTML의 보이는 글자와 같다.
+ * 앞 600자(단어 중간이면 그 단어 앞에서). 변환을 마친 AST에서 뽑는다 — 정화된 HTML의 보이는 글자와 같다.
+ * 103 강성찬 개인 확장: 200 → 600. 사진 카드와 같은 줄의 글 카드가 늘어난 높이를 요약으로 채우게(card-rows.js). 카드는 평소 3줄만 보인다.
  */
 final class ExcerptExtractor extends AbstractVisitor {
 
-    static final int MAX = 200;
+    static final int MAX = 600;
 
     private final StringBuilder out = new StringBuilder();
 

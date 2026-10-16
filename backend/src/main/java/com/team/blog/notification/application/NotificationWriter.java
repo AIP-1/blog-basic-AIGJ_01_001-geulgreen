@@ -112,6 +112,19 @@ public class NotificationWriter {
         return true;
     }
 
+    /** 099 문의 답장 알림: 운영 알림처럼 끌 수 없고, 그 문의로 가게 번호를 담는다. */
+    public boolean inquiryReplied(long receiverId, long inquiryId) {
+        if (!eligible(receiverId, null, NotificationType.INQUIRY_REPLIED, null)) {
+            return false;
+        }
+        Timestamp now = now();
+        jdbc.update("""
+                INSERT INTO notification (receiver_id, type, inquiry_id, actor_count, created_at, updated_at)
+                VALUES (?, 'INQUIRY_REPLIED', ?, 0, ?, ?)
+                """, receiverId, inquiryId, now, now);
+        return true;
+    }
+
     public static String likeGroup(long postId) {
         return "LIKE:post:" + postId;
     }

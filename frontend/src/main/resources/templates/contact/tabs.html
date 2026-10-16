@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 099 강성찬 개인 확장: 문의하기 | 내 문의 탭(회원에게만). tab = 지금 화면 -->
+<nav th:fragment="tabs(tab)" th:if="${currentMemberId != null}" class="manage-tabs" aria-label="문의 메뉴">
+    <a href="/contact" th:attr="aria-current=${tab == 'form' ? 'page' : null}">문의하기</a>
+    <a href="/contact/mine" th:attr="aria-current=${tab == 'mine' ? 'page' : null}">내 문의</a>
+</nav>
+</body>
+</html>
