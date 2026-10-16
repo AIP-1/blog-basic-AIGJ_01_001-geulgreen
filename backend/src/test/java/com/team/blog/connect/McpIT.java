@@ -162,4 +162,26 @@ class McpIT extends IntegrationTestBase {
         // 임시글로 남는다(발행은 사람이)
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE author_id = ? AND status <> 'DRAFT'", Integer.class, me)).isZero();
     }
+
+    /** 110 강성찬 개인 확장: 임시글 썸네일. 1600x1000 PNG를 그려 내 사진으로 올리고 카드 대표 사진으로 정한다. */
+    @Test
+    void makesThumbnailForMyDraftOnly() throws Exception {
+        long me = member("mcpthumb");
+        String key = issueKey(me);
+        String created = call(key, "create_draft", "{\"title\":\"썸네일 글\",\"content_md\":\"본문\",\"series_title\":\"글그린 제작기\"}");
+        assertThat(created).contains("\"isError\":false");
+        long postId = jdbc.queryForObject("SELECT id FROM post WHERE author_id = ?", Long.class, me);
+        String made = call(key, "make_thumbnail", "{\"post_id\":" + postId + ",\"theme\":\"ink\"}");
+        assertThat(made).contains("\"isError\":false").contains("image_url");
+        var cover = jdbc.queryForMap("SELECT pc.image_url, i.width, i.height, i.content_type FROM post_cover pc JOIN image i ON i.id = pc.image_id"
+                + " WHERE pc.post_id = ?", postId);
+        assertThat(cover).containsEntry("width", 1600).containsEntry("height", 1000).containsEntry("content_type", "image/png");
+        // 발행한 글·남의 글은 안 된다
+        long published = posts.published(me, "발행 글", "본문", 1, java.time.Instant.parse("2026-10-16T00:00:00Z"));
+        assertThat(call(key, "make_thumbnail", "{\"post_id\":" + published + "}")).contains("NOT_A_DRAFT");
+        long other = member("mcpthumbx");
+        long othersDraft = posts.draft(other, "남의 임시글", "본문", 0);
+        assertThat(call(key, "make_thumbnail", "{\"post_id\":" + othersDraft + "}")).contains("\"isError\":true");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post_cover WHERE post_id = ?", Integer.class, othersDraft)).isZero();
+    }
 }
