@@ -7,6 +7,40 @@
 
 ---
 
+## [1.66.4] — 2026-10-16 · 개인 확장 (함께 쓰기 첫 화면, 멤버 목록 접기)
+
+- **111 후속**: 함께 쓰기 첫 화면을 누르는 카드(내 이번 기간 상태)로, 만들기 폼은 버튼으로 열기, 빈 화면, 960px
+- **111 후속**: 멤버 9명부터 멤버 목록을 처음엔 접어 두고 펼치기
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기 첫 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-clubs-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-clubs-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-clubs-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-clubs-m-after.png) |
+
+**모임 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-club-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.4/v1664-club-m-after.png) |
+
+---
+
 ## [1.66.3] — 2026-10-16 · 개인 확장 (서식 추천받기 버튼)
 
 - **085 후속**: 글 점검의 서식 추천을 [서식 추천받기] 버튼으로, 결과 아래에 살펴본 항목, [다시 추천받기]

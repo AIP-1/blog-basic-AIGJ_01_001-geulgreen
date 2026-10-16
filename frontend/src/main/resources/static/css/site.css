@@ -1609,19 +1609,33 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .sort-menu.bulk-visibility summary::before { content: none; }
 /* 111 후보(강성찬 개인 확장): 미션 탭과 모임 */
 .mission-tabs { margin: 0; }
-.club-list, .club-board { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.club-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px; }
-.club-name { font-weight: 700; }
-.club-intro { flex-basis: 100%; margin: 0; }
-.club-form { display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
-.club-form .field { margin: 0; display: flex; flex-direction: column; gap: 6px; }
-.club-form .field > label { font-weight: 600; font-size: .92em; }
+.club-list, .club-board { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.club-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.club-list-head h2, #club-new-heading { margin: 0; font-size: 1.25em; }
+.club-list-lead { margin: 6px 0 0; }
+.club-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--color-border); border-radius: 16px;
+  color: inherit; text-decoration: none; background: var(--color-surface); }
+.club-card:hover { border-color: var(--color-control-border); }
+.club-card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.club-card-top { display: flex; align-items: center; gap: 8px; }
+.club-card-name { font-size: 1.05em; }
+.club-card-top .club-state, .club-card-top .badge { margin-left: auto; }
+.club-card-intro { color: var(--color-text); }
+.club-empty { margin-top: 14px; padding: 28px 16px; border: 1px dashed var(--color-border); border-radius: 16px; text-align: center; }
+.club-empty p { margin: 0 0 6px; }
+.club-empty .btn { margin-top: 8px; }
+.club-form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.club-form-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 6px 16px; }
+.club-form-row > label { font-weight: 600; font-size: .92em; }
 .club-form input[type=text] { width: 100%; }
 .club-form input[type=number], .club-form input[type=date] { font: inherit; color: var(--color-text); background: var(--color-surface);
   border: 1px solid var(--color-control-border); border-radius: 12px; padding: 8px 12px; }
-.club-rule input { width: 5em; }
-.club-form .btn { align-self: flex-start; }
-.club-dates { display: flex; flex-wrap: wrap; gap: 12px; }
+.club-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.club-inline input[type=number] { width: 5em; }
+.club-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.club-form-actions [hidden] { display: none; }
+#club-new[hidden] { display: none; }
+@media (max-width: 640px) { .club-form-row { grid-template-columns: 1fr; } }
 /* 함께 쓰기 화면: 위쪽은 960px 가운데, 멤버 줄은 흰 바탕 + 구분선 */
 .club-top { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 960px; margin: 0 auto; }
 .club-head h1 { margin: 0; }
@@ -1634,7 +1648,13 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .club-count .icon, .club-state .icon, #club-posts-heading .icon, #club-invite-copy .icon { width: 1em; height: 1em; flex: none; }
 .club-progress { height: 6px; margin-top: 10px; border-radius: 999px; background: var(--color-grass-0); overflow: hidden; }
 .club-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--color-grass-3); }
-.club-board { gap: 0; margin-top: 16px; }
+.club-members { margin-top: 16px; }
+.club-members > summary { display: flex; align-items: center; gap: 6px; padding: 8px 0; cursor: pointer; list-style: none;
+  font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
+.club-members > summary::-webkit-details-marker { display: none; }
+.club-members > summary .icon { width: 1em; height: 1em; }
+.club-members[open] > summary .icon { transform: rotate(90deg); }
+.club-board { gap: 0; margin-top: 4px; }
 .club-board li { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-top: 1px solid var(--color-border); }
 .club-member { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; color: inherit; text-decoration: none; }
 .club-member-text { display: flex; flex-direction: column; min-width: 0; }
