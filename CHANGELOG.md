@@ -7,6 +7,21 @@
 
 ---
 
+## [1.65.3] — 2026-10-16 · 개인 확장 (링크 미리보기 고양이 그림)
+
+- 링크 미리보기(og:image) 기본 그림을 첫 화면 고양이 그림으로(블로그 주소, 사진 없는 글 포함)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**링크 미리보기 기본 그림**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.3/v1653-og-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.3/v1653-og-after.jpg) |
+
+---
+
 ## [1.65.2] — 2026-10-16 · 개인 확장 (검색 결과 문구)
 
 - 홈 title "글그린 블로그 - 매일 쓴 글이 잔디처럼 자라는 곳"과 새 meta description, 모든 화면에 og:site_name=글그린, 홈에 WebSite 구조화 데이터(JSON-LD)
