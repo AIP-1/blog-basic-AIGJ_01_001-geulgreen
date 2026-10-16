@@ -7,6 +7,31 @@
 
 ---
 
+## [1.62.0] — 2026-10-16 · 개인 확장 (시리즈 읽는 순서)
+
+- **105 시리즈 읽는 순서**: 시리즈 화면에 1편부터·최신 글부터 정렬, 주인의 앞으로·뒤로는 [순서 바꾸기]를 눌렀을 때만
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**시리즈 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.62.0/v1620-series-owner-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.62.0/v1620-series-owner-after.png) |
+
+**순서 바꾸기를 누른 화면**
+
+![](https://github.com/practicech/blog/releases/download/v1.62.0/v1620-series-edit-after.png)
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.62.0/v1620-series-owner-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.62.0/v1620-series-owner-m-after.png) |
+
+---
+
 ## [1.61.0] — 2026-10-16 · 개인 확장 (탐색 시리즈 탭)
 
 - **104 탐색 시리즈 탭**: 탐색에 "시리즈" 탭, 모든 블로그의 공개 시리즈를 인기순·최근순으로
