@@ -7,6 +7,46 @@
 
 ---
 
+## [1.64.0] — 2026-10-16 · 개인 확장 (시리즈 관리, 설명·대표 사진)
+
+- **106 시리즈 관리**: 내 글에 시리즈 탭(만들기, 글 넣기·빼기, 순서), 글쓰기 발행 설정에 시리즈 칸, 공개 시리즈 화면의 순서 버튼은 시리즈 관리로
+- **107 시리즈 설명·대표 사진**: 설명 한 줄과 대표 사진(없으면 1편부터 첫 사진), 빈 시리즈는 남기고 삭제는 버튼으로만
+- DB: V26 시리즈 설명·대표 사진 칸(더하기만)
+
+#### 전/후 사진
+
+**내 글 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-manage-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-manage-after.png) |
+
+**발행 설정**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-publish-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-publish-after.png) |
+
+**시리즈 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-detail-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-detail-after.png) |
+
+**블로그의 시리즈 목록**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-list-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-list-after.png) |
+
+**탐색 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.64.0/v1640-explore-after.png) |
+
+---
+
 ## [1.63.0] — 2026-10-16 · 개인 확장 (글 카드 좁히기, 요약 끊김)
 
 - **103 후속 글 카드**: 카드 최소 250px(1440에서 5칸), 사진은 위 끝까지, 한 줄 제목 아래 빈 줄 없음, 사진 카드 요약 3줄과 "…", 글만 있는 카드는 딱 맞는 줄 수

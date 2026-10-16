@@ -10,20 +10,26 @@
     <th:block th:replace="~{fragments/blog-header :: header}"></th:block>
     <div th:if="${seriesList.isEmpty()}" class="empty-state">
         <p>아직 묶어 둔 시리즈가 없어요</p>
-        <p class="help" th:if="${isOwner}">글 화면 아래 <strong>시리즈</strong>에서 이어지는 글을 하나로 묶을 수 있어요</p>
+        <p class="help" th:if="${isOwner}"><a href="/manage/series">내 글 관리의 시리즈 탭</a>이나 글쓰기 발행 설정에서 이어지는 글을 하나로 묶을 수 있어요</p>
     </div>
     <ul th:replace="~{series/list :: seriesCards(${seriesList})}"></ul>
     <script th:src="@{/js/follow/follow.js}" defer></script>
 </main>
 <!-- 시리즈 카드 목록(시리즈 탭·홈 선반) -->
 <ul th:fragment="seriesCards(items)" class="series-list" th:unless="${items.isEmpty()}">
-    <li th:each="s : ${items}" class="series-card">
-        <a th:href="${paths.blog(owner.handle()) + '/series/' + s.id()}">
-            <svg th:replace="~{fragments/icons :: i-book}"></svg>
-            <strong th:text="${s.title()}">시리즈</strong>
-            <span class="help" th:text="${'글 ' + s.postCount() + '편'}">글 3편</span>
-        </a>
-    </li>
+    <th:block th:each="s : ${items}"><li th:replace="~{series/list :: seriesCard(${paths.blog(owner.handle()) + '/series/' + s.id()}, ${s}, ${'글 ' + s.postCount() + '편'})}"></li></th:block>
 </ul>
+<!-- 107 강성찬 개인 확장: 시리즈 카드 한 장(대표 사진·이름·설명 한 줄·글 수). 블로그 시리즈 탭·홈 선반·탐색 시리즈 탭이 같이 쓴다 -->
+<li th:fragment="seriesCard(href, s, meta)" class="series-card">
+    <a th:href="${href}">
+        <img th:if="${s.coverUrl() != null}" class="series-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
+        <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+        <span class="series-card-text">
+            <strong th:text="${s.title()}">시리즈</strong>
+            <span th:if="${s.description() != null}" class="series-card-desc" th:text="${s.description()}">설명</span>
+            <span class="help" th:text="${meta}">글 3편</span>
+        </span>
+    </a>
+</li>
 </body>
 </html>

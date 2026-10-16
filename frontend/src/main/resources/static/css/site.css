@@ -1404,8 +1404,21 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .series-card a { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 16px 18px; border-radius: 16px;
     background: var(--color-surface); border: 1px solid var(--color-border); color: inherit; text-decoration: none; }
 .series-card a:hover { border-color: var(--color-text-muted); }
-.series-card .icon { grid-row: span 2; color: var(--color-brand); }
 .series-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 107 강성찬 개인 확장: 시리즈 대표 사진(왼쪽 정사각형, 없으면 책 아이콘)·설명 한 줄 */
+.series-card a { grid-template-columns: 64px 1fr; gap: 14px; }
+.series-card-text { display: grid; gap: 2px; min-width: 0; }
+.series-card-desc { color: var(--color-text-muted); font-size: .92em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-cover { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; flex: none; background: var(--color-surface-muted); }
+.series-cover-empty { display: grid; place-items: center; color: var(--color-brand); }
+.series-cover-lg { width: 96px; height: 96px; border-radius: 16px; }
+.series-head { display: flex; gap: 16px; align-items: center; margin: 8px 0 12px; min-width: 0; }
+.series-head h1, .series-head h2 { margin: 0; }
+.series-head p { margin: 4px 0 0; }
+.series-desc { color: var(--color-text-muted); }
+.series-covers { border: 0; padding: 0; margin: 12px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.series-cover-choice { display: inline-flex; align-items: center; gap: 6px; }
+.series-cover-choice img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
 .series-cards .manage-badges form { position: relative; z-index: 1; margin: 0; }
 /* 머리말 화면 모드 버튼: 라이트에서는 달(다크로), 다크에서는 해(라이트로). 테마 판단은 밤 그림과 같은 규칙 */
 .theme-switch { border: 0; background: none; color: var(--color-text); padding: 0; cursor: pointer; }
@@ -1530,3 +1543,16 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
 
+/* 106 강성찬 개인 확장: 내 글 관리 [시리즈] 탭 */
+.series-pick { border: 0; padding: 0; margin: 12px 0; display: grid; gap: 6px; max-height: 280px; overflow-y: auto; }
+.series-pick legend { margin-bottom: 6px; }
+.series-pick label { display: flex; gap: 8px; align-items: baseline; }
+.series-manage .manage-head h2 { margin: 0; }
+.series-manage-items { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.series-manage-items li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+.series-manage-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-manage-items form { margin: 0; }
+.series-field select, .series-field input { margin-top: 6px; }
+.series-card { display: flex; }
+.series-card a { flex: 1; }
+.series-settings .field input { width: 100%; max-width: 480px; }

@@ -13,13 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 041 시리즈(강성찬 개인 확장): 내 글을 이름 붙인 묶음에 넣은 순서대로. 글은 시리즈 0~1개, 비면 시리즈도 지운다.
+ * 041 시리즈(강성찬 개인 확장): 내 글을 이름 붙인 묶음에 넣은 순서대로. 글은 시리즈 0~1개.
+ * 107: 글이 다 빠져도 시리즈(이름·설명·사진)는 남고, 지우기는 관리 탭 [시리즈 삭제]로만.
  * 목록·편 번호는 공용 목록 조건(012) 글만 센다.
  */
 @Service
 public class SeriesService {
 
-    public record Series(long id, String title, long postCount) {
+    /** 107: {@code coverUrl}은 화면에 쓸 사진(고른 것, 없으면 1편부터 첫 사진), {@code pickedCover}는 주인이 고른 것(관리 탭). */
+    public record Series(long id, String title, long postCount, String description, String coverUrl, String pickedCover) {
     }
 
     public record Item(long id, String title, String handle) {
@@ -46,18 +48,28 @@ public class SeriesService {
         return properties.enabled();
     }
 
+    /** 107 강성찬 개인 확장: 대표 사진(고른 것, 없으면 보이는 글 중 넣은 순서로 첫 사진). {@code s}는 series 별칭. */
+    private String coverSql(String condition) {
+        return "COALESCE(s.cover_url, (SELECT COALESCE(cp.thumb_url, cpost.thumbnail_url) FROM series_post csp"
+                + " JOIN post cpost ON cpost.id = csp.post_id JOIN member cm ON cm.id = cpost.author_id"
+                + " LEFT JOIN post_cover cp ON cp.post_id = cpost.id WHERE csp.series_id = s.id AND " + condition
+                + " AND COALESCE(cp.thumb_url, cpost.thumbnail_url) IS NOT NULL ORDER BY csp.position, cpost.id LIMIT 1)) AS cover";
+    }
+
     /** 블로그의 시리즈(공개 글 수 포함, 최근에 만든 순). {@code includeEmpty}: 주인에게는 공개 글이 없는 것도. */
     public List<Series> list(long memberId, boolean includeEmpty) {
-        List<Series> all = jdbc.query("SELECT s.id, s.title, (SELECT count(*) FROM series_post sp JOIN post p ON p.id = sp.post_id"
+        List<Series> all = jdbc.query("SELECT s.id, s.title, s.description, s.cover_url, " + coverSql(accessPolicy.blogListingCondition("cpost", "cm"))
+                        + ", (SELECT count(*) FROM series_post sp JOIN post p ON p.id = sp.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = s.id AND "
                         + accessPolicy.blogListingCondition("p", "m") + ") AS cnt FROM series s WHERE s.member_id = ?"
                         + " ORDER BY s.id DESC",
-                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), rs.getLong("cnt")), memberId);
+                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), rs.getLong("cnt"), rs.getString("description"),
+                        rs.getString("cover"), rs.getString("cover_url")), memberId);
         return includeEmpty ? all : all.stream().filter(s -> s.postCount() > 0).toList();
     }
 
     /** 탐색 시리즈 탭에 보일 한 줄: 누구의 시리즈인지와 공개 글 수. */
-    public record Browse(long id, String title, String handle, long postCount) {
+    public record Browse(long id, String title, String handle, long postCount, String description, String coverUrl) {
 
         public String url() {
             return com.team.blog.shared.web.BlogPaths.of(handle) + "/series/" + id;
@@ -72,13 +84,15 @@ public class SeriesService {
      */
     public List<Browse> browse(String sort) {
         String order = "recent".equals(sort) ? "latest DESC, s.id DESC" : "likes DESC, cnt DESC, latest DESC, s.id DESC";
-        return jdbc.query("SELECT s.id, s.title, owner.handle, count(*) AS cnt, sum(p.like_count) AS likes,"
+        return jdbc.query("SELECT s.id, s.title, s.description, " + coverSql(accessPolicy.publicListingCondition("cpost", "cm"))
+                        + ", owner.handle, count(*) AS cnt, sum(p.like_count) AS likes,"
                         + " max(COALESCE(p.first_public_at, p.published_at)) AS latest FROM series s"
                         + " JOIN member owner ON owner.id = s.member_id JOIN series_post sp ON sp.series_id = s.id"
                         + " JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id WHERE "
                         + accessPolicy.publicListingCondition("p", "m")
-                        + " GROUP BY s.id, s.title, owner.handle ORDER BY " + order + " LIMIT " + BROWSE_LIMIT,
-                (rs, i) -> new Browse(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("cnt")));
+                        + " GROUP BY s.id, s.title, s.description, s.cover_url, owner.handle ORDER BY " + order + " LIMIT " + BROWSE_LIMIT,
+                (rs, i) -> new Browse(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("cnt"),
+                        rs.getString("description"), rs.getString("cover")));
     }
 
     public Optional<Series> find(long memberId, long seriesId) {
@@ -115,7 +129,7 @@ public class SeriesService {
     /** 글이 든 시리즈(없으면 빈 값). */
     public Optional<Series> ofPost(long postId) {
         return jdbc.query("SELECT s.id, s.title FROM series_post sp JOIN series s ON s.id = sp.series_id WHERE sp.post_id = ?",
-                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0), postId).stream().findFirst();
+                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0, null, null, null), postId).stream().findFirst();
     }
 
     /**
@@ -135,14 +149,7 @@ public class SeriesService {
             }
             target = seriesId;
         } else {
-            String title = newTitle == null ? "" : newTitle.strip();
-            if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
-                throw new PostContentException("SERIES_TITLE_INVALID");
-            }
-            jdbc.update("INSERT INTO series (member_id, title) VALUES (?, ?) ON CONFLICT (member_id, title) DO NOTHING",
-                    me.memberId(), title);
-            target = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ? AND title = ?", Long.class, // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
-                    me.memberId(), title);
+            target = createOrFind(me, newTitle);
         }
         Optional<Series> before = ofPost(postId);
         if (before.isPresent() && before.get().id() == target) {
@@ -151,7 +158,6 @@ public class SeriesService {
         jdbc.update("DELETE FROM series_post WHERE post_id = ?", postId);
         jdbc.update("INSERT INTO series_post (post_id, series_id, position) VALUES (?, ?, "
                 + "(SELECT COALESCE(max(position), 0) + 1 FROM series_post WHERE series_id = ?))", postId, target, target);
-        before.ifPresent(s -> dropIfEmpty(s.id()));
         return target;
     }
 
@@ -159,49 +165,139 @@ public class SeriesService {
     public void remove(Optional<CurrentUser> current, long postId) {
         CurrentUser me = accountGuard.requireLoggedIn(current);
         requireMyPost(me, postId);
-        Optional<Series> before = ofPost(postId);
         jdbc.update("DELETE FROM series_post WHERE post_id = ?", postId);
-        before.ifPresent(s -> dropIfEmpty(s.id()));
+    }
+
+    /** 이름으로 내 시리즈를 만든다(같은 이름이 있으면 그것). */
+    private long createOrFind(CurrentUser me, String newTitle) {
+        String title = newTitle == null ? "" : newTitle.strip();
+        if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
+            throw new PostContentException("SERIES_TITLE_INVALID");
+        }
+        jdbc.update("INSERT INTO series (member_id, title) VALUES (?, ?) ON CONFLICT (member_id, title) DO NOTHING",
+                me.memberId(), title);
+        return jdbc.queryForObject("SELECT id FROM series WHERE member_id = ? AND title = ?", Long.class, // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
+                me.memberId(), title);
     }
 
     /**
-     * 100 강성찬 개인 확장: 내 시리즈에서 글을 보이는 목록({@link #items})의 바로 앞·뒤 글과 자리를 바꾼다.
-     * 숨은 글(비공개 등)은 제자리. 끝에서 더 못 가면 그대로. 자리 번호는 1부터 다시 매긴다.
+     * 100 강성찬 개인 확장: 내 시리즈에서 글을 바로 앞·뒤 글과 자리를 바꾼다. 106: 관리 탭은 비공개 글까지 보여 주므로
+     * 넣은 글 전체 순서({@link #ownerItems})에서 바꾼다. 끝에서 더 못 가면 그대로. 자리 번호는 1부터 다시 매긴다.
      */
     @Transactional
     public void move(Optional<CurrentUser> current, long seriesId, long postId, boolean up) {
         CurrentUser me = accountGuard.requireWritable(current);
-        Integer mine = jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ? AND member_id = ?", Integer.class,
-                seriesId, me.memberId());
-        if (mine == null || mine == 0) {
-            throw new NotFoundException();
-        }
-        // 먼저 잠그고 나서 보이는 순서를 읽는다(사이에 글이 빠지거나 옮겨지지 않게)
+        requireMySeries(me, seriesId);
+        // 잠그고 읽는다(사이에 글이 빠지거나 옮겨지지 않게)
         List<Long> all = new java.util.ArrayList<>(jdbc.queryForList(
                 "SELECT post_id FROM series_post WHERE series_id = ? ORDER BY position, post_id FOR UPDATE", Long.class, seriesId));
-        List<Long> visible = items(seriesId).stream().map(Item::id).toList();
-        int at = visible.indexOf(postId);
+        int at = all.indexOf(postId);
         int to = up ? at - 1 : at + 1;
         if (at < 0) {
             throw new NotFoundException();
         }
-        if (to < 0 || to >= visible.size()) {
+        if (to < 0 || to >= all.size()) {
             return;
         }
-        java.util.Collections.swap(all, all.indexOf(postId), all.indexOf(visible.get(to)));
+        java.util.Collections.swap(all, at, to);
         for (int i = 0; i < all.size(); i++) {
             jdbc.update("UPDATE series_post SET position = ? WHERE post_id = ?", i + 1, all.get(i));
+        }
+    }
+
+    private static final String THUMB = "COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumb";
+
+    /** 106 관리 탭 한 줄: 내 글(임시글 빼고, 지운 글 빼고)과 지금 든 시리즈. */
+    public record MyPost(long id, String title, String visibility, Long seriesId, String thumb) {
+    }
+
+    /** 106 강성찬 개인 확장: 시리즈 관리 탭용 내 발행 글(최근 순). */
+    public List<MyPost> myPosts(Optional<CurrentUser> current) {
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        return jdbc.query("SELECT p.id, p.title, p.visibility, sp.series_id, " + THUMB + " FROM post p LEFT JOIN series_post sp ON sp.post_id = p.id"
+                        + " LEFT JOIN post_cover pcv ON pcv.post_id = p.id"
+                        + " WHERE p.author_id = ? AND p.deleted_at IS NULL AND p.status = 'PUBLISHED'"
+                        + " ORDER BY COALESCE(p.first_public_at, p.published_at) DESC NULLS LAST, p.id DESC",
+                (rs, i) -> new MyPost(rs.getLong("id"), rs.getString("title"), rs.getString("visibility"),
+                        rs.getObject("series_id") == null ? null : rs.getLong("series_id"), rs.getString("thumb")), me.memberId());
+    }
+
+    /** 106: 주인이 보는 시리즈 글 전체(비공개 포함, 넣은 순서). */
+    public List<MyPost> ownerItems(long seriesId) {
+        return jdbc.query("SELECT p.id, p.title, p.visibility, sp.series_id, " + THUMB + " FROM series_post sp JOIN post p ON p.id = sp.post_id"
+                        + " LEFT JOIN post_cover pcv ON pcv.post_id = p.id WHERE sp.series_id = ? AND p.deleted_at IS NULL ORDER BY sp.position, p.id",
+                (rs, i) -> new MyPost(rs.getLong("id"), rs.getString("title"), rs.getString("visibility"), rs.getLong("series_id"),
+                        rs.getString("thumb")),
+                seriesId);
+    }
+
+    /**
+     * 106: 여러 글을 한 번에 넣는다. {@code seriesId}가 없으면 {@code newTitle}로 새 시리즈.
+     * 107: 새 시리즈는 글 없이도 만든다. 있는 시리즈에 넣을 때만 글이 하나 이상 필요하다.
+     */
+    @Transactional
+    public long addAll(Optional<CurrentUser> current, List<Long> postIds, Long seriesId, String newTitle) {
+        if (postIds == null || postIds.isEmpty()) {
+            if (seriesId != null) {
+                throw new PostContentException("SERIES_POSTS_REQUIRED");
+            }
+            return createOrFind(accountGuard.requireWritable(current), newTitle);
+        }
+        long target = add(current, postIds.get(0), seriesId, newTitle);
+        postIds.stream().skip(1).forEach(id -> add(current, id, target, null));
+        return target;
+    }
+
+    /**
+     * 106 이름 바꾸기, 107 설명 한 줄(100자까지, 비우면 없음)·대표 사진. 사진은 이 시리즈에 든 글의 사진 중에서만
+     * 고를 수 있다(아무 주소나 넣지 못하게). 비우면 1편부터 첫 사진을 쓴다. 이름은 1~60자, 내 다른 시리즈와 겹치면 안 된다.
+     */
+    @Transactional
+    public void update(Optional<CurrentUser> current, long seriesId, String newTitle, String description, String coverUrl) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        String title = newTitle == null ? "" : newTitle.strip();
+        if (title.isEmpty() || title.codePointCount(0, title.length()) > 60) {
+            throw new PostContentException("SERIES_TITLE_INVALID");
+        }
+        Integer taken = jdbc.queryForObject("SELECT count(*) FROM series WHERE member_id = ? AND title = ? AND id <> ?", Integer.class,
+                me.memberId(), title, seriesId);
+        if (taken != null && taken > 0) {
+            throw new PostContentException("SERIES_TITLE_TAKEN");
+        }
+        String desc = description == null ? "" : description.strip();
+        if (desc.codePointCount(0, desc.length()) > 100) {
+            throw new PostContentException("SERIES_DESCRIPTION_TOO_LONG");
+        }
+        String cover = coverUrl != null && ownerItems(seriesId).stream().anyMatch(p -> coverUrl.equals(p.thumb())) ? coverUrl : null;
+        jdbc.update("UPDATE series SET title = ?, description = ?, cover_url = ? WHERE id = ?", title, desc.isEmpty() ? null : desc,
+                cover, seriesId);
+    }
+
+    /** 106: 시리즈 묶음만 지운다(글은 그대로, series_post는 CASCADE). */
+    @Transactional
+    public void delete(Optional<CurrentUser> current, long seriesId) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        requireMySeries(me, seriesId);
+        jdbc.update("DELETE FROM series WHERE id = ?", seriesId);
+    }
+
+    /** 106: 관리 탭에서 내 시리즈 화면 주소를 만들 때. */
+    public String handle(long memberId) {
+        return jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, memberId);
+    }
+
+    private void requireMySeries(CurrentUser me, long seriesId) {
+        Integer mine = jdbc.queryForObject("SELECT count(*) FROM series WHERE id = ? AND member_id = ?", Integer.class,
+                seriesId, me.memberId());
+        if (mine == null || mine == 0) {
+            throw new NotFoundException();
         }
     }
 
     /** 탈퇴 정리. */
     public void purgeWithdrawn(long memberId) {
         jdbc.update("DELETE FROM series WHERE member_id = ?", memberId);
-    }
-
-    private void dropIfEmpty(long seriesId) {
-        jdbc.update("DELETE FROM series s WHERE s.id = ? AND NOT EXISTS (SELECT 1 FROM series_post sp WHERE sp.series_id = s.id)",
-                seriesId);
     }
 
     private void requireMyPost(CurrentUser me, long postId) {

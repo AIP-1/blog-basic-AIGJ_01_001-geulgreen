@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>내 시리즈 · 글그린</title>
+</head>
+<body>
+<!-- 106 강성찬 개인 확장: 내 글 관리 [시리즈] 탭. 만들기·글 여러 개 넣기·빼기·편 순서 바꾸기 -->
+<main class="list-page series-manage">
+    <div class="manage-head"><h1>내 글</h1></div>
+    <nav class="manage-tabs" aria-label="내 글 탭">
+        <a href="/manage/posts">발행 글</a>
+        <a th:href="@{/manage/posts(tab='drafts')}">임시글</a>
+        <a th:href="@{/manage/posts(tab='trash')}">휴지통</a>
+        <a href="/manage/series" aria-current="page">시리즈</a>
+        <a href="/manage/stats">통계</a>
+    </nav>
+    <p th:if="${error != null}" class="notice field-error" role="alert" th:text="#{${'error.' + error}}">오류</p>
+
+    <section class="stats-card" aria-labelledby="series-new-heading">
+        <h2 id="series-new-heading">새 시리즈 만들기</h2>
+        <form method="post" action="/manage/series">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="field">
+                <label for="series-new-title">시리즈 이름</label>
+                <input id="series-new-title" name="newTitle" type="text" maxlength="60" required placeholder="예: 스프링 부트 입문">
+            </div>
+            <fieldset class="series-pick">
+                <legend>넣을 글 <span class="help">(골라도 되고 나중에 넣어도 돼요. 아래 목록 순서로 1편부터 들어가요)</span></legend>
+                <p th:if="${myPosts.isEmpty()}" class="help">아직 발행한 글이 없어요. 글 없이 먼저 만들어 둘 수 있어요</p>
+                <label th:each="p : ${myPosts}"><input type="checkbox" name="postIds" th:value="${p.id()}">
+                    <span th:text="${p.title()}">글 제목</span>
+                    <span th:if="${p.seriesId() != null}" class="help">다른 시리즈에서 옮겨 와요</span></label>
+            </fieldset>
+            <button type="submit" class="btn">만들기</button>
+        </form>
+    </section>
+
+    <p th:if="${seriesItems.isEmpty()}" class="empty-state">아직 묶어 둔 시리즈가 없어요</p>
+    <section th:each="entry : ${seriesItems}" th:with="s=${entry.key}, items=${entry.value}" class="stats-card"
+             th:id="${'series-' + s.id()}" th:attr="aria-label=${s.title()}">
+        <div class="manage-head">
+            <div class="series-head">
+                <img th:if="${s.coverUrl() != null}" class="series-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
+                <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+                <div><h2 th:text="${s.title()}">시리즈</h2>
+                    <p class="help" th:text="${s.description() != null ? s.description() : '설명이 아직 없어요'}">설명</p></div>
+            </div>
+            <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}"
+               th:if="${s.postCount() > 0}">시리즈 화면</a>
+        </div>
+        <ol class="series-manage-items">
+            <li th:each="it, st : ${items}">
+                <span class="badge" th:text="${st.count + '편'}">1편</span>
+                <span class="series-manage-title" th:text="${it.title()}">글 제목</span>
+                <span th:if="${it.visibility() != 'PUBLIC'}" class="help">공개 안 됨</span>
+                <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}" th:unless="${st.first}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="up">
+                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 앞으로'}">앞으로</button>
+                </form>
+                <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}" th:unless="${st.last}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="down">
+                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 뒤로'}">뒤로</button>
+                </form>
+                <form class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${it.id()})}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="back" value="/manage/series">
+                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 시리즈에서 빼기'}">빼기</button>
+                </form>
+            </li>
+        </ol>
+        <p th:if="${items.isEmpty()}" class="help">아직 넣은 글이 없어요. 아래 [글 넣기]로 넣어 보세요</p>
+        <details class="series-settings">
+            <summary>이름·설명·대표 사진 고치기, 삭제</summary>
+            <form method="post" th:action="@{/manage/series/{id}/edit(id=${s.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="field">
+                    <label th:for="${'series-title-' + s.id()}">이름</label>
+                    <input th:id="${'series-title-' + s.id()}" name="title" type="text" maxlength="60" required th:value="${s.title()}">
+                </div>
+                <div class="field">
+                    <label th:for="${'series-desc-' + s.id()}">설명 한 줄</label>
+                    <input th:id="${'series-desc-' + s.id()}" name="description" type="text" maxlength="100"
+                           th:value="${s.description()}" placeholder="예: 처음 배우는 사람을 위한 5편짜리 입문">
+                </div>
+                <!-- 대표 사진은 이 시리즈 글의 사진 중에서(비우면 1편부터 첫 사진) -->
+                <fieldset class="series-covers">
+                    <legend>대표 사진</legend>
+                    <label class="series-cover-choice"><input type="radio" name="coverUrl" value=""
+                            th:checked="${s.pickedCover() == null}">
+                        <span>자동 (1편부터 첫 사진)</span></label>
+                    <label th:each="it : ${items}" th:if="${it.thumb() != null}" class="series-cover-choice">
+                        <input type="radio" name="coverUrl" th:value="${it.thumb()}" th:checked="${it.thumb() == s.pickedCover()}">
+                        <img th:src="${it.thumb()}" th:alt="${it.title()}" loading="lazy"></label>
+                </fieldset>
+                <button type="submit" class="btn btn-sm">저장</button>
+            </form>
+            <form class="inline-form" method="post" th:action="@{/manage/series/{id}/delete(id=${s.id()})}"
+                  data-confirm="시리즈를 지울까요? 글은 그대로 남아요.">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-sm">시리즈 삭제</button>
+                <span class="help">글은 지우지 않고 묶음만 풀어요</span>
+            </form>
+        </details>
+        <form th:unless="${freePosts.isEmpty()}" method="post" th:action="@{/manage/series/{id}/add(id=${s.id()})}">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <details>
+                <summary>글 넣기 <span class="help" th:text="${'시리즈에 없는 글 ' + freePosts.size() + '개'}">시리즈에 없는 글 3개</span></summary>
+                <fieldset class="series-pick">
+                    <legend class="visually-hidden">넣을 글</legend>
+                    <label th:each="p : ${freePosts}"><input type="checkbox" name="postIds" th:value="${p.id()}">
+                        <span th:text="${p.title()}">글 제목</span></label>
+                </fieldset>
+                <button type="submit" class="btn btn-sm">골라서 넣기</button>
+            </details>
+        </form>
+    </section>
+    <script th:src="@{/js/series/manage.js}" defer></script>
+</main>
+</body>
+</html>

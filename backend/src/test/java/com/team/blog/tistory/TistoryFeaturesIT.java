@@ -178,12 +178,14 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         String list = page("/serme/series/" + series);
         assertThat(list.indexOf("입문 1편")).isLessThan(list.indexOf("입문 2편"));
         assertThat(list.indexOf("입문 2편")).isLessThan(list.indexOf("입문 3편"));
-        // 다 빼면 시리즈도 사라진다
+        // 107: 다 빼도 시리즈(이름·설명·사진)는 남고, 블로그 시리즈 탭에는 안 보인다. 지우기는 관리 탭에서만
         for (long p : new long[] {p1, p2, p3}) {
             mockMvc.perform(post("/posts/{id}/series/remove", p).with(csrf()).with(TestAuth.member(me)))
                     .andExpect(status().is3xxRedirection());
         }
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM series", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM series", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM series_post", Integer.class)).isZero();
+        assertThat(page("/serme/series")).doesNotContain("스프링 입문");
     }
 
     @Test

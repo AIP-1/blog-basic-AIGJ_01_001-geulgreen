@@ -7,35 +7,30 @@
 <body>
 <main class="notes-page list-page">
     <p class="help"><a th:href="${paths.blog(owner.handle()) + '/series'}" th:text="${owner.handle() + '님의 시리즈'}">시리즈</a></p>
-    <h1 class="title-with-icon"><svg th:replace="~{fragments/icons :: i-book}"></svg> <span th:text="${series.title()}">시리즈</span></h1>
+    <!-- 107 강성찬 개인 확장: 대표 사진·설명 한 줄 -->
+    <div class="series-head">
+        <img th:if="${series.coverUrl() != null}" class="series-cover series-cover-lg" th:src="${series.coverUrl()}" alt="">
+        <span th:unless="${series.coverUrl() != null}" class="series-cover series-cover-lg series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
+        <div><h1 th:text="${series.title()}">시리즈</h1>
+            <p th:if="${series.description() != null}" class="series-desc" th:text="${series.description()}">설명</p></div>
+    </div>
     <p class="help" th:unless="${cards.isEmpty()}" th:text="${'글 ' + cards.size() + '편 · 앞에서부터 차례대로 읽어 보세요'}">글 3편</p>
-    <!-- 105 강성찬 개인 확장: 처음부터 읽을지 최신 글부터 볼지. 주인은 [순서 바꾸기]로 편 순서를 고친다 -->
+    <!-- 105 강성찬 개인 확장: 처음부터 읽을지 최신 글부터 볼지. 106: 주인의 편 순서·글 넣기는 내 글 관리 [시리즈] 탭 -->
     <div th:if="${cards.size() > 1}" class="home-tabs-row">
-        <nav class="manage-tabs tags-sort" aria-label="정렬" th:unless="${editing}">
+        <nav class="manage-tabs tags-sort" aria-label="정렬">
             <a href="?order=first" th:attr="aria-current=${order == 'first' ? 'page' : null}">1편부터</a>
             <a href="?order=latest" th:attr="aria-current=${order == 'latest' ? 'page' : null}">최신 글부터</a>
         </nav>
-        <p th:if="${editing}" class="help">앞으로·뒤로로 편 순서를 바꿔요</p>
-        <a th:if="${isOwner}" class="btn btn-sm" th:href="${editing ? '?' : '?edit=1'}" th:text="${editing ? '완료' : '순서 바꾸기'}">순서 바꾸기</a>
+        <a th:if="${isOwner}" class="btn btn-sm" th:href="${'/manage/series#series-' + series.id()}">시리즈 관리</a>
     </div>
     <p th:if="${cards.isEmpty()}" class="empty-state">아직 공개한 글이 없어요</p>
-    <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드, 순서는 "N편" 배지. 105: 정렬 버튼, 앞으로·뒤로는 주인의 [순서 바꾸기] 안에만 -->
+    <!-- 067 후속(강성찬 개인 확장): 홈과 같은 카드, 순서는 "N편" 배지. 105: 정렬 버튼 -->
     <ol class="series-cards card-grid home-cards">
         <li th:each="card, st : ${cards}">
             <article th:replace="~{fragments/post-card :: cardWith(${card}, ${cardDates.get(card.id())}, false, ~{series/detail :: seriesExtra})}"></article>
         </li>
     </ol>
 </main>
-<th:block th:fragment="seriesExtra"><div class="manage-badges"><span class="badge" th:text="${(order == 'latest' ? total - st.index : st.count) + '편'}">1편</span>
-    <th:block th:if="${editing}">
-        <form class="inline-form" method="post" th:action="${paths.blog(owner.handle()) + '/series/' + series.id() + '/move'}" th:unless="${st.first}">
-            <input type="hidden" name="postId" th:value="${card.id()}"><input type="hidden" name="dir" value="up">
-            <button type="submit" class="btn btn-sm" th:attr="aria-label=${card.title() + ' 앞으로'}">앞으로</button>
-        </form>
-        <form class="inline-form" method="post" th:action="${paths.blog(owner.handle()) + '/series/' + series.id() + '/move'}" th:unless="${st.last}">
-            <input type="hidden" name="postId" th:value="${card.id()}"><input type="hidden" name="dir" value="down">
-            <button type="submit" class="btn btn-sm" th:attr="aria-label=${card.title() + ' 뒤로'}">뒤로</button>
-        </form>
-    </th:block></div></th:block>
+<th:block th:fragment="seriesExtra"><div class="manage-badges"><span class="badge" th:text="${(order == 'latest' ? total - st.index : st.count) + '편'}">1편</span></div></th:block>
 </body>
 </html>
