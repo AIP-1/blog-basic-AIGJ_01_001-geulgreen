@@ -29,6 +29,9 @@
                 <p th:if="${board.notStarted()}" class="help">아직 함께 쓰기가 시작되지 않았어요. 시작 날짜부터 세요</p>
                 <p th:if="${board.ended()}" class="help">함께 쓰기가 끝났어요. 마지막 기간의 기록이에요</p>
             </div>
+            <!-- 사람이 많으면(9명부터) 처음엔 접어 둔다. 스크립트 없이 details -->
+            <details class="club-members" th:open="${board.members().size() <= 8}">
+            <summary><span th:text="${'멤버 ' + board.members().size() + '명'}">멤버</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
             <ul class="club-board" aria-label="멤버">
                 <li th:each="m : ${board.members()}">
                     <a th:href="${paths.blog(m.handle())}" class="club-member">
@@ -44,6 +47,7 @@
                     </form>
                 </li>
             </ul>
+            </details>
         </section>
         <section class="mission-panel club-invite-card" aria-labelledby="club-invite-heading" th:if="${!board.ended()}">
             <h2 id="club-invite-heading">친구 초대하기</h2>
