@@ -1584,3 +1584,7 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: center; }
+
+/* 110 강성찬 개인 확장(10-16 chan "4줄로"): 사진 카드 요약은 4줄 + …(사진 16:10은 그대로). 사진 없는 카드는 그대로(같은 줄 높이만큼 채움) */
+.card-grid .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 4; line-clamp: 4; }
+
