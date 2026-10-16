@@ -40,13 +40,7 @@
     <th:block th:if="${tab == 'series'}">
     <p th:if="${seriesList.isEmpty()}" class="empty-state">아직 공개된 시리즈가 없어요</p>
     <ul class="series-list" th:unless="${seriesList.isEmpty()}">
-        <li th:each="s : ${seriesList}" class="series-card">
-            <a th:href="${s.url()}">
-                <svg th:replace="~{fragments/icons :: i-book}"></svg>
-                <strong th:text="${s.title()}">시리즈</strong>
-                <span class="help" th:text="${s.handle() + ' · 글 ' + s.postCount() + '편'}">아이디 · 글 3편</span>
-            </a>
-        </li>
+        <th:block th:each="s : ${seriesList}"><li th:replace="~{series/list :: seriesCard(${s.url()}, ${s}, ${s.handle() + ' · 글 ' + s.postCount() + '편'})}"></li></th:block>
     </ul>
     </th:block>
     <th:block th:unless="${tab == 'series'}">
