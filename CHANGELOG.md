@@ -7,6 +7,27 @@
 
 ---
 
+## [1.65.1] — 2026-10-16 · 개인 확장 (발행 설정 창 정리)
+
+- 발행 설정 창: 칸 제목 통일과 구분선, 공개 범위 둥근 버튼, 이모지 대신 선 아이콘, 시리즈는 목록 하나("새 시리즈 만들기"일 때만 이름 칸), 대표 사진 버튼 한 줄, 취소·발행 오른쪽 아래 고정
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**발행 설정 창**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.65.1/v1651-publish-m-after.png) |
+
+---
+
 ## [1.65.0] — 2026-10-16 · 개인 확장 (시리즈 최근 업데이트)
 
 - **108 시리즈 최근 업데이트**: 시리즈 카드에 "글 N편 · 날짜 업데이트", 블로그 시리즈 목록은 최근 업데이트 순, 탐색 시리즈 탭 60개 넘으면 더 보기, 팔로워 새 글 알림이 시리즈 글이면 "시리즈 「이름」 새 편"
