@@ -258,8 +258,12 @@ public class SeriesService {
             }
             return createOrFind(accountGuard.requireWritable(current), newTitle);
         }
-        long target = add(current, postIds.get(0), seriesId, newTitle);
-        postIds.stream().skip(1).forEach(id -> add(current, id, target, null));
+        // 화면 목록은 최신 글이 위라 고른 순서 그대로 넣으면 거꾸로 들어간다: 공개(발행)한 순서대로 뒤에 붙인다
+        List<Long> ordered = new java.util.ArrayList<>(jdbc.queryForList("SELECT id FROM post WHERE id = ANY (?)"
+                + " ORDER BY COALESCE(first_public_at, published_at) NULLS LAST, id", Long.class, (Object) postIds.toArray(new Long[0])));
+        postIds.stream().filter(id -> !ordered.contains(id)).forEach(ordered::add); // 없는 글은 add가 404로
+        long target = add(current, ordered.get(0), seriesId, newTitle);
+        ordered.stream().skip(1).forEach(id -> add(current, id, target, null));
         return target;
     }
 

@@ -50,30 +50,35 @@
                th:if="${s.postCount() > 0}">시리즈 화면</a>
         </div>
         <ol class="series-manage-items">
+            <!-- 10-16 가독성(강성찬 개인 확장): 번호 칸 너비 고정, 위·아래 화살표는 늘 같은 자리(끝 줄은 비활성), 빼기는 끝에 옅게 -->
             <li th:each="it, st : ${items}">
-                <span class="badge" th:text="${st.count + '편'}">1편</span>
+                <span class="series-no" th:text="${st.count + '편'}">1편</span>
                 <span class="series-manage-title" th:text="${it.title()}">글 제목</span>
                 <span th:if="${it.visibility() != 'PUBLIC'}" class="help">공개 안 됨</span>
-                <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}" th:unless="${st.first}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="up">
-                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 앞으로'}">앞으로</button>
-                </form>
-                <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}" th:unless="${st.last}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="down">
-                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 뒤로'}">뒤로</button>
-                </form>
-                <form class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${it.id()})}">
-                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="hidden" name="back" value="/manage/series">
-                    <button type="submit" class="btn btn-sm" th:attr="aria-label=${it.title() + ' 시리즈에서 빼기'}">빼기</button>
-                </form>
+                <span class="series-row-actions">
+                    <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="up">
+                        <button type="submit" class="icon-btn" th:disabled="${st.first}" th:attr="aria-label=${it.title() + ' 앞으로'}"
+                                title="앞으로"><svg th:replace="~{fragments/icons :: arrow-up}"></svg></button>
+                    </form>
+                    <form class="inline-form" method="post" th:action="@{/manage/series/{id}/move(id=${s.id()})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="postId" th:value="${it.id()}"><input type="hidden" name="dir" value="down">
+                        <button type="submit" class="icon-btn" th:disabled="${st.last}" th:attr="aria-label=${it.title() + ' 뒤로'}"
+                                title="뒤로"><svg th:replace="~{fragments/icons :: arrow-down}"></svg></button>
+                    </form>
+                    <form class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${it.id()})}">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="back" value="/manage/series">
+                        <button type="submit" class="btn-text series-remove" th:attr="aria-label=${it.title() + ' 시리즈에서 빼기'}">빼기</button>
+                    </form>
+                </span>
             </li>
         </ol>
         <p th:if="${items.isEmpty()}" class="help">아직 넣은 글이 없어요. 아래 [글 넣기]로 넣어 보세요</p>
         <details class="series-settings">
-            <summary>이름·설명·대표 사진 고치기, 삭제</summary>
+            <summary><svg th:replace="~{fragments/icons :: gear}"></svg>이름·설명·대표 사진 고치기, 삭제<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
             <form method="post" th:action="@{/manage/series/{id}/edit(id=${s.id()})}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="field">
@@ -106,8 +111,8 @@
         </details>
         <form th:unless="${freePosts.isEmpty()}" method="post" th:action="@{/manage/series/{id}/add(id=${s.id()})}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <details>
-                <summary>글 넣기 <span class="help" th:text="${'시리즈에 없는 글 ' + freePosts.size() + '개'}">시리즈에 없는 글 3개</span></summary>
+            <details class="series-settings">
+                <summary><svg th:replace="~{fragments/icons :: i-list}"></svg>글 넣기 <span class="help" th:text="${'시리즈에 없는 글 ' + freePosts.size() + '개'}">시리즈에 없는 글 3개</span><svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
                 <fieldset class="series-pick">
                     <legend class="visually-hidden">넣을 글</legend>
                     <label th:each="p : ${freePosts}"><input type="checkbox" name="postIds" th:value="${p.id()}">

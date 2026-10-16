@@ -1686,3 +1686,27 @@ dialog.thumb-dialog textarea { width: 100%; box-sizing: border-box; resize: vert
 .thumb-swatch:has(input:checked) { border-color: var(--color-brand); color: var(--color-brand); font-weight: 600; }
 .thumb-swatch:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 dialog.thumb-dialog .pp-actions { margin: 16px -24px 0; }
+/* 10-16 시리즈 관리 탭 가독성(강성찬 개인 확장): 번호 칸 고정·버튼 자리 고정·옅은 빼기, 접힌 메뉴는 아이콘 + 꺾쇠 버튼 줄 */
+.series-manage-items li { flex-wrap: nowrap; gap: 12px; }
+.series-no { flex: none; width: 3.2em; text-align: center; padding: 2px 0; border-radius: 999px; font-size: .85em;
+    color: var(--color-text-muted); background: var(--color-surface-muted); }
+.series-manage-title { font-weight: 500; }
+.series-row-actions { flex: none; display: inline-flex; align-items: center; gap: 2px; margin-left: auto; }
+.series-row-actions .icon-btn { width: 32px; height: 32px; border: 0; background: none; color: var(--color-text-muted); }
+.series-row-actions .icon-btn:hover:not(:disabled) { background: var(--color-surface-muted); color: var(--color-text); }
+.series-row-actions .icon-btn:disabled { opacity: .3; cursor: default; }
+.series-remove { font-size: .85em; padding: 4px 8px; }
+.series-remove:hover { color: var(--color-danger); }
+.series-settings { margin-top: 4px; }
+.series-settings > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 10px 12px; margin: 4px 0;
+    border-radius: 12px; cursor: pointer; font-weight: 600; color: var(--color-text); }
+.series-settings > summary::-webkit-details-marker { display: none; }
+.series-settings > summary:hover { background: var(--color-surface-muted); }
+.series-settings > summary .icon { width: 18px; height: 18px; color: var(--color-text-muted); }
+.series-settings > summary .menu-chevron { margin-left: auto; transition: transform .15s; }
+.series-settings[open] > summary .menu-chevron { transform: rotate(90deg); }
+.series-settings > summary .help { font-weight: 400; }
+@media (max-width: 600px) {
+    .series-manage-items li { flex-wrap: wrap; row-gap: 4px; }
+    .series-manage-title { flex: 1 1 calc(100% - 4.5em); white-space: normal; }
+}
