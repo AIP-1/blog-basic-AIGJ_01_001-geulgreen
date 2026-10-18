@@ -1860,3 +1860,6 @@ a.series-box-step:hover { border-color: var(--color-brand); }
 .series-cover-new .btn { display: inline-flex; align-items: center; gap: 6px; }
 .series-cover-new .icon { width: 16px; height: 16px; }
 .series-cover-status:empty { display: none; }
+/* 111: 시리즈 화면 머리 사진은 16:10 그대로(썸네일 글자가 잘리지 않게) */
+.series-cover-lg { width: 176px; height: 110px; }
+@media (max-width: 600px) { .series-cover-lg { width: 128px; height: 80px; } }
