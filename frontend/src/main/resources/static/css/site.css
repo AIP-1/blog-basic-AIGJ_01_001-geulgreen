@@ -1867,4 +1867,16 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 .filter-result .btn { gap: 4px; }
 .blog-tags details > summary { display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
 .blog-tags details[open] > summary .menu-chevron { transform: rotate(90deg); }
+/* 10-18 강성찬 개인 확장: 태그 화면 가로 줄 카드도 공용 카드와 같은 모양(사진 위 끝까지·안쪽 여백·요약 3줄). 공용 카드 규칙이
+   .card-grid 안에서만 걸려 있어 .tag-row 카드는 옛 모양(작성자 줄 먼저, 사진은 아래 둥근 칸)이었다. 폭도 다른 목록처럼 한 줄 4개 기준 */
+.tag-row .post-card { padding: 12px 16px 10px; gap: 6px; }
+.tag-row .card-thumb { order: -1; }
+.tag-row .post-card > .card-thumb { margin: -12px -16px 2px; border-radius: 17px 17px 0 0; }
+.tag-row .card-body { gap: 4px; }
+.tag-row .card-top { margin: 0; min-height: 24px; }
+.tag-row .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 3; line-clamp: 3; }
+.tag-row { grid-auto-columns: 82%; }
+@media (min-width: 600px) { .tag-row { grid-auto-columns: calc((100% - 16px) / 2); } }
+@media (min-width: 900px) { .tag-row { grid-auto-columns: calc((100% - 32px) / 3); } }
+@media (min-width: 1200px) { .tag-row { grid-auto-columns: calc((100% - 48px) / 4); } }
 
