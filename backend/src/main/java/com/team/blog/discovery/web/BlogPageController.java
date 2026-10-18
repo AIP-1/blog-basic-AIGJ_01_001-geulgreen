@@ -100,6 +100,13 @@ public class BlogPageController {
         // 100: 선반 — 최근 글 몇 개, 시리즈 몇 개(보는 사람이 볼 수 있는 것만, 비면 화면이 숨긴다)
         CardPage recent = blogPage(owner.memberId(), friendViewer, null, java.util.Optional.empty(), null);
         CardModel.fill(model, new CardPage(recent.items().stream().limit(HOME_SHELF).toList(), null), clock.instant());
+        // 검색·미리보기: 소개글, 없으면 공개 글 수와 최근 글 제목(목록은 공개 글만)
+        String bio = owner.bio() == null ? "" : owner.bio().strip();
+        String recentTitles = com.team.blog.shared.web.ListMeta.titles(recent.items().stream()
+                .map(com.team.blog.post.application.PostCard::title).toList(), 3);
+        model.addAttribute("listMeta", new com.team.blog.shared.web.ListMeta(owner.displayName() + "의 블로그 · 글그린",
+                !bio.isEmpty() ? bio : recentTitles.isEmpty() ? owner.displayName() + "님의 글그린 블로그예요"
+                        : owner.displayName() + "님의 글그린 블로그. 최근 글: " + recentTitles, null));
         if (series.enabled()) {
             model.addAttribute("homeSeries", series.list(owner.memberId(), false).stream().limit(HOME_SHELF).toList());
         }

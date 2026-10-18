@@ -112,7 +112,9 @@ class ProfileTabsIT extends IntegrationTestBase {
         // 셋을 앞으로 → 하나, 셋, 둘
         mockMvc.perform(post(move).param("postId", String.valueOf(p3)).param("dir", "up").with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
+        // 검색 문구(head)에도 제목이 들어가서 순서는 본문에서만 본다
         String list = page("/tabord/series/" + sid, me);
+        list = list.substring(list.indexOf("<body"));
         assertThat(list.indexOf("순서 하나")).isLessThan(list.indexOf("순서 셋"));
         assertThat(list.indexOf("순서 셋")).isLessThan(list.indexOf("순서 둘"));
         // 106: 읽는 화면은 1편부터·최신 글부터만, 주인에게는 관리 탭 링크. 앞으로·뒤로는 관리 탭에
@@ -120,6 +122,7 @@ class ProfileTabsIT extends IntegrationTestBase {
         assertThat(page("/tabord/series/" + sid)).doesNotContain(">시리즈 관리</a>");
         assertThat(page("/manage/series", me)).contains("순서 셋 앞으로").contains("순서 둘 시리즈에서 빼기");
         String latest = page("/tabord/series/" + sid + "?order=latest");
+        latest = latest.substring(latest.indexOf("<body"));
         assertThat(latest.indexOf("순서 둘")).isLessThan(latest.indexOf("순서 하나"));
         assertThat(latest).contains(">3편<");
         assertThat(page("/tabord/posts/" + p3)).contains("(2/3)").contains("이전편: 순서 하나").contains("다음편: 순서 둘");

@@ -11,4 +11,9 @@ public record BlogOwner(long memberId, String handle, String nickname, String bi
     public AuthorDisplay toAuthorDisplay() {
         return AuthorDisplay.of(handle, nickname, null, profileImageUrl);
     }
+
+    /** 화면·검색 문구에 쓸 이름: 별명, 없으면 아이디. */
+    public String displayName() {
+        return nickname == null || nickname.isBlank() ? handle : nickname;
+    }
 }
