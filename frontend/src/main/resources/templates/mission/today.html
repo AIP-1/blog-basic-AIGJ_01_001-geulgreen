@@ -42,7 +42,7 @@
         <div class="mission-panel-head">
             <h2 id="topics-heading"><th:block th:replace="~{fragments/icons :: paw}"></th:block>
                 <span th:text="${isToday ? '오늘의 미션' : '그날의 미션'}">오늘의 미션</span></h2>
-            <p class="help" th:text="${dayLabel + ' · 주제 ' + topics.size() + '개 중 하나를 골라 써 보세요'}">10월 13일 (화)</p>
+            <p class="help"><th:block th:replace="~{fragments/meta :: parts(${dayLabel + ' · 주제 ' + topics.size() + '개 중 하나를 골라 써 보세요'})}"></th:block></p>
             <span class="count-chip" th:text="${anyAi ? 'AI 추천 ✨' : '글그린 추천 ✨'}">AI 추천</span>
             <nav class="mission-days" aria-label="날짜 옮기기">
                 <a th:href="@{/missions(date=${prevDay})}" th:text="${'← ' + prevLabel}">← 전날</a>
@@ -158,7 +158,7 @@
                 <span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span></a>
             <span class="card-tag chip0" th:text="${mp.topicTitle()}">주제</span>
         </p>
-        <h3 class="card-title"><a class="card-link" th:href="${mp.url()}" th:title="${mp.title()}" th:text="${mp.title()}">제목</a></h3>
+        <h3 class="card-title"><a class="card-link" th:href="${mp.url()}" th:title="${mp.title()}" th:text="${#strings.replace(mp.title(), ' · ', ' ·&#160;')}">제목</a></h3>
         <p class="card-excerpt" th:if="${!mp.excerpt().isEmpty()}" th:text="${mp.excerpt()}">요약</p>
     </div>
     <p class="card-foot">

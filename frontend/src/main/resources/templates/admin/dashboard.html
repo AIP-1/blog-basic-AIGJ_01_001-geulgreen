@@ -23,7 +23,7 @@
         <li th:classappend="${dash.pendingReports() + dash.newInquiries() > 0} ? 'admin-alert'"><span class="stat-label">처리할 신고·문의</span>
             <strong th:text="${dash.pendingReports() + dash.newInquiries()}">0</strong>
             <span class="stat-total"><a href="/admin/reports" th:text="${'신고 ' + dash.pendingReports()}">신고</a><th:block th:if="${contactPage == true}"> · <a href="/admin/inquiries" th:text="${'문의 ' + dash.newInquiries()}">문의</a></th:block></span>
-            <span class="stat-total" th:text="${'오늘 새로 ' + dash.incoming().now() + '건 · ' + dash.incoming().basis()}">오늘</span></li>
+            <span class="stat-total"><th:block th:replace="~{fragments/meta :: parts(${'오늘 새로 ' + dash.incoming().now() + '건 · ' + dash.incoming().basis()})}"></th:block></span></li>
     </ul>
     <p class="help admin-today-note">위 숫자는 오늘 0시(한국 시간)부터 지금까지예요. ▲▼는 어제 같은 시각까지와 비교했고, 조회는 날짜별 합계만 있어서 어제 하루를 지난 시간만큼 나눈 추정과 비교해요.</p>
     <section aria-labelledby="trend-heading" class="admin-panel">
@@ -96,6 +96,6 @@
 </main>
 <!-- 098 후속: 숫자 카드의 어제 대비(▲ 늘어남 초록, ▼ 줄어듦 빨강, 같음 회색). basis = 무엇과 비교했는지 -->
 <th:block th:fragment="delta(d)"><span th:class="${'delta delta-' + d.dir()}"><span aria-hidden="true" th:text="${d.dir() == 'up' ? '▲ ' + d.diff() : d.dir() == 'down' ? '▼ ' + d.diff() : '– 0'}">▲ 1</span><span class="visually-hidden" th:text="${d.dir() == 'up' ? d.diff() + ' 늘었어요' : d.dir() == 'down' ? d.diff() + ' 줄었어요' : '같아요'}">늘었어요</span></span>
-    <span class="stat-basis" th:text="${d.basis()}">어제 이 시각까지 0</span></th:block>
+    <span class="stat-basis"><th:block th:replace="~{fragments/meta :: parts(${d.basis()})}"></th:block></span></th:block>
 </body>
 </html>

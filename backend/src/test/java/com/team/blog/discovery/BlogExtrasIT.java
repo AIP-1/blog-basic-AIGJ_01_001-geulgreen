@@ -37,11 +37,11 @@ class BlogExtrasIT extends IntegrationTestBase {
         mockMvc.perform(get("/visitowner/posts/{id}", postId).with(TestAuth.member(other)));
         mockMvc.perform(get("/visitowner").cookie(new Cookie("vid", "guest-one")));
         String html = mockMvc.perform(get("/visitowner").with(TestAuth.member(owner))).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("오늘 2 · 전체 2");
+        assertThat(html).contains("오늘 2</span> · <span class=\"meta-part\">전체 2");
         clock.set(T.plusSeconds(3600 * 25));
         mockMvc.perform(get("/visitowner").with(TestAuth.member(other)));
         assertThat(mockMvc.perform(get("/visitowner").with(TestAuth.member(owner))).andReturn().getResponse().getContentAsString())
-                .contains("오늘 1 · 전체 3");
+                .contains("오늘 1</span> · <span class=\"meta-part\">전체 3");
     }
 
     @Test

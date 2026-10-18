@@ -37,7 +37,7 @@
             <li th:each="k : ${keys}" class="follow-row">
                 <div class="follow-text">
                     <p><strong th:text="${k.name()}">키 이름</strong></p>
-                    <p class="help" th:text="${'만든 날 ' + k.createdAt() + ' · ' + (k.lastUsedAt() == null ? '아직 안 썼어요' : '마지막 사용 ' + k.lastUsedAt())}">만든 날</p>
+                    <p class="help"><th:block th:replace="~{fragments/meta :: parts(${'만든 날 ' + k.createdAt() + ' · ' + (k.lastUsedAt() == null ? '아직 안 썼어요' : '마지막 사용 ' + k.lastUsedAt())})}"></th:block></p>
                 </div>
                 <form method="post" th:action="@{/settings/connections/ai/{id}/revoke(id=${k.id()})}" class="friend-form">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
