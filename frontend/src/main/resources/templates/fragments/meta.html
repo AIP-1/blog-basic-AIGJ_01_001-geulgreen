@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- "A · B · C" 메타 줄: 줄이 넘치면 조각 사이(·)에서만 꺾이게 조각마다 inline-block으로 감싼다 -->
+<th:block th:fragment="parts(text)" th:each="p, st : ${text.split(' · ')}"><span class="meta-part" th:text="${p}">조각</span><th:block th:unless="${st.last}"> · </th:block></th:block>
+</body>
+</html>

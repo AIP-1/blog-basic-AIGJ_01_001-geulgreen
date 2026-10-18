@@ -27,7 +27,7 @@
         <span class="series-card-text">
             <strong th:text="${s.title()}">시리즈</strong>
             <span th:if="${s.description() != null}" class="series-card-desc" th:text="${s.description()}">설명</span>
-            <span class="help" th:text="${meta}">글 3편</span>
+            <span class="help"><th:block th:replace="~{fragments/meta :: parts(${meta})}"></th:block></span>
         </span>
     </a>
 </li>

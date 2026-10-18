@@ -42,7 +42,7 @@
             <!-- 022: 숨긴 글은 작성자만 본다 -->
             <p th:if="${post.hidden()}" class="warning" role="status"
                th:text="${'운영 정책에 따라 숨겨진 글이에요 (사유: ' + hiddenReasonLabel + '). 다른 사람에게는 보이지 않아요'}">숨겨진 글</p>
-            <h1 th:text="${post.title()}">제목</h1>
+            <h1 th:text="${#strings.replace(post.title(), ' · ', '&#160;·&#160;')}">제목</h1>
             <div class="post-meta-row">
             <p class="post-meta">
                 <a class="author-link" th:href="${paths.blog(post.author().handle())}">

@@ -2,8 +2,12 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-       line-height: 1.7; color: var(--color-text); background: var(--color-bg); overflow-wrap: anywhere; word-break: keep-all;
+       line-height: 1.7; color: var(--color-text); background: var(--color-bg); overflow-wrap: break-word; word-break: keep-all;
        -webkit-font-smoothing: antialiased; }
+/* anywhere는 최소 폭까지 한 글자로 줄여 버튼·표 머리·좁은 칸이 "남기/기"처럼 끊긴다. 공통은 break-word, 긴 주소가 들어올 수 있는 글 칸만 anywhere */
+.post-body, .comment-content, .note-content, .card-title, .card-excerpt, .profile-bio, .notif-message { overflow-wrap: anywhere; }
+th { white-space: nowrap; }
+.meta-part { display: inline-block; }
 /* 목록 화면·머리말·꼬리말이 함께 쓰는 넓은 폭(넓은 모니터에서 여백만 크지 않게). 읽는 화면(main 기본 760px)은 그대로 */
 :root { --page-wide: 1440px; }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
@@ -312,7 +316,7 @@ main.list-page { max-width: var(--page-wide); }
 button, .btn, .button-link { font: inherit; font-size: .93em; font-weight: 600; line-height: 1.4; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 8px 16px; border-radius: 999px; border: 1px solid var(--color-control-border);
-    background: var(--color-surface); color: var(--color-text); text-decoration: none; }
+    background: var(--color-surface); color: var(--color-text); text-decoration: none; white-space: nowrap; }
 button:hover, .btn:hover, .button-link:hover { background: var(--color-surface-muted); }
 button:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary, #publish-open, #publish-submit, #comment-form button[type=submit], .settings form button[type=submit],
@@ -931,6 +935,8 @@ main.admin-page { max-width: 1280px; }
 .admin-features li { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .admin-features code { overflow-wrap: anywhere; }
 .admin-log-table td, .admin-log-table th { text-align: left; }
+.admin-log-table { display: block; max-width: none; overflow-x: auto; }
+.admin-log-table td:not(.help) { white-space: nowrap; }
 .site-notice { background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); padding: 8px 16px;
     text-align: center; font-size: .92em; }
 .site-notice a { margin-left: 8px; }
@@ -1614,7 +1620,7 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 /* 111 후보(강성찬 개인 확장): 미션 탭과 모임 */
 .mission-tabs { margin: 0; }
 .club-list, .club-board { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.club-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.club-list-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 .club-list-head h2, #club-new-heading { margin: 0; font-size: 1.25em; }
 .club-list-lead { margin: 6px 0 0; }
 .club-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--color-border); border-radius: 16px;
