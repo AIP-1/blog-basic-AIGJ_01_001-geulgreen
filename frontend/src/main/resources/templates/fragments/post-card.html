@@ -20,8 +20,8 @@
             <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
                th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
         </p>
-        <!-- 제목의 " · "는 양옆을 붙여 가운뎃점이 줄 끝에 홀로 남지 않게 -->
-        <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${#strings.replace(card.title(), ' · ', '&#160;·&#160;')}">제목</a></h2>
+        <!-- 제목의 " · "는 뒤 낱말과 붙여 가운뎃점이 줄 끝에 홀로 남지 않게 -->
+        <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${#strings.replace(card.title(), ' · ', ' ·&#160;')}">제목</a></h2>
         <p class="card-excerpt" th:if="${snippetHtml == null}" th:text="${card.excerpt()}">요약</p>
         <!-- 검색(086): 서버가 이스케이프하고 검색어에만 <mark>를 붙인 미리보기 -->
         <p class="card-excerpt" th:if="${snippetHtml != null}" th:utext="${snippetHtml}">미리보기</p>
