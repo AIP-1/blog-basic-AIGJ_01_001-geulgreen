@@ -38,8 +38,14 @@ public class UploadQuota {
         return "img:daily:" + memberId + ":" + LocalDate.ofInstant(now, SEOUL).format(DAY);
     }
 
-    /** 오늘 장수를 1 올리고 한도를 넘으면 거부(올린 수는 되돌리지 않음 — 실패한 업로드도 센다). */
+    /**
+     * 오늘 장수를 1 올리고 한도를 넘으면 거부(올린 수는 되돌리지 않음 — 실패한 업로드도 센다). 관리자는 하루 한도 없음(저장 공간 한도는 그대로).
+     * 역할은 DB에서 읽는다 — AI 연결 키 요청은 로그인 정보에 USER만 실린다.
+     */
     public void countDailyUpload(long memberId, Instant now) {
+        if (isAdmin(memberId)) {
+            return;
+        }
         String key = dailyKey(memberId, now);
         Long count = redis.opsForValue().increment(key);
         if (count != null && count == 1) {
@@ -49,6 +55,10 @@ public class UploadQuota {
             Instant midnight = LocalDate.ofInstant(now, SEOUL).plusDays(1).atStartOfDay(SEOUL).toInstant();
             throw new DailyUploadLimitException(Duration.between(now, midnight).toSeconds());
         }
+    }
+
+    private boolean isAdmin(long memberId) {
+        return !jdbc.queryForList("SELECT 1 FROM member WHERE id = ? AND role = 'ADMIN'", Integer.class, memberId).isEmpty();
     }
 
     public int todayCount(long memberId, Instant now) {
