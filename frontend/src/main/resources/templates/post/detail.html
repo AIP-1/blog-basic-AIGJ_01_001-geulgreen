@@ -120,23 +120,7 @@
         <p th:if="${postCategory != null}" class="post-category">
             <a class="tag" th:href="@{${paths.blog(post.author().handle())}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
         </p>
-        <!-- 057 강성찬 개인 확장: 오늘의 미션 글 -->
-        <p th:if="${postMission != null}" class="post-missions">
-            <a class="tag" th:href="@{/missions(date=${postMission.day()})}" th:text="${'🗓 오늘의 미션 · ' + postMission.title()}">🗓 오늘의 미션</a>
-        </p>
-        <!-- 미션 완료 상자: 축하 한 줄 → 연속·지금까지 → 친구들 글 보러 가기 -->
-        <section th:if="${missionStats != null}" class="mission-done-note" th:classappend="${postMission.countedOnDay()} ? 'is-done'" role="status">
-            <span class="mission-done-emoji" aria-hidden="true" th:text="${postMission.countedOnDay() ? '🎉' : '🗓'}">🎉</span>
-            <div class="mission-done-text">
-                <strong th:if="${postMission.countedOnDay()}">오늘 미션 완료!</strong>
-                <strong th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</strong>
-                <p class="mission-done-stats">
-                    <span class="streak-chip" th:text="${'🔥 ' + missionStats.streak() + '일 연속'}">🔥 1일 연속</span>
-                    <span class="help" th:text="${'지금까지 ' + missionStats.total() + '번'}">지금까지 1번</span>
-                </p>
-            </div>
-            <a class="btn btn-primary btn-sm" href="/missions">다른 친구들 글 보러 가기</a>
-        </section>
+        <!-- 10-18 chan: 글 화면에는 미션 이야기를 넣지 않는다(미션 칩·완료 상자는 미션 화면에서만). 글과 미션 연결은 데이터에 그대로 -->
         <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글") -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
