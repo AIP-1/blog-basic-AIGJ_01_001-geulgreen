@@ -1851,3 +1851,12 @@ a.series-box-step:hover { border-color: var(--color-brand); }
     .series-box-nav { grid-template-columns: 1fr; }
     .series-box-step.is-empty { display: none; }
 }
+/* 111 강성찬 개인 확장: 시리즈 화면 위 뒤로 가기 링크, 시리즈 탭 대표 사진 새로 정하기 */
+.series-back { display: inline-flex; align-items: center; gap: 6px; margin: 8px 0 4px; padding: 6px 12px 6px 8px; border-radius: 999px;
+    color: var(--color-text-muted); text-decoration: none; font-size: .92em; }
+.series-back:hover { color: var(--color-text); background: var(--color-surface-muted); }
+.series-back .icon { width: 18px; height: 18px; }
+.series-cover-new { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.series-cover-new .btn { display: inline-flex; align-items: center; gap: 6px; }
+.series-cover-new .icon { width: 16px; height: 16px; }
+.series-cover-status:empty { display: none; }

@@ -104,9 +104,20 @@
                     <label class="series-cover-choice"><input type="radio" name="coverUrl" value=""
                             th:checked="${s.pickedCover() == null}">
                         <span>자동 (1편부터 첫 사진)</span></label>
+                    <!-- 111: 따로 올린 사진·만든 썸네일 -->
+                    <label th:if="${s.pickedCover() != null and !#lists.contains(items.![thumb()], s.pickedCover())}" class="series-cover-choice">
+                        <input type="radio" name="coverUrl" th:value="${s.pickedCover()}" checked>
+                        <img th:src="${s.pickedCover()}" alt="따로 정한 대표 사진" loading="lazy"></label>
                     <label th:each="it : ${items}" th:if="${it.thumb() != null}" class="series-cover-choice">
                         <input type="radio" name="coverUrl" th:value="${it.thumb()}" th:checked="${it.thumb() == s.pickedCover()}">
                         <img th:src="${it.thumb()}" th:alt="${it.title()}" loading="lazy"></label>
+                    <!-- 111: 새 사진 올리기·썸네일 만들기(고르면 바로 저장) -->
+                    <span class="series-cover-new" th:attr="data-series-title=${s.title()},data-series-meta=${'시리즈 · 글 ' + items.size() + '편'}">
+                        <button type="button" class="btn btn-sm series-cover-upload"><svg th:replace="~{fragments/icons :: image}"></svg>사진 올리기</button>
+                        <button type="button" class="btn btn-sm series-cover-make"><svg th:replace="~{fragments/icons :: sparkle}"></svg>썸네일 만들기</button>
+                        <input type="file" class="series-cover-file" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+                    </span>
+                    <p class="help series-cover-status" role="status"></p>
                 </fieldset>
                 <button type="submit" class="btn btn-sm">저장</button>
             </form>
@@ -131,6 +142,9 @@
         </form>
     </div>
     </details>
+    <dialog th:replace="~{fragments/thumb-dialog :: dialog('시리즈 이름과 글 수가 들어가요. 저장하면 이 시리즈의 대표 사진이 되고, 링크 미리보기 그림도 이 사진이 돼요.')}"></dialog>
+    <script th:src="@{/js/editor/image-upload.js}" defer></script>
+    <script th:src="@{/js/editor/thumbnail.js}" defer></script>
     <script th:src="@{/js/series/manage.js}" defer></script>
 </main>
 </body>

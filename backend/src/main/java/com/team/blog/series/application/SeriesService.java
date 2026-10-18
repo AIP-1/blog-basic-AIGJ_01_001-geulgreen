@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 목록·편 번호는 공용 목록 조건(012) 글만 센다.
  */
 @Service
-public class SeriesService {
+public class SeriesService implements com.team.blog.media.application.ImageReferenceLookup {
 
     /** 107: {@code coverUrl}은 화면에 쓸 사진(고른 것, 없으면 1편부터 첫 사진), {@code pickedCover}는 주인이 고른 것(관리 탭). */
     public record Series(long id, String title, long postCount, String description, String coverUrl, String pickedCover,
@@ -42,10 +42,13 @@ public class SeriesService {
     private final PostAccessPolicy accessPolicy;
     private final SeriesProperties properties;
     private final java.time.Clock clock;
+    private final com.team.blog.media.application.PostImageService postImages;
 
     public SeriesService(JdbcTemplate jdbc, AccountGuard accountGuard, PostAccessPolicy accessPolicy,
-                         SeriesProperties properties, java.time.Clock clock) {
+                         SeriesProperties properties, java.time.Clock clock,
+                         com.team.blog.media.application.PostImageService postImages) {
         this.clock = clock;
+        this.postImages = postImages;
         this.jdbc = jdbc;
         this.accountGuard = accountGuard;
         this.accessPolicy = accessPolicy;
@@ -268,7 +271,7 @@ public class SeriesService {
     }
 
     /**
-     * 106 이름 바꾸기, 107 설명 한 줄(100자까지, 비우면 없음)·대표 사진. 사진은 이 시리즈에 든 글의 사진 중에서만
+     * 106 이름 바꾸기, 107 설명 한 줄(100자까지, 비우면 없음)·대표 사진. 사진은 이 시리즈에 든 글의 사진 중에서, 또는 111: 내가 올린 사진(썸네일 만들기 포함)
      * 고를 수 있다(아무 주소나 넣지 못하게). 비우면 1편부터 첫 사진을 쓴다. 이름은 1~60자, 내 다른 시리즈와 겹치면 안 된다.
      */
     @Transactional
@@ -288,9 +291,21 @@ public class SeriesService {
         if (desc.codePointCount(0, desc.length()) > 100) {
             throw new PostContentException("SERIES_DESCRIPTION_TOO_LONG");
         }
-        String cover = coverUrl != null && ownerItems(seriesId).stream().anyMatch(p -> coverUrl.equals(p.thumb())) ? coverUrl : null;
-        jdbc.update("UPDATE series SET title = ?, description = ?, cover_url = ? WHERE id = ?", title, desc.isEmpty() ? null : desc,
-                cover, seriesId);
+        // 111: 이 시리즈 글의 사진이거나, 내가 올린(올리기를 마친) 사진만. 그 밖의 주소는 자동(1편부터 첫 사진)
+        String cover = null;
+        Long imageId = null;
+        var saved = jdbc.queryForMap("SELECT cover_url, cover_image_id FROM series WHERE id = ?", seriesId);
+        if (coverUrl != null && ownerItems(seriesId).stream().anyMatch(p -> coverUrl.equals(p.thumb()))) {
+            cover = coverUrl;
+        } else if (coverUrl != null && saved.get("cover_image_id") != null && coverUrl.equals(saved.get("cover_url"))) {
+            cover = coverUrl; // 이미 올려 둔 대표 사진을 그대로 두고 이름·설명만 고칠 때
+            imageId = ((Number) saved.get("cover_image_id")).longValue();
+        } else if (coverUrl != null && !coverUrl.isBlank()) {
+            imageId = postImages.ownedCompletedImageId(me.memberId(), coverUrl.strip()).orElse(null);
+            cover = imageId == null ? null : postImages.cardThumbnailOf(coverUrl.strip());
+        }
+        jdbc.update("UPDATE series SET title = ?, description = ?, cover_url = ?, cover_image_id = ? WHERE id = ?", title,
+                desc.isEmpty() ? null : desc, cover, imageId, seriesId);
     }
 
     /** 106: 시리즈 묶음만 지운다(글은 그대로, series_post는 CASCADE). */
@@ -316,6 +331,16 @@ public class SeriesService {
         if (mine == null || mine == 0) {
             throw new NotFoundException();
         }
+    }
+
+    /** 111: 시리즈 대표 사진으로 올린 사진은 정리 작업이 지우지 않는다. */
+    @Override
+    public java.util.Set<Long> referencedIds(java.util.Collection<Long> imageIds) {
+        if (imageIds == null || imageIds.isEmpty()) {
+            return java.util.Set.of();
+        }
+        return new java.util.HashSet<>(jdbc.queryForList("SELECT cover_image_id FROM series WHERE cover_image_id = ANY (?)", Long.class,
+                (Object) imageIds.toArray(new Long[0])));
     }
 
     /** 탈퇴 정리. */
