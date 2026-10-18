@@ -120,6 +120,6 @@ class ThemeIT extends IntegrationTestBase {
         long author = members.localMember("cardauthor", "cardauthor", "cardauthor@example.com", "Blog#2026ok", true);
         posts.published(author, "사진 없는 글", "본문", 1, java.time.Instant.parse("2026-10-01T00:00:00Z"));
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
-        assertThat(home).contains("/fonts/pretendard/pretendard.css").contains("사진 없는 글").doesNotContain("class=\"card-thumb\"");
+        assertThat(home).contains("/fonts/pretendard/pretendard.css").contains("사진 없는 글").doesNotContain("class=\"card-thumb\"").contains("class=\"card-thumb card-cover\""); // 10-18: 사진 없는 글은 기본 썸네일
     }
 }

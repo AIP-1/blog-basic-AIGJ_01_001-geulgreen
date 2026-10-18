@@ -57,5 +57,21 @@
     }
   }
 
+  // 10-18 강성찬 개인 확장: 글 화면 안에서 가는 # 링크(목차·각주 등)는 바로 뛰지 않고 부드럽게 스크롤한다.
+  // 멈추는 자리는 CSS scroll-margin-top(머리말 아래), 주소는 #으로 바꿔 뒤로 가기·공유가 그대로 된다. 움직임 줄이기 설정이면 원래대로 바로
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    var id = decodeURIComponent(a.getAttribute('href').slice(1));
+    var target = id && document.getElementById(id);
+    if (!target) { return; }
+    e.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (location.hash !== '#' + encodeURIComponent(id) && location.hash !== '#' + id) { history.pushState(null, '', '#' + encodeURIComponent(id)); }
+    if (!target.hasAttribute('tabindex')) { target.setAttribute('tabindex', '-1'); }
+    target.focus({ preventScroll: true }); // 키보드·화면 낭독기도 그 자리부터
+  });
+
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
