@@ -7,6 +7,46 @@
 
 ---
 
+## [1.67.5] — 2026-10-18 · 개인 확장 (카테고리·태그 나누기, 태그 화면 카드)
+
+- 카테고리는 제목 위(폴더 아이콘·회색 글자), 태그는 본문 아래 # 칩, 블로그 글 탭 카테고리 줄, 글 설정·태그 칸 설명
+- 태그 화면 가로 줄 카드를 공용 카드 모양으로(사진 위, 한 줄 4개 폭)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**글 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-post-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-post-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-post-m-after.png) |
+
+**블로그 글 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-blog-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-blog-after.png) |
+
+**태그 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-tagrow-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-tagrow-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-tagrow-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.5/v1675-tagrow-m-after.png) |
+
+---
+
 ## [1.67.4] — 2026-10-18 · 개인 확장 (첫 댓글을 기다리는 글 카드 크기)
 
 - 탐색 "첫 댓글을 기다리는 글" 칸 카드를 공용 카드 크기·간격으로

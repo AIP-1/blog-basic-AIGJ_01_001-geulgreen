@@ -20,19 +20,20 @@
             <a class="tag" th:href="@{${postsPath}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
         </th:block>
         <details th:if="${blogTags.size() > 10}">
-            <summary>태그 더 보기</summary>
+            <summary>태그 더 보기<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
             <th:block th:each="t, st : ${blogTags}" th:if="${st.index >= 10}">
                 <a class="tag" th:href="@{${postsPath}(tag=${t.name()})}" th:text="${'#' + t.name() + ' ' + t.postCount()}">#태그 1</a>
             </th:block>
         </details>
     </nav>
-    <p th:if="${filterCategory != null}" class="tag-filter">
-        <span><svg th:replace="~{fragments/icons :: folder}"></svg> <th:block th:text="${filterCategory.name() + ' 글'}">카테고리 글</th:block></span>
-        <a th:href="${postsPath}">필터 해제</a>
+    <!-- 10-18 강성찬 개인 확장: 거른 결과 한 줄(폴더 아이콘·이름·글 수 또는 #태그) + [전체 보기] 버튼 -->
+    <p th:if="${filterCategory != null}" class="tag-filter filter-result">
+        <span class="filter-label"><svg th:replace="~{fragments/icons :: folder}"></svg><strong th:text="${filterCategory.name()}">카테고리</strong><span class="help" th:text="${'· ' + filterCategory.postCount() + '편'}">· 4편</span></span>
+        <a class="btn btn-sm" th:href="${postsPath}"><svg th:replace="~{fragments/icons :: close}"></svg>전체 보기</a>
     </p>
-    <p th:if="${filterTag != null}" class="tag-filter">
-        <span th:text="${'#' + filterTag + ' 글'}">#태그 글</span>
-        <a th:href="${postsPath}">필터 해제</a>
+    <p th:if="${filterTag != null}" class="tag-filter filter-result">
+        <span class="filter-label"><strong th:text="${'#' + filterTag}">#태그</strong><span class="help">글</span></span>
+        <a class="btn btn-sm" th:href="${postsPath}"><svg th:replace="~{fragments/icons :: close}"></svg>전체 보기</a>
     </p>
     <p th:if="${continued}"><a class="link-btn" th:href="${sort == 'popular' ? postsPath + '?sort=popular' : postsPath}">처음부터 보기</a></p>
     <!-- 100 강성찬 개인 확장: 글 탭 정렬(필터 없을 때) -->
