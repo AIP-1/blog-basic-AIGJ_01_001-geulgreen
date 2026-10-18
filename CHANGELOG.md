@@ -7,6 +7,27 @@
 
 ---
 
+## [1.67.4] — 2026-10-18 · 개인 확장 (첫 댓글을 기다리는 글 카드 크기)
+
+- 탐색 "첫 댓글을 기다리는 글" 칸 카드를 공용 카드 크기·간격으로
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**탐색 [추천]**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.4/v1674-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.4/v1674-explore-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.4/v1674-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.4/v1674-explore-m-after.png) |
+
+---
+
 ## [1.67.3] — 2026-10-18 · 개인 확장 (검색 결과 제목·설명)
 
 - 태그·시리즈·블로그 홈마다 검색용 제목과 설명(공개 글만, 머리말만, 화면 그대로), og:title도 같은 제목
