@@ -162,7 +162,7 @@ class TagPagesIT extends IntegrationTestBase {
         String html = mockMvc.perform(get("/tagblog/posts")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("#common 15").contains("태그 더 보기");
         String filtered = mockMvc.perform(get("/tagblog").param("tag", "jpa")).andReturn().getResponse().getContentAsString();
-        assertThat(filtered).contains("jpa 글").doesNotContain("글 3<").contains("필터 해제");
+        assertThat(filtered).contains("#jpa<").doesNotContain("글 3<").contains("전체 보기"); // 10-18: 거른 결과 한 줄 + [전체 보기]
         mockMvc.perform(get("/tagblog").param("tag", "JPA")).andExpect(status().isMovedPermanently())
                 .andExpect(header().string("Location", "/tagblog/posts?tag=jpa"));
         mockMvc.perform(get("/api/members/tagblog/tags")).andExpect(jsonPath("$[0].name").value("common"));

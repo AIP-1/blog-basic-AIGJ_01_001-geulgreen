@@ -1852,3 +1852,20 @@ a.series-box-step:hover { border-color: var(--color-brand); }
     .series-box-nav { grid-template-columns: 1fr; }
     .series-box-step.is-empty { display: none; }
 }
+
+/* 10-18 강성찬 개인 확장(카테고리·태그 헷갈리지 않게): 카테고리는 제목 위 작은 글자 링크(폴더 선 아이콘), 태그는 본문 아래 # 칩 */
+.post-head .post-category { margin: 0 0 4px; font-size: .88em; }
+.post-head .post-category a { display: inline-flex; align-items: center; gap: 5px; color: var(--color-text-muted); text-decoration: none; font-weight: 600; }
+.post-head .post-category a:hover { color: var(--color-brand); text-decoration: underline; }
+.post-tags-bottom { margin: 28px 0 0; }
+label[for="category-select"] { display: inline-flex; align-items: center; gap: 4px; }
+.field-hint { margin: 2px 0 6px; font-size: .85em; }
+/* 블로그 글 탭: 거른 결과 한 줄 */
+.filter-result { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap;
+    margin: 12px 0; padding: 8px 8px 8px 14px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.filter-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.filter-label .icon { color: var(--color-text-muted); }
+.filter-result .btn { gap: 4px; }
+.blog-tags details > summary { display: inline-flex; align-items: center; gap: 2px; cursor: pointer; }
+.blog-tags details[open] > summary .menu-chevron { transform: rotate(90deg); }
+
