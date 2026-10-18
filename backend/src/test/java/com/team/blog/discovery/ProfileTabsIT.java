@@ -87,7 +87,7 @@ class ProfileTabsIT extends IntegrationTestBase {
         assertThat(page("/tabperm/series")).contains("글 1편</span> · <span class=\"meta-part\">").contains(" 업데이트");
         assertThat(page("/tabperm")).contains("id=\"shelf-series\"").contains("탭 시리즈");
         // 글 화면 시리즈 위치·이전/다음도 보이는 글만
-        assertThat(page("/tabperm/posts/" + open)).contains("(1/1)").doesNotContain("다음편");
+        assertThat(page("/tabperm/posts/" + open)).contains(">1/1<").doesNotContain("series-box-nav");
         // 비공개 계정: 수락받지 않은 사람에게는 홈 탭만(프로필 윗부분), 다른 탭은 홈으로(073 인터셉터)
         jdbc.update("INSERT INTO private_account (member_id) VALUES (?)", me);
         assertThat(page("/tabperm", visitor)).contains("비공개 계정이에요").doesNotContain("공개 탭글");
@@ -122,7 +122,7 @@ class ProfileTabsIT extends IntegrationTestBase {
         String latest = page("/tabord/series/" + sid + "?order=latest");
         assertThat(latest.indexOf("순서 둘")).isLessThan(latest.indexOf("순서 하나"));
         assertThat(latest).contains(">3편<");
-        assertThat(page("/tabord/posts/" + p3)).contains("(2/3)").contains("이전편: 순서 하나").contains("다음편: 순서 둘");
+        assertThat(page("/tabord/posts/" + p3)).contains(">2/3<").contains("이전 편").contains("순서 하나").contains("다음 편").contains("순서 둘");
         // 맨 앞에서 더 앞으로는 그대로, 남은 못 바꾼다
         mockMvc.perform(post(move).param("postId", String.valueOf(p1)).param("dir", "up").with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
