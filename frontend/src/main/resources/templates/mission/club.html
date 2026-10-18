@@ -39,9 +39,14 @@
                     <a th:href="${paths.blog(m.handle())}" class="club-member">
                         <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 32)}"></th:block>
                         <span class="club-member-text"><span class="club-member-name"><span th:text="${m.name()}">이름</span><span
-                                th:if="${m.owner()}" class="badge">만든 사람</span></span><span class="help" th:text="${m.handle()}">아이디</span></span></a>
+                                th:if="${m.owner()}" class="badge">만든 사람</span><span
+                                th:if="${m.admin() and !m.owner()}" class="badge">관리자</span></span><span class="help" th:text="${m.handle()}">아이디</span></span></a>
                     <span class="club-state" th:classappend="${m.wrote()} ? 'is-done'"><th:block th:if="${m.wrote()}"><th:block
                             th:replace="~{fragments/icons :: check}"></th:block>썼어요</th:block><th:block th:unless="${m.wrote()}">아직이에요</th:block></span>
+                    <form th:if="${board.isOwner() and !m.owner()}" class="inline-form" method="post"
+                          th:action="${'/missions/clubs/' + c.id() + '/members/' + m.memberId() + (m.admin() ? '/member' : '/admin')}">
+                        <button type="submit" class="btn-text club-remove" th:text="${m.admin() ? '관리자 해제' : '관리자로'}">관리자로</button>
+                    </form>
                     <form th:if="${board.isOwner() and !m.owner()}" class="inline-form" method="post"
                           th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
                           th:attr="data-confirm=${m.name() + ' 님을 함께 쓰기에서 내보낼까요?'}">
@@ -51,8 +56,8 @@
             </ul>
             </details>
         </section>
-        <!-- 111 후속: 만든 사람만 — 참여 요청 승인·거절, 방 종류·정원 -->
-        <section th:if="${board.isOwner()}" class="mission-panel club-owner" aria-labelledby="club-owner-heading">
+        <!-- 111 후속: 관리자(만든 사람·부방장)는 참여 요청 승인·거절, 방 종류·정원은 만든 사람만 -->
+        <section th:if="${board.isAdmin() and (board.isOwner() or !requests.isEmpty())}" class="mission-panel club-owner" aria-labelledby="club-owner-heading">
             <h2 id="club-owner-heading">방 관리</h2>
             <th:block th:if="${!requests.isEmpty()}">
                 <h3 class="club-sub" th:text="${'참여 요청 ' + requests.size() + '명'}">참여 요청</h3>
@@ -68,7 +73,7 @@
                     </li>
                 </ul>
             </th:block>
-            <form method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
+            <form th:if="${board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
                 <fieldset class="club-modes">
                     <legend>방 종류</legend>
                     <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${c.joinMode()})}"></label></th:block>
@@ -82,7 +87,7 @@
         </section>
         <section class="mission-panel club-invite-card" aria-labelledby="club-invite-heading" th:if="${!board.ended()}">
             <h2 id="club-invite-heading">친구 초대하기</h2>
-            <p th:unless="${candidates.isEmpty()}" class="help" th:text="${'나를 팔로우하는 사람과 친한 친구에게 초대를 보내요. 받은 사람이 수락하면 바로 들어와요 · 오늘 ' + invitesLeft + '명 더 보낼 수 있어요'}">설명</p>
+            <p th:unless="${candidates.isEmpty()}" class="help" th:text="${'나를 팔로우하는 사람과 친한 친구에게 초대를 보내요. ' + (c.joinMode() == 'APPROVAL' and !board.isAdmin() ? '받은 사람이 수락하면 관리자 승인 뒤 들어와요' : '받은 사람이 수락하면 바로 들어와요') + ' · 오늘 ' + invitesLeft + '명 더 보낼 수 있어요'}">설명</p>
             <form th:if="${!candidates.isEmpty()}" method="post" th:action="@{/missions/clubs/{id}/invite(id=${c.id()})}" class="club-picker">
                 <details class="club-members">
                     <summary><span th:text="${'초대할 사람 고르기 · ' + candidates.size() + '명'}">고르기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
@@ -97,7 +102,7 @@
                 </details>
             </form>
             <p th:if="${candidates.isEmpty()}" class="help">초대할 수 있는 팔로워·친한 친구가 없어요. 아래 링크를 보내 주세요</p>
-            <p class="help club-link-lead">링크를 받은 사람은 방 종류와 상관없이 바로 들어올 수 있어요</p>
+            <p class="help club-link-lead" th:text="${c.joinMode() == 'APPROVAL' ? '승인 후 참여 방이라 링크로 와도 관리자가 승인해야 들어와요' : '링크를 받은 사람은 바로 들어올 수 있어요'}">링크 안내</p>
             <button type="button" id="club-invite-copy" class="btn btn-sm" hidden
                     th:attr="data-invite-url=${siteOrigin + '/missions/clubs/join/' + c.inviteCode()}"><th:block
                     th:replace="~{fragments/icons :: link}"></th:block>초대 링크 복사</button>

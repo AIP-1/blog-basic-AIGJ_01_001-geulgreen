@@ -110,7 +110,8 @@ public class ClubService {
     public record Period(int index, int total, LocalDate start, LocalDate end) {
     }
 
-    public record Member(long memberId, String handle, String nickname, String profileImageUrl, boolean wrote, boolean owner) {
+    public record Member(long memberId, String handle, String nickname, String profileImageUrl, boolean wrote, boolean owner,
+                         boolean admin) {
 
         public String name() {
             return nickname == null ? handle : nickname;
@@ -122,7 +123,7 @@ public class ClubService {
     }
 
     public record Board(Club club, Period period, List<Member> members, List<Long> postIds, boolean isOwner, boolean ended,
-                        boolean notStarted) {
+                        boolean notStarted, boolean isAdmin) {
     }
 
     /** 화면 값. 잘못 낸 값을 flash(세션)로 돌려보내서 Serializable. */
@@ -220,12 +221,31 @@ public class ClubService {
                 "SELECT EXISTS (SELECT 1 FROM writing_club_member WHERE club_id = ? AND member_id = ?)", Boolean.class, clubId, memberId));
     }
 
-    /** 초대 링크로 들어오기. 이미 멤버면 그대로. */
+    /** 초대 링크로 들어오기. 이미 멤버면 그대로. 승인 후 참여 방은 링크로 와도 참여 요청이 된다(관리자 승인 없이는 못 들어옴). */
+    @Transactional
     public long join(Optional<CurrentUser> current, String code) {
         CurrentUser me = accountGuard.requireWritable(current);
         Club club = byInvite(code).orElseThrow(NotFoundException::new);
+        if (APPROVAL.equals(club.joinMode()) && !isMember(club.id(), me.memberId())) {
+            request(club, me.memberId());
+            return club.id();
+        }
         addMember(club, me.memberId());
         return club.id();
+    }
+
+    /** 만든 사람이거나 관리자(부방장). */
+    public boolean isAdmin(long clubId, long memberId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM writing_club c WHERE c.id = ? AND c.owner_id = ?)
+                    OR EXISTS (SELECT 1 FROM writing_club_member m WHERE m.club_id = ? AND m.member_id = ? AND m.role = 'ADMIN')
+                """, Boolean.class, clubId, memberId, clubId, memberId));
+    }
+
+    /** 만든 사람만: 멤버를 관리자로 정하거나 해제. */
+    public void setAdmin(Optional<CurrentUser> current, long clubId, long memberId, boolean admin) {
+        requireOwner(current, clubId);
+        jdbc.update("UPDATE writing_club_member SET role = ? WHERE club_id = ? AND member_id = ?", admin ? "ADMIN" : "MEMBER", clubId, memberId);
     }
 
     /** 멤버만 본다. 아니면 없는 모임처럼 404. */
@@ -243,17 +263,18 @@ public class ClubService {
                 WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date BETWEEN ? AND ?",
                 Long.class, clubId, Date.valueOf(period.start()), Date.valueOf(period.end())).stream().collect(Collectors.toSet());
         List<Member> members = jdbc.query("""
-                SELECT mb.id, mb.handle, mb.nickname, mb.profile_image_url FROM writing_club_member m JOIN member mb ON mb.id = m.member_id
+                SELECT mb.id, mb.handle, mb.nickname, mb.profile_image_url, m.role FROM writing_club_member m JOIN member mb ON mb.id = m.member_id
                 WHERE m.club_id = ? ORDER BY m.joined_at, mb.id
                 """, (rs, i) -> new Member(rs.getLong("id"), rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url"),
-                wrote.contains(rs.getLong("id")), rs.getLong("id") == club.ownerId()), clubId);
+                wrote.contains(rs.getLong("id")), rs.getLong("id") == club.ownerId(),
+                rs.getLong("id") == club.ownerId() || "ADMIN".equals(rs.getString("role"))), clubId);
         List<Long> postIds = jdbc.queryForList("""
                 SELECT p.id FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
                 WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date BETWEEN ? AND ?"
                 + " ORDER BY p.first_public_at DESC LIMIT " + POSTS,
                 Long.class, clubId, Date.valueOf(club.startDate()), Date.valueOf(club.endDate()));
         return new Board(club, period, members, postIds, club.ownerId() == me.memberId(), today.isAfter(club.endDate()),
-                today.isBefore(club.startDate()));
+                today.isBefore(club.startDate()), isAdmin(clubId, me.memberId()));
     }
 
     /** 오늘이 든 기간. 시작 전이면 첫 기간, 끝난 뒤면 마지막 기간. 마지막 기간은 끝 날짜에서 잘린다. */
@@ -365,12 +386,19 @@ public class ClubService {
         if (isMember(clubId, me.memberId())) {
             return true;
         }
+        request(club, me.memberId());
+        return false;
+    }
+
+    /** 참여 요청을 남기고 관리자들에게 알린다(정원이 찼거나 거절된 지 7일이 안 됐으면 실패). */
+    private void request(Club club, long memberId) {
+        long clubId = club.id();
         if (club.full()) {
             throw new ClubException("정원(" + club.memberCap() + "명)이 다 찼어요");
         }
         Optional<java.sql.Timestamp> rejected = jdbc.queryForList(
                 "SELECT rejected_at FROM writing_club_join WHERE club_id = ? AND member_id = ? AND kind = 'REQUEST'",
-                java.sql.Timestamp.class, clubId, me.memberId()).stream().filter(java.util.Objects::nonNull).findFirst();
+                java.sql.Timestamp.class, clubId, memberId).stream().filter(java.util.Objects::nonNull).findFirst();
         if (rejected.isPresent() && rejected.get().toInstant().isAfter(clock.instant().minus(java.time.Duration.ofDays(REJECT_COOLDOWN_DAYS)))) {
             throw new ClubException("거절된 요청은 " + REJECT_COOLDOWN_DAYS + "일 뒤에 다시 보낼 수 있어요");
         }
@@ -378,11 +406,19 @@ public class ClubService {
                 INSERT INTO writing_club_join (club_id, member_id, kind) VALUES (?, ?, 'REQUEST')
                 ON CONFLICT (club_id, member_id) DO UPDATE SET kind = 'REQUEST', invited_by = NULL, rejected_at = NULL,
                   created_at = CURRENT_TIMESTAMP WHERE writing_club_join.kind = 'REQUEST'
-                """, clubId, me.memberId());
+                """, clubId, memberId);
         if (n > 0) {
-            events.publishEvent(new com.team.blog.shared.event.ClubNotice(clubId, club.ownerId(), me.memberId(), false));
+            for (Long admin : admins(clubId)) {
+                events.publishEvent(new com.team.blog.shared.event.ClubNotice(clubId, admin, memberId, false));
+            }
         }
-        return false;
+    }
+
+    private List<Long> admins(long clubId) {
+        return jdbc.queryForList("""
+                SELECT owner_id FROM writing_club WHERE id = ?
+                UNION SELECT member_id FROM writing_club_member WHERE club_id = ? AND role = 'ADMIN'
+                """, Long.class, clubId, clubId);
     }
 
     /** 내 참여 요청 거두기. */
@@ -402,10 +438,13 @@ public class ClubService {
                 """, (rs, i) -> pending(rs), clubId);
     }
 
-    /** 만든 사람만: 요청 승인(정원 확인) 또는 거절(7일 동안 다시 못 보냄). */
+    /** 만든 사람·관리자만: 요청 승인(정원 확인) 또는 거절(7일 동안 다시 못 보냄). */
     @Transactional
     public void decide(Optional<CurrentUser> current, long clubId, long memberId, boolean approve) {
-        requireOwner(current, clubId);
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        if (!isAdmin(clubId, me.memberId())) {
+            throw new NotFoundException();
+        }
         Integer pending = jdbc.queryForObject("SELECT count(*) FROM writing_club_join WHERE club_id = ? AND member_id = ? AND kind = 'REQUEST' AND rejected_at IS NULL",
                 Integer.class, clubId, memberId);
         if (pending == null || pending == 0) {
@@ -501,20 +540,30 @@ public class ClubService {
                 """, (rs, i) -> pending(rs), me, Date.valueOf(today()));
     }
 
-    /** 받은 초대 수락(정원 확인) 또는 거절. */
+    /** 받은 초대 수락(정원 확인) 또는 거절. 수락했는데 승인을 기다리게 되면 {@code false}. */
     @Transactional
-    public void answerInvite(Optional<CurrentUser> current, long clubId, boolean accept) {
+    public boolean answerInvite(Optional<CurrentUser> current, long clubId, boolean accept) {
         CurrentUser me = accountGuard.requireWritable(current);
         Integer n = jdbc.queryForObject("SELECT count(*) FROM writing_club_join WHERE club_id = ? AND member_id = ? AND kind = 'INVITE'",
                 Integer.class, clubId, me.memberId());
         if (n == null || n == 0) {
             throw new NotFoundException();
         }
-        if (accept) {
-            addMember(byId(clubId).orElseThrow(NotFoundException::new), me.memberId());
-        } else {
+        if (!accept) {
             jdbc.update("DELETE FROM writing_club_join WHERE club_id = ? AND member_id = ?", clubId, me.memberId());
+            return true;
         }
+        Club club = byId(clubId).orElseThrow(NotFoundException::new);
+        Long inviter = jdbc.queryForObject("SELECT invited_by FROM writing_club_join WHERE club_id = ? AND member_id = ?",
+                Long.class, clubId, me.memberId());
+        // 승인 후 참여 방: 관리자가 보낸 초대만 승인으로 친다. 일반 멤버의 초대는 수락하면 참여 요청이 된다
+        if (APPROVAL.equals(club.joinMode()) && (inviter == null || !isAdmin(clubId, inviter))) {
+            jdbc.update("DELETE FROM writing_club_join WHERE club_id = ? AND member_id = ?", clubId, me.memberId());
+            request(club, me.memberId());
+            return false;
+        }
+        addMember(club, me.memberId());
+        return true;
     }
 
     private static Pending pending(java.sql.ResultSet rs) throws java.sql.SQLException {

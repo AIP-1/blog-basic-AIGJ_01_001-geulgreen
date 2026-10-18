@@ -6,6 +6,10 @@ ALTER TABLE writing_club ADD CONSTRAINT ck_writing_club_join_mode CHECK (join_mo
 ALTER TABLE writing_club ADD CONSTRAINT ck_writing_club_cap CHECK (member_cap BETWEEN 2 AND 100);
 CREATE INDEX ix_writing_club_listed ON writing_club (join_mode, end_date);
 
+-- 멤버 역할: 만든 사람이 멤버를 관리자(부방장)로 정하면, 관리자도 참여 요청을 승인·거절한다. 만든 사람은 늘 관리자로 친다.
+ALTER TABLE writing_club_member ADD COLUMN role varchar(10) NOT NULL DEFAULT 'MEMBER';
+ALTER TABLE writing_club_member ADD CONSTRAINT ck_writing_club_member_role CHECK (role IN ('MEMBER', 'ADMIN'));
+
 -- 참여 요청(본인이 보냄, 만든 사람이 승인)과 초대(멤버가 팔로워·친구에게 보냄, 받은 사람이 수락). 한 사람당 한 줄.
 CREATE TABLE writing_club_join (
     club_id                bigint NOT NULL,
@@ -35,5 +39,6 @@ ALTER TABLE notification ADD CONSTRAINT ck_notification_type CHECK (type IN ('CO
 
 COMMENT ON COLUMN writing_club.join_mode IS '참여 방식: LINK 링크만, APPROVAL 승인 후 참여, OPEN 누구나 바로';
 COMMENT ON COLUMN writing_club.member_cap IS '멤버 상한(만든 사람 포함)';
+COMMENT ON COLUMN writing_club_member.role IS 'MEMBER 또는 ADMIN(참여 요청 승인 가능). 만든 사람은 이 값과 상관없이 관리자';
 COMMENT ON TABLE writing_club_join IS '함께 쓰기 참여 요청(REQUEST)과 초대(INVITE). 거절된 요청은 rejected_at으로 7일 동안 다시 못 보냄';
 COMMENT ON COLUMN notification.club_id IS '함께 쓰기 초대·참여 요청 알림이 가리키는 함께 쓰기';

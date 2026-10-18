@@ -93,7 +93,7 @@
         <!-- 111 후속: 공개 함께 쓰기(승인 후 참여·누구나 바로) 찾기. 링크로만인 방은 보이지 않는다 -->
         <section class="mission-panel" aria-labelledby="clubs-open-heading">
             <h2 id="clubs-open-heading" class="club-sub-title">함께 쓸 방 찾기</h2>
-            <p class="help club-list-lead">공개된 방이에요. '누구나 바로'는 누르면 들어가고, '승인 후 참여'는 만든 사람이 승인하면 들어가요</p>
+            <p class="help club-list-lead">공개된 방이에요. '누구나 바로'는 누르면 들어가고, '승인 후 참여'는 관리자가 승인하면 들어가요</p>
             <form method="get" action="/missions/clubs" role="search" class="club-search">
                 <label for="club-q" class="visually-hidden">방 이름·소개로 찾기</label>
                 <input id="club-q" type="search" name="q" maxlength="30" th:value="${q}" placeholder="방 이름·소개로 찾기">
@@ -121,7 +121,7 @@
 <label th:fragment="modeOption(mode, selected)" class="club-mode">
     <input type="radio" name="joinMode" th:value="${mode}" th:checked="${mode == selected}" required>
     <span class="club-mode-text"><strong th:text="${mode == 'OPEN' ? '누구나 바로' : mode == 'APPROVAL' ? '승인 후 참여' : '링크로만'}">종류</strong>
-        <span class="help" th:text="${mode == 'OPEN' ? '공개 목록에서 누르면 바로 들어와요. 오픈채팅처럼' : mode == 'APPROVAL' ? '공개 목록에 보이고, 참여 요청을 내가 승인해요' : '목록에 안 보여요. 초대 링크나 초대를 받은 사람만 들어와요'}">설명</span></span>
+        <span class="help" th:text="${mode == 'OPEN' ? '공개 목록에서 누르면 바로 들어와요. 오픈채팅처럼' : mode == 'APPROVAL' ? '공개 목록에 보여요. 링크나 초대로 와도 나나 관리자가 승인해야 들어와요' : '목록에 안 보여요. 초대 링크나 초대를 받은 사람만 들어와요'}">설명</span></span>
 </label>
 </body>
 </html>

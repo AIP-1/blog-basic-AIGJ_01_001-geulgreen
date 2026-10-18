@@ -121,4 +121,40 @@ class ClubJoinIT extends IntegrationTestBase {
         mockMvc.perform(post("/missions/clubs/" + club + "/invite").with(csrf()).with(TestAuth.member(owner)).param("memberIds", String.valueOf(fan)));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_join WHERE member_id = ?", Integer.class, fan)).isZero();
     }
+
+    @Test
+    void approvalRoomNeedsAdminEvenByLinkOrMemberInvite() throws Exception {
+        clock.set(NOW);
+        long owner = members.localMember("apowner", "승인방장", "apowner@example.com", "Blog#2026ok", true);
+        long helper = members.localMember("aphelper", "부방장", "aphelper@example.com", "Blog#2026ok", true);
+        long plain = members.localMember("applain", "그냥멤버", "applain@example.com", "Blog#2026ok", true);
+        long byLink = members.localMember("aplink", "링크손님", "aplink@example.com", "Blog#2026ok", true);
+        long friendOfPlain = members.localMember("apfriend", "멤버친구", "apfriend@example.com", "Blog#2026ok", true);
+        long friendOfHelper = members.localMember("aphfriend", "부방친구", "aphfriend@example.com", "Blog#2026ok", true);
+        long club = create(owner, "승인 일기방", "APPROVAL");
+        jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?), (?, ?)", club, helper, club, plain);
+        String code = jdbc.queryForObject("SELECT invite_code FROM writing_club WHERE id = ?", String.class, club);
+        // 링크로 와도 요청
+        mockMvc.perform(post("/missions/clubs/join/" + code).with(csrf()).with(TestAuth.member(byLink)));
+        assertThat(member(club, byLink)).isFalse();
+        // 관리자가 아닌 사람은 승인 못 함, 만든 사람이 관리자로 정하면 됨
+        mockMvc.perform(post("/missions/clubs/" + club + "/requests/" + byLink + "/approve").with(csrf()).with(TestAuth.member(helper)));
+        assertThat(member(club, byLink)).isFalse();
+        mockMvc.perform(post("/missions/clubs/" + club + "/members/" + helper + "/admin").with(csrf()).with(TestAuth.member(plain)));
+        assertThat(page("/missions/clubs/" + club, owner)).doesNotContain("관리자 해제");
+        mockMvc.perform(post("/missions/clubs/" + club + "/members/" + helper + "/admin").with(csrf()).with(TestAuth.member(owner)));
+        assertThat(page("/missions/clubs/" + club, helper)).contains("참여 요청 1명").doesNotContain("club-settings");
+        mockMvc.perform(post("/missions/clubs/" + club + "/requests/" + byLink + "/approve").with(csrf()).with(TestAuth.member(helper)));
+        assertThat(member(club, byLink)).isTrue();
+        // 일반 멤버의 초대는 수락하면 요청, 관리자의 초대는 바로
+        jdbc.update("INSERT INTO follow (follower_id, followee_id) VALUES (?, ?), (?, ?)", friendOfPlain, plain, friendOfHelper, helper);
+        mockMvc.perform(post("/missions/clubs/" + club + "/invite").with(csrf()).with(TestAuth.member(plain)).param("memberIds", String.valueOf(friendOfPlain)));
+        mockMvc.perform(post("/missions/clubs/" + club + "/invite").with(csrf()).with(TestAuth.member(helper)).param("memberIds", String.valueOf(friendOfHelper)));
+        mockMvc.perform(post("/missions/clubs/" + club + "/invite/accept").with(csrf()).with(TestAuth.member(friendOfPlain)));
+        mockMvc.perform(post("/missions/clubs/" + club + "/invite/accept").with(csrf()).with(TestAuth.member(friendOfHelper)));
+        assertThat(member(club, friendOfPlain)).isFalse();
+        assertThat(member(club, friendOfHelper)).isTrue();
+        assertThat(jdbc.queryForObject("SELECT kind FROM writing_club_join WHERE club_id = ? AND member_id = ?", String.class, club, friendOfPlain))
+                .isEqualTo("REQUEST");
+    }
 }

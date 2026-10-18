@@ -35,7 +35,7 @@
                             <form th:if="${preview.requestState() == 'NONE'}" method="post" th:action="@{/missions/clubs/{id}/join(id=${c.id()})}">
                                 <button type="submit" class="btn btn-primary btn-sm">참여 요청</button></form>
                             <th:block th:if="${preview.requestState() == 'REQUESTED'}">
-                                <p class="help">참여를 요청했어요. 만든 사람이 승인하면 들어가요</p>
+                                <p class="help">참여를 요청했어요. 관리자가 승인하면 들어가요</p>
                                 <form method="post" th:action="@{/missions/clubs/{id}/request/cancel(id=${c.id()})}">
                                     <button type="submit" class="btn btn-sm">요청 거두기</button></form>
                             </th:block>

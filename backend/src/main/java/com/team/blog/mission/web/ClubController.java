@@ -89,7 +89,7 @@ public class ClubController {
             return "mission/club-preview";
         }
         ClubService.Board board = clubs.board(currentUserProvider.current(), id);
-        if (board.isOwner()) {
+        if (board.isAdmin()) {
             model.addAttribute("requests", clubs.requests(id));
             model.addAttribute("modes", ClubService.MODES);
         }
@@ -123,7 +123,8 @@ public class ClubController {
     public RedirectView join(@PathVariable("code") String code, RedirectAttributes flash) {
         try {
             long id = clubs.join(currentUserProvider.current(), code);
-            flash.addFlashAttribute("clubNotice", "함께 쓰기에 들어왔어요");
+            boolean in = currentUserProvider.current().map(u -> clubs.isMember(id, u.memberId())).orElse(false);
+            flash.addFlashAttribute("clubNotice", in ? "함께 쓰기에 들어왔어요" : "참여를 요청했어요. 관리자가 승인하면 들어가요");
             return seeOther("/missions/clubs/" + id);
         } catch (ClubService.ClubException e) {
             flash.addFlashAttribute("clubError", e.getMessage());
@@ -136,7 +137,7 @@ public class ClubController {
     @PostMapping("/missions/clubs/{id}/join")
     public RedirectView joinListed(@PathVariable("id") long id, RedirectAttributes flash) {
         return act(id, flash, () -> clubs.joinListed(currentUserProvider.current(), id) ? "함께 쓰기에 들어왔어요"
-                : "참여를 요청했어요. 만든 사람이 승인하면 들어가요");
+                : "참여를 요청했어요. 관리자가 승인하면 들어가요");
     }
 
     @PostMapping("/missions/clubs/{id}/request/cancel")
@@ -154,6 +155,16 @@ public class ClubController {
         return act(id, flash, () -> {
             clubs.decide(currentUserProvider.current(), id, memberId, approve);
             return approve ? "참여를 승인했어요" : "참여 요청을 거절했어요";
+        });
+    }
+
+    @PostMapping("/missions/clubs/{id}/members/{memberId}/{role:admin|member}")
+    public RedirectView setRole(@PathVariable("id") long id, @PathVariable("memberId") long memberId,
+                                @PathVariable("role") String role, RedirectAttributes flash) {
+        boolean admin = "admin".equals(role);
+        return act(id, flash, () -> {
+            clubs.setAdmin(currentUserProvider.current(), id, memberId, admin);
+            return admin ? "관리자로 정했어요" : "관리자에서 뺐어요";
         });
     }
 
@@ -180,8 +191,9 @@ public class ClubController {
     public RedirectView answerInvite(@PathVariable("id") long id, @PathVariable("answer") String answer, RedirectAttributes flash) {
         boolean accept = "accept".equals(answer);
         try {
-            clubs.answerInvite(currentUserProvider.current(), id, accept);
-            flash.addFlashAttribute("clubNotice", accept ? "함께 쓰기에 들어왔어요" : "초대를 거절했어요");
+            boolean in = clubs.answerInvite(currentUserProvider.current(), id, accept);
+            flash.addFlashAttribute("clubNotice", !accept ? "초대를 거절했어요"
+                    : in ? "함께 쓰기에 들어왔어요" : "초대를 수락했어요. 관리자가 승인하면 들어가요");
             return seeOther(accept ? "/missions/clubs/" + id : "/missions/clubs");
         } catch (ClubService.ClubException e) {
             flash.addFlashAttribute("listError", e.getMessage());
