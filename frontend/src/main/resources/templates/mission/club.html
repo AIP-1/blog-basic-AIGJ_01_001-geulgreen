@@ -82,7 +82,7 @@
         </section>
         <section class="mission-panel club-invite-card" aria-labelledby="club-invite-heading" th:if="${!board.ended()}">
             <h2 id="club-invite-heading">친구 초대하기</h2>
-            <p class="help" th:text="${'나를 팔로우하는 사람과 친한 친구에게 초대를 보내요. 받은 사람이 수락하면 바로 들어와요 · 오늘 ' + invitesLeft + '명 더 보낼 수 있어요'}">설명</p>
+            <p th:unless="${candidates.isEmpty()}" class="help" th:text="${'나를 팔로우하는 사람과 친한 친구에게 초대를 보내요. 받은 사람이 수락하면 바로 들어와요 · 오늘 ' + invitesLeft + '명 더 보낼 수 있어요'}">설명</p>
             <form th:if="${!candidates.isEmpty()}" method="post" th:action="@{/missions/clubs/{id}/invite(id=${c.id()})}" class="club-picker">
                 <details class="club-members">
                     <summary><span th:text="${'초대할 사람 고르기 · ' + candidates.size() + '명'}">고르기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
