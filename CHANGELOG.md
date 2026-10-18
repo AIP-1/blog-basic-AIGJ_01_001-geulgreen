@@ -7,6 +7,40 @@
 
 ---
 
+## [1.66.7] — 2026-10-18 · 개인 확장 (줄바꿈 정리, 검색 메뉴 태그)
+
+- 줄바꿈: body는 overflow-wrap break-word, 긴 주소가 들어올 칸만 anywhere, 버튼·표 머리 nowrap, "A · B" 메타 줄은 조각마다 묶어 "·" 사이에서만 꺾임
+- 검색 메뉴 추천 태그의 "# #일상"을 "# 일상"으로
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**AI 연결(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-conn-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-conn-m-after.png) |
+
+**시리즈 목록(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-series-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-series-m-after.png) |
+
+**함께 쓰기(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-clubs-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-clubs-m-after.png) |
+
+**검색 메뉴 추천 태그**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-search-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.7/v1667-search-after.png) |
+
+---
+
 ## [1.66.6] — 2026-10-18 · 개인 확장 (글 카드 위아래 줄이기)
 
 - **103 후속**: 넓은 화면(1200px 이상) 한 줄 4개, 좁으면 3·2·1개, 사진 카드 미리보기 3줄, 카드 안쪽 여백·줄 사이 줄임
