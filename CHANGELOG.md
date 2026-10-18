@@ -7,6 +7,31 @@
 
 ---
 
+## [1.68.0] — 2026-10-18 · 개인 확장 (시리즈 대표 사진 올리기)
+
+- **107 후속**: 시리즈 대표 사진을 [사진 올리기]·[썸네일 만들기]로(없으면 1편부터 첫 사진), og:image도 대표 사진, 시리즈 화면 머리 링크 "닉네임님의 시리즈 모두 보기"와 16:10 사진
+- DB: V29 series.cover_image_id(더하기만)
+
+#### 전/후 사진
+
+*대표 사진 고치기(새로 생김)*
+
+![](https://github.com/practicech/blog/releases/download/v1.68.0/v1680-edit-after.png)
+
+**시리즈 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.0/v1680-series-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.0/v1680-series-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.0/v1680-series-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.0/v1680-series-m-after.png) |
+
+---
+
 ## [1.67.5] — 2026-10-18 · 개인 확장 (카테고리·태그 나누기, 태그 화면 카드)
 
 - 카테고리는 제목 위(폴더 아이콘·회색 글자), 태그는 본문 아래 # 칩, 블로그 글 탭 카테고리 줄, 글 설정·태그 칸 설명
