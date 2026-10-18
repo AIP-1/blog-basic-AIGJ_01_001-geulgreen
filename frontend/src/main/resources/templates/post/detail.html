@@ -42,6 +42,10 @@
             <!-- 022: 숨긴 글은 작성자만 본다 -->
             <p th:if="${post.hidden()}" class="warning" role="status"
                th:text="${'운영 정책에 따라 숨겨진 글이에요 (사유: ' + hiddenReasonLabel + '). 다른 사람에게는 보이지 않아요'}">숨겨진 글</p>
+            <!-- 037·10-18: 카테고리는 이 블로그 안의 폴더(글마다 하나). 제목 위에 작은 글자 링크로, 누르면 이 블로그의 그 폴더 글 -->
+            <p th:if="${postCategory != null}" class="post-category">
+                <a th:href="@{${paths.blog(post.author().handle())}(category=${postCategory.id()})}" th:title="${post.author().handle() + ' 블로그의 ' + postCategory.name() + ' 글'}"><svg th:replace="~{fragments/icons :: folder}"></svg><span th:text="${postCategory.name()}">카테고리</span></a>
+            </p>
             <h1 th:text="${#strings.replace(post.title(), ' · ', ' ·&#160;')}">제목</h1>
             <div class="post-meta-row">
             <p class="post-meta">
@@ -74,10 +78,6 @@
                 </div>
             </details>
             </div>
-            <!-- 080: 태그 칩은 작성자 줄 바로 아래 -->
-            <ul class="post-tags" th:unless="${post.tags().isEmpty()}">
-                <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
-            </ul>
             <span th:if="${viewerIsAuthor}" id="author-action-status" class="help" role="status" data-toast="success"></span>
         </header>
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
@@ -116,10 +116,10 @@
         <!-- 039 강성찬 개인 확장: 목차(스크립트가 소제목으로 채운다, 2개 미만이면 숨김) -->
         <nav th:if="${tocEnabled}" id="post-toc" class="post-toc" aria-label="목차" hidden></nav>
         <div class="post-body" th:utext="${post.contentHtml()}"></div>
-        <!-- 037 강성찬 개인 확장: 카테고리(글쓴이는 글 설정 창에서 고른다) -->
-        <p th:if="${postCategory != null}" class="post-category">
-            <a class="tag" th:href="@{${paths.blog(post.author().handle())}(category=${postCategory.id()})}" th:text="${'📁 ' + postCategory.name()}">📁 카테고리</a>
-        </p>
+        <!-- 10-18 강성찬 개인 확장: 태그는 본문 아래 # 칩(다른 사람 글까지 같은 주제로 찾는 말). 카테고리(내 블로그 폴더)는 제목 위 -->
+        <ul class="post-tags post-tags-bottom" th:unless="${post.tags().isEmpty()}" aria-label="태그">
+            <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
+        </ul>
         <!-- 10-18 chan: 글 화면에는 미션 이야기를 넣지 않는다(미션 칩·완료 상자는 미션 화면에서만). 글과 미션 연결은 데이터에 그대로 -->
         <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글") -->
         <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
@@ -246,7 +246,8 @@
                   th:action="@{/posts/{id}/category(id=${post.id()})}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="back" th:value="${post.url()}">
-                <label for="category-select">📁 카테고리</label>
+                <label for="category-select"><svg th:replace="~{fragments/icons :: folder}"></svg>카테고리</label>
+                <span class="help field-hint">내 블로그 안에서 글을 나누는 폴더예요. 글마다 하나만.</span>
                 <select id="category-select" name="categoryId">
                     <option value="">분류 없음</option>
                     <option th:each="c : ${myCategories}" th:value="${c.id()}" th:text="${c.name()}"
