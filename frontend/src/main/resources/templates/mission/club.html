@@ -13,13 +13,13 @@
         <section class="mission-panel club-head" aria-labelledby="club-heading">
             <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
             <p th:if="${!c.intro().isEmpty()}" class="club-intro" th:text="${c.intro()}">소개</p>
-            <p class="help club-meta" th:text="${c.everyDays() + '일에 1편 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ '
-                    + #temporals.format(c.endDate(), 'M월 d일') + ' · 멤버 ' + board.members().size() + '명'}">7일에 1편</p>
+            <p class="help club-meta"><th:block th:replace="~{fragments/meta :: parts(${c.everyDays() + '일에 1편 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ '
+                    + #temporals.format(c.endDate(), 'M월 d일') + ' · 멤버 ' + board.members().size() + '명'})}"></th:block></p>
             <div class="club-period">
                 <p class="club-period-row">
                     <strong th:text="${board.ended() ? '마지막 기간' : board.notStarted() ? '첫 기간' : '이번 기간'}">이번 기간</strong>
-                    <span class="help" th:text="${p.index() + '/' + p.total() + '번째 · ' + #temporals.format(p.start(), 'M월 d일') + ' ~ '
-                            + (p.start().getMonthValue() == p.end().getMonthValue() ? #temporals.format(p.end(), 'd일') : #temporals.format(p.end(), 'M월 d일'))}">기간</span>
+                    <span class="help"><th:block th:replace="~{fragments/meta :: parts(${p.index() + '/' + p.total() + '번째 · ' + #temporals.format(p.start(), 'M월 d일') + ' ~ '
+                            + (p.start().getMonthValue() == p.end().getMonthValue() ? #temporals.format(p.end(), 'd일') : #temporals.format(p.end(), 'M월 d일'))})}"></th:block></span>
                     <span class="club-count" th:classappend="${allDone} ? 'is-done'"><th:block th:if="${allDone}"><th:block
                             th:replace="~{fragments/icons :: check}"></th:block></th:block><span th:text="${wroteCount + '/' + board.members().size() + '명 썼어요'}">0명</span></span>
                 </p>

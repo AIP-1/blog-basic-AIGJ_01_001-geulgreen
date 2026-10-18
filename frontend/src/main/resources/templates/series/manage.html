@@ -48,7 +48,7 @@
             <span th:unless="${s.coverUrl() != null}" class="series-cover series-cover-empty"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
             <span class="series-group-text">
                 <strong th:text="${s.title()}">시리즈</strong>
-                <span class="help" th:text="${'글 ' + items.size() + '편' + (s.latestLabel() != null ? ' · ' + s.latestLabel() + ' 업데이트' : '')}">글 3편</span>
+                <span class="help"><th:block th:replace="~{fragments/meta :: parts(${'글 ' + items.size() + '편' + (s.latestLabel() != null ? ' · ' + s.latestLabel() + ' 업데이트' : '')})}"></th:block></span>
             </span>
             <svg th:replace="~{fragments/icons :: chevron}"></svg>
         </summary>
