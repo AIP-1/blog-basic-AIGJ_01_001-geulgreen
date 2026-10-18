@@ -70,7 +70,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
         assertThat(blog).contains("개발 1").contains("자바 공부").contains("산책 일기");
         String filtered = page("/catme?category=" + dev);
         assertThat(filtered.substring(filtered.indexOf("id=\"card-grid\""))).contains("자바 공부").doesNotContain("산책 일기");
-        assertThat(page("/catme/posts/" + a)).contains("📁 개발");
+        assertThat(page("/catme/posts/" + a)).contains(">개발</span>").doesNotContain("📁"); // 10-18: 이모지 대신 선 아이콘
         // 지우면 글은 분류 없음
         mockMvc.perform(post("/settings/categories/{id}/delete", dev).with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
