@@ -7,6 +7,27 @@
 
 ---
 
+## [1.67.2] — 2026-10-18 · 개인 확장 (글 화면 미션 표시 빼기)
+
+- 글 화면에서 "오늘의 미션" 칩과 미션 완료 상자를 뺌(태그·미션 화면·미션 기록은 그대로)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**글 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.2/v1672-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.2/v1672-post-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.2/v1672-post-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.2/v1672-post-m-after.png) |
+
+---
+
 ## [1.67.1] — 2026-10-18 · 개인 확장 (고양이 기본 썸네일, 시리즈 상자, 목차 스크롤)
 
 - 사진 없는 글 카드에 고양이 기본 썸네일(어두운 화면은 밤 사진, 화면에서만)
