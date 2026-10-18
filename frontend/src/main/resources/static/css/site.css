@@ -741,14 +741,10 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 .category-link:hover { background: var(--color-surface-muted); }
 .category-link.active { border-color: var(--color-brand); color: var(--color-brand); font-weight: 700; }
 .post-category-form, .series-form { margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.series-box { border: 1px solid var(--color-border); border-radius: 12px; padding: 10px 16px; margin: 12px 0; background: var(--color-surface); }
-.series-box summary { cursor: pointer; font-weight: 700; }
-.series-items { margin: 8px 0 0; padding-left: 1.4em; }
 /* 067 시리즈 글도 홈과 같은 카드로(강성찬 개인 확장), 순서는 "N편" 배지 */
 .series-cards { list-style: none; padding: 0; margin: 16px 0; }
 .series-cards > li { display: flex; }
 .series-cards > li > .post-card { flex: 1; }
-.series-nav { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 0; flex-wrap: wrap; }
 .secret-check { display: inline-flex; gap: 6px; align-items: center; margin: 6px 0; font-size: .92em; }
 .schedule-field input[type="datetime-local"] { margin-top: 6px; }
 /* 045~050 관리자 화면 확장·사이트 공지(강성찬 개인 확장) */
@@ -1819,3 +1815,50 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-link-lead { margin: 16px 0 0; }
 .club-join-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
 .club-join-actions p { margin: 0; }
+/* 10-18 강성찬 개인 확장(chan "기본 썸네일, 고양이 사진으로"): 사진 없는 글 카드의 기본 썸네일. 링크 미리보기(og:image)와 같은
+   잠자는 고양이 사진을 16:10으로 잘라 쓰고, 어두운 화면은 같은 고양이의 밤 사진(소개 영역 hero-night의 오른쪽, 글자 없는 쪽).
+   화면에서만 그리고 글에는 저장하지 않는다 */
+.card-cover { background: var(--color-thumb-empty) url("/images/og-cat.jpg") center 60% / cover no-repeat; }
+:root[data-theme="dark"] .card-cover { background-image: url("/images/hero-night.webp"); background-position: 96% 70%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card-cover { background-image: url("/images/hero-night.webp"); background-position: 96% 70%; } }
+
+/* 10-18 글 화면 시리즈 상자(강성찬 개인 확장): 카드 하나. 머리 → 접힌 목록 → 이전·다음 편 카드 두 칸 */
+.series-box { border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 18px; margin: 16px 0; background: var(--color-surface); }
+.series-box-head { display: flex; align-items: center; gap: 12px; }
+.series-box-icon { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px;
+    background: var(--color-brand-soft); color: var(--color-brand); }
+.series-box-icon .icon { width: 20px; height: 20px; }
+.series-box-name { display: grid; min-width: 0; flex: 1; }
+.series-box-label { font-size: .8em; color: var(--color-text-muted); }
+.series-box-name a { font-weight: 700; color: var(--color-text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-box-name a:hover { color: var(--color-brand); }
+.series-box-count { flex: none; padding: 2px 10px; border-radius: 999px; font-size: .85em; font-weight: 600;
+    color: var(--color-brand); background: var(--color-brand-soft); }
+.series-box-list { margin: 12px 0 0; }
+.series-box-list > summary { list-style: none; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px;
+    margin-left: -8px; border-radius: 8px; font-size: .9em; color: var(--color-text-muted); }
+.series-box-list > summary::-webkit-details-marker { display: none; }
+.series-box-list > summary:hover { color: var(--color-text); background: var(--color-surface-muted); }
+.series-box-list > summary .menu-chevron { transition: transform .15s; }
+.series-box-list[open] > summary .menu-chevron { transform: rotate(90deg); }
+.series-box-list ol { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
+.series-box-list li { display: flex; align-items: baseline; gap: 10px; padding: 6px 8px; border-radius: 8px; }
+.series-box-list li a { color: var(--color-text); text-decoration: none; }
+.series-box-list li a:hover { color: var(--color-brand); }
+.series-box-no { flex: none; width: 1.6em; text-align: right; font-size: .85em; color: var(--color-text-muted); }
+.series-box-list li.is-current { background: var(--color-brand-soft); font-weight: 700; color: var(--color-brand); }
+.series-box-list li.is-current .series-box-no { color: var(--color-brand); }
+.series-box-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 0; }
+.series-box-step { display: grid; gap: 4px; min-width: 0; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px;
+    color: var(--color-text); text-decoration: none; }
+a.series-box-step:hover { border-color: var(--color-brand); }
+.series-box-step.is-next { text-align: right; }
+.series-box-step.is-empty { border: 0; padding: 0; }
+.series-box-dir { display: inline-flex; align-items: center; gap: 4px; font-size: .8em; color: var(--color-text-muted); }
+.series-box-step.is-next .series-box-dir { justify-content: flex-end; }
+.series-box-dir .icon { width: 16px; height: 16px; }
+.series-box-step-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) {
+    .series-box-nav { grid-template-columns: 1fr; }
+    .series-box-step.is-empty { display: none; }
+}

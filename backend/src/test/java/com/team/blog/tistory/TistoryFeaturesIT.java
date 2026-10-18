@@ -174,7 +174,7 @@ class TistoryFeaturesIT extends IntegrationTestBase {
                     .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
         }
         String html = page("/serme/posts/" + p2);
-        assertThat(html).contains("📚 스프링 입문").contains("(2/3)").contains("이전편: 입문 1편").contains("다음편: 입문 3편");
+        assertThat(html).contains("스프링 입문</a>").contains(">2/3<").contains("이전 편").contains("입문 1편").contains("다음 편").contains("입문 3편").doesNotContain("📚");
         String list = page("/serme/series/" + series);
         assertThat(list.indexOf("입문 1편")).isLessThan(list.indexOf("입문 2편"));
         assertThat(list.indexOf("입문 2편")).isLessThan(list.indexOf("입문 3편"));
