@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${preview.club().name() + ' · 함께 쓰기 · 글그린'}">함께 쓰기 · 글그린</title>
+</head>
+<body>
+<main class="list-page mission-page">
+    <!-- 111 후속(강성찬 개인 확장): 멤버가 아닌 사람이 보는 공개 방(또는 초대받은 방). 누구나 바로면 [참여하기], 승인 후 참여면 [참여 요청] -->
+    <nav th:replace="~{mission/today :: missionTabs('clubs')}"></nav>
+    <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
+    <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
+    <div class="club-top" th:with="c=${preview.club()}">
+        <section class="mission-panel club-head" aria-labelledby="club-heading">
+            <span class="club-mode-badge" th:classappend="${c.joinMode() == 'OPEN'} ? 'is-open'" th:text="${c.modeLabel()}">방 종류</span>
+            <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
+            <p th:if="${!c.intro().isEmpty()}" class="club-intro" th:text="${c.intro()}">소개</p>
+            <p class="help club-meta"><th:block th:replace="~{fragments/meta :: parts(${c.everyDays() + '일에 1편 · ' + #temporals.format(c.startDate(), 'M월 d일') + ' ~ '
+                    + #temporals.format(c.endDate(), 'M월 d일') + ' · 멤버 ' + c.memberCount() + '/' + c.memberCap() + '명'})}"></th:block></p>
+            <p class="help club-list-lead">기간 안에 전체 공개로 발행한 글이 자동으로 1편으로 세져요. 멤버가 되면 진행표와 멤버들의 글을 볼 수 있어요</p>
+            <div class="club-join-actions">
+                <th:block th:if="${preview.ended()}"><p class="help">끝난 함께 쓰기예요</p></th:block>
+                <th:block th:unless="${preview.ended()}">
+                    <th:block th:if="${preview.invited()}">
+                        <form class="inline-form" method="post" th:action="@{/missions/clubs/{id}/invite/decline(id=${c.id()})}">
+                            <button type="submit" class="btn btn-sm">초대 거절</button></form>
+                        <form class="inline-form" method="post" th:action="@{/missions/clubs/{id}/invite/accept(id=${c.id()})}">
+                            <button type="submit" class="btn btn-primary btn-sm">초대 수락</button></form>
+                    </th:block>
+                    <th:block th:unless="${preview.invited()}">
+                        <p th:if="${c.full()}" class="help">정원이 다 찼어요</p>
+                        <form th:if="${!c.full() and c.joinMode() == 'OPEN'}" method="post" th:action="@{/missions/clubs/{id}/join(id=${c.id()})}">
+                            <button type="submit" class="btn btn-primary btn-sm">참여하기</button></form>
+                        <th:block th:if="${!c.full() and c.joinMode() == 'APPROVAL'}">
+                            <form th:if="${preview.requestState() == 'NONE'}" method="post" th:action="@{/missions/clubs/{id}/join(id=${c.id()})}">
+                                <button type="submit" class="btn btn-primary btn-sm">참여 요청</button></form>
+                            <th:block th:if="${preview.requestState() == 'REQUESTED'}">
+                                <p class="help">참여를 요청했어요. 관리자가 승인하면 들어가요</p>
+                                <form method="post" th:action="@{/missions/clubs/{id}/request/cancel(id=${c.id()})}">
+                                    <button type="submit" class="btn btn-sm">요청 거두기</button></form>
+                            </th:block>
+                            <p th:if="${preview.requestState() == 'REJECTED'}" class="help">참여 요청이 거절됐어요. 7일 뒤에 다시 보낼 수 있어요</p>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

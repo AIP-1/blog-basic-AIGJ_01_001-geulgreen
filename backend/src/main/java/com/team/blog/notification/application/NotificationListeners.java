@@ -14,6 +14,7 @@ import com.team.blog.shared.event.MemberFollowed;
 import com.team.blog.shared.event.MemberUnfollowed;
 import com.team.blog.shared.event.PostLiked;
 import com.team.blog.shared.event.MissionCompleted;
+import com.team.blog.shared.event.ClubNotice;
 import com.team.blog.shared.event.PostPublished;
 import com.team.blog.shared.event.PostUnliked;
 import com.team.blog.shared.event.PostVisibilityChanged;
@@ -100,6 +101,13 @@ public class NotificationListeners {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void on(InquiryReplied e) {
         dispatcher.submit("inquiry replied " + e.inquiryId(), () -> writer.inquiryReplied(e.memberId(), e.inquiryId()));
+    }
+
+    /** 111 후속 강성찬 개인 확장: 함께 쓰기 초대 → 받은 사람, 참여 요청 → 만든 사람. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(ClubNotice e) {
+        dispatcher.submit("club " + e.clubId() + " " + e.receiverId(), () -> writer.club(e.receiverId(),
+                e.invite() ? NotificationType.CLUB_INVITE : NotificationType.CLUB_REQUEST, e.clubId(), e.actorId()));
     }
 
     /** 057 강성찬 개인 확장: 오늘의 미션 글 → 친구에게. */

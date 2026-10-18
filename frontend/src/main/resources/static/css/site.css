@@ -1794,3 +1794,28 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .card-grid .card-body { gap: 4px; }
 .card-grid .card-top { margin: 0; min-height: 24px; }
 
+
+/* 111 후속: 함께 쓰기 방 종류·공개 목록·초대 */
+.club-sub-title { margin: 0; font-size: 1.25em; }
+.club-sub { margin: 16px 0 0; font-size: 1em; }
+.club-mode-badge { flex: none; display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: .8em; font-weight: 600;
+  color: var(--color-text-muted); background: var(--color-surface-muted); }
+.club-mode-badge.is-open { color: var(--color-brand); background: var(--color-grass-1); }
+.club-card-top .club-mode-badge { margin-left: auto; }
+.club-head > .club-mode-badge { margin-bottom: 8px; }
+.club-search { display: flex; gap: 8px; margin-top: 14px; }
+.club-search input { flex: 1; min-width: 0; }
+.club-empty-line { margin: 14px 0 0; }
+.club-modes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: 0; }
+.club-modes > legend { padding: 0; margin-bottom: 8px; font-weight: 600; font-size: .92em; }
+.club-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px; cursor: pointer; }
+.club-mode:has(input:checked) { border-color: var(--color-brand); background: var(--color-grass-0); }
+.club-mode input { margin-top: 3px; }
+.club-mode-text { display: flex; flex-direction: column; gap: 2px; }
+.club-owner h2 { margin: 0; font-size: 1.15em; }
+.club-settings { margin-top: 16px; }
+.club-picker { margin-top: 12px; }
+.club-picker label.club-member { cursor: pointer; }
+.club-link-lead { margin: 16px 0 0; }
+.club-join-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.club-join-actions p { margin: 0; }
