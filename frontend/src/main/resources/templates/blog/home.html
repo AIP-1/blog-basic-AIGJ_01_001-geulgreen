@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${owner.handle() + ' · 글그린'}">블로그</title>
+    <title th:text="${owner.displayName() + '의 블로그 · 글그린'}">블로그</title>
 </head>
 <body>
 <main class="list-page">
