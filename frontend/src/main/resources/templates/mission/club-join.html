@@ -12,6 +12,7 @@
         <h1 id="club-join-heading" th:text="${club.name()}">함께 쓰기</h1>
         <p th:if="${!club.intro().isEmpty()}" th:text="${club.intro()}">소개</p>
         <p class="help"><th:block th:replace="~{fragments/meta :: parts(${club.everyDays() + '일에 1편 · ' + club.memberCount() + '명 · ' + #temporals.format(club.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(club.endDate(), 'M월 d일')})}"></th:block></p>
+        <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
         <form method="post" th:action="@{/missions/clubs/join/{code}(code=${club.inviteCode()})}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <button type="submit" class="btn btn-primary">참여하기</button>

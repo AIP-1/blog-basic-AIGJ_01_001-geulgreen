@@ -33,7 +33,7 @@ class ClubIT extends IntegrationTestBase {
                 .param("name", " ").param("everyDays", "7").param("startDate", "2026-10-12").param("endDate", "2026-11-08"))
                 .andReturn().getResponse().getRedirectedUrl()).isEqualTo("/missions/clubs");
         String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
-                .param("name", "3반 모임").param("intro", "같이 써요").param("everyDays", "7")
+                .param("name", "3반 모임").param("intro", "같이 써요").param("joinMode", "LINK").param("everyDays", "7")
                 .param("startDate", "2026-10-12").param("endDate", "2026-11-08")).andReturn().getResponse().getRedirectedUrl();
         long id = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
         String code = jdbc.queryForObject("SELECT invite_code FROM writing_club WHERE id = ?", String.class, id);

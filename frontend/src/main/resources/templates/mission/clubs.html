@@ -9,7 +9,22 @@
     <!-- 111 강성찬 개인 확장: 참여 중인 함께 쓰기(누르는 카드)와 만들기. 만들기 폼은 버튼을 눌러야 열린다(스크립트가 없거나 오류가 있으면 펼친 채) -->
     <nav th:replace="~{mission/today :: missionTabs('clubs')}"></nav>
     <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
+    <p th:if="${listError != null}" class="notice" role="alert" data-toast="error" th:text="${listError}">오류</p>
     <div class="club-top">
+        <!-- 111 후속: 받은 초대(수락하면 바로 들어감) -->
+        <section th:if="${!invites.isEmpty()}" class="mission-panel" aria-labelledby="club-invites-heading">
+            <h2 id="club-invites-heading" class="club-sub-title" th:text="${'받은 초대 ' + invites.size() + '개'}">받은 초대</h2>
+            <ul class="club-board">
+                <li th:each="i : ${invites}">
+                    <a class="club-member" th:href="@{/missions/clubs/{id}(id=${i.clubId()})}"><span class="club-member-text"><span class="club-member-name" th:text="${i.clubName()}">이름</span>
+                        <span class="help" th:text="${i.inviterName() + '님이 초대했어요'}">초대한 사람</span></span></a>
+                    <form class="inline-form" method="post" th:action="@{/missions/clubs/{id}/invite/decline(id=${i.clubId()})}">
+                        <button type="submit" class="btn-text club-remove">거절</button></form>
+                    <form class="inline-form" method="post" th:action="@{/missions/clubs/{id}/invite/accept(id=${i.clubId()})}">
+                        <button type="submit" class="btn btn-primary btn-sm">수락</button></form>
+                </li>
+            </ul>
+        </section>
         <section class="mission-panel" aria-labelledby="clubs-heading">
             <div class="club-list-head">
                 <h2 id="clubs-heading">참여 중인 함께 쓰기</h2>
@@ -38,6 +53,30 @@
                 </li>
             </ul>
         </section>
+        <!-- 111 후속: 공개 함께 쓰기(승인 후 참여·누구나 바로) 찾기. 링크로만인 방은 보이지 않는다 -->
+        <section class="mission-panel" aria-labelledby="clubs-open-heading">
+            <h2 id="clubs-open-heading" class="club-sub-title">함께 쓸 방 찾기</h2>
+            <p class="help club-list-lead">공개된 방이에요. '누구나 바로'는 누르면 들어가고, '승인 후 참여'는 만든 사람이 승인하면 들어가요</p>
+            <form method="get" action="/missions/clubs" role="search" class="club-search">
+                <label for="club-q" class="visually-hidden">방 이름·소개로 찾기</label>
+                <input id="club-q" type="search" name="q" maxlength="30" th:value="${q}" placeholder="방 이름·소개로 찾기">
+                <button type="submit" class="btn btn-sm">찾기</button>
+            </form>
+            <p th:if="${listed.isEmpty()}" class="help club-empty-line" th:text="${q.isEmpty() ? '아직 공개된 방이 없어요' : '「' + q + '」에 맞는 방이 없어요'}">없음</p>
+            <ul class="club-list" th:unless="${listed.isEmpty()}">
+                <li th:each="c : ${listed}">
+                    <a class="club-card" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
+                        <span class="club-card-top">
+                            <strong class="club-card-name" th:text="${c.name()}">방</strong>
+                            <span class="club-mode-badge" th:classappend="${c.joinMode() == 'OPEN'} ? 'is-open'" th:text="${c.modeLabel()}">방 종류</span>
+                        </span>
+                        <span th:if="${!c.intro().isEmpty()}" class="club-card-intro" th:text="${c.intro()}">소개</span>
+                        <span class="help"><th:block th:replace="~{fragments/meta :: parts(${c.everyDays() + '일에 1편 · 멤버 ' + c.memberCount() + '/' + c.memberCap() + '명 · '
+                                + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')})}"></th:block></span>
+                    </a>
+                </li>
+            </ul>
+        </section>
         <section id="club-new" class="mission-panel" aria-labelledby="club-new-heading" data-club-form
                  th:attr="data-keep-open=${clubError != null}">
             <h2 id="club-new-heading">함께 쓰기 만들기</h2>
@@ -61,6 +100,14 @@
                     <span class="club-inline"><input id="club-start" name="startDate" type="date" required th:value="${form.startDate()}"
                             aria-label="시작 날짜"> ~ <input id="club-end" name="endDate" type="date" required th:value="${form.endDate()}" aria-label="끝 날짜"></span>
                 </div>
+                <fieldset class="club-modes">
+                    <legend>방 종류</legend>
+                    <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${form.joinMode()})}"></label></th:block>
+                </fieldset>
+                <div class="club-form-row">
+                    <label for="club-cap-new">정원</label>
+                    <span class="club-inline"><input id="club-cap-new" name="memberCap" type="number" min="2" max="100" required th:value="${form.memberCap()}"> 명까지</span>
+                </div>
                 <div class="club-form-actions">
                     <button type="button" class="btn btn-sm" data-close-club-form hidden>닫기</button>
                     <button type="submit" class="btn btn-primary btn-sm">만들기</button>
@@ -70,5 +117,11 @@
     </div>
     <script th:src="@{/js/mission/club.js}" defer></script>
 </main>
+<!-- 111 후속: 방 종류 고르기 한 칸(만들기·방 관리 같이 씀) -->
+<label th:fragment="modeOption(mode, selected)" class="club-mode">
+    <input type="radio" name="joinMode" th:value="${mode}" th:checked="${mode == selected}" required>
+    <span class="club-mode-text"><strong th:text="${mode == 'OPEN' ? '누구나 바로' : mode == 'APPROVAL' ? '승인 후 참여' : '링크로만'}">종류</strong>
+        <span class="help" th:text="${mode == 'OPEN' ? '공개 목록에서 누르면 바로 들어와요. 오픈채팅처럼' : mode == 'APPROVAL' ? '공개 목록에 보이고, 참여 요청을 내가 승인해요' : '목록에 안 보여요. 초대 링크나 초대를 받은 사람만 들어와요'}">설명</span></span>
+</label>
 </body>
 </html>

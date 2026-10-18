@@ -125,6 +125,19 @@ public class NotificationWriter {
         return true;
     }
 
+    /** 111 후속: 함께 쓰기 초대·참여 요청 알림. 그 함께 쓰기 번호를 담는다(지우면 함께 사라짐). */
+    public boolean club(long receiverId, NotificationType type, long clubId, long actorId) {
+        if (!eligible(receiverId, actorId, type, null)) {
+            return false;
+        }
+        Timestamp now = now();
+        jdbc.update("""
+                INSERT INTO notification (receiver_id, type, club_id, last_actor_id, actor_count, created_at, updated_at)
+                VALUES (?, ?, ?, ?, 1, ?, ?)
+                """, receiverId, type.name(), clubId, actorId, now, now);
+        return true;
+    }
+
     public static String likeGroup(long postId) {
         return "LIKE:post:" + postId;
     }
