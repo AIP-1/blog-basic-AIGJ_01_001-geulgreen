@@ -7,6 +7,51 @@
 
 ---
 
+## [1.67.1] — 2026-10-18 · 개인 확장 (고양이 기본 썸네일, 시리즈 상자, 목차 스크롤)
+
+- 사진 없는 글 카드에 고양이 기본 썸네일(어두운 화면은 밤 사진, 화면에서만)
+- 글 화면 시리즈 상자: 이름·편 수, 접힌 목록(지금 글 표시), 이전·다음 편 카드
+- 목차를 누르면 부드럽게 스크롤(움직임이라 사진 없음)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**사진 없는 글 카드(밝은 화면)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-light-after.png) |
+
+**어두운 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-1440-dark-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-1440-dark-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-home-m-after.png) |
+
+**글 화면 시리즈 상자**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-box-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-box-after.png) |
+
+*목록을 펼친 모습*
+
+![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-box-open-after.png)
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-box-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.1/v1671-box-m-after.png) |
+
+---
+
 ## [1.67.0] — 2026-10-18 · 개인 확장 (함께 쓰기 방 종류, 공개 목록, 초대)
 
 - **111 후속**: 방 종류(승인 후 참여·누구나 바로·링크로만, 기존 방은 링크로만), 함께 쓸 방 찾기(공개 목록·검색), 참여 요청과 승인, 관리자 역할, 팔로워·친구 초대, 정원 2~100명, 초대·참여 요청 알림
