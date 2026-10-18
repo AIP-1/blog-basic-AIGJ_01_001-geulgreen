@@ -58,6 +58,7 @@ class BlogExtrasIT extends IntegrationTestBase {
         mockMvc.perform(post("/posts/{id}/pin", first).with(csrf()).with(TestAuth.member(other))).andExpect(status().isNotFound());
         mockMvc.perform(post("/posts/{id}/pin", first).with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
         String blog = mockMvc.perform(get("/pinme")).andReturn().getResponse().getContentAsString();
+        blog = blog.substring(blog.indexOf("<body")); // 검색 문구(head)에도 글 제목이 들어가서 순서는 본문에서만
         assertThat(blog).contains("class=\"pinned-label\"");
         assertThat(blog.indexOf("고정할 글")).isLessThan(blog.indexOf("새 글"));
         // 비공개로 바꾸면 목록에서 고정 글도 안 보인다
