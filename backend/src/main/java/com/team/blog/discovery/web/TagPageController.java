@@ -71,6 +71,12 @@ public class TagPageController {
         model.addAttribute("continued", cursor != null && !cursor.isEmpty());
         model.addAttribute("listApi", "/api" + tagPath(name) + "/posts");
         model.addAttribute("tagPath", tagPath(name));
+        // 검색·미리보기: 공개 글 수와 최근 공개 글 제목(목록이 이미 공개 글만)
+        long count = (long) model.getAttribute("publicCount");
+        String recent = com.team.blog.shared.web.ListMeta.titles(page.items().stream().map(com.team.blog.post.application.PostCard::title).toList(), 3);
+        model.addAttribute("listMeta", new com.team.blog.shared.web.ListMeta("#" + name + " 글 모음 · 글그린",
+                count == 0 ? "글그린의 '" + name + "' 태그 글 모음이에요"
+                        : "글그린에서 '" + name + "' 태그로 쓴 글 " + count + "편." + (recent.isEmpty() ? "" : " 최근 글: " + recent), null));
         return "tag/tag";
     }
 

@@ -68,6 +68,7 @@ public class SeriesController {
         model.addAttribute("series", s);
         // 067 후속: 홈과 같은 카드
         List<PostCard> cards = series.cards(id);
+        List<PostCard> firstOrder = cards;
         // 105 강성찬 개인 확장: 1편부터(기본)·최신 글부터. 편 번호는 그대로(화면이 total로 거꾸로 센다).
         // 106: 순서 바꾸기는 내 글 관리 [시리즈] 탭으로 옮겼다
         boolean latest = "latest".equals(order);
@@ -81,6 +82,11 @@ public class SeriesController {
         cards.forEach(c -> dates.put(c.id(), CardDates.label(c.firstPublicAt(), now)));
         model.addAttribute("cards", cards);
         model.addAttribute("cardDates", dates);
+        // 검색·미리보기: 시리즈 설명(없으면 앞 편 제목들), 대표 사진(목록은 블로그 공개 글만)
+        String about = s.description() != null && !s.description().isBlank() ? s.description()
+                : owner.displayName() + "님의 시리즈 「" + s.title() + "」 " + firstOrder.size() + "편: "
+                        + com.team.blog.shared.web.ListMeta.titles(firstOrder.stream().map(PostCard::title).toList(), 3);
+        model.addAttribute("listMeta", new com.team.blog.shared.web.ListMeta(s.title() + " · 글그린", about, s.coverUrl()));
         return "series/detail";
     }
 
