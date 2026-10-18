@@ -7,6 +7,33 @@
 
 ---
 
+## [1.66.6] — 2026-10-18 · 개인 확장 (글 카드 위아래 줄이기)
+
+- **103 후속**: 넓은 화면(1200px 이상) 한 줄 4개, 좁으면 3·2·1개, 사진 카드 미리보기 3줄, 카드 안쪽 여백·줄 사이 줄임
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**1440 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-1440-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-1440-after.png) |
+
+**1920 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-1920-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-1920-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.66.6/v1666-home-m-after.png) |
+
+---
+
 ## [1.66.5] — 2026-10-16 · 개인 확장 (내 글 쪽 번호)
 
 - **113 내 글 쪽 번호**: 내 글 목록을 한 쪽 20개와 쪽 번호로([더 보기] 대신)
