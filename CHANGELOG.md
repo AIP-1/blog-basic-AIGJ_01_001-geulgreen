@@ -7,6 +7,39 @@
 
 ---
 
+## [1.67.0] — 2026-10-18 · 개인 확장 (함께 쓰기 방 종류, 공개 목록, 초대)
+
+- **111 후속**: 방 종류(승인 후 참여·누구나 바로·링크로만, 기존 방은 링크로만), 함께 쓸 방 찾기(공개 목록·검색), 참여 요청과 승인, 관리자 역할, 팔로워·친구 초대, 정원 2~100명, 초대·참여 요청 알림
+- DB: V28 함께 쓰기 방 종류·정원·멤버 역할, writing_club_join 테이블, 알림 club_id와 종류 두 가지(더하기만)
+
+#### 전/후 사진
+
+**함께 쓰기 탭(참여한 사람)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-reader-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-reader-after.png) |
+
+**함께 쓰기 탭(만든 사람)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-after.png) |
+
+**휴대폰**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-clubs-m-after.png) |
+
+**방 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.67.0/v1670-club-after.png) |
+
+---
+
 ## [1.66.7] — 2026-10-18 · 개인 확장 (줄바꿈 정리, 검색 메뉴 태그)
 
 - 줄바꿈: body는 overflow-wrap break-word, 긴 주소가 들어올 칸만 anywhere, 버튼·표 머리 nowrap, "A · B" 메타 줄은 조각마다 묶어 "·" 사이에서만 꺾임
