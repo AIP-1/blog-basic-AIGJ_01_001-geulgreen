@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 110 강성찬 개인 확장: 썸네일 만들기 창(글쓰기 발행 설정·내 글 관리 시리즈 탭이 같이 쓴다, 그리기는 js/editor/thumbnail.js) -->
+<dialog th:fragment="dialog(help)" id="thumb-dialog" class="thumb-dialog" aria-labelledby="thumb-heading" th:attr="data-blog=${currentAvatar != null ? '@' + currentAvatar.handle() : ''}">
+    <h2 id="thumb-heading">썸네일 만들기</h2>
+    <canvas id="thumb-canvas" class="thumb-canvas" width="1600" height="1000" role="img" aria-label="썸네일 미리보기"></canvas>
+    <div class="field">
+        <label for="thumb-title">넣을 제목</label>
+        <textarea id="thumb-title" rows="2" maxlength="120"></textarea>
+    </div>
+    <fieldset class="thumb-themes">
+        <legend>배경</legend>
+        <label class="thumb-swatch thumb-forest"><input type="radio" name="thumb-theme" value="forest"><span>초록</span></label>
+        <label class="thumb-swatch thumb-cream"><input type="radio" name="thumb-theme" value="cream"><span>크림</span></label>
+        <label class="thumb-swatch thumb-sunset"><input type="radio" name="thumb-theme" value="sunset"><span>노을</span></label>
+        <label class="thumb-swatch thumb-ink"><input type="radio" name="thumb-theme" value="ink"><span>먹색</span></label>
+    </fieldset>
+    <p class="help" th:text="${help}">도움말</p>
+    <div class="pp-actions">
+        <button type="button" id="thumb-cancel">취소</button>
+        <button type="button" id="thumb-save">대표 사진으로 저장</button>
+    </div>
+</dialog>
+</body>
+</html>

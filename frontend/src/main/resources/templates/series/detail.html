@@ -6,7 +6,9 @@
 </head>
 <body>
 <main class="notes-page list-page">
-    <p class="help"><a th:href="${paths.blog(owner.handle()) + '/series'}" th:text="${owner.handle() + '님의 시리즈'}">시리즈</a></p>
+    <!-- 111 강성찬 개인 확장: 위 링크는 그 블로그의 시리즈 탭으로(닉네임, 화살표 뒤로 가기 모양) -->
+    <a class="series-back" th:href="${paths.blog(owner.handle()) + '/series'}"><svg th:replace="~{fragments/icons :: arrow-left}"></svg><span
+        th:text="${owner.displayName() + '님의 시리즈 모두 보기'}">시리즈</span></a>
     <!-- 107 강성찬 개인 확장: 대표 사진·설명 한 줄 -->
     <div class="series-head">
         <img th:if="${series.coverUrl() != null}" class="series-cover series-cover-lg" th:src="${series.coverUrl()}" alt="">
