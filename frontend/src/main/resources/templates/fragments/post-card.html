@@ -30,6 +30,8 @@
     <div class="card-thumb" th:if="${card.thumbnailUrl() != null}">
         <img th:src="${card.thumbnailUrl()}" th:alt="${card.title()}" loading="lazy">
     </div>
+    <!-- 10-18 강성찬 개인 확장: 사진이 없는 글은 기본 썸네일(잠자는 고양이). 화면에서만 그리고 글에는 저장하지 않는다(사진·만든 썸네일이 있으면 그쪽) -->
+    <div class="card-thumb card-cover" th:if="${card.thumbnailUrl() == null}" aria-hidden="true"></div>
     <p class="card-foot">
         <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}" th:text="${'♡ ' + card.likeCount()}">♡ 12</span>
         <span class="card-comments" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">3</span></span>

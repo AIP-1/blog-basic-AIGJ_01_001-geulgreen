@@ -90,6 +90,10 @@
       var thumb = el('div', 'card-thumb');
       var img = el('img'); img.src = item.thumbnailUrl; img.alt = item.title; img.loading = 'lazy'; thumb.appendChild(img);
       article.appendChild(thumb);
+    } else {
+      // 10-18: 사진이 없는 글은 기본 썸네일(fragments/post-card.html과 같은 모양)
+      var cover = el('div', 'card-thumb card-cover'); cover.setAttribute('aria-hidden', 'true');
+      article.appendChild(cover);
     }
     var foot = el('p', 'card-foot');
     var likes = el('span', 'card-likes', '♡ ' + item.likeCount); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount); foot.appendChild(likes);
