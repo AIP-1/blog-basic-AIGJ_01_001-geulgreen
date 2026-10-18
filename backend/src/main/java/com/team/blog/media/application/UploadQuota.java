@@ -39,11 +39,11 @@ public class UploadQuota {
     }
 
     /**
-     * 오늘 장수를 1 올리고 한도를 넘으면 거부(올린 수는 되돌리지 않음 — 실패한 업로드도 센다). 관리자는 하루 한도 없음(저장 공간 한도는 그대로).
+     * 오늘 장수를 1 올리고 한도를 넘으면 거부(올린 수는 되돌리지 않음 — 실패한 업로드도 센다). 관리자는 하루 한도 없음(강성찬 개인 확장, 끌 수 있음; 저장 공간 한도는 그대로).
      * 역할은 DB에서 읽는다 — AI 연결 키 요청은 로그인 정보에 USER만 실린다.
      */
     public void countDailyUpload(long memberId, Instant now) {
-        if (isAdmin(memberId)) {
+        if (properties.adminDailyLimitExempt() && isAdmin(memberId)) {
             return;
         }
         String key = dailyKey(memberId, now);
