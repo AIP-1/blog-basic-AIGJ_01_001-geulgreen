@@ -184,4 +184,45 @@ class McpIT extends IntegrationTestBase {
         assertThat(call(key, "make_thumbnail", "{\"post_id\":" + othersDraft + "}")).contains("\"isError\":true");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post_cover WHERE post_id = ?", Integer.class, othersDraft)).isZero();
     }
+
+    /** 111 강성찬 개인 확장: 시리즈 대표 사진을 내가 올린 사진(여기서는 만든 썸네일)으로. 남의 사진·외부 주소는 자동으로, 정리 작업은 안 지운다. */
+    @Test
+    void seriesCoverCanBeMyUploadedImage() throws Exception {
+        long me = member("mcpcover");
+        String key = issueKey(me);
+        // 시리즈 밖 글로 썸네일을 만들어(내가 올린 사진) 시리즈 대표 사진으로 쓴다
+        call(key, "create_draft", "{\"title\":\"시리즈 글\",\"content_md\":\"본문\",\"series_title\":\"표지 시리즈\"}");
+        call(key, "create_draft", "{\"title\":\"표지 글\",\"content_md\":\"본문\"}");
+        long postId = jdbc.queryForObject("SELECT id FROM post WHERE author_id = ? AND title = '표지 글'", Long.class, me);
+        call(key, "make_thumbnail", "{\"post_id\":" + postId + "}");
+        var img = jdbc.queryForMap("SELECT image_id, image_url FROM post_cover WHERE post_id = ?", postId);
+        long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/manage/series/{id}/edit", sid)
+                .param("title", "표지 시리즈").param("coverUrl", (String) img.get("image_url"))
+                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                .with(com.team.blog.support.TestAuth.member(me)));
+        var row = jdbc.queryForMap("SELECT cover_url, cover_image_id FROM series WHERE id = ?", sid);
+        assertThat(row.get("cover_image_id")).isEqualTo(img.get("image_id"));
+        assertThat((String) row.get("cover_url")).isNotBlank();
+        // 이름만 고쳐도(지금 대표 사진 주소 그대로) 사진은 남는다
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/manage/series/{id}/edit", sid)
+                .param("title", "표지 시리즈 2").param("coverUrl", (String) row.get("cover_url"))
+                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                .with(com.team.blog.support.TestAuth.member(me)));
+        assertThat(jdbc.queryForObject("SELECT cover_image_id FROM series WHERE id = ?", Long.class, sid)).isEqualTo(img.get("image_id"));
+        assertThat(seriesService.referencedIds(java.util.List.of((Long) img.get("image_id")))).contains((Long) img.get("image_id"));
+        // 남의 시리즈 사진으로는 못 쓴다: 다른 사람이 내 사진 주소를 넣으면 자동
+        long other = member("mcpcoverx");
+        jdbc.update("INSERT INTO series (member_id, title) VALUES (?, '남의 시리즈')", other);
+        long otherSid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, other);
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/manage/series/{id}/edit", otherSid)
+                .param("title", "남의 시리즈").param("coverUrl", (String) img.get("image_url"))
+                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
+                .with(com.team.blog.support.TestAuth.member(other)));
+        assertThat(jdbc.queryForMap("SELECT cover_url, cover_image_id FROM series WHERE id = ?", otherSid))
+                .containsEntry("cover_url", null).containsEntry("cover_image_id", null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.team.blog.series.application.SeriesService seriesService;
 }

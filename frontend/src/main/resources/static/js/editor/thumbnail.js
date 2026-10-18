@@ -86,8 +86,11 @@
     return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
   }
 
-  /** 만들기 창을 연다. 저장을 누르면 PNG File로, 닫으면 null로 끝난다. */
-  function open() {
+  /**
+   * 만들기 창을 연다. 저장을 누르면 PNG File로, 닫으면 null로 끝난다.
+   * {@code given}({title, series})을 주면 그 글자로(시리즈 탭), 없으면 글쓰기 화면의 제목·시리즈 칸에서 읽는다.
+   */
+  function open(given) {
     var dialog = document.getElementById('thumb-dialog');
     var canvas = document.getElementById('thumb-canvas');
     var title = document.getElementById('thumb-title');
@@ -96,7 +99,8 @@
     var postTitle = document.getElementById('post-title');
     var pick = document.getElementById('series-pick');
     var opt = pick && pick.value && pick.value !== 'new' ? pick.selectedOptions[0] : null;
-    var opts = { title: postTitle ? postTitle.value : '', series: opt ? opt.textContent.trim() : '', date: today(),
+    var opts = { title: given ? given.title : (postTitle ? postTitle.value : ''),
+      series: given ? given.series : (opt ? opt.textContent.trim() : ''), date: today(),
       blog: dialog.dataset.blog || '', theme: THEMES[0] };
     title.value = opts.title;
 

@@ -166,26 +166,7 @@
             <input type="file" id="cover-file" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
             <p class="help" id="cover-status" role="status"></p>
             <!-- 110 강성찬 개인 확장: 썸네일 만들기(미리 보고 저장하면 카드 대표 사진이 된다) -->
-            <dialog id="thumb-dialog" class="thumb-dialog" aria-labelledby="thumb-heading" th:attr="data-blog=${currentAvatar != null ? '@' + currentAvatar.handle() : ''}">
-                <h2 id="thumb-heading">썸네일 만들기</h2>
-                <canvas id="thumb-canvas" class="thumb-canvas" width="1600" height="1000" role="img" aria-label="썸네일 미리보기"></canvas>
-                <div class="field">
-                    <label for="thumb-title">넣을 제목</label>
-                    <textarea id="thumb-title" rows="2" maxlength="120"></textarea>
-                </div>
-                <fieldset class="thumb-themes">
-                    <legend>배경</legend>
-                    <label class="thumb-swatch thumb-forest"><input type="radio" name="thumb-theme" value="forest"><span>초록</span></label>
-                    <label class="thumb-swatch thumb-cream"><input type="radio" name="thumb-theme" value="cream"><span>크림</span></label>
-                    <label class="thumb-swatch thumb-sunset"><input type="radio" name="thumb-theme" value="sunset"><span>노을</span></label>
-                    <label class="thumb-swatch thumb-ink"><input type="radio" name="thumb-theme" value="ink"><span>먹색</span></label>
-                </fieldset>
-                <p class="help">시리즈 이름과 오늘 날짜가 함께 들어가요. 저장하면 이 글의 카드 대표 사진이 돼요.</p>
-                <div class="pp-actions">
-                    <button type="button" id="thumb-cancel">취소</button>
-                    <button type="button" id="thumb-save">대표 사진으로 저장</button>
-                </div>
-            </dialog>
+            <dialog th:replace="~{fragments/thumb-dialog :: dialog('시리즈 이름과 오늘 날짜가 함께 들어가요. 저장하면 이 글의 카드 대표 사진이 돼요.')}"></dialog>
         </div>
         <!-- 042 강성찬 개인 확장: 예약 발행(임시글만) -->
         <div class="field schedule-field" th:if="${scheduleEnabled and !published}" th:attr="data-post-id=${post.postId()}">
