@@ -60,7 +60,7 @@
         <ol class="series-manage-items">
             <!-- 10-16 가독성(강성찬 개인 확장): 번호 칸 너비 고정, 위·아래 화살표는 늘 같은 자리(끝 줄은 비활성), 빼기는 끝에 옅게 -->
             <li th:each="it, st : ${items}">
-                <span class="series-no" th:text="${st.count + '편'}">1편</span>
+                <span class="series-no" th:text="${(st.index + s.firstNo()) + '편'}">1편</span>
                 <span class="series-manage-title" th:text="${it.title()}">글 제목</span>
                 <span th:if="${it.visibility() != 'PUBLIC'}" class="help">공개 안 됨</span>
                 <span class="series-row-actions">
@@ -97,6 +97,12 @@
                     <label th:for="${'series-desc-' + s.id()}">설명 한 줄</label>
                     <input th:id="${'series-desc-' + s.id()}" name="description" type="text" maxlength="100"
                            th:value="${s.description()}" placeholder="예: 처음 배우는 사람을 위한 5편짜리 입문">
+                </div>
+                <!-- 112 강성찬 개인 확장: 편 번호를 0편부터(기본은 1편부터) -->
+                <div class="field">
+                    <label class="check-row"><input type="checkbox" name="startZero" value="on" th:checked="${s.startZero()}">
+                        0편부터 시작</label>
+                    <p class="help">켜면 첫 글이 0편, 다음 글이 1편이 돼요. 00번부터 번호를 붙여 쓰는 글에 맞춰요.</p>
                 </div>
                 <!-- 대표 사진은 이 시리즈 글의 사진 중에서(비우면 1편부터 첫 사진) -->
                 <fieldset class="series-covers">
