@@ -90,13 +90,13 @@
                 <span class="series-box-icon"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
                 <span class="series-box-name"><span class="series-box-label">시리즈</span>
                     <a id="series-heading" th:href="${paths.blog(post.author().handle()) + '/series/' + postSeries.id()}" th:text="${postSeries.title()}">시리즈</a></span>
-                <span class="series-box-count" th:if="${seriesIndex >= 0}" th:text="${(seriesIndex + 1) + '/' + seriesItems.size()}">1/3</span>
+                <span class="series-box-count" th:if="${seriesIndex >= 0}" th:text="${(seriesIndex + postSeries.firstNo()) + '/' + (seriesItems.size() - 1 + postSeries.firstNo())}">1/3</span>
             </div>
             <details class="series-box-list">
                 <summary>목록 보기<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
                 <ol>
                     <li th:each="it, st : ${seriesItems}" th:classappend="${it.id() == post.id()} ? 'is-current'">
-                        <span class="series-box-no" th:text="${st.count}">1</span>
+                        <span class="series-box-no" th:text="${st.index + postSeries.firstNo()}">1</span>
                         <span th:if="${it.id() == post.id()}" aria-current="page" th:text="${it.title()}">지금 글</span>
                         <a th:unless="${it.id() == post.id()}" th:href="${it.url()}" th:text="${it.title()}">글</a>
                     </li>

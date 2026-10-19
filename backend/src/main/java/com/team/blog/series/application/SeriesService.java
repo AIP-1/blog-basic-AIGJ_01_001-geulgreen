@@ -22,7 +22,12 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
 
     /** 107: {@code coverUrl}은 화면에 쓸 사진(고른 것, 없으면 1편부터 첫 사진), {@code pickedCover}는 주인이 고른 것(관리 탭). */
     public record Series(long id, String title, long postCount, String description, String coverUrl, String pickedCover,
-                         String latestLabel) {
+                         String latestLabel, boolean startZero) {
+
+        /** 112: 첫 편 번호(0편부터 시작이면 0, 아니면 1). 화면은 순서(0부터)에 이 값을 더해 "N편"을 쓴다. */
+        public int firstNo() {
+            return startZero ? 0 : 1;
+        }
 
         /** 108: 카드 아래 줄 "글 3편 · 2026.10.14 업데이트". */
         public String meta() {
@@ -69,7 +74,7 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
 
     /** 블로그의 시리즈(공개 글 수 포함, 최근에 만든 순). {@code includeEmpty}: 주인에게는 공개 글이 없는 것도. */
     public List<Series> list(long memberId, boolean includeEmpty) {
-        List<Series> all = jdbc.query("SELECT s.id, s.title, s.description, s.cover_url, " + coverSql(accessPolicy.blogListingCondition("cpost", "cm"))
+        List<Series> all = jdbc.query("SELECT s.id, s.title, s.description, s.cover_url, s.start_zero, " + coverSql(accessPolicy.blogListingCondition("cpost", "cm"))
                         + ", (SELECT count(*) FROM series_post sp JOIN post p ON p.id = sp.post_id"
                         + " JOIN member m ON m.id = p.author_id WHERE sp.series_id = s.id AND "
                         + accessPolicy.blogListingCondition("p", "m") + ") AS cnt, (SELECT max(COALESCE(p.first_public_at, p.published_at))"
@@ -77,7 +82,8 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
                         + accessPolicy.blogListingCondition("p", "m") + ") AS latest FROM series s WHERE s.member_id = ?"
                         + " ORDER BY latest DESC NULLS LAST, s.id DESC", // 108: 최근에 글이 올라온 시리즈부터
                 (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), rs.getLong("cnt"), rs.getString("description"),
-                        rs.getString("cover"), rs.getString("cover_url"), label(rs.getTimestamp("latest"))), memberId);
+                        rs.getString("cover"), rs.getString("cover_url"), label(rs.getTimestamp("latest")),
+                        rs.getBoolean("start_zero")), memberId);
         return includeEmpty ? all : all.stream().filter(s -> s.postCount() > 0).toList();
     }
 
@@ -146,8 +152,9 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
 
     /** 글이 든 시리즈(없으면 빈 값). */
     public Optional<Series> ofPost(long postId) {
-        return jdbc.query("SELECT s.id, s.title FROM series_post sp JOIN series s ON s.id = sp.series_id WHERE sp.post_id = ?",
-                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0, null, null, null, null), postId).stream().findFirst();
+        return jdbc.query("SELECT s.id, s.title, s.start_zero FROM series_post sp JOIN series s ON s.id = sp.series_id WHERE sp.post_id = ?",
+                (rs, i) -> new Series(rs.getLong("id"), rs.getString("title"), 0, null, null, null, null, rs.getBoolean("start_zero")), postId)
+                .stream().findFirst();
     }
 
     /**
@@ -275,7 +282,8 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
      * 고를 수 있다(아무 주소나 넣지 못하게). 비우면 1편부터 첫 사진을 쓴다. 이름은 1~60자, 내 다른 시리즈와 겹치면 안 된다.
      */
     @Transactional
-    public void update(Optional<CurrentUser> current, long seriesId, String newTitle, String description, String coverUrl) {
+    public void update(Optional<CurrentUser> current, long seriesId, String newTitle, String description, String coverUrl,
+                       boolean startZero) {
         CurrentUser me = accountGuard.requireWritable(current);
         requireMySeries(me, seriesId);
         String title = newTitle == null ? "" : newTitle.strip();
@@ -304,8 +312,8 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
             imageId = postImages.ownedCompletedImageId(me.memberId(), coverUrl.strip()).orElse(null);
             cover = imageId == null ? null : postImages.cardThumbnailOf(coverUrl.strip());
         }
-        jdbc.update("UPDATE series SET title = ?, description = ?, cover_url = ?, cover_image_id = ? WHERE id = ?", title,
-                desc.isEmpty() ? null : desc, cover, imageId, seriesId);
+        jdbc.update("UPDATE series SET title = ?, description = ?, cover_url = ?, cover_image_id = ?, start_zero = ? WHERE id = ?", title,
+                desc.isEmpty() ? null : desc, cover, imageId, startZero, seriesId);
     }
 
     /** 106: 시리즈 묶음만 지운다(글은 그대로, series_post는 CASCADE). */
