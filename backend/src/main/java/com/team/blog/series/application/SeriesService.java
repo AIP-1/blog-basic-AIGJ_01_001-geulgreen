@@ -351,6 +351,28 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
                 (Object) imageIds.toArray(new Long[0])));
     }
 
+    static final String MISSION_TITLE = "오늘의 미션";
+
+    /**
+     * 113 강성찬 개인 확장: 오늘의 미션 글이 처음 발행되면 글쓴이의 미션 시리즈 맨 끝에 넣는다(없으면 "오늘의 미션"으로 만든다).
+     * 미션 글이 아니거나 이미 다른 시리즈에 든 글은 그대로. 시리즈는 이름이 아니라 표시(mission)로 찾아서 이름을 바꿔도 이어진다.
+     * 같은 이름의 내 시리즈가 이미 있으면 그 시리즈를 미션 시리즈로 쓴다.
+     */
+    // 발행 트랜잭션이 끝난 뒤(커밋 뒤 사건)에 부른다. 새 트랜잭션을 열면 동시 발행 때 연결을 두 개씩 잡아 풀이 마른다(미션 완료 기록과 같은 방식)
+    public void addMissionPost(long memberId, long postId) {
+        Integer mission = jdbc.queryForObject("SELECT count(*) FROM mission_post WHERE post_id = ? AND member_id = ?", Integer.class,
+                postId, memberId);
+        if (mission == null || mission == 0 || ofPost(postId).isPresent()) {
+            return;
+        }
+        Long target = jdbc.queryForList("SELECT id FROM series WHERE member_id = ? AND mission", Long.class, memberId)
+                .stream().findFirst().orElseGet(() -> jdbc.queryForObject("""
+                        INSERT INTO series (member_id, title, mission) VALUES (?, ?, TRUE)
+                        ON CONFLICT (member_id, title) DO UPDATE SET mission = TRUE RETURNING id""", Long.class, memberId, MISSION_TITLE));
+        jdbc.update("INSERT INTO series_post (post_id, series_id, position) VALUES (?, ?, "
+                + "(SELECT COALESCE(max(position), 0) + 1 FROM series_post WHERE series_id = ?)) ON CONFLICT DO NOTHING", postId, target, target);
+    }
+
     /** 탈퇴 정리. */
     public void purgeWithdrawn(long memberId) {
         jdbc.update("DELETE FROM series WHERE member_id = ?", memberId);
