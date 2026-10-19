@@ -37,8 +37,6 @@ class ExploreIT extends IntegrationTestBase {
         for (int i = 0; i < 15; i++) {
             posts.published(author, "더 많은 글" + i, "본문", 1, NOW.minus(Duration.ofHours(i + 1)));
         }
-        // 10-16: 댓글 0개인 최근 글은 위 "첫 댓글을 기다리는 글"로 빠지므로, 이어 보기만 보려고 댓글을 하나씩 단 것으로
-        jdbc.update("UPDATE post SET comment_count = 1");
         String api = mockMvc.perform(get("/api/explore")).andReturn().getResponse().getContentAsString();
         assertThat(api).contains("\"nextCursor\":\"15\"");
         assertThat(mockMvc.perform(get("/api/explore?cursor=15")).andReturn().getResponse().getContentAsString())
