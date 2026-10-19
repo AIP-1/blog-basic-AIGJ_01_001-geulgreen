@@ -25,7 +25,8 @@ public record ImageProperties(
         @DefaultValue Cleanup cleanup,
         @DefaultValue Post post,
         @DefaultValue("1073741824") long quotaBytes,
-        @DefaultValue("200") int dailyLimit) {
+        @DefaultValue("200") int dailyLimit,
+        @DefaultValue("true") boolean adminDailyLimitExempt) {
 
     /**
      * 글 사진 규격.

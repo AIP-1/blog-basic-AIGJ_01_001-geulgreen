@@ -105,6 +105,15 @@ class StorageQuotaIT extends IntegrationTestBase {
     }
 
     @Test
+    void adminHasNoDailyLimit() throws Exception {
+        clock.set(Instant.parse("2026-10-07T03:00:00Z"));
+        long admin = verified("dailyadmin");
+        jdbc.update("UPDATE member SET role = 'ADMIN' WHERE id = ?", admin);
+        redis.opsForValue().set("img:daily:" + admin + ":20261007", "500");
+        mockMvc.perform(postPresignRequest(admin, "image/webp", 100, null)).andExpect(status().isOk());
+    }
+
+    @Test
     void usageCountsOriginalAndThumbnailOfAllImages() throws Exception {
         long me = verified("usageuser");
         jdbc.update("""
