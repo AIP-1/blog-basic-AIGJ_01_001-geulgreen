@@ -216,6 +216,8 @@ blog:
       gif-max-frames: 300
     quota-bytes: 1073741824
     daily-limit: 200
+    # 강성찬 개인 확장: 관리자는 하루 장수 한도 없음(false면 관리자도 200장)
+    admin-daily-limit-exempt: ${IMAGE_ADMIN_DAILY_LIMIT_EXEMPT:true}
   # 003-profile: 소개·소셜 사진(11 §3·§4-2)
   profile:
     bio:
