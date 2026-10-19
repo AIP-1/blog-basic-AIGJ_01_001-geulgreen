@@ -33,15 +33,15 @@ class ExploreIT extends IntegrationTestBase {
         // 홈 오른쪽 "둘러보기" 칸은 뺌(탐색은 머리말 메뉴로)
         assertThat(home).contains("href=\"/explore\"").doesNotContain("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")
                 .doesNotContain("side-rec-posts");
-        // 추천 글은 12개씩 이어 보기(커서 = 추천 위치), 잘못된 커서는 처음부터
-        for (int i = 0; i < 13; i++) {
+        // 추천 글은 15개씩 이어 보기(커서 = 추천 위치, 10-19부터 한 줄 5장 × 세 줄), 잘못된 커서는 처음부터
+        for (int i = 0; i < 15; i++) {
             posts.published(author, "더 많은 글" + i, "본문", 1, NOW.minus(Duration.ofHours(i + 1)));
         }
         // 10-16: 댓글 0개인 최근 글은 위 "첫 댓글을 기다리는 글"로 빠지므로, 이어 보기만 보려고 댓글을 하나씩 단 것으로
         jdbc.update("UPDATE post SET comment_count = 1");
         String api = mockMvc.perform(get("/api/explore")).andReturn().getResponse().getContentAsString();
-        assertThat(api).contains("\"nextCursor\":\"12\"");
-        assertThat(mockMvc.perform(get("/api/explore?cursor=12")).andReturn().getResponse().getContentAsString())
+        assertThat(api).contains("\"nextCursor\":\"15\"");
+        assertThat(mockMvc.perform(get("/api/explore?cursor=15")).andReturn().getResponse().getContentAsString())
                 .contains("\"nextCursor\":null");
         assertThat(mockMvc.perform(get("/explore?cursor=abc")).andReturn().getResponse().getStatus()).isEqualTo(200);
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("href=\"/explore\"");

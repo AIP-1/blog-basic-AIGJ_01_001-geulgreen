@@ -160,6 +160,9 @@ public class ExploreController {
 
     static final int WAITING = 4;
 
+    /** 10-19(chan "크기는 작게 해서 많이 추천"): 탐색 카드는 PC 한 줄 5장이라 한 번에 15개(세 줄). */
+    static final int PAGE = 15;
+
     private CardPage page(long viewer, String cursor) {
         int offset = 0;
         if (cursor != null && !cursor.isEmpty()) {
@@ -179,7 +182,7 @@ public class ExploreController {
             // 10-19: 남은 글이 위 칸의 글뿐이면 목록이 비지 않게 그 글들을 아래에도 둔다
             ids = List.copyOf(waiting);
         }
-        int end = Math.min(offset + PostListQuery.PAGE_SIZE, ids.size());
+        int end = Math.min(offset + PAGE, ids.size());
         List<Long> slice = offset >= end ? List.of() : ids.subList(offset, end);
         Map<Long, PostCard> cards = listQuery.cardsByIds(slice);
         return new CardPage(slice.stream().map(cards::get).filter(Objects::nonNull).toList(),
