@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** 113 강성찬 개인 확장: 오늘의 미션 글을 발행하면 글쓴이의 '오늘의 미션' 시리즈 끝에 들어간다. 글 화면에는 상자가 없다. */
+/** 113 강성찬 개인 확장: 오늘의 미션 글을 발행하면 글쓴이의 '오늘의 미션' 시리즈 끝에 들어간다. 보이는 건 여느 시리즈와 같다. */
 class MissionSeriesIT extends IntegrationTestBase {
 
     private static final Instant T = Instant.parse("2026-10-12T03:00:00Z");
@@ -71,9 +71,8 @@ class MissionSeriesIT extends IntegrationTestBase {
         long plain = posts.draft(me, "그냥 글", "본문", 0);
         publish(me, plain);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM series_post WHERE post_id = ?", Integer.class, plain)).isZero();
-        // 글 화면에는 미션 시리즈 상자가 없고, 시리즈 화면·시리즈 탭에는 보인다
-        assertThat(page("/msseries/posts/" + second)).doesNotContain("series-box");
-        assertThat(page("/msseries/posts/" + third)).contains("series-box");
+        // 여느 시리즈처럼 글 화면 상자(목록·이전 편), 시리즈 화면·시리즈 탭에 보인다
+        assertThat(page("/msseries/posts/" + second)).contains("series-box").contains("매일 쓰기</a>").contains("이전 편");
         assertThat(page("/msseries/series")).contains("매일 쓰기");
         assertThat(page("/msseries/series/" + sid)).contains("미션 글 " + first).contains("미션 글 " + second);
     }

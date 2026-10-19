@@ -365,11 +365,6 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
                 + "(SELECT COALESCE(max(position), 0) + 1 FROM series_post WHERE series_id = ?)) ON CONFLICT DO NOTHING", postId, target, target);
     }
 
-    /** 113: 미션 시리즈면 글 화면에 시리즈 상자를 보이지 않는다(글 화면에는 미션 티를 내지 않는다). */
-    public boolean isMission(long seriesId) {
-        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT mission FROM series WHERE id = ?", Boolean.class, seriesId));
-    }
-
     /** 탈퇴 정리. */
     public void purgeWithdrawn(long memberId) {
         jdbc.update("DELETE FROM series WHERE member_id = ?", memberId);

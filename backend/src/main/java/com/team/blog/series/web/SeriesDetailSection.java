@@ -25,8 +25,7 @@ public class SeriesDetailSection implements PostDetailSection {
         if (!series.enabled()) {
             return;
         }
-        // 113: 미션 시리즈는 글 화면에 상자를 그리지 않는다(시리즈 화면·시리즈 탭에는 그대로)
-        series.ofPost(post.id()).filter(s -> !series.isMission(s.id())).ifPresent(s -> {
+        series.ofPost(post.id()).ifPresent(s -> {
             List<SeriesService.Item> items = series.items(s.id());
             int index = -1;
             for (int i = 0; i < items.size(); i++) {
