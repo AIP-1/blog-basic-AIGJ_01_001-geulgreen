@@ -41,6 +41,41 @@
     });
   });
 
+  // 10-19: [글 넣기]·[설정]은 창(휴대폰은 아래에서 올라오는 판)으로. 닫기 버튼·바깥 누르기·Esc로 닫는다
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open]'), function (button) {
+    var dialog = document.getElementById(button.dataset.open);
+    if (!dialog) { return; }
+    button.addEventListener('click', function () { dialog.showModal(); });
+    Array.prototype.forEach.call(dialog.querySelectorAll('[data-close]'), function (x) {
+      x.addEventListener('click', function () { dialog.close(); });
+    });
+    dialog.addEventListener('click', function (e) { if (e.target === dialog) { dialog.close(); } });
+  });
+  // 글 넣기 창: 제목으로 거르기, 고른 수, 하나도 안 고르면 [넣기]를 막는다
+  Array.prototype.forEach.call(document.querySelectorAll('.series-add-dialog'), function (dialog) {
+    var q = dialog.querySelector('.series-add-q');
+    var labels = dialog.querySelectorAll('.series-pick label');
+    var none = dialog.querySelector('.series-add-none');
+    var count = dialog.querySelector('.series-add-count');
+    var submit = dialog.querySelector('button[type="submit"]');
+    function update() {
+      var n = dialog.querySelectorAll('input[name="postIds"]:checked').length;
+      count.textContent = '고른 글 ' + n + '개';
+      submit.disabled = n === 0;
+    }
+    q.addEventListener('input', function () {
+      var word = q.value.trim().toLowerCase(), shown = 0;
+      Array.prototype.forEach.call(labels, function (l) {
+        var hit = !word || l.textContent.toLowerCase().indexOf(word) >= 0;
+        l.hidden = !hit;
+        if (hit) { shown++; }
+      });
+      none.hidden = shown > 0;
+    });
+    dialog.addEventListener('change', update);
+    update();
+  });
+
   var target = location.hash && document.getElementById(location.hash.slice(1));
   if (target && target.classList.contains('series-group')) { target.open = true; }
 })();

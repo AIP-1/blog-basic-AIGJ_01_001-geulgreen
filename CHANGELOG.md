@@ -7,6 +7,35 @@
 
 ---
 
+## [1.69.1] — 2026-10-19 · 개인 확장 (시리즈 관리 창)
+
+- 내 글 > 시리즈: [글 넣기]·[설정]·[시리즈 화면] 버튼, 글 넣기 창(찾기·여러 개 고르기·고른 수, 휴대폰은 아래에서 올라오는 창), 설정 창(이름·설명·0편부터·대표 사진·삭제)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**펼친 시리즈**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-open-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-open-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-open-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-open-m-after.png) |
+
+*글 넣기 창*
+
+![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-add.png)
+
+*설정 창*
+
+![](https://github.com/practicech/blog/releases/download/v1.69.1/v1691-set.png)
+
+---
+
 ## [1.69.0] — 2026-10-19 · 개인 확장 (시리즈 상자 글 끝으로, 미션 시리즈, 표지 16:10)
 
 - 글 화면 시리즈 상자는 본문 끝으로, 위에는 한 줄(이름·몇 번째), 시리즈 글은 이전·다음 편만
