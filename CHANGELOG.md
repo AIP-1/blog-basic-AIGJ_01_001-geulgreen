@@ -7,6 +7,27 @@
 
 ---
 
+## [1.69.2] — 2026-10-19 · 개인 확장 (탐색 추천이 비지 않게)
+
+- 탐색 [추천]: 일반 추천 뒤에 팔로우한 사람 글(최신순), 그래도 비면 "첫 댓글을 기다리는 글" 칸 글도 목록에(내 글은 제외)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**탐색 [추천](모두 팔로우한 계정)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.2/v1692-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.2/v1692-explore-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.2/v1692-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.2/v1692-explore-m-after.png) |
+
+---
+
 ## [1.69.1] — 2026-10-19 · 개인 확장 (시리즈 관리 창)
 
 - 내 글 > 시리즈: [글 넣기]·[설정]·[시리즈 화면] 버튼, 글 넣기 창(찾기·여러 개 고르기·고른 수, 휴대폰은 아래에서 올라오는 창), 설정 창(이름·설명·0편부터·대표 사진·삭제)
