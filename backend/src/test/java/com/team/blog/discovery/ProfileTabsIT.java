@@ -126,6 +126,11 @@ class ProfileTabsIT extends IntegrationTestBase {
         assertThat(latest.indexOf("순서 둘")).isLessThan(latest.indexOf("순서 하나"));
         assertThat(latest).contains(">3편<");
         assertThat(page("/tabord/posts/" + p3)).contains(">2/3<").contains("이전 편").contains("순서 하나").contains("다음 편").contains("순서 둘");
+        // 10-19: 위에는 한 줄(시리즈 이름·몇 번째), 상자는 본문 뒤, 시리즈 글은 블로그 이전·다음 글 칸 대신 상자의 이전·다음 편만
+        String postPage = page("/tabord/posts/" + p3);
+        assertThat(postPage).contains("class=\"series-line\"").doesNotContain("class=\"post-nav\"");
+        assertThat(postPage.indexOf("class=\"series-line\"")).isLessThan(postPage.indexOf("class=\"post-body\""));
+        assertThat(postPage.indexOf("class=\"post-body\"")).isLessThan(postPage.indexOf("id=\"series-box\""));
         // 맨 앞에서 더 앞으로는 그대로, 남은 못 바꾼다
         mockMvc.perform(post(move).param("postId", String.valueOf(p1)).param("dir", "up").with(csrf()).with(TestAuth.member(me)))
                 .andExpect(status().is3xxRedirection());
