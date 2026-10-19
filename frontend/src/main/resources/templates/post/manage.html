@@ -61,6 +61,8 @@
                     </div>
                 </details>
                 <button type="button" class="btn btn-sm btn-danger" data-bulk-action="trash"><svg th:replace="~{fragments/icons :: trash}"></svg>휴지통으로</button>
+                <!-- 113 후속: 임시글은 고른 글을 저장된 발행 설정(공개 범위·태그)으로 한 번에 발행 -->
+                <button type="button" th:if="${tab == 'drafts'}" class="btn btn-sm btn-primary" data-bulk-publish><svg th:replace="~{fragments/icons :: share}"></svg>선택한 글 발행</button>
             </th:block>
             <th:block th:if="${tab == 'trash'}">
                 <button type="button" class="btn btn-sm" data-bulk-action="restore"><svg th:replace="~{fragments/icons :: restore}"></svg>복원</button>

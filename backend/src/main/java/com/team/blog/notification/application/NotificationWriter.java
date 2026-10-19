@@ -223,6 +223,11 @@ public class NotificationWriter {
 
     /** 새 글: 팔로워에게 한 문장으로(25 §4-1). 처리 시점에 글이 공개·발행 상태인지 다시 본다. */
     public int newPost(long postId, long authorId) {
+        return newPost(postId, authorId, 1);
+    }
+
+    /** 113 후속: {@code count}편을 한 번에 올렸으면 한 건에 편 수를 적는다(새 글 알림의 actor_count = 함께 올린 글 수). */
+    public int newPost(long postId, long authorId, int count) {
         if (member(authorId).map(MemberState::withdrawn).orElse(true)) {
             return 0;
         }
@@ -236,13 +241,13 @@ public class NotificationWriter {
         Timestamp now = now();
         return jdbc.update("""
                 INSERT INTO notification (receiver_id, type, post_id, last_actor_id, actor_count, created_at, updated_at)
-                SELECT f.follower_id, 'NEW_POST', ?, ?, 1, ?, ?
+                SELECT f.follower_id, 'NEW_POST', ?, ?, ?, ?, ?
                 FROM follow f JOIN member r ON r.id = f.follower_id
                 WHERE f.followee_id = ? AND r.withdrawn_at IS NULL
                   AND NOT EXISTS (SELECT 1 FROM notification_mute nm WHERE nm.member_id = f.follower_id AND nm.type = 'NEW_POST')
                   AND NOT EXISTS (SELECT 1 FROM notification n WHERE n.receiver_id = f.follower_id AND n.post_id = ?
                                   AND n.type IN ('FIRST_PUBLIC', 'MISSION_DONE'))
-                """, postId, authorId, now, now, authorId, postId);
+                """, postId, authorId, Math.max(1, count), now, now, authorId, postId);
     }
 
     /**
