@@ -1934,3 +1934,15 @@ main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { 
     main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .explore-main .card-grid .post-card { font-size: .9em; }
 }
+/* 10-19(chan "유튜브처럼 카드 경계"): 휴대폰은 카드 상자(테두리·그림자·배경)를 빼고 글 사이는 여백으로 나눈다.
+   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 탐색 두 줄·태그 가로 줄은 사진만 둥글게. PC는 그대로 */
+@media (max-width: 639px) {
+    .post-card { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+    .post-card:hover { transform: none; box-shadow: none; }
+    .card-link::after { border-radius: 0; }
+    .card-grid { gap: 32px; }
+    .card-grid .post-card, .tag-row .post-card { padding: 0; }
+    .card-grid .post-card > .card-thumb { margin: 0 -20px 6px; border-radius: 0; }
+    main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { gap: 20px 12px; }
+    .explore-main .card-grid .post-card > .card-thumb, .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
+}
