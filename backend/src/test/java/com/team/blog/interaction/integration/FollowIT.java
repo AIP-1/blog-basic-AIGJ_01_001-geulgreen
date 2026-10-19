@@ -202,7 +202,10 @@ class FollowIT extends IntegrationTestBase {
         String recommended = page.substring(page.indexOf("class=\"explore-people\""), page.indexOf("</aside>"));
         assertThat(recommended).contains("href=\"/fdstranger\"").contains("data-follow-handle=\"fdstranger\"")
                 .doesNotContain("/fdwriter1\"").doesNotContain("/fdwriter2\"").doesNotContain("/fdreader\"");
-        assertThat(page.substring(page.indexOf("id=\"card-grid\""))).contains("모르는 사람").doesNotContain("피드글");
+        // 10-19: 팔로우한 사람 글은 추천 뒤쪽에 붙는다(목록이 비지 않게), 모르는 사람 글이 먼저
+        String grid = page.substring(page.indexOf("id=\"card-grid\""));
+        assertThat(grid).contains("모르는 사람");
+        assertThat(grid.indexOf("모르는 사람")).isLessThan(grid.indexOf("피드글") < 0 ? Integer.MAX_VALUE : grid.indexOf("피드글"));
         assertThat(strangerPost).isPositive();
         // 언팔로우 직후 다음 요청부터 빠짐, 작성자 탈퇴 유예도 빠짐
         mockMvc.perform(delete("/api/members/fdwriter2/follow").with(csrf()).with(TestAuth.member(me))).andExpect(status().isOk());

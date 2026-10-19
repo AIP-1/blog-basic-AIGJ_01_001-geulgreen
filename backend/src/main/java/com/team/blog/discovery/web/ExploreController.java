@@ -173,8 +173,12 @@ public class ExploreController {
             }
         }
         // 위 "첫 댓글을 기다리는 글"에 나온 글은 아래 추천 글에서 뺀다(같은 글이 두 번 보이지 않게)
-        java.util.Set<Long> waiting = new java.util.HashSet<>(recommendedPostQuery.waitingFirstComment(viewer, WAITING));
+        java.util.Set<Long> waiting = new java.util.LinkedHashSet<>(recommendedPostQuery.waitingFirstComment(viewer, WAITING));
         List<Long> ids = recommendedPostQuery.pool(viewer).stream().filter(id -> !waiting.contains(id)).toList();
+        if (ids.isEmpty()) {
+            // 10-19: 남은 글이 위 칸의 글뿐이면 목록이 비지 않게 그 글들을 아래에도 둔다
+            ids = List.copyOf(waiting);
+        }
         int end = Math.min(offset + PostListQuery.PAGE_SIZE, ids.size());
         List<Long> slice = offset >= end ? List.of() : ids.subList(offset, end);
         Map<Long, PostCard> cards = listQuery.cardsByIds(slice);
