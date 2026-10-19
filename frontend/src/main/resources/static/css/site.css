@@ -1892,6 +1892,10 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 /* 111: 시리즈 화면 머리 사진은 16:10 그대로(썸네일 글자가 잘리지 않게) */
 .series-cover-lg { width: 176px; height: 110px; }
 @media (max-width: 600px) { .series-cover-lg { width: 128px; height: 80px; } }
+/* 114: 시리즈 카드(블로그·탐색 시리즈 탭)·시리즈 관리의 표지도 썸네일 만들기와 같은 16:10(정사각형이면 양옆 글자가 잘림) */
+.series-card a { grid-template-columns: 96px 1fr; }
+.series-card .series-cover, .series-group-head .series-cover { width: 96px; height: 60px; }
+.series-cover-choice img { width: 88px; height: 55px; }
 /* 112: 시리즈 고치기의 '0편부터 시작' 체크 줄 */
 .series-settings .check-row { display: inline-flex; align-items: center; gap: 8px; width: auto; cursor: pointer; }
 .series-settings .check-row input { width: auto; margin: 0; accent-color: var(--color-brand); }
