@@ -57,7 +57,10 @@ public class RecommendedPostQuery {
     // ponytail: 탐색 추천 글은 앞 100개까지만(그 뒤는 "모든 글을 다 봤어요"). 글이 아주 많아지면 커서 방식으로.
     static final int POOL = 100;
 
-    /** 086 탐색 추천 글 순서: 같은 태그(새 사람) 먼저, 그다음 조회수 순. 내 글·팔로우한 사람 글(피드에 나옴)은 뺀다. */
+    /**
+     * 086 탐색 추천 글 순서: 같은 태그(새 사람) 먼저, 그다음 조회수 순(팔로우한 사람 글은 피드에 나오므로 여기선 뺀다).
+     * 10-19: 그 뒤에 팔로우한 사람 글(최신순)을 붙여, 내 글이 아닌 공개 글이 하나라도 있으면 비지 않는다.
+     */
     public List<Long> pool(long memberId) {
         String visible = accessPolicy.publicListingCondition("p", "m");
         Set<Long> ids = new LinkedHashSet<>(jdbc.queryForList(tagSql(visible) + " " + POOL,
@@ -68,6 +71,14 @@ public class RecommendedPostQuery {
                  AND p.author_id <> ? AND p.author_id NOT IN (SELECT f.followee_id FROM follow f WHERE f.follower_id = ?)
                 ORDER BY p.first_public_at >= ? DESC, p.view_count DESC, p.first_public_at DESC, p.id DESC LIMIT""" + " " + POOL,
                 Long.class, memberId, memberId, Timestamp.from(clock.instant().minus(VIEW_WINDOW))));
+        // 10-19(chan "추천이 아예 없는 경우는 없게"): 글쓴이가 적은 사이트에서 다른 사람을 모두 팔로우하면 위 목록이 비므로,
+        // 그 뒤에 팔로우한 사람 글을 최신순으로 붙인다(내 글은 계속 뺀다)
+        ids.addAll(jdbc.queryForList("""
+                SELECT p.id FROM post p JOIN member m ON m.id = p.author_id
+                WHERE""" + " " + visible + """
+                 AND p.author_id <> ? AND p.author_id IN (SELECT f.followee_id FROM follow f WHERE f.follower_id = ?)
+                ORDER BY p.first_public_at DESC, p.id DESC LIMIT""" + " " + POOL,
+                Long.class, memberId, memberId));
         return ids.stream().limit(POOL).toList();
     }
 
