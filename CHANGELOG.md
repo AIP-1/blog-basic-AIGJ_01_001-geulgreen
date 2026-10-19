@@ -7,6 +7,41 @@
 
 ---
 
+## [1.69.0] — 2026-10-19 · 개인 확장 (시리즈 상자 글 끝으로, 미션 시리즈, 표지 16:10)
+
+- 글 화면 시리즈 상자는 본문 끝으로, 위에는 한 줄(이름·몇 번째), 시리즈 글은 이전·다음 편만
+- 오늘의 미션 글은 발행할 때 글쓴이의 "오늘의 미션" 시리즈에 저절로(한 번에 발행 포함)
+- 시리즈 카드·관리 표지 칸 16:10
+- DB: V31 series.mission과 한 사람에 하나 색인(더하기만)
+
+#### 전/후 사진
+
+**글 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-post-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-post-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-post-m-after.png) |
+
+**내 글 > 시리즈(미션 글 발행 뒤)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-mission-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-mission-after.png) |
+
+**블로그 시리즈 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-blogseries-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.0/v1690-blogseries-after.png) |
+
+---
+
 ## [1.68.2] — 2026-10-19 · 개인 확장 (임시글 한 번에 발행, 시리즈 0편부터)
 
 - **109 후속**: 내 글 > 임시글에서 골라 [선택한 글 발행], 여러 편이어도 팔로워 알림은 한 번
