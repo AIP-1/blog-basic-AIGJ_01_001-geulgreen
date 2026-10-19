@@ -350,7 +350,7 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
      * 미션 글이 아니거나 이미 다른 시리즈에 든 글은 그대로. 시리즈는 이름이 아니라 표시(mission)로 찾아서 이름을 바꿔도 이어진다.
      * 같은 이름의 내 시리즈가 이미 있으면 그 시리즈를 미션 시리즈로 쓴다.
      */
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    // 발행 트랜잭션이 끝난 뒤(커밋 뒤 사건)에 부른다. 새 트랜잭션을 열면 동시 발행 때 연결을 두 개씩 잡아 풀이 마른다(미션 완료 기록과 같은 방식)
     public void addMissionPost(long memberId, long postId) {
         Integer mission = jdbc.queryForObject("SELECT count(*) FROM mission_post WHERE post_id = ? AND member_id = ?", Integer.class,
                 postId, memberId);
