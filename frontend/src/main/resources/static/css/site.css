@@ -1896,3 +1896,12 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 .series-settings .check-row { display: inline-flex; align-items: center; gap: 8px; width: auto; cursor: pointer; }
 .series-settings .check-row input { width: auto; margin: 0; accent-color: var(--color-brand); }
 .series-settings .check-row + .help { margin: 4px 0 0; }
+/* 10-19 글 화면 위 한 줄 시리즈 표시(강성찬 개인 확장): 상자는 글 끝, 위에는 이름·몇 번째만 */
+.series-line { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; margin: 4px 0 12px; padding: 6px 12px; border-radius: 999px;
+    background: var(--color-brand-soft); color: var(--color-brand); text-decoration: none; font-size: .9em; font-weight: 600; }
+.series-line:hover { filter: brightness(.97); }
+.series-line .icon { flex: none; width: 16px; height: 16px; }
+.series-line-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-line-count { flex: none; font-weight: 500; opacity: .8; }
+.post-body + .post-tags-bottom + .series-box, .post-body + .series-box { margin-top: 24px; }
+#series-box { scroll-margin-top: 80px; }

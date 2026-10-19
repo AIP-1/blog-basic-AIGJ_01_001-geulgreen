@@ -83,8 +83,20 @@
         <!-- 본문: 007 렌더러가 허용 목록으로 정화해 저장한 HTML만 그대로 낸다(헌법 IV, FR-010) -->
         <!-- 052 강성찬 개인 확장: 읽기 진행 막대(스크립트가 스크롤에 맞춰 채운다) -->
         <div th:if="${readProgressEnabled}" id="read-progress" class="read-progress" aria-hidden="true"><span></span></div>
-        <!-- 041 강성찬 개인 확장: 시리즈 -->
-        <section th:if="${postSeries != null}" class="series-box" aria-labelledby="series-heading">
+        <!-- 041 강성찬 개인 확장: 시리즈. 10-19(chan): 위에는 한 줄(시리즈 이름·몇 번째, 누르면 글 끝의 시리즈 상자로), 상자는 글 끝 -->
+        <a th:if="${postSeries != null}" class="series-line" href="#series-box">
+            <svg th:replace="~{fragments/icons :: i-book}"></svg><span class="series-line-name" th:text="${postSeries.title()}">시리즈</span>
+            <span class="series-line-count" th:if="${seriesIndex >= 0}" th:text="${(seriesIndex + postSeries.firstNo()) + '/' + (seriesItems.size() - 1 + postSeries.firstNo())}">1/3</span></a>
+        <!-- 039 강성찬 개인 확장: 목차(스크립트가 소제목으로 채운다, 2개 미만이면 숨김) -->
+        <nav th:if="${tocEnabled}" id="post-toc" class="post-toc" aria-label="목차" hidden></nav>
+        <div class="post-body" th:utext="${post.contentHtml()}"></div>
+        <!-- 10-18 강성찬 개인 확장: 태그는 본문 아래 # 칩(다른 사람 글까지 같은 주제로 찾는 말). 카테고리(내 블로그 폴더)는 제목 위 -->
+        <ul class="post-tags post-tags-bottom" th:unless="${post.tags().isEmpty()}" aria-label="태그">
+            <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
+        </ul>
+        <!-- 10-18 chan: 글 화면에는 미션 이야기를 넣지 않는다(미션 칩·완료 상자는 미션 화면에서만). 글과 미션 연결은 데이터에 그대로 -->
+        <!-- 041 시리즈 상자. 10-19: 글 끝으로 옮기고, 시리즈 글에서는 아래 이전·다음 글 대신 이 상자의 이전·다음 편만 -->
+        <section th:if="${postSeries != null}" id="series-box" class="series-box" aria-labelledby="series-heading">
             <!-- 10-18 다시 꾸밈(강성찬 개인 확장): 머리(책 아이콘·시리즈 이름·몇 번째), 목록은 접어 두고, 아래에 이전·다음 편 카드 -->
             <div class="series-box-head">
                 <span class="series-box-icon"><svg th:replace="~{fragments/icons :: i-book}"></svg></span>
@@ -113,16 +125,8 @@
                 <span th:unless="${seriesNext != null}" class="series-box-step is-empty" aria-hidden="true"></span>
             </nav>
         </section>
-        <!-- 039 강성찬 개인 확장: 목차(스크립트가 소제목으로 채운다, 2개 미만이면 숨김) -->
-        <nav th:if="${tocEnabled}" id="post-toc" class="post-toc" aria-label="목차" hidden></nav>
-        <div class="post-body" th:utext="${post.contentHtml()}"></div>
-        <!-- 10-18 강성찬 개인 확장: 태그는 본문 아래 # 칩(다른 사람 글까지 같은 주제로 찾는 말). 카테고리(내 블로그 폴더)는 제목 위 -->
-        <ul class="post-tags post-tags-bottom" th:unless="${post.tags().isEmpty()}" aria-label="태그">
-            <li th:each="tag : ${post.tags()}"><a class="tag" th:href="@{/tags/{name}(name=${tag})}" th:text="${'#' + tag}">#태그</a></li>
-        </ul>
-        <!-- 10-18 chan: 글 화면에는 미션 이야기를 넣지 않는다(미션 칩·완료 상자는 미션 화면에서만). 글과 미션 연결은 데이터에 그대로 -->
-        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글") -->
-        <nav th:if="${prevPost != null or nextPost != null}" class="post-nav" aria-label="이전 글과 다음 글">
+        <!-- 038 강성찬 개인 확장: 이전 글·다음 글(관련 글은 095 댓글 아래 "관련 글"). 10-19: 시리즈 글은 위 상자가 대신한다 -->
+        <nav th:if="${postSeries == null and (prevPost != null or nextPost != null)}" class="post-nav" aria-label="이전 글과 다음 글">
             <a th:if="${prevPost != null}" class="post-nav-prev" th:href="${prevPost.url()}">
                 <span class="help">이전 글</span><span th:text="${prevPost.title()}">이전 글 제목</span></a>
             <a th:if="${nextPost != null}" class="post-nav-next" th:href="${nextPost.url()}">
