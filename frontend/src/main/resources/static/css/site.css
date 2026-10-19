@@ -1905,3 +1905,4 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 .series-line-count { flex: none; font-weight: 500; opacity: .8; }
 .post-body + .post-tags-bottom + .series-box, .post-body + .series-box { margin-top: 24px; }
 #series-box { scroll-margin-top: 80px; }
+.series-line { margin: 24px 0 0; } /* 10-19: 글쓴이 줄과 본문 사이 가운데쯤 */
