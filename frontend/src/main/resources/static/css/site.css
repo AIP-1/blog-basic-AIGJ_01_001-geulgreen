@@ -1910,3 +1910,27 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 .post-body + .post-tags-bottom + .series-box, .post-body + .series-box { margin-top: 24px; }
 #series-box { scroll-margin-top: 80px; }
 .series-line { margin: 24px 0 0; } /* 10-19: 글쓴이 줄과 본문 사이 가운데쯤 */
+/* 10-19 시리즈 관리(강성찬 개인 확장): 오른쪽 위 버튼 줄, 글 넣기·설정 창(넓은 화면은 가운데 창, 휴대폰은 아래에서 올라오는 판) */
+.series-group-buttons { flex: none; display: inline-flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.series-group-buttons .btn { display: inline-flex; align-items: center; gap: 6px; }
+.series-group-buttons .icon { width: 16px; height: 16px; }
+dialog.sheet-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; padding: 0;
+    border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); color: var(--color-text); }
+dialog.sheet-dialog::backdrop { background: var(--color-overlay); }
+dialog.sheet-dialog > form, dialog.sheet-dialog > .sheet-head, .series-settings-dialog > form { padding: 0 20px; }
+.series-settings-dialog > form:last-child { padding-bottom: 20px; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 8px; }
+.sheet-head h2 { margin: 0; font-size: 1.1em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.series-add-dialog .sheet-head { padding: 16px 0 8px; }
+.series-add-q { width: 100%; box-sizing: border-box; margin: 4px 0 8px; }
+.series-add-dialog .series-pick { max-height: min(50vh, 420px); margin: 0; }
+.series-add-dialog .series-pick label { padding: 8px 4px; border-bottom: 1px solid var(--color-border); cursor: pointer; }
+.series-add-dialog .series-pick label[hidden] { display: none; }
+.sheet-actions { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    margin: 0 -20px; padding: 12px 20px 16px; background: var(--color-surface); border-top: 1px solid var(--color-border); }
+.series-settings-dialog .field input[type="text"] { width: 100%; box-sizing: border-box; }
+@media (max-width: 600px) {
+    dialog.sheet-dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 18px 18px 0 0; max-height: 85vh; }
+    .series-group-tools { flex-wrap: wrap; }
+    .series-group-buttons { justify-content: flex-start; }
+}

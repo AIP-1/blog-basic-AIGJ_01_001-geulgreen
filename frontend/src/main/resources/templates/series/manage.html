@@ -53,9 +53,15 @@
             <svg th:replace="~{fragments/icons :: chevron}"></svg>
         </summary>
         <div class="series-group-body">
+        <!-- 10-19(chan): 오른쪽 위 버튼 줄. 글 넣기·설정은 창으로 연다(아래로 펼치지 않는다) -->
         <div class="series-group-tools">
             <p class="help" th:text="${s.description() != null ? s.description() : '설명이 아직 없어요'}">설명</p>
-            <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}" th:if="${s.postCount() > 0}">시리즈 화면</a>
+            <span class="series-group-buttons">
+                <button type="button" class="btn btn-sm" th:attr="data-open=${'add-' + s.id()}" th:disabled="${freePosts.isEmpty()}"
+                        th:title="${freePosts.isEmpty() ? '시리즈에 없는 글이 없어요' : null}"><svg th:replace="~{fragments/icons :: i-list}"></svg>글 넣기</button>
+                <button type="button" class="btn btn-sm" th:attr="data-open=${'settings-' + s.id()}"><svg th:replace="~{fragments/icons :: gear}"></svg>설정</button>
+                <a class="btn btn-sm" th:href="${myBlog + '/series/' + s.id()}" th:if="${s.postCount() > 0}">시리즈 화면</a>
+            </span>
         </div>
         <ol class="series-manage-items">
             <!-- 10-16 가독성(강성찬 개인 확장): 번호 칸 너비 고정, 위·아래 화살표는 늘 같은 자리(끝 줄은 비활성), 빼기는 끝에 옅게 -->
@@ -84,9 +90,10 @@
                 </span>
             </li>
         </ol>
-        <p th:if="${items.isEmpty()}" class="help">아직 넣은 글이 없어요. 아래 [글 넣기]로 넣어 보세요</p>
-        <details class="series-settings">
-            <summary><svg th:replace="~{fragments/icons :: gear}"></svg>이름·설명·대표 사진 고치기, 삭제<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
+        <p th:if="${items.isEmpty()}" class="help">아직 넣은 글이 없어요. 위 [글 넣기]로 넣어 보세요</p>
+        <dialog class="sheet-dialog series-settings-dialog" th:id="${'settings-' + s.id()}" th:attr="aria-label=${s.title() + ' 설정'}">
+            <div class="sheet-head"><h2 th:text="${s.title() + ' 설정'}">설정</h2>
+                <button type="button" class="icon-btn" data-close aria-label="닫기"><svg th:replace="~{fragments/icons :: close}"></svg></button></div>
             <form method="post" th:action="@{/manage/series/{id}/edit(id=${s.id()})}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="field">
@@ -133,19 +140,28 @@
                 <button type="submit" class="btn btn-sm">시리즈 삭제</button>
                 <span class="help">글은 지우지 않고 묶음만 풀어요</span>
             </form>
-        </details>
-        <form th:unless="${freePosts.isEmpty()}" method="post" th:action="@{/manage/series/{id}/add(id=${s.id()})}">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <details class="series-settings">
-                <summary><svg th:replace="~{fragments/icons :: i-list}"></svg>글 넣기 <span class="help" th:text="${'시리즈에 없는 글 ' + freePosts.size() + '개'}">시리즈에 없는 글 3개</span><svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
+        </dialog>
+        <!-- 10-19: 글 넣기 창(찾기·여러 개 고르기·고른 수). 고른 글은 공개한 순서대로 시리즈 끝에 -->
+        <dialog th:unless="${freePosts.isEmpty()}" class="sheet-dialog series-add-dialog" th:id="${'add-' + s.id()}"
+                th:attr="aria-label=${s.title() + '에 글 넣기'}">
+            <form method="post" th:action="@{/manage/series/{id}/add(id=${s.id()})}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="sheet-head"><h2 th:text="${s.title() + '에 글 넣기'}">글 넣기</h2>
+                    <button type="button" class="icon-btn" data-close aria-label="닫기"><svg th:replace="~{fragments/icons :: close}"></svg></button></div>
+                <label class="visually-hidden" th:for="${'add-q-' + s.id()}">글 찾기</label>
+                <input type="search" class="series-add-q" th:id="${'add-q-' + s.id()}" placeholder="제목으로 찾기" autocomplete="off">
                 <fieldset class="series-pick">
                     <legend class="visually-hidden">넣을 글</legend>
                     <label th:each="p : ${freePosts}"><input type="checkbox" name="postIds" th:value="${p.id()}">
                         <span th:text="${p.title()}">글 제목</span></label>
+                    <p class="help series-add-none" hidden>찾는 글이 없어요</p>
                 </fieldset>
-                <button type="submit" class="btn btn-sm">골라서 넣기</button>
-            </details>
-        </form>
+                <div class="sheet-actions">
+                    <span class="help series-add-count" role="status">고른 글 0개</span>
+                    <button type="submit" class="btn" disabled>넣기</button>
+                </div>
+            </form>
+        </dialog>
     </div>
     </details>
     <dialog th:replace="~{fragments/thumb-dialog :: dialog('시리즈 이름과 글 수가 들어가요. 저장하면 이 시리즈의 대표 사진이 되고, 링크 미리보기 그림도 이 사진이 돼요.')}"></dialog>
