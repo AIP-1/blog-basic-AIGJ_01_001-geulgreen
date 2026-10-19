@@ -7,6 +7,34 @@
 
 ---
 
+## [1.69.3] — 2026-10-19 · 개인 확장 (탐색 카드 작게, 첫 댓글 칸 빼기)
+
+- 탐색 [추천]·[트렌딩] 카드 작게: PC 한 줄 5개, 휴대폰 2개, 미리보기 글 없음, 15개씩 불러오기
+- "첫 댓글을 기다리는 글" 칸과 그 글을 추천에서 빼던 규칙, 1.69.2의 칸 글로 채우던 단계를 뺌
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**탐색 [추천]**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-explore-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-explore-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-explore-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-explore-m-after.png) |
+
+**탐색 [트렌딩]**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-trend-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.3/v1693-trend-after.png) |
+
+---
+
 ## [1.69.2] — 2026-10-19 · 개인 확장 (탐색 추천이 비지 않게)
 
 - 탐색 [추천]: 일반 추천 뒤에 팔로우한 사람 글(최신순), 그래도 비면 "첫 댓글을 기다리는 글" 칸 글도 목록에(내 글은 제외)

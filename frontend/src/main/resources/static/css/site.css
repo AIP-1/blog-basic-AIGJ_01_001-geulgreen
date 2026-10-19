@@ -1687,15 +1687,6 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .start-no { flex: none; width: 28px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
     background: var(--color-brand-fill); color: var(--color-on-fill); font-weight: 700; }
 .verify-next { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-/* 강성찬 개인 확장(10-16): 탐색 [추천] 맨 위 "첫 댓글을 기다리는 글" 한 묶음 */
-.waiting-comments { margin: 0 0 20px; padding: 12px 14px 14px; border-radius: 16px; background: var(--color-brand-soft); }
-.waiting-comments h2 { margin: 0 0 4px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
-.waiting-comments h2 .icon-inline { color: var(--color-brand); }
-.waiting-comments .help { margin: 0 0 10px; }
-/* 10-18(chan "너무 크다"): 카드는 다른 목록과 같은 크기(공용 auto-fill 250px 칸). 예전 auto-fit은 글이 2개면 두 장이 칸 전체로 늘어났다 */
-/* 휴대폰: 4장을 세로로 쌓으면 추천 글이 너무 밀리니 가로로 넘기는 한 줄 */
-@media (max-width: 639px) { main.list-page:not(.search-page) .card-grid.waiting-grid:not(.related-cards) { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82%;
-    overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; } main.list-page .card-grid.waiting-grid > * { scroll-snap-align: start; } }
 /* 110 강성찬 개인 확장: 썸네일 만들기 창 */
 dialog.thumb-dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; padding: 20px 24px 0;
     border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-surface); color: var(--color-text); }
@@ -1933,4 +1924,13 @@ dialog.sheet-dialog > form, dialog.sheet-dialog > .sheet-head, .series-settings-
     dialog.sheet-dialog { width: 100%; max-width: 100%; margin: auto 0 0; border-radius: 18px 18px 0 0; max-height: 85vh; }
     .series-group-tools { flex-wrap: wrap; }
     .series-group-buttons { justify-content: flex-start; }
+}
+/* 10-19(chan "탐색이면 크기는 작게 해서 많이 추천"): 탐색 [추천]·[트렌딩] 카드는 작게 — PC 한 줄 5장(1440 기준), 휴대폰 2장,
+   요약 줄은 빼고 사진(16:10)·제목·반응만. 홈·피드·태그·시리즈 탭은 그대로 */
+main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 14px; }
+.explore-main .card-grid .card-excerpt { display: none; }
+.explore-main .card-grid .card-title { font-size: .98em; }
+@media (max-width: 639px) {
+    main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .explore-main .card-grid .post-card { font-size: .9em; }
 }

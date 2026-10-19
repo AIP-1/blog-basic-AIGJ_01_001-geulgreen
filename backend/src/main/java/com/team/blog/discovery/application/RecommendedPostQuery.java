@@ -82,19 +82,6 @@ public class RecommendedPostQuery {
         return ids.stream().limit(POOL).toList();
     }
 
-    /**
-     * 강성찬 개인 확장(10-16): 첫 댓글을 기다리는 글. 최근 7일 안에 처음 공개됐고 댓글이 0개인 글(공용 목록 조건 = 전체 공개 글·공개 계정),
-     * 보는 사람 자신의 글은 빼고 최신순으로 {@code limit}개.
-     */
-    public List<Long> waitingFirstComment(long memberId, int limit) {
-        return jdbc.queryForList("""
-                SELECT p.id FROM post p JOIN member m ON m.id = p.author_id
-                WHERE""" + " " + accessPolicy.publicListingCondition("p", "m") + """
-                 AND p.visibility = 'PUBLIC' AND p.comment_count = 0 AND p.author_id <> ? AND p.first_public_at >= ?
-                ORDER BY p.first_public_at DESC, p.id DESC LIMIT ?""",
-                Long.class, memberId, Timestamp.from(clock.instant().minus(VIEW_WINDOW)), limit);
-    }
-
     private static String tagSql(String visible) {
         return """
                 SELECT p.id FROM post p JOIN member m ON m.id = p.author_id

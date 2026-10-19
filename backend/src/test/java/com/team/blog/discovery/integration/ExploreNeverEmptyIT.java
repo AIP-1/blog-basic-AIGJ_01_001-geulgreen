@@ -38,12 +38,11 @@ class ExploreNeverEmptyIT extends IntegrationTestBase {
         // 팔로우한 사람 글로 채운다, 내 글은 없다
         assertThat(list(me)).contains("팔로우한 사람 지난 글").doesNotContain("내가 쓴 글").doesNotContain("아직 둘러볼 글이 없어요");
 
-        // 남은 글이 모두 위 "첫 댓글을 기다리는 글" 칸에 들어가도 아래 목록이 비지 않는다
-        jdbc.update("UPDATE post SET deleted_at = now() WHERE id = ?", old);
+        // 댓글 없는 새 글도 추천에 그대로 나온다(10-19 "첫 댓글을 기다리는 글" 칸을 없앴다)
         posts.published(b, "댓글 없는 새 글", "본문", 1, NOW.minus(Duration.ofHours(2)));
         String html = mockMvc.perform(get("/explore").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("waiting-comments");
-        assertThat(html.substring(html.indexOf("id=\"card-grid\""))).contains("댓글 없는 새 글").doesNotContain("아직 둘러볼 글이 없어요");
+        assertThat(html).doesNotContain("waiting-comments").doesNotContain("첫 댓글을 기다리는 글");
+        assertThat(html.substring(html.indexOf("id=\"card-grid\""))).contains("댓글 없는 새 글");
 
         // 내 글뿐이면 비어 있는 게 맞다
         jdbc.update("DELETE FROM post WHERE author_id <> ?", me);
