@@ -16,6 +16,7 @@ import com.team.blog.shared.event.PostLiked;
 import com.team.blog.shared.event.MissionCompleted;
 import com.team.blog.shared.event.ClubNotice;
 import com.team.blog.shared.event.PostPublished;
+import com.team.blog.shared.event.PostsPublishedTogether;
 import com.team.blog.shared.event.PostUnliked;
 import com.team.blog.shared.event.PostVisibilityChanged;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -119,9 +120,17 @@ public class NotificationListeners {
     /** 처음 전체 공개될 때 한 번(FR-006): 공개로 발행했거나, 공개 범위 변경으로 처음 공개됐을 때. */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void on(PostPublished e) {
-        if ("PUBLIC".equals(e.visibility())) {
+        // 113 후속: 한 번에 여러 글을 발행하는 중이면 글마다 알리지 않고 끝나고 한 번(PostsPublishedTogether)
+        if ("PUBLIC".equals(e.visibility()) && !PostsPublishedTogether.batching()) {
             dispatcher.submit("new post " + e.postId(), () -> writer.newPost(e.postId(), e.authorId()));
         }
+    }
+
+    /** 113 후속: 임시글 한 번에 발행 → 팔로워에게 "새 글 N편" 한 번(가장 나중에 발행한 글로 연결). */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(PostsPublishedTogether e) {
+        long last = e.publicPostIds().get(e.publicPostIds().size() - 1);
+        dispatcher.submit("new posts " + last, () -> writer.newPost(last, e.authorId(), e.publicPostIds().size()));
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
