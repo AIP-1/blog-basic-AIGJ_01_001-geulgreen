@@ -167,7 +167,10 @@ public class NotificationQuery {
             case FIRST_PUBLIC -> onPost(p, actorName + "님이 친구에게만 보여 주던 「" + p.title() + "」을(를) 모두에게 공개했어요");
             case MISSION_DONE -> onPost(p, actorName + "님이 오늘의 미션 글을 올렸어요: 「" + p.title() + "」");
             // 108 강성찬 개인 확장: 시리즈에 든 글이면 "새 편"으로(읽을 때 시리즈를 보므로 발행 뒤 넣어도 맞다)
-            case NEW_POST -> onPost(p, rs.getString("series_title") == null ? actorName + "님이 새 글을 올렸어요: 「" + p.title() + "」"
+            // 113 후속: 한 번에 여러 편(actor_count = 함께 올린 글 수)
+            case NEW_POST -> rs.getInt("actor_count") > 1
+                    ? onPost(p, actorName + "님이 새 글 " + rs.getInt("actor_count") + "편을 올렸어요: 「" + p.title() + "」 외 " + (rs.getInt("actor_count") - 1) + "편")
+                    : onPost(p, rs.getString("series_title") == null ? actorName + "님이 새 글을 올렸어요: 「" + p.title() + "」"
                     : actorName + "님의 시리즈 「" + rs.getString("series_title") + "」 새 편: 「" + p.title() + "」");
             case FOLLOW -> new Body(null, null, who(actorName, others) + " 회원님을 팔로우해요", "/me/followers");
             case FRIEND_REQUEST -> new Body(null, null, who(actorName, others) + " 친구 요청을 보냈어요", "/settings/friends");

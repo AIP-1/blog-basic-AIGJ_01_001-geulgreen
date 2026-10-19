@@ -73,9 +73,11 @@ public class SeriesManageController {
     @PostMapping(PAGE + "/{id}/edit")
     public RedirectView edit(@PathVariable("id") long id, @RequestParam("title") String title,
                              @RequestParam(value = "description", required = false) String description,
-                             @RequestParam(value = "coverUrl", required = false) String coverUrl) {
+                             @RequestParam(value = "coverUrl", required = false) String coverUrl,
+                             @RequestParam(value = "startZero", required = false) String startZero) {
         try {
-            series.update(currentUserProvider.current(), id, title, description, coverUrl);
+            // 112: 체크 칸이라 꺼지면 값이 오지 않는다
+            series.update(currentUserProvider.current(), id, title, description, coverUrl, startZero != null);
             return seeOther(PAGE + "#series-" + id);
         } catch (PostContentException e) {
             return seeOther(PAGE + "?error=" + e.getCode());

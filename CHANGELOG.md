@@ -7,6 +7,46 @@
 
 ---
 
+## [1.68.2] — 2026-10-19 · 개인 확장 (임시글 한 번에 발행, 시리즈 0편부터)
+
+- **109 후속**: 내 글 > 임시글에서 골라 [선택한 글 발행], 여러 편이어도 팔로워 알림은 한 번
+- **106 후속**: 시리즈 "0편부터 시작"(첫 글이 0편, 기본 꺼짐)
+- DB: V30 series.start_zero(기본 false, 더하기만)
+
+#### 전/후 사진
+
+**임시글 탭**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-drafts-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-drafts-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-drafts-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-drafts-m-after.png) |
+
+**시리즈 설정**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-form-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-form-after.png) |
+
+**시리즈 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-page-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-page-after.png) |
+
+**글 화면 시리즈 상자(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-box-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.68.2/v1682-box-m-after.png) |
+
+---
+
 ## [1.68.1] — 2026-10-19 · 개인 확장 (관리자 사진 하루 한도 없음)
 
 - 관리자 계정은 하루 사진 200장 한도 없음(다른 회원은 200장, 1GB 저장 한도는 그대로), 스위치 IMAGE_ADMIN_DAILY_LIMIT_EXEMPT 기본 켜짐

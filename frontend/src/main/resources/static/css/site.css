@@ -1892,3 +1892,7 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 /* 111: 시리즈 화면 머리 사진은 16:10 그대로(썸네일 글자가 잘리지 않게) */
 .series-cover-lg { width: 176px; height: 110px; }
 @media (max-width: 600px) { .series-cover-lg { width: 128px; height: 80px; } }
+/* 112: 시리즈 고치기의 '0편부터 시작' 체크 줄 */
+.series-settings .check-row { display: inline-flex; align-items: center; gap: 8px; width: auto; cursor: pointer; }
+.series-settings .check-row input { width: auto; margin: 0; accent-color: var(--color-brand); }
+.series-settings .check-row + .help { margin: 4px 0 0; }

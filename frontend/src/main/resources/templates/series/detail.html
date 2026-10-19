@@ -33,6 +33,6 @@
         </li>
     </ol>
 </main>
-<th:block th:fragment="seriesExtra"><div class="manage-badges"><span class="badge" th:text="${(order == 'latest' ? total - st.index : st.count) + '편'}">1편</span></div></th:block>
+<th:block th:fragment="seriesExtra"><div class="manage-badges"><span class="badge" th:text="${(order == 'latest' ? total - 1 - st.index : st.index) + series.firstNo() + '편'}">1편</span></div></th:block>
 </body>
 </html>

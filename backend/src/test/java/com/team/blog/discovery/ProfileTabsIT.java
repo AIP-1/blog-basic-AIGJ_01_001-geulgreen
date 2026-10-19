@@ -209,6 +209,30 @@ class ProfileTabsIT extends IntegrationTestBase {
                 .contains("aria-label=\"3일차 앞으로\">");
     }
 
+    /** 112 강성찬 개인 확장: '0편부터 시작'을 켜면 시리즈 화면·글 화면 상자·관리 탭 번호가 0부터. 기본은 1편부터. */
+    @Test
+    void seriesCanStartAtZero() throws Exception {
+        long me = member("tabzero");
+        long p0 = posts.published(me, "강의 영", "본문", 1, T);
+        long p1 = posts.published(me, "강의 일", "본문", 1, T.plusSeconds(60));
+        long p2 = posts.published(me, "강의 이", "본문", 1, T.plusSeconds(120));
+        mockMvc.perform(post("/manage/series").param("newTitle", "강의").param("postIds", String.valueOf(p0), String.valueOf(p1), String.valueOf(p2))
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        long sid = jdbc.queryForObject("SELECT id FROM series WHERE member_id = ?", Long.class, me);
+        assertThat(page("/tabzero/series/" + sid)).contains(">1편<").doesNotContain(">0편<");
+        mockMvc.perform(post("/manage/series/{id}/edit", sid).param("title", "강의").param("startZero", "on")
+                .with(csrf()).with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
+        assertThat(page("/tabzero/series/" + sid)).contains(">0편<").contains(">2편<").doesNotContain(">3편<");
+        assertThat(page("/tabzero/series/" + sid + "?order=latest").indexOf(">2편<"))
+                .isLessThan(page("/tabzero/series/" + sid + "?order=latest").indexOf(">0편<"));
+        assertThat(page("/tabzero/posts/" + p1)).contains(">1/2<").contains("series-box-no\">0<");
+        assertThat(page("/manage/series", me)).contains(">0편<").contains("name=\"startZero\" value=\"on\" checked=\"checked\"");
+        // 끄면(체크 칸이 안 오면) 다시 1편부터
+        mockMvc.perform(post("/manage/series/{id}/edit", sid).param("title", "강의").with(csrf()).with(TestAuth.member(me)))
+                .andExpect(status().is3xxRedirection());
+        assertThat(page("/tabzero/posts/" + p1)).contains(">2/3<");
+    }
+
     @Test
     void postsTabSortsByLikesWhenAsked() throws Exception {
         long me = member("tabpop");

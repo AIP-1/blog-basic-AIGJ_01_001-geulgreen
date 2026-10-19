@@ -215,6 +215,34 @@
         });
       });
     });
+    // 113 후속 강성찬 개인 확장: 임시글 한 번에 발행. 서버가 글마다 저장된 설정으로 발행하고, 빠진 게 있는 글은 이름·이유를 돌려준다
+    var publishAll = bar.querySelector('[data-bulk-publish]');
+    if (publishAll) {
+      publishAll.addEventListener('click', function () {
+        var rows = picked().map(rowOf);
+        if (!rows.length) { return; }
+        if (!window.confirm(rows.length + '개를 저장된 발행 설정(공개 범위·태그)으로 발행할까요?')) { return; }
+        busy(true);
+        call('POST', '/api/me/posts/publish-drafts', { postIds: rows.map(function (r) { return Number(r.dataset.postId); }) })
+          .then(function (data) {
+            var done = {};
+            (data.published || []).forEach(function (id) { done[id] = true; });
+            rows.forEach(function (row) { if (done[row.dataset.postId]) { row.remove(); } });
+            var skipped = data.skipped || [];
+            var text = (data.published || []).length + '개를 발행했어요';
+            if (skipped.length) {
+              text += ' · 발행하지 못한 글 ' + skipped.length + '개: ' + skipped.map(function (s) {
+                return '「' + (s.title || '글 ' + s.id) + '」(' + s.reason + ')';
+              }).join(', ');
+            }
+            notice(text);
+            refreshCounts();
+          })
+          .catch(function (err) { notice((err.data && err.data.message) || '발행하지 못했어요. 잠시 뒤 다시 시도해 주세요.'); })
+          .then(function () { busy(false); update(); afterRemove(); });
+      });
+    }
+
     var PAGE_NOTE = 'manage-page-note';
     Array.prototype.forEach.call(document.querySelectorAll('.pager a'), function (a) {
       a.addEventListener('click', function () {
