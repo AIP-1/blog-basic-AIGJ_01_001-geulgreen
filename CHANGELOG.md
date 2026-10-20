@@ -7,6 +7,27 @@
 
 ---
 
+## [1.69.4] — 2026-10-20 · 개인 확장 (휴대폰 홈 카드 상자 빼기)
+
+- 휴대폰 홈 한 줄 카드: 테두리·그림자·배경 상자 없이 사진은 화면 끝까지, 카드 사이는 여백으로(탐색 카드와 PC는 그대로)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**휴대폰 홈(어두운 화면)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.4/v1694-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.4/v1694-home-m-after.png) |
+
+**휴대폰 홈(밝은 화면)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.4/v1694-home-m-light-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.4/v1694-home-m-light-after.png) |
+
+---
+
 ## [1.69.3] — 2026-10-19 · 개인 확장 (탐색 카드 작게, 첫 댓글 칸 빼기)
 
 - 탐색 [추천]·[트렌딩] 카드 작게: PC 한 줄 5개, 휴대폰 2개, 미리보기 글 없음, 15개씩 불러오기
