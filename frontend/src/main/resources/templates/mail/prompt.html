@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>오늘의 글감</title>
+</head>
+<body>
+<p>오늘은 아직 글을 안 쓰셨네요. 이런 글감은 어때요?</p>
+<p><strong th:text="${title}">글감</strong></p>
+<p th:if="${!#strings.isEmpty(hint)}" th:text="${hint}">안내</p>
+<p><a th:href="${writeLink}">[오늘의 글감 보러 가기]</a></p>
+<p>이 메일은 그날 글을 안 쓴 날에만 한 통 가요. 그만 받으려면 <a th:href="${settingsLink}">설정 › 알림</a>에서 끄면 돼요.</p>
+</body>
+</html>

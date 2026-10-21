@@ -2,29 +2,28 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>오늘의 미션 · 글그린</title>
+    <title>오늘의 글감 · 글그린</title>
 </head>
 <body>
 <main class="list-page mission-page">
-    <nav th:replace="~{mission/today :: missionTabs('today')}"></nav>
-    <!-- 057 강성찬 개인 확장: 오늘의 미션. 시안(10-13): 소개+내 기록 3칸 → 오늘의 주제 3칸 → 성장 기록 달력·배지 → 친구들·모두의 글 -->
+    <!-- 057 강성찬 개인 확장: 오늘의 미션(10-21부터 "오늘의 글감", 함께 쓰기는 머리글 메뉴의 따로 된 칸). 시안(10-13): 소개+내 기록 3칸 → 오늘의 주제 3칸 → 성장 기록 달력·배지 → 친구들·모두의 글 -->
     <section class="mission-panel mission-hero" aria-labelledby="mission-title">
         <div class="mission-hero-text">
-            <p class="mission-eyebrow" th:if="${isToday}">🌱 TODAY&#39;S MISSION</p>
-            <p class="mission-eyebrow" th:unless="${isToday}">🗓 지난 미션</p>
-            <h1 id="mission-title" th:text="${isToday ? '오늘도 한 편, 글그린' : dayLabel}">오늘도 한 편, 글그린</h1>
-            <p class="mission-lead" th:if="${isToday}">좋아하는 주제 하나를 골라 글을 써 보세요.<br>작은 기록이 모여, 멋진 이야기가 될 거예요.</p>
-            <p class="mission-lead" th:unless="${isToday}">그날의 주제와 글이에요. 미션은 그날 안에 쓴 글만 완료로 세요.</p>
+            <p class="mission-eyebrow" th:if="${isToday}">🌱 오늘의 글감</p>
+            <p class="mission-eyebrow" th:unless="${isToday}">🗓 지난 글감</p>
+            <h1 id="mission-title" th:text="${isToday ? '오늘은 무엇을 써 볼까요' : dayLabel}">오늘은 무엇을 써 볼까요</h1>
+            <p class="mission-lead" th:if="${isToday}">마음에 드는 글감 하나를 골라 써 보세요.<br>글쓰기 화면에서도 오늘의 글감을 보여 드려요.</p>
+            <p class="mission-lead" th:unless="${isToday}">그날의 글감과 글이에요. 그날 안에 쓴 글만 기록으로 세요.</p>
             <p class="mission-today-state" th:if="${isToday and myStats != null}" th:classappend="${myStats.doneToday()} ? 'is-done'">
                 <span class="streak-chip" th:if="${myStats.streak() > 0}" th:text="${'🔥 ' + myStats.streak() + '일 연속'}">🔥 1일 연속</span>
-                <th:block th:if="${myStats.doneToday()}">🎉 오늘 미션 완료!
+                <th:block th:if="${myStats.doneToday()}">🎉 오늘 한 편 썼어요!
                     <a th:if="${myTodayPost != null}" th:href="${myTodayPost.url()}" th:text="${'「' + myTodayPost.title() + '」'}">내 글</a></th:block>
-                <th:block th:unless="${myStats.doneToday()}">아직 오늘 미션을 안 했어요</th:block>
+                <th:block th:unless="${myStats.doneToday()}">오늘은 아직 안 썼어요</th:block>
             </p>
             <p class="mission-today-state mission-login-hint" th:if="${myStats == null}"><a href="/login?redirect=/missions">로그인</a>하면 내 기록과 배지를 모을 수 있어요</p>
         </div>
-        <ul class="mission-tiles" th:if="${myStats != null}" aria-label="내 미션 기록">
-            <li class="mission-tile tone-sand"><span class="mission-tile-icon" aria-hidden="true">✏️</span><span class="help">누적 미션</span>
+        <ul class="mission-tiles" th:if="${myStats != null}" aria-label="내 글감 기록">
+            <li class="mission-tile tone-sand"><span class="mission-tile-icon" aria-hidden="true">✏️</span><span class="help">쓴 날</span>
                 <strong th:text="${myStats.total() + '번'}">0번</strong><span class="help" th:text="${'최고 ' + myStats.best() + '일 연속'}">최고 0일 연속</span></li>
             <li class="mission-tile tone-green"><span class="mission-tile-icon" aria-hidden="true">🔥</span><span class="help">연속 참여</span>
                 <strong th:text="${myStats.streak() + '일'}">0일</strong><span class="help" th:text="${myStats.doneToday() ? '오늘도 이어 갔어요!' : '오늘 쓰면 이어져요'}">오늘도 이어 가요!</span></li>
@@ -41,8 +40,8 @@
     <section class="mission-panel mission-topics" aria-labelledby="topics-heading">
         <div class="mission-panel-head">
             <h2 id="topics-heading"><th:block th:replace="~{fragments/icons :: paw}"></th:block>
-                <span th:text="${isToday ? '오늘의 미션' : '그날의 미션'}">오늘의 미션</span></h2>
-            <p class="help"><th:block th:replace="~{fragments/meta :: parts(${dayLabel + ' · 주제 ' + topics.size() + '개 중 하나를 골라 써 보세요'})}"></th:block></p>
+                <span th:text="${isToday ? '오늘의 글감' : '그날의 글감'}">오늘의 글감</span></h2>
+            <p class="help"><th:block th:replace="~{fragments/meta :: parts(${dayLabel + ' · 글감 ' + topics.size() + '개 중 하나를 골라 써 보세요'})}"></th:block></p>
             <span class="count-chip" th:text="${anyAi ? 'AI 추천 ✨' : '글그린 추천 ✨'}">AI 추천</span>
             <nav class="mission-days" aria-label="날짜 옮기기">
                 <a th:href="@{/missions(date=${prevDay})}" th:text="${'← ' + prevLabel}">← 전날</a>
@@ -50,10 +49,10 @@
                 <a th:if="${nextDay != null}" th:href="@{/missions(date=${nextDay})}">다음날 →</a>
             </nav>
         </div>
-        <p th:if="${topics.isEmpty()}" class="empty-state">이날은 주제가 없었어요</p>
+        <p th:if="${topics.isEmpty()}" class="empty-state">이날은 글감이 없었어요</p>
         <ol class="topic-cards">
             <li th:each="t, st : ${topics}" th:class="${'topic-card tone-' + (st.index == 0 ? 'green' : st.index == 1 ? 'blue' : 'orange')}">
-                <p class="topic-no" th:text="${'주제 ' + (st.index + 1)}">주제 1</p>
+                <p class="topic-no" th:text="${'글감 ' + (st.index + 1)}">글감 1</p>
                 <h3 class="topic-title" th:text="${t.title()}">주제</h3>
                 <p class="topic-hint" th:text="${t.hint()}">안내</p>
                 <div class="topic-foot">
@@ -61,7 +60,7 @@
                     <th:block th:if="${isToday}">
                         <form th:if="${currentMemberId != null}" method="post" th:action="@{/missions/topics/{id}/write(id=${t.id()})}">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                            <button type="submit" class="btn topic-write">✍ 이 주제로 쓰기 →</button>
+                            <button type="submit" class="btn topic-write">✍ 이 글감으로 쓰기 →</button>
                         </form>
                         <a th:unless="${currentMemberId != null}" class="btn topic-write" href="/login?redirect=/missions">로그인하고 쓰기 →</a>
                     </th:block>
@@ -88,7 +87,7 @@
                     <th:block th:each="c : ${calendar.cells()}">
                         <span th:if="${c.day() == 0}" class="cal-day cal-blank"></span>
                         <a th:if="${c.day() > 0 and c.done()}" th:href="@{/missions(date=${c.date()})}" class="cal-day is-done"
-                           th:classappend="${c.selected()} ? 'is-selected'" th:text="${c.day()}" th:title="${'미션 완료 · ' + c.date()}">1</a>
+                           th:classappend="${c.selected()} ? 'is-selected'" th:text="${c.day()}" th:title="${'쓴 날 · ' + c.date()}">1</a>
                         <span th:if="${c.day() > 0 and !c.done()}" class="cal-day" th:classappend="${(c.future() ? 'is-future ' : '') + (c.selected() ? 'is-selected' : '')}" th:text="${c.day()}">2</span>
                     </th:block>
                 </div>

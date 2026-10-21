@@ -63,15 +63,15 @@ class DailyMissionIT extends IntegrationTestBase {
         // 오늘의 주제 3개가 내장 주제로 만들어진다
         String today = page("/missions", writer);
         List<TopicPool.Topic> expected = TopicPool.forDay(DAY, 3);
-        assertThat(today).contains("오늘의 미션").contains(expected.get(0).title()).contains(expected.get(2).title())
-                .contains("글그린 추천").contains("이 주제로 쓰기");
+        assertThat(today).contains("오늘의 글감").contains(expected.get(0).title()).contains(expected.get(2).title())
+                .contains("글그린 추천").contains("이 글감으로 쓰기");
         List<MissionService.Topic> topics = missions.topics(DAY);
         assertThat(topics).hasSize(3);
         // 주제를 고르면 제목에 주제가 든 임시글, 다시 눌러도 같은 글
         long postId = startWriting(writer, topics.get(0).id());
         assertThat(startWriting(writer, topics.get(0).id())).isEqualTo(postId);
         assertThat(jdbc.queryForObject("SELECT title FROM post WHERE id = ?", String.class, postId)).isEqualTo(topics.get(0).title());
-        assertThat(page("/write/" + postId, writer)).contains("🗓 오늘의 미션: " + topics.get(0).title());
+        assertThat(page("/write/" + postId, writer)).contains("오늘의 글감: " + topics.get(0).title());
         // 친구 공개로 발행 → 완료, 친구에게만 알림
         publish(writer, postId, "FRIENDS");
         assertThat(jdbc.queryForObject("SELECT completed_at IS NOT NULL FROM mission_post WHERE post_id = ?", Boolean.class, postId)).isTrue();
@@ -86,7 +86,7 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions", stranger)).doesNotContain("오늘의 미션 글");
         assertThat(page("/missions", null)).doesNotContain("오늘의 미션 글");
         // 내 기록과 글 화면 표시
-        assertThat(page("/missions", writer)).contains("1번").contains("🔥 1일").contains("오늘 미션 완료");
+        assertThat(page("/missions", writer)).contains("1번").contains("🔥 1일").contains("오늘 한 편 썼어요");
         // 066 배지: 첫 미션만 받음, 나머지는 받는 법이 보인다. 로그인 안 한 사람에게는 배지 칸이 없다
         assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 미션").contains("받았어요")
                 .contains("3일 연속 완료하면");
@@ -98,7 +98,7 @@ class DailyMissionIT extends IntegrationTestBase {
         clock.set(T.plusSeconds(24 * 3600));
         mockMvc.perform(post("/missions/topics/{id}/write", topics.get(0).id()).with(csrf()).with(TestAuth.member(writer)))
                 .andExpect(status().isBadRequest());
-        assertThat(page("/missions?date=2026-10-12", friend)).contains("지난 미션").contains("오늘의 미션 글");
+        assertThat(page("/missions?date=2026-10-12", friend)).contains("지난 글감").contains("오늘의 미션 글");
         assertThat(page("/missions", friend)).contains("10월 12일");
         mockMvc.perform(get("/missions?date=2026-12-31")).andExpect(status().isNotFound());
     }

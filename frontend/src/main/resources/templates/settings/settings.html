@@ -238,6 +238,21 @@
             <p class="form-status" id="notification-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
+    <!-- 10-21 강성찬 개인 확장: 저녁 글감 메일(기본 꺼짐). 그날 글을 안 쓴 날에만 저녁 8시에 한 통 -->
+    <section th:if="${promptMailOn != null}" aria-labelledby="prompt-mail-heading">
+        <h2 id="prompt-mail-heading">저녁 글감 메일</h2>
+        <form method="post" action="/settings/prompt-mail">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="field">
+                <label>
+                    <input type="checkbox" name="on" value="on" th:checked="${promptMailOn}">
+                    <span>글을 안 쓴 날 저녁에 오늘의 글감 메일 받기</span>
+                </label>
+            </div>
+            <p class="help">저녁 8시에 한 통만 보내요. 그날 글을 발행했으면 보내지 않아요. 보내는 사람은 "글그린"이에요.</p>
+            <button type="submit">저장</button>
+        </form>
+    </section>
     <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
     <section th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
         <h2 id="telegram-heading">텔레그램 알림</h2>

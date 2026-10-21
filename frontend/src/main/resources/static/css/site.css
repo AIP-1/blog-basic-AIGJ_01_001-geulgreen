@@ -1959,3 +1959,15 @@ dialog.ask-dialog { width: min(420px, calc(100% - 32px)); margin: auto; padding:
 dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 .ask-text { margin: 0 0 16px; line-height: 1.6; word-break: keep-all; }
 .ask-actions { display: flex; justify-content: flex-end; gap: 8px; }
+/* 10-21 강성찬 개인 확장: 글쓰기 화면의 오늘의 글감 한 줄(누르면 그 글감으로 쓰기, ×로 닫기) */
+.topic-note { display: flex; align-items: center; gap: 4px; margin: 0 0 12px; padding: 4px 6px 4px 4px; border-radius: 12px;
+    background: var(--color-brand-soft); min-width: 0; }
+.topic-note[hidden] { display: none; }
+.topic-note-pick { margin: 0; flex: 1; min-width: 0; }
+.topic-note-pick button { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; border: 0; background: none;
+    justify-content: flex-start; padding: 8px 10px; color: var(--color-text); font: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+.topic-note-pick button:hover .topic-note-title { text-decoration: underline; }
+.topic-note-pick .icon { flex: none; color: var(--color-brand); }
+.topic-note-label { flex: none; color: var(--color-brand); font-weight: 700; font-size: .9em; }
+.topic-note-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topic-note-close { flex: none; color: var(--color-text-muted); }
