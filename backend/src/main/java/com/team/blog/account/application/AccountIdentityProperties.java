@@ -18,11 +18,14 @@ public record AccountIdentityProperties(
      * @param reserved               블로그 주소 예약어(본문 정확 일치, FR-004)
      * @param prefillMaxBodyLength   미리 채우기 7단계 자르기 길이(08 §3)
      * @param suggestionBatchSize    대안 번호 후보를 한 번에 조회하는 개수(research R-3)
+     * @param permanentHolds         강성찬 개인 확장: 바꾼 뒤에도 잡아 두는 기간이 끝나지 않는 옛 주소(검색에 올라간 주소의 넘김을 지킨다).
+     *                               예약어와 달리 지금 그 주소를 쓰는 회원의 블로그 경로는 그대로다
      */
     public record HandleSettings(
             @DefaultValue List<String> reserved,
             @DefaultValue("30") int prefillMaxBodyLength,
-            @DefaultValue("20") int suggestionBatchSize) {
+            @DefaultValue("20") int suggestionBatchSize,
+            @DefaultValue List<String> permanentHolds) {
     }
 
     /**

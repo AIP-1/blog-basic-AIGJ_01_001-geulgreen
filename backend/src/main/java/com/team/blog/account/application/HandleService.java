@@ -173,12 +173,15 @@ public class HandleService {
         return null;
     }
 
-    /** 074: 아직 잡아 둔 기간인 옛 주소(그 주인 {@code memberId}의 것은 빼고). */
+    /** 074: 아직 잡아 둔 기간인 옛 주소(그 주인 {@code memberId}의 것은 빼고). {@code permanentHolds}는 기간이 끝나지 않는다. */
     private List<String> heldByOthers(List<String> handles, Long memberId) {
-        return jdbc.queryForList("SELECT old_handle FROM handle_history WHERE old_handle IN (:h) AND hold_until > :now"
+        boolean permanent = !settings.permanentHolds().isEmpty();
+        return jdbc.queryForList("SELECT old_handle FROM handle_history WHERE old_handle IN (:h)"
+                        + (permanent ? " AND (hold_until > :now OR old_handle IN (:permanent))" : " AND hold_until > :now")
                         + " AND (CAST(:me AS bigint) IS NULL OR member_id <> :me)",
                 new org.springframework.jdbc.core.namedparam.MapSqlParameterSource("h", handles)
                         .addValue("now", java.sql.Timestamp.from(clock.instant()))
+                        .addValue("permanent", settings.permanentHolds())
                         .addValue("me", memberId, java.sql.Types.BIGINT), String.class);
     }
 
