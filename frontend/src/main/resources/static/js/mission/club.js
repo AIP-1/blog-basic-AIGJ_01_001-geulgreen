@@ -2,8 +2,11 @@
 (function () {
   'use strict';
   Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
+    var approved = false; // [예] 뒤 다시 보내는 제출은 그대로 통과(keep-scroll.js 등 다른 submit 처리도 받게)
     form.addEventListener('submit', function (e) {
-      if (!window.confirm(form.dataset.confirm)) { e.preventDefault(); }
+      if (approved) { approved = false; return; }
+      e.preventDefault();
+      window.ask(form.dataset.confirm, '확인', true).then(function (ok) { if (ok) { approved = true; form.requestSubmit(); } });
     });
   });
   var copy = document.getElementById('club-invite-copy');
