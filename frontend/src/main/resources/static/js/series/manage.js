@@ -78,4 +78,6 @@
 
   var target = location.hash && document.getElementById(location.hash.slice(1));
   if (target && target.classList.contains('series-group')) { target.open = true; }
+  // 10-21: 프로필 시리즈 탭 [시리즈 추가]로 오면 이름 칸에 바로 쓸 수 있게
+  if (target && target.id === 'series-new') { var name = document.getElementById('series-new-title'); if (name) { name.focus(); } }
 })();

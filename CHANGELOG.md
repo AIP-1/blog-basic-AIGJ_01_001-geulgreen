@@ -7,6 +7,28 @@
 
 ---
 
+## [1.69.5] — 2026-10-21 · 개인 확장 (시리즈 추가 버튼, 탭 줄 스크롤바)
+
+- 내 블로그 시리즈 탭 줄 끝에 [시리즈 추가](주인에게만, 내 글 > 시리즈의 새 시리즈 만들기 칸을 연 채로)
+- 블로그 홈·글·시리즈 탭 줄의 세로 스크롤바 없앰
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**블로그 시리즈 탭(주인)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.5/v1695-stab-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.5/v1695-stab-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.69.5/v1695-stab-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.69.5/v1695-stab-m-after.png) |
+
+---
+
 ## [1.69.4] — 2026-10-20 · 개인 확장 (휴대폰 홈 카드 상자 빼기)
 
 - 휴대폰 홈 한 줄 카드: 테두리·그림자·배경 상자 없이 사진은 화면 끝까지, 카드 사이는 여백으로(탐색 카드와 PC는 그대로)

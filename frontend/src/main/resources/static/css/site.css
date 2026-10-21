@@ -1945,3 +1945,8 @@ main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { 
     .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; }
     .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
 }
+/* 10-21(chan) 강성찬 개인 확장: 프로필 탭 줄은 가로로만 넘친다(세로 1px 넘침에 스크롤 바가 생기던 것), 주인의 [시리즈 추가]는 오른쪽 끝 */
+.blog-tabs { overflow-y: hidden; align-items: center; }
+.blog-tabs-action { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.blog-tabs-action .icon { width: 16px; height: 16px; }
+.blog-tabs .blog-tabs-action { padding: 4px 12px; min-height: 0; margin: 4px 1px 4px auto; line-height: 1.4; border: 1px solid var(--color-control-border); color: var(--color-text); }
