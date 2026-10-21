@@ -234,12 +234,14 @@
     var discard = document.getElementById('discard-working-copy');
     if (discard) {
       discard.addEventListener('click', function () {
-        if (!window.confirm('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?')) { return; }
-        fetch('/api/posts/' + state.postId + '/working-copy', { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
-          .then(function (res) {
-            if (res.status !== 204) { showNotice('변경을 취소하지 못했어요.', 'error'); return; }
-            autosave.disable().then(function () { window.location.reload(); });
-          }, function () { showNotice('연결되지 않아 변경을 취소하지 못했어요.', 'error'); });
+        window.ask('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?', '되돌리기', true).then(function (ok) {
+          if (!ok) { return; }
+          fetch('/api/posts/' + state.postId + '/working-copy', { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
+            .then(function (res) {
+              if (res.status !== 204) { showNotice('변경을 취소하지 못했어요.', 'error'); return; }
+              autosave.disable().then(function () { window.location.reload(); });
+            }, function () { showNotice('연결되지 않아 변경을 취소하지 못했어요.', 'error'); });
+        });
       });
     }
 
