@@ -15,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BlogOwnerResolver {
 
     private final MemberRepository memberRepository;
+    private final GuardianConsentService guardianConsent;
 
-    public BlogOwnerResolver(MemberRepository memberRepository) {
+    public BlogOwnerResolver(MemberRepository memberRepository, GuardianConsentService guardianConsent) {
         this.memberRepository = memberRepository;
+        this.guardianConsent = guardianConsent;
     }
 
     @Transactional(readOnly = true)
@@ -25,7 +27,9 @@ public class BlogOwnerResolver {
         if (!HandleRules.isValidFormat(handle)) {
             return Optional.empty();
         }
-        return memberRepository.findActiveByHandle(handle).map(BlogOwnerResolver::toOwner);
+        // 10-21 chan: 보호자 동의 전인 14세 미만 계정은 아직 없는 것처럼
+        return memberRepository.findActiveByHandle(handle).filter(m -> !guardianConsent.pending(m.getId()))
+                .map(BlogOwnerResolver::toOwner);
     }
 
     private static BlogOwner toOwner(Member member) {

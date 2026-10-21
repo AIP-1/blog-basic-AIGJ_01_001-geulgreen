@@ -62,14 +62,14 @@ class SocialSignupConcurrencyIT extends IntegrationTestBase {
         assertThat(results).allMatch(r -> r.memberId() == memberId);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM member", Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM auth_identity", Integer.class)).isEqualTo(1);
-        assertThat(jdbc.queryForObject("SELECT count(*) FROM member_agreement", Integer.class)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM member_agreement", Integer.class)).isEqualTo(3);
     }
 
     @Test
     void sameSubmissionTwentyTimesHitsMemberHandleFirst() throws Exception {
         PendingSocialSignup pending = new PendingSocialSignup(Provider.GOOGLE, "g-race", "race@gmail.com", "Race", null,
                 clock.instant());
-        assertExactlyOneAccount(race(pending, n -> new SocialSignupCommand("레이스", "race", true, true, false, null)));
+        assertExactlyOneAccount(race(pending, n -> new SocialSignupCommand("레이스", "race", true, true, false, null, "OVER14", null, null)));
     }
 
     @Test
@@ -77,6 +77,6 @@ class SocialSignupConcurrencyIT extends IntegrationTestBase {
         PendingSocialSignup pending = new PendingSocialSignup(Provider.GITHUB, "31337", "race@x.com", "Race", null,
                 clock.instant());
         assertExactlyOneAccount(race(pending, n -> new SocialSignupCommand("경주" + (char) ('가' + n), "race_" + n,
-                true, true, false, null)));
+                true, true, false, null, "OVER14", null, null)));
     }
 }

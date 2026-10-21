@@ -7,5 +7,10 @@ package com.team.blog.account.application;
  * @param email  공급자가 인증한 이메일이 없을 때만 사용자가 입력한 이메일, 아니면 무시
  */
 public record SocialSignupCommand(String nickname, String handle, boolean agreeTerms, boolean agreePrivacy,
-                                  boolean useSocialPicture, String email) {
+                                  boolean useSocialPicture, String email, String ageGroup,
+                                  String guardianName, String guardianEmail) {
+
+    public boolean under14() {
+        return AgeGroup.UNDER14.equals(ageGroup);
+    }
 }

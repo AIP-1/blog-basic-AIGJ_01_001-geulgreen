@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>보호자 동의 · 글그린</title>
+</head>
+<body>
+<main class="auth-page auth-page-single guardian-page">
+    <!-- 10-21 chan: 보호자가 메일 링크로 여는 동의 화면. 무엇을·왜·얼마나 보관하는지 보여 주고 동의 여부를 받는다 -->
+    <th:block th:if="${pending == null}">
+        <h1>링크를 쓸 수 없어요</h1>
+        <p>이미 처리했거나 기한이 지난 동의 링크예요. 기한이 지난 경우 아이가 적은 정보는 지워졌으니, 다시 가입하면 새 메일이 가요.</p>
+        <p><a class="link-btn" href="/">처음으로</a></p>
+    </th:block>
+    <th:block th:if="${pending != null}">
+        <h1 th:text="${pending.guardianName() + '님, ' + pending.childNickname() + '님의 가입에 동의해 주세요'}">보호자 동의</h1>
+        <p>만 14세 미만 어린이가 글그린에 가입하려면 보호자의 동의가 필요해요(개인정보 보호법 제22조의2).</p>
+        <dl class="guardian-terms">
+            <dt>모으는 정보</dt>
+            <dd>어린이: 이메일, 닉네임, 블로그 주소, 비밀번호(암호로 바꿔 보관), 쓴 글과 댓글<br>보호자: 이름, 이메일(동의 확인에만 써요)</dd>
+            <dt>쓰는 곳</dt>
+            <dd>블로그 계정을 만들고, 로그인하고, 글을 쓰고 보여 주는 데만 써요. 광고나 다른 곳에 넘기지 않아요.</dd>
+            <dt>보관 기간</dt>
+            <dd>탈퇴할 때까지 보관하고, 탈퇴하면 정해진 기간 뒤 지워요. 동의하지 않으면 지금 바로 지워요.</dd>
+            <dt>보호자 권리</dt>
+            <dd>언제든 아이 계정의 정보를 보거나 고치거나 지워 달라고 요청할 수 있어요(문의하기).</dd>
+        </dl>
+        <p class="help" th:text="${'이 링크는 ' + #temporals.format(pending.expiresAt(), 'M월 d일 HH:mm') + '까지 쓸 수 있어요. 그때까지 답하지 않으면 정보는 지워져요.'}">기한</p>
+        <div class="guardian-actions">
+            <form method="post" action="/auth/guardian/consent">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="token" th:value="${token}">
+                <button type="submit" name="answer" value="decline" class="btn">동의하지 않아요</button>
+            </form>
+            <form method="post" action="/auth/guardian/consent">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="token" th:value="${token}">
+                <button type="submit" name="answer" value="agree" class="btn btn-primary">동의해요</button>
+            </form>
+        </div>
+    </th:block>
+</main>
+</body>
+</html>
