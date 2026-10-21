@@ -278,6 +278,12 @@ main.list-page { max-width: var(--page-wide); }
 .notif-unread .notif-message { font-weight: 700; }
 .notif-dot { color: var(--color-brand); margin-right: 4px; }
 .notif-time { display: block; color: var(--color-text-muted); font-size: .85em; }
+.notif-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 2px 8px; border-bottom: 1px solid var(--color-border); }
+.notif-panel-title { font-size: 1.02em; }
+.notif-read-all { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; padding: 5px 12px; font-size: .85em; font-weight: 600;
+    background: var(--color-brand-soft); color: var(--color-brand); cursor: pointer; }
+.notif-read-all:hover { background: var(--color-brand); color: var(--color-on-fill); }
+.notif-read-all:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 /* 022 운영 */
 .warning { background: var(--color-highlight); border: 1px solid var(--color-warning-border); padding: 6px 10px; border-radius: 6px; }
 .snapshot { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--color-surface-muted); padding: 8px; border-radius: 6px; }
@@ -1085,7 +1091,7 @@ main.list-page .home-cards { gap: 18px; }
 .sort-menu-panel a { padding: 8px 12px; border-radius: 8px; color: var(--color-text); text-decoration: none; font-size: .92em; }
 .sort-menu-panel a:hover, .sort-menu-panel a[aria-current] { background: var(--color-surface-muted); }
 /* 홈 오른쪽 인기 태그는 작게 */
-/* 057 오늘의 미션(강성찬 개인 확장). 시안(10-13): 흰 판(panel) 여러 장, 소개+기록 3칸 → 주제 3칸 → 달력·배지 → 글 */
+/* 057 오늘의 미션(강성찬 개인 확장). 10-21 다시 그림: 제목 한 줄 → 흰 글감 카드 3장 → 내 기록(숫자 한 곳)·배지 → 글. 이모지 대신 선 아이콘 */
 .mission-page { display: flex; flex-direction: column; gap: 20px; }
 .mission-panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 22px; padding: 24px 26px;
     box-shadow: 0 2px 10px var(--color-shadow); }
@@ -1095,43 +1101,18 @@ main.list-page .home-cards { gap: 18px; }
 .mission-panel-head > .help { margin: 0; }
 .mission-panel-head .count-chip { font-size: .8em; margin-left: auto; }
 .mission-panel > .help { margin: 6px 0 0; }
-/* 소개: 글 · 기록 3칸 · 고양이 */
-.mission-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: center; position: relative; overflow: hidden; }
-@media (min-width: 760px) { .mission-hero { grid-template-columns: minmax(0, 1.1fr) auto; } }
-@media (min-width: 1100px) { .mission-hero { grid-template-columns: minmax(0, 1fr) auto 260px; padding-right: 0; padding-block: 0; }
-    .mission-hero-text { padding-block: 28px; } }
 .mission-eyebrow { margin: 0 0 6px; color: var(--color-brand); font-weight: 700; font-size: .85em; letter-spacing: .06em; }
-.mission-hero h1 { margin: 0; font-size: 1.85em; line-height: 1.3; }
-.mission-lead { margin: 10px 0 0; color: var(--color-text-muted); line-height: 1.7; }
-.mission-today-state { margin: 14px 0 0; font-weight: 600; font-size: .92em; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.mission-today-state.is-done { align-self: flex-start; background: var(--color-brand-soft); padding: 8px 14px; border-radius: 12px; }
-.mission-today-state a { color: var(--color-brand); }
-.streak-chip { padding: 2px 10px; border-radius: 999px; background: var(--tone-orange-bg); color: var(--color-text); font-size: .9em; }
-.mission-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.mission-tile { background: var(--tone-bg); border-radius: 16px; padding: 14px 12px; min-width: 104px; text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.mission-tile-icon { font-size: 1.4em; line-height: 1.2; }
-.mission-tile strong { font-size: 1.6em; line-height: 1.3; }
-.mission-tile .help { font-size: .8em; }
-.mission-hero-art { display: none; position: relative; align-self: stretch; }
-@media (min-width: 1100px) { .mission-hero-art { display: block; grid-column: -2 / -1; min-height: 220px; } }
-.mission-today-state.mission-login-hint { display: block; font-weight: 500; color: var(--color-text-muted); }
-.mission-hero-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0 22px 22px 0;
-    mask-image: linear-gradient(to right, transparent, black 35%); -webkit-mask-image: linear-gradient(to right, transparent, black 35%); }
-.mission-hero-note { position: absolute; z-index: 1; top: 14px; left: 30px; margin: 0; font-family: Gaegu, "Pretendard Variable", cursive;
-    font-size: 1.05em; line-height: 1.3; color: var(--color-text); }
 /* 오늘의 주제 3칸: 색 카드, 주제 칩, 아래 줄은 완료 수와 색 버튼 */
 .mission-days { display: flex; gap: 6px; flex-wrap: wrap; }
-.mission-days a { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-brand);
+.mission-days a { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-brand);
     text-decoration: none; font-weight: 600; font-size: .85em; }
 .mission-days a:hover { background: var(--color-surface-muted); }
-.topic-cards { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.topic-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 @media (min-width: 800px) { .topic-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.topic-card { background: var(--tone-bg); border-radius: 18px; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
-.topic-no { align-self: flex-start; margin: 0; padding: 3px 12px; border-radius: 999px; background: var(--color-surface);
-    color: var(--color-text); font-weight: 700; font-size: .82em; display: inline-flex; align-items: center; gap: 6px; }
-.topic-no::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tone-fg); } /* 카드 색은 점으로, 글자는 대비 맞는 기본색 */
-.topic-title { margin: 4px 0 0; font-size: 1.3em; line-height: 1.4; }
+.topic-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 20px 22px;
+    display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 10px var(--color-shadow); }
+.topic-no { margin: 0; color: var(--color-brand); font-weight: 700; font-size: .82em; }
+.topic-title { margin: 0; font-size: 1.3em; line-height: 1.4; }
 /* 084: 세 칸으로 나란할 때 주제 제목은 2줄 자리를 잡아 안내 글 시작 줄을 맞춘다 */
 @media (min-width: 800px) { .topic-title { min-height: calc(2em * 1.4); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden; } }
@@ -1151,9 +1132,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-month a:hover { background: var(--color-surface-muted); }
 .mission-month-off { color: var(--color-text-muted); cursor: default; }
 .mission-month strong { padding: 2px 14px; border: 1px solid var(--color-border); border-radius: 999px; font-size: .9em; }
-.mission-growth-body { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (min-width: 560px) { .mission-growth-body { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); align-items: center; } }
-.mission-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px 4px; padding: 14px 10px;
+.mission-calendar { margin-top: 14px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px 4px; padding: 14px 10px;
     border: 1px solid var(--color-border); border-radius: 16px; text-align: center; }
 .cal-week { font-size: .78em; color: var(--color-text-muted); padding-bottom: 4px; }
 .cal-day { justify-self: center; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
@@ -1162,22 +1141,17 @@ main.list-page .home-cards { gap: 18px; }
 .cal-day.is-done:hover { outline: 2px solid var(--tone-green-fg); }
 .cal-day.is-future { color: var(--color-text-muted); }
 .cal-day.is-selected { outline: 2px solid var(--color-brand); }
-.mission-growth-side { display: flex; flex-direction: column; gap: 14px; }
-.mission-growth-note { margin: 0; font-family: Gaegu, "Pretendard Variable", cursive; font-size: 1.1em; line-height: 1.4; color: var(--color-text-muted); }
-.mission-rate { border: 1px solid var(--color-border); border-radius: 14px; padding: 12px 14px; }
-.mission-rate p { margin: 0 0 8px; display: flex; justify-content: space-between; gap: 8px; font-size: .85em; color: var(--color-text-muted); white-space: nowrap; }
-.mission-rate strong { color: var(--color-text); }
-.mission-rate-bar { height: 8px; border-radius: 999px; background: var(--color-surface-muted); overflow: hidden; }
-.mission-rate-bar span { display: block; height: 100%; border-radius: 999px; background: var(--color-brand-fill); }
 /* 066 미션 배지: 받은 것은 색 카드, 아직인 것은 흐리게 받는 법과 함께 */
 .badge-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
 .badge-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 8px; text-align: center;
     background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: 16px; color: var(--color-text-muted); }
-.badge-item.is-earned { color: var(--color-text); border-style: solid; background: var(--tone-bg); border-color: var(--tone-bg); }
+.badge-item.is-earned { color: var(--color-text); border-style: solid; background: var(--color-brand-soft); border-color: var(--color-brand-soft); }
 .badge-item strong { font-size: .9em; }
 .badge-item .help { font-size: .78em; }
-.badge-emoji { font-size: 2em; line-height: 1.3; }
-.badge-item:not(.is-earned) .badge-emoji { filter: grayscale(1); }
+.badge-icon { display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 999px;
+    background: var(--color-surface-muted); color: var(--color-text-muted); margin-bottom: 4px; }
+.badge-icon .icon { width: 22px; height: 22px; }
+.badge-item.is-earned .badge-icon { background: var(--color-surface); color: var(--color-brand); }
 /* 친구들·모두의 글: 홈과 같은 글 카드 */
 .mission-feed { margin-top: 8px; }
 .mission-feed h2 { font-size: 1.15em; margin: 0 0 12px; }
@@ -1193,10 +1167,25 @@ main.list-page .home-cards { gap: 18px; }
 .mission-post .card-tag { max-width: 50%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mission-post-reply { position: relative; z-index: 1; margin-left: auto; color: var(--color-brand); font-weight: 600; text-decoration: none; }
 .mission-post-reply:hover { text-decoration: underline; }
-@media (max-width: 640px) { .mission-panel { padding: 20px 18px; } .mission-hero h1 { font-size: 1.5em; }
-    .mission-tile { min-width: 0; padding: 12px 6px; } .mission-tile strong { font-size: 1.35em; }
-    .mission-panel-head .count-chip { margin-left: 0; } }
+@media (max-width: 640px) { .mission-panel { padding: 20px 18px; } .mission-panel-head .count-chip { margin-left: 0; } }
 .mission-editor-note strong { margin-right: 6px; }
+/* 10-21 글감 화면 머리: 제목·날짜 줄, 오늘 쓴 상태 한 줄, 내 기록 숫자 4칸 */
+.geulgam-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; }
+.geulgam-head h1 { margin: 0; font-size: 1.75em; }
+.geulgam-head .help { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.geulgam-head .count-chip { font-size: .8em; }
+.geulgam-state { margin: -6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-weight: 600; font-size: .95em; }
+.geulgam-state.is-done { color: var(--color-brand); }
+.geulgam-state a { color: var(--color-brand); }
+.geulgam-streak { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-muted); font-weight: 500; }
+.geulgam-streak .icon { width: 16px; height: 16px; }
+.topic-write .icon { width: 15px; height: 15px; }
+.btn.topic-write { display: inline-flex; align-items: center; gap: 6px; }
+.geulgam-stats { margin: 14px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.geulgam-stats div { background: var(--color-surface-muted); border-radius: 12px; padding: 10px 8px; text-align: center; }
+.geulgam-stats dt { font-size: .78em; color: var(--color-text-muted); }
+.geulgam-stats dd { margin: 2px 0 0; font-size: 1.25em; font-weight: 700; }
+.mission-feed h2 { display: flex; align-items: center; gap: 8px; }
 
 /* 058 서식 창(강성찬 개인 확장, 노션 선택 메뉴처럼): 글을 고르면 뜨는 창. 059 AI로 고치기 칸 */
 .format-panel { position: absolute; z-index: 40; width: 256px; max-width: calc(100vw - 16px); padding: 6px;
