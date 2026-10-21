@@ -50,6 +50,7 @@
     box.hidden = !text;
   }
 
+  var ASK_LABEL = { trash: '휴지통으로', purge: '영구 삭제' };
   var CONFIRM = {
     trash: '휴지통으로 옮길까요? 30일 뒤 완전히 삭제돼요',
     purge: '영구 삭제하면 되돌릴 수 없어요. 댓글·좋아요도 함께 지워져요'
@@ -72,7 +73,8 @@
     // 휴지통 비우기: 확인만 받고 폼은 그대로 제출(서버가 돌아올 때 알림)
     Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
       form.addEventListener('submit', function (e) {
-        if (!window.confirm(form.dataset.confirm)) { e.preventDefault(); }
+        e.preventDefault();
+        window.ask(form.dataset.confirm, '영구 삭제', true).then(function (ok) { if (ok) { form.submit(); } });
       });
     });
 
@@ -82,18 +84,20 @@
         var action = form.dataset.rowAction;
         var row = rowOf(form);
         var id = row.dataset.postId;
-        if (CONFIRM[action] && !window.confirm(CONFIRM[action])) { return; }
-        var request = action === 'trash' ? call('DELETE', '/api/posts/' + id)
-          : action === 'restore' ? call('POST', '/api/posts/' + id + '/restore')
-          : call('DELETE', '/api/posts/' + id + '/permanent');
-        request.then(function (data) {
-          if (data && data.purged) { notice('빈 글이라 바로 삭제했어요'); }
-          if (action === 'restore') { notice('복구했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요'); }
-          row.remove();
-          refreshCounts();
-          afterRemove();
-        }).catch(function (err) {
-          fail(row, (err.data && err.data.message) || '처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+        (CONFIRM[action] ? window.ask(CONFIRM[action], ASK_LABEL[action], true) : Promise.resolve(true)).then(function (ok) {
+          if (!ok) { return; }
+          var request = action === 'trash' ? call('DELETE', '/api/posts/' + id)
+            : action === 'restore' ? call('POST', '/api/posts/' + id + '/restore')
+            : call('DELETE', '/api/posts/' + id + '/permanent');
+          request.then(function (data) {
+            if (data && data.purged) { notice('빈 글이라 바로 삭제했어요'); }
+            if (action === 'restore') { notice('복구했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요'); }
+            row.remove();
+            refreshCounts();
+            afterRemove();
+          }).catch(function (err) {
+            fail(row, (err.data && err.data.message) || '처리하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+          });
         });
       });
     });
@@ -120,13 +124,15 @@
 
     Array.prototype.forEach.call(document.querySelectorAll('.discard-editing'), function (button) {
       button.addEventListener('click', function () {
-        if (!window.confirm('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?')) { return; }
-        var row = rowOf(button);
-        call('DELETE', '/api/posts/' + button.dataset.postId + '/working-copy').then(function () {
-          var badge = row.querySelector('.badge-editing');
-          if (badge) { badge.remove(); }
-          button.remove();
-        }).catch(function () { fail(row, '변경을 취소하지 못했어요.'); });
+        window.ask('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?', '되돌리기', true).then(function (ok) {
+          if (!ok) { return; }
+          var row = rowOf(button);
+          call('DELETE', '/api/posts/' + button.dataset.postId + '/working-copy').then(function () {
+            var badge = row.querySelector('.badge-editing');
+            if (badge) { badge.remove(); }
+            button.remove();
+          }).catch(function () { fail(row, '변경을 취소하지 못했어요.'); });
+        });
       });
     });
   }
@@ -175,17 +181,19 @@
         if (!rows.length) { return; }
         var ask = action === 'trash' ? rows.length + '개를 휴지통으로 옮길까요? 30일 뒤 완전히 삭제돼요'
           : action === 'purge' ? rows.length + '개를 영구 삭제할까요? 되돌릴 수 없어요. 댓글·좋아요도 함께 지워져요' : null;
-        if (ask && !window.confirm(ask)) { return; }
-        busy(true);
-        each(rows, function (id) {
-          return action === 'trash' ? call('DELETE', '/api/posts/' + id)
-            : action === 'restore' ? call('POST', '/api/posts/' + id + '/restore')
-            : call('DELETE', '/api/posts/' + id + '/permanent');
-        }, function (row) { row.remove(); }).then(function (done) {
-          busy(false);
-          if (done) { notice(done + DONE[action]); refreshCounts(); }
-          update();
-          afterRemove();
+        (ask ? window.ask(ask, ASK_LABEL[action], true) : Promise.resolve(true)).then(function (ok) {
+          if (!ok) { return; }
+          busy(true);
+          each(rows, function (id) {
+            return action === 'trash' ? call('DELETE', '/api/posts/' + id)
+              : action === 'restore' ? call('POST', '/api/posts/' + id + '/restore')
+              : call('DELETE', '/api/posts/' + id + '/permanent');
+          }, function (row) { row.remove(); }).then(function (done) {
+            busy(false);
+            if (done) { notice(done + DONE[action]); refreshCounts(); }
+            update();
+            afterRemove();
+          });
         });
       });
     });
@@ -196,22 +204,24 @@
         var rows = picked().map(rowOf);
         button.closest('details').open = false;
         if (!rows.length) { return; }
-        if (to === 'PUBLIC' && !window.confirm(rows.length + '개를 모든 사람이 볼 수 있게 바꿀까요?')) { return; }
-        busy(true);
-        each(rows, function (id) { return call('PATCH', '/api/posts/' + id + '/visibility', { visibility: to }); }, function (row, data) {
-          var v = (data && data.visibility) || to;
-          // 줄의 ⋯ 메뉴 값도 맞추고, 카드 표시는 visibility-changed를 받는 아래 처리가 바꾼다
-          var menu = row.querySelector('.visibility-menu');
-          if (!menu) { return; }
-          menu.dataset.visibility = v;
-          menu.querySelector('[data-visibility-label]').textContent = LABELS[v] || v;
-          Array.prototype.forEach.call(menu.querySelectorAll('[data-visibility-option]'), function (b) {
-            b.setAttribute('aria-pressed', String(b.dataset.visibilityOption === v));
+        (to === 'PUBLIC' ? window.ask(rows.length + '개를 모든 사람이 볼 수 있게 바꿀까요?', '전체 공개로') : Promise.resolve(true)).then(function (ok) {
+          if (!ok) { return; }
+          busy(true);
+          each(rows, function (id) { return call('PATCH', '/api/posts/' + id + '/visibility', { visibility: to }); }, function (row, data) {
+            var v = (data && data.visibility) || to;
+            // 줄의 ⋯ 메뉴 값도 맞추고, 카드 표시는 visibility-changed를 받는 아래 처리가 바꾼다
+            var menu = row.querySelector('.visibility-menu');
+            if (!menu) { return; }
+            menu.dataset.visibility = v;
+            menu.querySelector('[data-visibility-label]').textContent = LABELS[v] || v;
+            Array.prototype.forEach.call(menu.querySelectorAll('[data-visibility-option]'), function (b) {
+              b.setAttribute('aria-pressed', String(b.dataset.visibilityOption === v));
+            });
+            menu.dispatchEvent(new CustomEvent('visibility-changed', { bubbles: true, detail: { visibility: v, label: LABELS[v] || v } }));
+          }).then(function (done) {
+            busy(false);
+            if (done) { notice(done + '개의 공개 범위를 ' + (LABELS[to] || to) + '(으)로 바꿨어요'); }
           });
-          menu.dispatchEvent(new CustomEvent('visibility-changed', { bubbles: true, detail: { visibility: v, label: LABELS[v] || v } }));
-        }).then(function (done) {
-          busy(false);
-          if (done) { notice(done + '개의 공개 범위를 ' + (LABELS[to] || to) + '(으)로 바꿨어요'); }
         });
       });
     });
@@ -221,25 +231,27 @@
       publishAll.addEventListener('click', function () {
         var rows = picked().map(rowOf);
         if (!rows.length) { return; }
-        if (!window.confirm(rows.length + '개를 저장된 발행 설정(공개 범위·태그)으로 발행할까요?')) { return; }
-        busy(true);
-        call('POST', '/api/me/posts/publish-drafts', { postIds: rows.map(function (r) { return Number(r.dataset.postId); }) })
-          .then(function (data) {
-            var done = {};
-            (data.published || []).forEach(function (id) { done[id] = true; });
-            rows.forEach(function (row) { if (done[row.dataset.postId]) { row.remove(); } });
-            var skipped = data.skipped || [];
-            var text = (data.published || []).length + '개를 발행했어요';
-            if (skipped.length) {
-              text += ' · 발행하지 못한 글 ' + skipped.length + '개: ' + skipped.map(function (s) {
-                return '「' + (s.title || '글 ' + s.id) + '」(' + s.reason + ')';
-              }).join(', ');
-            }
-            notice(text);
-            refreshCounts();
-          })
-          .catch(function (err) { notice((err.data && err.data.message) || '발행하지 못했어요. 잠시 뒤 다시 시도해 주세요.'); })
-          .then(function () { busy(false); update(); afterRemove(); });
+        window.ask(rows.length + '개를 저장된 발행 설정(공개 범위·태그)으로 발행할까요?', rows.length + '개 발행').then(function (ok) {
+          if (!ok) { return; }
+          busy(true);
+          call('POST', '/api/me/posts/publish-drafts', { postIds: rows.map(function (r) { return Number(r.dataset.postId); }) })
+            .then(function (data) {
+              var done = {};
+              (data.published || []).forEach(function (id) { done[id] = true; });
+              rows.forEach(function (row) { if (done[row.dataset.postId]) { row.remove(); } });
+              var skipped = data.skipped || [];
+              var text = (data.published || []).length + '개를 발행했어요';
+              if (skipped.length) {
+                text += ' · 발행하지 못한 글 ' + skipped.length + '개: ' + skipped.map(function (s) {
+                  return '「' + (s.title || '글 ' + s.id) + '」(' + s.reason + ')';
+                }).join(', ');
+              }
+              notice(text);
+              refreshCounts();
+            })
+            .catch(function (err) { notice((err.data && err.data.message) || '발행하지 못했어요. 잠시 뒤 다시 시도해 주세요.'); })
+            .then(function () { busy(false); update(); afterRemove(); });
+        });
       });
     }
 

@@ -4,7 +4,8 @@
   'use strict';
   Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
     form.addEventListener('submit', function (e) {
-      if (!window.confirm(form.dataset.confirm)) { e.preventDefault(); }
+      e.preventDefault();
+      window.ask(form.dataset.confirm, '지우기', true).then(function (ok) { if (ok) { form.submit(); } });
     });
   });
   // 111: 대표 사진 새로 정하기. 올린(만든) 사진 주소를 고른 칸으로 넣고 그 폼을 바로 저장한다

@@ -3,7 +3,8 @@
   'use strict';
   Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
     form.addEventListener('submit', function (e) {
-      if (!window.confirm(form.dataset.confirm)) { e.preventDefault(); }
+      e.preventDefault();
+      window.ask(form.dataset.confirm, '확인', true).then(function (ok) { if (ok) { form.submit(); } });
     });
   });
   var copy = document.getElementById('club-invite-copy');

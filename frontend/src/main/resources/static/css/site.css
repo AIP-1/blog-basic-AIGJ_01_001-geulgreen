@@ -1945,3 +1945,10 @@ main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { 
     .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; }
     .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
 }
+
+/* 확인 창(js/ask.js): 브라우저 기본 confirm 대신. [아니요]가 왼쪽, 하는 버튼이 오른쪽 */
+dialog.ask-dialog { width: min(420px, calc(100% - 32px)); margin: auto; padding: 20px 20px 16px; color: var(--color-text);
+    background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
+dialog.ask-dialog::backdrop { background: var(--color-overlay); }
+.ask-text { margin: 0 0 16px; line-height: 1.6; word-break: keep-all; }
+.ask-actions { display: flex; justify-content: flex-end; gap: 8px; }

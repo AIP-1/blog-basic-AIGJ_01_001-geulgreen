@@ -28,13 +28,15 @@
     var trash = document.getElementById('trash-post');
     if (trash) {
       trash.addEventListener('click', function () {
-        if (!window.confirm('휴지통으로 옮길까요? 30일 뒤 완전히 삭제돼요')) { return; }
-        fetch('/api/posts/' + postId, { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
-          .then(function (res) {
-            if (!res.ok) { throw new Error(String(res.status)); }
-            window.location.assign('/manage/posts?tab=trash');
-          })
-          .catch(function () { status.dataset.toast = 'error'; status.textContent = '삭제하지 못했어요.'; });
+        window.ask('휴지통으로 옮길까요? 30일 뒤 완전히 삭제돼요', '휴지통으로', true).then(function (ok) {
+          if (!ok) { return; }
+          fetch('/api/posts/' + postId, { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
+            .then(function (res) {
+              if (!res.ok) { throw new Error(String(res.status)); }
+              window.location.assign('/manage/posts?tab=trash');
+            })
+            .catch(function () { status.dataset.toast = 'error'; status.textContent = '삭제하지 못했어요.'; });
+        });
       });
     }
     // 075 강성찬 개인 확장: ⋯ 메뉴의 [글 설정]이 카테고리·시리즈·카드 한 줄 소개 창을 연다. 소개 저장·AI 제안 뒤(#teaser)엔 다시 연다
@@ -50,9 +52,11 @@
     var discard = document.getElementById('discard-editing');
     if (discard) {
       discard.addEventListener('click', function () {
-        if (!window.confirm('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?')) { return; }
-        fetch('/api/posts/' + postId + '/working-copy', { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
-          .then(function (res) { if (res.status === 204) { window.location.reload(); } });
+        window.ask('고치던 내용을 버리고 마지막 발행본으로 되돌릴까요?', '되돌리기', true).then(function (ok) {
+          if (!ok) { return; }
+          fetch('/api/posts/' + postId + '/working-copy', { method: 'DELETE', headers: csrfHeaders(), credentials: 'same-origin' })
+            .then(function (res) { if (res.status === 204) { window.location.reload(); } });
+        });
       });
     }
   }
