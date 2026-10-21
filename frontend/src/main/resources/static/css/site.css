@@ -1935,13 +1935,15 @@ main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { 
     .explore-main .card-grid .post-card { font-size: .9em; }
 }
 /* 10-19(chan "유튜브처럼 카드 경계"): 휴대폰은 카드 상자(테두리·그림자·배경)를 빼고 글 사이는 여백으로 나눈다.
-   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. 탐색은 상자 그대로(chan 10-20), PC도 그대로 */
+   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. 탐색은 상자 그대로(chan 10-20), PC도 그대로.
+   10-21(chan "썸네일 설명칸 위아래로 구분선"): 베이지 썸네일이 배경에 묻혀서 사진 아래와 글 사이에 얇은 선 */
 @media (max-width: 639px) {
     .post-card:not(.explore-main *) { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
     .post-card:not(.explore-main *):hover { transform: none; box-shadow: none; }
     .card-link:not(.explore-main *)::after { border-radius: 0; }
-    .card-grid:not(.explore-main *) { gap: 32px; }
     .card-grid .post-card:not(.explore-main *), .tag-row .post-card { padding: 0; }
-    .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; }
+    .card-grid:not(.explore-main *), main.list-page .card-grid:not(.explore-main *) { gap: 0; }
+    .card-grid .post-card:not(.explore-main *) { border-bottom: 1px solid var(--color-border); margin: 0 -20px; padding: 0 20px 18px; }
+    .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; border-bottom: 1px solid var(--color-border); }
     .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
 }
