@@ -7,6 +7,47 @@
 
 ---
 
+## [1.70.1] — 2026-10-21 · 개인 확장 (설정 > 연결 키 보기 · 만 14세 미만 안내)
+
+- 설정 > 연결 칸에 키 이름·마지막 사용, 키가 있으면 버튼 "키 관리"
+- 연결 화면 Claude Code 명령에 --scope user(한 번 실행하면 모든 폴더에서)
+- 개인정보 처리방침에 만 14세 미만 칸(보호자 동의·권리), 보관 기간에 동의 대기 가입, 이용약관 2. 계정에 보호자 동의
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**설정 > 연결**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-set-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-set-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-set-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-set-m-after.png) |
+
+**연결 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-conn-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-conn-after.png) |
+
+**개인정보 처리방침**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-privacy-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-privacy-after.png) |
+
+**이용약관**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-terms-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.1/v1701-terms-after.png) |
+
+---
+
 ## [1.70.0] — 2026-10-21 · 개인 확장 (오늘의 글감, 함께 쓰기 개편, 14세 미만 보호자 동의)
 
 - 머리글 "미션"을 "글감"·"함께 쓰기"로 나눔
