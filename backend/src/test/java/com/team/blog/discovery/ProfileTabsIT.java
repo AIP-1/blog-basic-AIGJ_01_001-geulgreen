@@ -85,6 +85,11 @@ class ProfileTabsIT extends IntegrationTestBase {
             }
         }
         assertThat(page("/tabperm/series")).contains("글 1편</span> · <span class=\"meta-part\">").contains(" 업데이트");
+        // 10-21: [시리즈 추가]는 주인이 시리즈 탭을 볼 때만
+        assertThat(page("/tabperm/series", me)).contains("href=\"/manage/series?create=1#series-new\"");
+        assertThat(page("/tabperm/series", visitor)).doesNotContain("시리즈 추가</a>");
+        assertThat(page("/tabperm/posts", me)).doesNotContain("시리즈 추가</a>");
+        assertThat(page("/manage/series?create=1", me)).contains("id=\"series-new\" class=\"stats-card series-group series-settings series-new\" open=\"open\"");
         assertThat(page("/tabperm")).contains("id=\"shelf-series\"").contains("탭 시리즈");
         // 글 화면 시리즈 위치·이전/다음도 보이는 글만
         assertThat(page("/tabperm/posts/" + open)).contains(">1/1<").doesNotContain("series-box-nav");

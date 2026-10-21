@@ -18,7 +18,7 @@
     <p th:if="${error != null}" class="notice field-error" role="alert" th:text="#{${'error.' + error}}">오류</p>
 
     <!-- 10-16: 새 시리즈 만들기도 접어 둔다(목록이 먼저 보이게) -->
-    <details class="stats-card series-group series-settings series-new" th:open="${seriesItems.isEmpty()}">
+    <details id="series-new" class="stats-card series-group series-settings series-new" th:open="${seriesItems.isEmpty() or param.create != null}">
         <summary><svg th:replace="~{fragments/icons :: pen}"></svg>새 시리즈 만들기<svg th:replace="~{fragments/icons :: chevron}"></svg></summary>
         <div class="series-new-body">
         <form method="post" action="/manage/series">
