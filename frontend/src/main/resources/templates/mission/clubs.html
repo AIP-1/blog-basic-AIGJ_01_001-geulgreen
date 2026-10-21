@@ -78,6 +78,7 @@
             <h2 id="club-new-heading">방 만들기</h2>
             <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
             <form method="post" action="/missions/clubs" class="club-form">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="club-form-row">
                     <label for="club-name">방 이름</label>
                     <input id="club-name" name="name" type="text" maxlength="30" required th:value="${form.name()}" placeholder="예: 4학년 2반 글쓰기, 주말 글친구">

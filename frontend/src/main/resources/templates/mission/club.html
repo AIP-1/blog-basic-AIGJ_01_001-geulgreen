@@ -68,6 +68,7 @@
                     <p class="club-next-title" th:text="${board.notStarted() ? '시작하면 첫 글을 써 보세요' : '이번 기간에 아직 안 썼어요'}">이번 기간에 아직 안 썼어요</p>
                     <p class="help" th:text="${#temporals.format(p.end(), 'M월 d일') + '까지 전체 공개로 한 편 쓰면 돼요'}">마감</p>
                     <form th:unless="${board.notStarted()}" method="post" action="/write">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="btn btn-primary btn-sm"><th:block th:replace="~{fragments/icons :: pen}"></th:block>글 쓰러 가기</button>
                     </form>
                 </th:block>
