@@ -47,7 +47,7 @@ class ClubJoinIT extends IntegrationTestBase {
         long b = members.localMember("roomguestb", "손님나", "roomguestb@example.com", "Blog#2026ok", true);
         long club = create(owner, "공개 독서방", null);
         assertThat(jdbc.queryForObject("SELECT join_mode FROM writing_club WHERE id = ?", String.class, club)).isEqualTo("APPROVAL");
-        assertThat(page("/missions/clubs?q=독서", a)).contains("공개 독서방").contains("승인 후 참여");
+        assertThat(page("/missions/clubs/find?q=독서", a)).contains("공개 독서방").contains("승인 후 참여");
         assertThat(page("/missions/clubs/" + club, a)).contains("참여 요청");
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(a)));
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(b)));
@@ -156,5 +156,26 @@ class ClubJoinIT extends IntegrationTestBase {
         assertThat(member(club, friendOfHelper)).isTrue();
         assertThat(jdbc.queryForObject("SELECT kind FROM writing_club_join WHERE club_id = ? AND member_id = ?", String.class, club, friendOfPlain))
                 .isEqualTo("REQUEST");
+    }
+
+    @Test
+    void tabsOnboardingAndNextStep() throws Exception {
+        clock.set(NOW);
+        long me = members.localMember("nexter", "다음할일", "nexter@example.com", "Blog#2026ok", true);
+        long mate = members.localMember("nextmate", "짝꿍이", "nextmate@example.com", "Blog#2026ok", true);
+        // 처음 화면: 반·친구 예시와 세 단계, 방 찾기는 따로
+        assertThat(page("/missions/clubs", me)).contains("함께 쓰면 꾸준히 쓸 수 있어요").contains("반 방 만들기").contains("친구 방 만들기")
+                .contains("href=\"/missions/clubs/find\"").doesNotContain("방 이름·소개로 찾기");
+        // 만들기 폼은 csrf 칸을 직접 넣어야 한다(th:action이 아니어서)
+        assertThat(page("/missions/clubs", me)).containsPattern("action=\"/missions/clubs\" class=\"club-form\">\\s*<input type=\"hidden\" name=\"_csrf\"");
+        assertThat(page("/missions/clubs/find", me)).contains("아직 공개된 방이 없어요").contains("방 만들기").contains("방 이름·소개로 찾기");
+        long club = create(me, "다음 할 일 방", "LINK");
+        assertThat(page("/missions/clubs/" + club, me)).contains("아직 혼자예요");
+        jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
+        assertThat(page("/missions/clubs/" + club, me)).contains("이번 기간에 아직 안 썼어요").contains("글 쓰러 가기")
+                .containsPattern("action=\"/write\">\\s*<input type=\"hidden\" name=\"_csrf\"");
+        posts.published(me, "오늘 쓴 글", "본문", 1, NOW.minus(Duration.ofHours(1)));
+        assertThat(page("/missions/clubs/" + club, me)).contains("이번 기간 썼어요").doesNotContain("글 쓰러 가기");
+        assertThat(page("/missions/clubs", me)).contains("참여 중인 방").contains("이번 기간 썼어요");
     }
 }

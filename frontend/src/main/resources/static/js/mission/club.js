@@ -26,15 +26,26 @@
   var opens = document.querySelectorAll('[data-open-club-form]');
   function show(open) {
     form.hidden = !open;
-    Array.prototype.forEach.call(opens, function (b) { b.hidden = open; });
+    Array.prototype.forEach.call(opens, function (b) { if (!b.hasAttribute('data-preset')) { b.hidden = open; } });
   }
   show(form.dataset.keepOpen === 'true');
   if (close) { close.hidden = false; close.addEventListener('click', function () { show(false); }); }
+  // 10-21: 처음 화면의 "반 방 만들기"·"친구 방 만들기"는 폼을 그 예시 값으로 채워 연다
+  function fill(b) {
+    var f = form.querySelector('form');
+    f.elements.name.value = b.dataset.name;
+    f.elements.intro.value = b.dataset.intro;
+    f.elements.everyDays.value = b.dataset.every;
+    f.elements.memberCap.value = b.dataset.cap;
+    Array.prototype.forEach.call(f.querySelectorAll('input[name="joinMode"]'), function (r) { r.checked = r.value === b.dataset.mode; });
+  }
   Array.prototype.forEach.call(opens, function (b) {
     b.addEventListener('click', function (e) {
       e.preventDefault();
+      if (b.hasAttribute('data-preset')) { fill(b); }
       show(true);
-      form.querySelector('input').focus();
+      form.scrollIntoView({ block: 'start' });
+      form.querySelector('input[name="name"]').focus();
     });
   });
 })();
