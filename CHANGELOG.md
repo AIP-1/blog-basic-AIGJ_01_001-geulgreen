@@ -7,6 +7,34 @@
 
 ---
 
+## [1.71.0] — 2026-10-21 · 개인 확장 (글감 화면 디자인 · 알림 모두 읽음)
+
+- 글감 화면 새 디자인: 제목·숫자 한 번씩, 선 아이콘 카드, 배지 이름 "첫 글감"·"글감 10번/30번/100번"
+- 알림 종: 펼치기만 해서는 읽음 처리하지 않고, 머리줄의 [모두 읽음] 버튼으로 한 번에 읽음
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**글감 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-gg-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-gg-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-gg-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-gg-m-after.png) |
+
+**알림 종**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-bell-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.71.0/v1710-bell-after.png) |
+
+---
+
 ## [1.70.1] — 2026-10-21 · 개인 확장 (설정 > 연결 키 보기 · 만 14세 미만 안내)
 
 - 설정 > 연결 칸에 키 이름·마지막 사용, 키가 있으면 버튼 "키 관리"
