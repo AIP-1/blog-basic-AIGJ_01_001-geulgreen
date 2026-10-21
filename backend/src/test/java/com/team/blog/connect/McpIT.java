@@ -49,6 +49,18 @@ class McpIT extends IntegrationTestBase {
     }
 
     @Test
+    void settingsListsKeysAndSnippetIsUserScope() throws Exception {
+        long me = member("mcplist");
+        String key = issueKey(me);
+        String settings = mockMvc.perform(get("/settings").with(TestAuth.member(me))).andReturn().getResponse()
+                .getContentAsString();
+        assertThat(settings).contains("Claude Code · 마지막 사용 아직 없음").contains("키 관리").doesNotContain(key);
+        String page = mockMvc.perform(get("/settings/connections").with(TestAuth.member(me))).andReturn().getResponse()
+                .getContentAsString();
+        assertThat(page).contains("--transport http --scope user geulgreen");
+    }
+
+    @Test
     void keySpeaksMcpWithoutCookies() throws Exception {
         String key = issueKey(member("mcpproto"));
         // 원문은 DB에 없다

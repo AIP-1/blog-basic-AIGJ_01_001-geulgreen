@@ -278,7 +278,11 @@
     <section aria-labelledby="connections-heading">
         <h2 id="connections-heading">연결</h2>
         <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요. 발행은 내가 직접 해요.</p>
-        <a href="/settings/connections" class="link-btn">AI에 연결하기</a>
+        <p class="help" th:if="${aiKeys.isEmpty()}">아직 연결한 키가 없어요</p>
+        <ul class="help" th:unless="${aiKeys.isEmpty()}">
+            <li th:each="k : ${aiKeys}" th:text="${k}">키 이름 · 마지막 사용</li>
+        </ul>
+        <a href="/settings/connections" class="link-btn" th:text="${aiKeys.isEmpty()} ? 'AI에 연결하기' : '키 관리'">AI에 연결하기</a>
     </section>
 
 
