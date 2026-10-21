@@ -86,10 +86,10 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions", stranger)).doesNotContain("오늘의 미션 글");
         assertThat(page("/missions", null)).doesNotContain("오늘의 미션 글");
         // 내 기록과 글 화면 표시
-        assertThat(page("/missions", writer)).contains("1번").contains("🔥 1일").contains("오늘 한 편 썼어요");
+        assertThat(page("/missions", writer)).contains(">1번<").contains("1일 연속").contains("오늘 한 편 썼어요");
         // 066 배지: 첫 미션만 받음, 나머지는 받는 법이 보인다. 로그인 안 한 사람에게는 배지 칸이 없다
-        assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 미션").contains("받았어요")
-                .contains("3일 연속 완료하면");
+        assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 글감").contains("받았어요")
+                .contains("3일 연속 쓰면");
         assertThat(page("/missions", null)).doesNotContain("내 배지");
         // 10-18: 글 화면에는 미션 이야기가 없다(미션 화면에서만). 글쓴이에게도
         assertThat(page("/mswriter/posts/" + postId, writer)).doesNotContain("오늘의 미션 · ").doesNotContain("미션 완료").doesNotContain("mission-done-note");
@@ -98,7 +98,7 @@ class DailyMissionIT extends IntegrationTestBase {
         clock.set(T.plusSeconds(24 * 3600));
         mockMvc.perform(post("/missions/topics/{id}/write", topics.get(0).id()).with(csrf()).with(TestAuth.member(writer)))
                 .andExpect(status().isBadRequest());
-        assertThat(page("/missions?date=2026-10-12", friend)).contains("지난 글감").contains("오늘의 미션 글");
+        assertThat(page("/missions?date=2026-10-12", friend)).contains("그날의 글감과 글이에요").contains("오늘의 미션 글");
         assertThat(page("/missions", friend)).contains("10월 12일");
         mockMvc.perform(get("/missions?date=2026-12-31")).andExpect(status().isNotFound());
     }
@@ -131,7 +131,7 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(statsOf(days, today).streak()).isEqualTo(4);
         // 066 배지: 4번·최고 4일 연속 → 첫 미션, 3일 연속
         assertThat(MissionService.badges(statsOf(days, today))).filteredOn(MissionService.Badge::earned)
-                .extracting(MissionService.Badge::name).containsExactly("첫 미션", "3일 연속");
+                .extracting(MissionService.Badge::name).containsExactly("첫 글감", "3일 연속");
         assertThat(MissionService.badges(new MissionService.Stats(100, 0, 30, false))).allMatch(MissionService.Badge::earned);
         assertThat(MissionService.badges(new MissionService.Stats(0, 0, 0, false))).noneMatch(MissionService.Badge::earned);
         assertThat(TopicPool.size()).isEqualTo(120);
