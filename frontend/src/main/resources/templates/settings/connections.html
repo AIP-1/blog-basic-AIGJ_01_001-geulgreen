@@ -51,7 +51,7 @@
             <th:block th:if="${newKey == null}">아래 <code>&lt;연결 키&gt;</code> 자리에 발급받은 키를 넣어 주세요.</th:block>
             <th:block th:if="${newKey != null}">아래 설정에는 방금 만든 키가 들어 있어요.</th:block></p>
         <h4>Claude Code</h4>
-        <p class="help">터미널에서 한 번 실행해요.</p>
+        <p class="help">터미널에서 한 번 실행하면 모든 폴더에서 같은 키를 써요. 키는 하나면 충분해요.</p>
         <pre class="connect-snippet"><code id="snippet-claude-code" th:text="${claudeCode}">claude mcp add</code></pre>
         <button type="button" class="btn btn-sm" data-copy="#snippet-claude-code">복사</button>
         <h4>Cursor</h4>

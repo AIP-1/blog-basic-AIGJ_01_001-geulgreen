@@ -4,6 +4,7 @@ import com.team.blog.account.application.HandleChangeService;
 import com.team.blog.account.application.ProfileService;
 import com.team.blog.account.application.ProfileView;
 import com.team.blog.connect.application.AiConnectProperties;
+import com.team.blog.connect.application.AiKeyService;
 import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.KoreanDateFormatter;
@@ -26,11 +27,13 @@ public class SettingsController {
     private final AccountGuard accountGuard;
     private final HandleChangeService handleChangeService;
     private final AiConnectProperties aiConnectProperties;
+    private final AiKeyService aiKeys;
 
     public SettingsController(ProfileService profileService, CurrentUserProvider currentUserProvider,
                               AccountGuard accountGuard, HandleChangeService handleChangeService,
-                              AiConnectProperties aiConnectProperties) {
+                              AiConnectProperties aiConnectProperties, AiKeyService aiKeys) {
         this.aiConnectProperties = aiConnectProperties;
+        this.aiKeys = aiKeys;
         this.handleChangeService = handleChangeService;
         this.profileService = profileService;
         this.currentUserProvider = currentUserProvider;
@@ -51,6 +54,11 @@ public class SettingsController {
                     .map(KoreanDateFormatter::monthDay).orElse(null));
         }
         model.addAttribute("aiConnectEnabled", aiConnectProperties.enabled()); // 097 강성찬 개인 확장
+        if (aiConnectProperties.enabled()) { // 키가 연결 화면에만 있어 사라진 줄 알기 쉬워 설정에도 보인다
+            model.addAttribute("aiKeys", aiKeys.list(currentUserProvider.current().orElseThrow().memberId()).stream()
+                    .map(k -> k.name() + " · 마지막 사용 " + (k.lastUsedAt() == null ? "아직 없음" : KoreanDateFormatter.dateTime(k.lastUsedAt())))
+                    .toList());
+        }
         return "settings/settings";
     }
 
