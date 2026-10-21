@@ -46,6 +46,9 @@
         <a th:href="${paths.blog(owner.handle())}" th:attr="aria-current=${blogTab == 'home' ? 'page' : null}">홈</a>
         <a th:href="${paths.blog(owner.handle()) + '/posts'}" th:attr="aria-current=${blogTab == 'posts' ? 'page' : null}">글</a>
         <a th:if="${seriesEnabled}" th:href="${paths.blog(owner.handle()) + '/series'}" th:attr="aria-current=${blogTab == 'series' ? 'page' : null}">시리즈</a>
+        <!-- 10-21(chan) 강성찬 개인 확장: 주인이 시리즈 탭을 볼 때만 탭 줄 오른쪽 끝에 [시리즈 추가](내 글 시리즈 관리의 새 시리즈 만들기를 열어 둔 채로) -->
+        <a th:if="${seriesEnabled and isOwner and blogTab == 'series'}" class="btn btn-sm blog-tabs-action" href="/manage/series?create=1#series-new"><svg
+            th:replace="~{fragments/icons :: pen}"></svg>시리즈 추가</a>
     </nav>
 </th:block>
 <!-- 홈 선반 제목 줄: 제목 + 그 탭으로 가는 "모두 보기 >" -->
