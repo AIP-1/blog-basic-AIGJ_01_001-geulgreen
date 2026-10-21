@@ -1,7 +1,8 @@
 /*
  * 종 아이콘(017 FR-024·FR-025): 열 때와 30초마다 안 읽은 수만 확인(탭이 가려지면 멈추고, 보이면 바로 한 번). 99개 초과 "99+",
  * 화면 낭독기 이름 "안 읽은 알림 N개". 누르면 최근 10개 펼침 목록과 [모든 알림 보기]. 글자는 textContent로만 넣는다.
- * 068(강성찬 개인 확장): 펼치면 모두 읽음으로 바꾼다. 이번에 펼친 목록의 안 읽음 점은 그대로 둬서 무엇이 새것이었는지 보이게 한다.
+ * 10-21 chan(강성찬 개인 확장): 펼치기만 해서는 읽음으로 바꾸지 않는다(068의 자동 읽음을 거둠). 안 읽은 알림이 있으면 머리줄의
+ * [모두 읽음] 버튼으로 바꾸고, 결과는 머리말 아래 안내로.
  */
 (function () {
   'use strict';
@@ -9,6 +10,7 @@
   var bell = document.getElementById('notif-bell');
   var badge = document.getElementById('notif-badge');
   var panel = document.getElementById('notif-panel');
+  var status = document.getElementById('notif-bell-status');
   if (!bell || !badge || !panel) { return; }
   var POLL_MS = 30000;
   var timer = null;
@@ -59,8 +61,37 @@
       });
   }
 
+  function checkIcon() {
+    var ns = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(ns, 'svg');
+    [['viewBox', '0 0 24 24'], ['width', '14'], ['height', '14'], ['aria-hidden', 'true'], ['focusable', 'false'], ['fill', 'none'],
+      ['stroke', 'currentColor'], ['stroke-width', '2.4'], ['stroke-linecap', 'round'], ['stroke-linejoin', 'round']]
+      .forEach(function (a) { svg.setAttribute(a[0], a[1]); });
+    var path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', 'M5 12.5l4.5 4.5L19 7.5');
+    svg.appendChild(path);
+    return svg;
+  }
+
   function render(items) {
     panel.textContent = '';
+    var head = el('div', 'notif-panel-head');
+    head.appendChild(el('strong', 'notif-panel-title', '알림'));
+    panel.appendChild(head);
+    if (items.some(function (i) { return !i.read; })) {
+      var markAll = el('button', 'notif-read-all');
+      markAll.type = 'button';
+      markAll.appendChild(checkIcon());
+      markAll.appendChild(document.createTextNode('모두 읽음'));
+      markAll.id = 'notif-panel-read-all';
+      markAll.addEventListener('click', function () {
+        readAll(function () {
+          render(items.map(function (i) { return Object.assign({}, i, { read: true }); }));
+          say('success', '알림을 모두 읽음으로 바꿨어요');
+        }, function () { say('error', '모두 읽음으로 바꾸지 못했어요'); });
+      });
+      head.appendChild(markAll);
+    }
     if (!items.length) {
       panel.appendChild(el('p', 'notice', '새 알림이 없어요'));
     } else {
@@ -83,10 +114,16 @@
     panel.appendChild(el('p')).appendChild(all);
   }
 
-  function readAll() {
+  function say(kind, text) {
+    if (!status) { return; }
+    status.dataset.toast = kind;
+    status.textContent = text;
+  }
+
+  function readAll(done, failed) {
     fetch('/api/notifications/read-all', { method: 'POST', credentials: 'same-origin', headers: csrf() })
-      .then(function (r) { if (r.ok) { show(0); } })
-      .catch(function () {});
+      .then(function (r) { if (!r.ok) { throw new Error(); } show(0); if (done) { done(); } })
+      .catch(function () { if (failed) { failed(); } });
   }
 
   function load() {
@@ -94,9 +131,7 @@
     fetch('/api/notifications?size=10', { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { if (!r.ok) { throw new Error(); } return r.json(); })
       .then(function (body) {
-        var items = body.items || [];
-        render(items);
-        if (items.some(function (i) { return !i.read; })) { readAll(); }
+        render(body.items || []);
       })
       .catch(function () { panel.textContent = '알림을 불러오지 못했어요'; });
   }

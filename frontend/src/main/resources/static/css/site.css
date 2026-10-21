@@ -278,6 +278,12 @@ main.list-page { max-width: var(--page-wide); }
 .notif-unread .notif-message { font-weight: 700; }
 .notif-dot { color: var(--color-brand); margin-right: 4px; }
 .notif-time { display: block; color: var(--color-text-muted); font-size: .85em; }
+.notif-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 2px 8px; border-bottom: 1px solid var(--color-border); }
+.notif-panel-title { font-size: 1.02em; }
+.notif-read-all { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; padding: 5px 12px; font-size: .85em; font-weight: 600;
+    background: var(--color-brand-soft); color: var(--color-brand); cursor: pointer; }
+.notif-read-all:hover { background: var(--color-brand); color: var(--color-on-fill); }
+.notif-read-all:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 /* 022 운영 */
 .warning { background: var(--color-highlight); border: 1px solid var(--color-warning-border); padding: 6px 10px; border-radius: 6px; }
 .snapshot { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--color-surface-muted); padding: 8px; border-radius: 6px; }
