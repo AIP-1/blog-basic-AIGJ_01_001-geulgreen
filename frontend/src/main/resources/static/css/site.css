@@ -1795,6 +1795,38 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-link-lead { margin: 16px 0 0; }
 .club-join-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
 .club-join-actions p { margin: 0; }
+/* 10-21 chan: 함께 쓰기 처음 화면(반·친구 예시, 세 단계)과 방 화면 "다음 할 일" */
+.club-onboard h1 { margin: 0; font-size: 1.6em; }
+.club-onboard-lead { margin: 8px 0 0; color: var(--color-text-muted); line-height: 1.6; }
+.club-presets { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 20px; }
+.club-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 18px; text-align: left; font: inherit; width: 100%; min-width: 0; box-sizing: border-box;
+  color: var(--color-text); background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: 16px; cursor: pointer; }
+.club-preset:hover { border-color: var(--color-brand); }
+.club-preset:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.club-preset strong { font-size: 1.05em; }
+.club-preset .help { line-height: 1.5; }
+.club-preset-go { margin-top: 4px; font-weight: 600; color: var(--color-brand); }
+.club-steps { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 0; padding: 0; }
+.club-steps li { counter-increment: step; display: flex; flex-direction: column; gap: 2px; padding-top: 34px; position: relative; }
+.club-steps li::before { content: counter(step); position: absolute; top: 0; left: 0; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .85em; font-weight: 700; color: var(--color-on-fill); background: var(--color-brand-fill); }
+.club-onboard-find { margin: 18px 0 0; }
+.club-next { border-color: var(--color-brand); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.club-next.is-done { border-color: var(--color-border); }
+.club-next-title { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 1.1em; font-weight: 700; }
+.club-next-title .icon { width: 1em; height: 1em; color: var(--color-brand); }
+.club-next > .help { margin: 0; }
+.club-next form, .club-next > .btn { margin-top: 8px; }
+.club-next .btn .icon { width: 1em; height: 1em; }
+.club-next .btn { display: inline-flex; align-items: center; gap: 6px; }
+.club-more { margin-top: 12px; }
+.club-more > summary { display: flex; align-items: center; gap: 6px; padding: 8px 0; cursor: pointer; list-style: none; font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
+.club-more > summary::-webkit-details-marker { display: none; }
+.club-more > summary .icon { width: 1em; height: 1em; }
+.club-more[open] > summary .icon { transform: rotate(90deg); }
+.club-more > * + * { margin-top: 12px; }
+@media (max-width: 640px) { .club-presets, .club-steps { grid-template-columns: 1fr; } }
+.club-preset, .club-preset * { white-space: normal; overflow-wrap: anywhere; }
 /* 10-18 강성찬 개인 확장(chan "기본 썸네일, 고양이 사진으로"): 사진 없는 글 카드의 기본 썸네일. 링크 미리보기(og:image)와 같은
    잠자는 고양이 사진을 16:10으로 잘라 쓰고, 어두운 화면은 같은 고양이의 밤 사진(소개 영역 hero-night의 오른쪽, 글자 없는 쪽).
    화면에서만 그리고 글에는 저장하지 않는다 */
@@ -1959,3 +1991,16 @@ dialog.ask-dialog { width: min(420px, calc(100% - 32px)); margin: auto; padding:
 dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 .ask-text { margin: 0 0 16px; line-height: 1.6; word-break: keep-all; }
 .ask-actions { display: flex; justify-content: flex-end; gap: 8px; }
+/* 10-21 강성찬 개인 확장: 글쓰기 화면의 오늘의 글감 한 줄(누르면 그 글감으로 쓰기, ×로 닫기) */
+.topic-note { display: flex; align-items: center; gap: 4px; margin: 0 0 12px; padding: 4px 6px 4px 4px; border-radius: 12px;
+    background: var(--color-brand-soft); min-width: 0; }
+.topic-note[hidden] { display: none; }
+.topic-note-pick { margin: 0; flex: 1; min-width: 0; }
+.topic-note-pick button { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; border: 0; background: none;
+    justify-content: flex-start; padding: 8px 10px; color: var(--color-text); font: inherit; text-align: left; cursor: pointer; border-radius: 10px; }
+.topic-note-pick button:hover .topic-note-title { text-decoration: underline; }
+.topic-note-pick .icon { flex: none; color: var(--color-brand); }
+.topic-note-label { flex: none; color: var(--color-brand); font-weight: 700; font-size: .9em; }
+.topic-note-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topic-note-close { flex: none; color: var(--color-text-muted); }
+
