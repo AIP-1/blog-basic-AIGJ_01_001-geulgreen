@@ -26,7 +26,12 @@
     var to = option.dataset.visibilityOption;
     var from = menu.dataset.visibility;
     if (to === from) { menu.open = false; return; }
-    if (to === 'PUBLIC' && !window.confirm('모든 사람이 볼 수 있게 돼요. 공개할까요?')) { return; }
+    if (to === 'PUBLIC' && !option.dataset.asked) {
+      window.ask('모든 사람이 볼 수 있게 돼요. 공개할까요?', '공개').then(function (ok) {
+        if (ok) { option.dataset.asked = '1'; option.click(); delete option.dataset.asked; }
+      });
+      return;
+    }
     option.disabled = true;
     fetch('/api/posts/' + menu.dataset.postId + '/visibility', { method: 'PATCH', headers: headers(), credentials: 'same-origin',
       body: JSON.stringify({ visibility: to }) })

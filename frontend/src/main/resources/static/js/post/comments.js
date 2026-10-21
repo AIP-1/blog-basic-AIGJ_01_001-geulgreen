@@ -204,10 +204,12 @@
             .then(function (c) { reopen(c.id); }).catch(function (err) { showError(box, err.message); });
         });
       } else if (button.classList.contains('comment-delete')) {
-        if (!window.confirm('댓글을 삭제할까요? 되돌릴 수 없어요')) { return; }
-        call('DELETE', '/api/comments/' + box.dataset.commentId)
-          .then(function () { window.location.assign(base + '#comments'); window.location.reload(); })
-          .catch(function (err) { showError(box, err.message); });
+        window.ask('댓글을 삭제할까요? 되돌릴 수 없어요', '삭제', true).then(function (ok) {
+          if (!ok) { return; }
+          call('DELETE', '/api/comments/' + box.dataset.commentId)
+            .then(function () { window.location.assign(base + '#comments'); window.location.reload(); })
+            .catch(function (err) { showError(box, err.message); });
+        });
       } else if (button.classList.contains('replies-more')) {
         button.disabled = true;
         call('GET', '/api/comments/' + button.dataset.rootId + '/replies?cursor=' + encodeURIComponent(button.dataset.cursor))
