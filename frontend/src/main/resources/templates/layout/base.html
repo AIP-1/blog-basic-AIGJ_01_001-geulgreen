@@ -74,8 +74,11 @@
                 <a href="/tags" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/tags') ? 'page' : null}">태그</a>
                 <!-- 067 후속(강성찬 개인 확장): 내 글·설정은 오른쪽 위 프로필 메뉴에만(겹침 정리). 10-15 chan: 피드를 미션 앞으로 -->
                 <a href="/feed" th:if="${currentMemberId != null}" th:attr="aria-current=${currentPath == '/feed' ? 'page' : null}">피드</a>
+                <!-- 10-21 chan: 글감(오늘의 글감)과 함께 쓰기를 메뉴에서 따로 -->
                 <a href="/missions" th:if="${missionsEnabled != null and missionsEnabled}"
-                   th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') ? 'page' : null}">미션</a>
+                   th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions') and !currentPath.startsWith('/missions/clubs') ? 'page' : null}">글감</a>
+                <a href="/missions/clubs" th:if="${missionsEnabled != null and missionsEnabled and currentMemberId != null}"
+                   th:attr="aria-current=${currentPath != null and currentPath.startsWith('/missions/clubs') ? 'page' : null}">함께 쓰기</a>
                 <th:block th:if="${currentMemberId != null}">
                     <a href="/admin" th:if="${currentIsAdmin}" th:attr="aria-current=${currentPath != null and currentPath.startsWith('/admin') ? 'page' : null}">관리</a>
                 </th:block>

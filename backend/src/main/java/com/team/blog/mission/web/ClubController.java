@@ -45,21 +45,33 @@ public class ClubController {
     public String list(@RequestParam(value = "q", required = false) String q, Model model) {
         CurrentUser me = currentUserProvider.current().orElseThrow(LoginRequiredException::new);
         java.util.List<ClubService.Club> mine = clubs.mine(me.memberId());
-        java.util.Set<Long> mineIds = mine.stream().map(ClubService.Club::id).collect(java.util.stream.Collectors.toSet());
         model.addAttribute("clubs", mine);
         model.addAttribute("wrote", clubs.wroteThisPeriod(me.memberId(), mine));
         model.addAttribute("today", clubs.today());
         // 111 후속: 받은 초대, 공개 목록(내가 든 것은 빼고)·검색
         model.addAttribute("invites", clubs.myInvites(me.memberId()));
-        model.addAttribute("q", q == null ? "" : q.strip());
-        model.addAttribute("listed", clubs.listed(q).stream().filter(c -> !mineIds.contains(c.id())).toList());
         model.addAttribute("modes", ClubService.MODES);
+        // 예전 ?q= 주소는 방 찾기 탭으로
+        if (q != null && !q.isBlank()) {
+            return "redirect:/missions/clubs/find?q=" + org.springframework.web.util.UriUtils.encodeQueryParam(q.strip(), java.nio.charset.StandardCharsets.UTF_8);
+        }
         if (!model.containsAttribute("form")) {
             LocalDate today = clubs.today();
             model.addAttribute("form", new ClubService.Form("", "", 7, today, today.plusWeeks(4).minusDays(1),
                     ClubService.APPROVAL, ClubService.DEFAULT_CAP));
         }
         return "mission/clubs";
+    }
+
+    /** 10-21 chan: 방 찾기 탭(공개 방·검색). 내가 든 방은 빼고 보여 준다. */
+    @GetMapping("/missions/clubs/find")
+    public String find(@RequestParam(value = "q", required = false) String q, Model model) {
+        CurrentUser me = currentUserProvider.current().orElseThrow(LoginRequiredException::new);
+        java.util.Set<Long> mineIds = clubs.mine(me.memberId()).stream().map(ClubService.Club::id)
+                .collect(java.util.stream.Collectors.toSet());
+        model.addAttribute("q", q == null ? "" : q.strip());
+        model.addAttribute("listed", clubs.listed(q).stream().filter(c -> !mineIds.contains(c.id())).toList());
+        return "mission/clubs-find";
     }
 
     @PostMapping("/missions/clubs")
@@ -101,6 +113,10 @@ public class ClubController {
         java.util.Map<Long, String> cardDates = new java.util.HashMap<>();
         cards.values().forEach(c -> cardDates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), clock.instant())));
         model.addAttribute("board", board);
+        // 10-21 chan: "다음 할 일" — 이번 기간에 내가 썼는지, 다음 기간은 언제부터인지
+        model.addAttribute("myWrote", board.members().stream().anyMatch(m -> m.memberId() == me.memberId() && m.wrote()));
+        java.time.LocalDate nextStart = board.period().end().plusDays(1);
+        model.addAttribute("nextStart", nextStart.isAfter(board.club().endDate()) ? null : nextStart);
         model.addAttribute("wroteCount", board.members().stream().filter(ClubService.Member::wrote).count());
         model.addAttribute("cards", board.postIds().stream().filter(cards::containsKey).map(cards::get).toList());
         model.addAttribute("cardDates", cardDates);
