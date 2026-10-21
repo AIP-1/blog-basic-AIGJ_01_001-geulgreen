@@ -15,7 +15,7 @@ class PrivacyPageIT extends IntegrationTestBase {
         String html = mockMvc.perform(get("/privacy")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("조회수 중복 방지용 무작위 식별자").contains("Google Gemini API(무료 등급)")
                 .contains("사람이 읽고 검토할 수 있어요").contains("외부로 전송되지 않아요");
-        assertThat(html).contains("만 14세 미만 친구들의 개인정보").contains("보호자 이름과 이메일");
+        assertThat(html).contains("만 14세 미만 친구들의 개인정보").contains("보호자 이름과 이메일").contains("쓰지 말아 달라고").contains("동의도 거둘 수 있어요");
         assertThat(mockMvc.perform(get("/terms")).andReturn().getResponse().getContentAsString())
                 .contains("만 14세 미만은 보호자(법정대리인)의 동의를 받은 뒤");
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("href=\"/privacy\"");
