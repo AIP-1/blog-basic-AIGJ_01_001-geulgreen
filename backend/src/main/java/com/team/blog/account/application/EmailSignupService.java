@@ -48,13 +48,15 @@ public class EmailSignupService {
     private final ApplicationEventPublisher events;
     private final TransactionTemplate transactionTemplate;
     private final Clock clock;
+    private final GuardianConsentService guardianConsent;
 
     public EmailSignupService(MemberRepository memberRepository, AuthIdentityRepository authIdentityRepository,
                               AgreementRecorder agreementRecorder, HandleService handleService,
                               NicknamePolicy nicknamePolicy, PasswordPolicy passwordPolicy,
                               PasswordEncoder passwordEncoder, RedisTokenStore tokenStore,
                               MemberUniqueViolationTranslator translator, ApplicationEventPublisher events,
-                              TransactionTemplate transactionTemplate, Clock clock) {
+                              TransactionTemplate transactionTemplate, Clock clock, GuardianConsentService guardianConsent) {
+        this.guardianConsent = guardianConsent;
         this.memberRepository = memberRepository;
         this.authIdentityRepository = authIdentityRepository;
         this.agreementRecorder = agreementRecorder;
@@ -113,7 +115,12 @@ public class EmailSignupService {
         if (!Objects.equals(command.password(), command.passwordConfirm())) {
             throw new PasswordMismatchException();
         }
-        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
+        agreementRecorder.requireAll(command.agreeTerms(), command.agreePrivacy(), command.ageGroup());
+        if (command.under14()) {
+            GuardianConsentService.problem(command.guardianName(), command.guardianEmail(), email).ifPresent(m -> {
+                throw new GuardianInfoException(m);
+            });
+        }
 
         Instant now = clock.instant();
         Member member = memberRepository.saveAndFlush(new Member(handle, nickname, now));
@@ -123,7 +130,11 @@ public class EmailSignupService {
             identity.markVerified(now);
         }
         authIdentityRepository.saveAndFlush(identity);
-        agreementRecorder.recordSignupAgreements(memberId, now);
+        agreementRecorder.recordSignupAgreements(memberId, now, !command.under14());
+        if (command.under14()) {
+            // 14세 미만: 보호자가 동의해야 계정이 열린다(로그인 막힘)
+            guardianConsent.request(memberId, command.guardianName(), command.guardianEmail(), nickname.value());
+        }
         if (emailVerified) {
             events.publishEvent(new MemberSignedUp(memberId, Provider.LOCAL.name()));
             events.publishEvent(new EmailVerified(memberId));

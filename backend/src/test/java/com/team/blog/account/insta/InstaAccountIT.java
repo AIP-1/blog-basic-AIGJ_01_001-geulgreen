@@ -67,7 +67,7 @@ class InstaAccountIT extends IntegrationTestBase {
 
         MvcResult result = browser.perform(post("/signup").with(csrf()).param("email", "New@Example.com")
                 .param("handle", "newbie").param("password", PASSWORD).param("passwordConfirm", PASSWORD)
-                .param("nickname", "새사람").param("agreeTerms", "true").param("agreePrivacy", "true"));
+                .param("nickname", "새사람").param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14"));
         assertThat(result.getResponse().getStatus()).isEqualTo(303);
         assertThat(result.getResponse().getHeader("Location")).isEqualTo("/");
         assertThat(jdbc.queryForObject("SELECT email_verified_at IS NOT NULL FROM auth_identity WHERE email = 'new@example.com'",

@@ -23,6 +23,10 @@ public class FormLoginFailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) {
         String redirect = request.getParameter("redirect");
+        if (exception instanceof GuardianPendingAuthenticationException) {
+            AuthResponses.seeOther(request, response, AuthResponses.loginPage("guardian", redirect));
+            return;
+        }
         if (exception instanceof AccountSuspendedAuthenticationException suspended) {
             request.getSession(true).setAttribute(AuthResponses.SUSPENDED_NOTICE,
                     SuspensionNotice.text(suspended.getEndsAt(), suspended.getReason()));

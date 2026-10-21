@@ -18,6 +18,12 @@ public sealed interface LoginStatus extends Serializable {
         private static final long serialVersionUID = 1L;
     }
 
+    /** 10-21 chan: 14세 미만 — 보호자 동의 전이라 로그인할 수 없다. */
+    record GuardianPending() implements LoginStatus {
+        @Serial
+        private static final long serialVersionUID = 1L;
+    }
+
     record WithdrawnPending() implements LoginStatus {
         @Serial
         private static final long serialVersionUID = 1L;

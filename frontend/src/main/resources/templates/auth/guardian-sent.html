@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>보호자에게 메일을 보냈어요 · 글그린</title>
+</head>
+<body>
+<main class="auth-page auth-page-single guardian-page">
+    <!-- 10-21 chan: 14세 미만 가입 직후. 보호자가 동의하기 전에는 로그인할 수 없다 -->
+    <h1>보호자에게 동의 메일을 보냈어요</h1>
+    <p>보호자(부모님 등)가 메일에서 <strong>[동의해요]</strong>를 누르면 바로 로그인해서 글을 쓸 수 있어요.</p>
+    <p class="help" th:text="${days + '일 안에 동의하지 않으면 적어 둔 정보는 모두 지워져요. 그때는 다시 가입하면 돼요.'}">기한</p>
+    <p class="help">메일이 안 보이면 보호자에게 스팸함도 확인해 달라고 해 주세요.</p>
+    <p><a class="link-btn" href="/">처음으로</a></p>
+</main>
+</body>
+</html>

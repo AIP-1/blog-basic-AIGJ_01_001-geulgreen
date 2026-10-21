@@ -7,6 +7,48 @@
 
 ---
 
+## [1.70.0] — 2026-10-21 · 개인 확장 (오늘의 글감, 함께 쓰기 개편, 14세 미만 보호자 동의)
+
+- 머리글 "미션"을 "글감"·"함께 쓰기"로 나눔
+- 오늘의 글감: 글감 셋 중 골라 쓰기, 글쓰기 화면에 오늘의 글감, 저녁 글감 메일(켠 사람만, 안 쓴 날만)
+- 함께 쓰기: "참여 중인 방"·"방 찾기" 탭, 처음 안내, 방 만들기·글 쓰러 가기 403 고침(csrf)
+- 가입 때 나이 확인, 만 14세 미만은 보호자 메일 동의 후 계정 열림(5일 안에 없으면 지움)
+- DB: V32 prompt_mail, V33 동의 종류 AGE14·GUARDIAN과 guardian_consent(더하기만)
+
+#### 전/후 사진
+
+**머리글 메뉴**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-head-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-head-after.png) |
+
+**오늘의 글감**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-missions-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-missions-after.png) |
+
+**함께 쓰기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-clubs-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-clubs-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-clubs-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-clubs-m-after.png) |
+
+**가입 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-signup-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.70.0/v1700-signup-after.png) |
+
+---
+
 ## [1.69.7] — 2026-10-21 · 개인 확장 (휴대폰 홈 카드 구분선)
 
 - 휴대폰 홈 한 줄 카드: 사진 아래와 글 설명 아래에 얇은 구분선(탐색·PC는 그대로)

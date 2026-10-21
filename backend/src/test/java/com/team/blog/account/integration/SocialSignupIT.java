@@ -58,7 +58,7 @@ class SocialSignupIT extends IntegrationTestBase {
         Browser browser = pendingGoogle("g-order", "order@gmail.com", "Order Kim");
         String page = browser.perform(post("/signup/social").with(csrf()).param("handle", "orderkim").param("nickname", "!"))
                 .getResponse().getContentAsString();
-        assertThat(page).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(page).doesNotContain("만 14세 이상 확인과 필수 약관 2개에 모두 동의해 주세요");
         assertThat(memberCount()).isZero();
     }
 
@@ -76,7 +76,7 @@ class SocialSignupIT extends IntegrationTestBase {
         assertThat(row).containsEntry("provider", "GOOGLE").containsEntry("provider_user_id", "g-sub-77")
                 .containsEntry("email", "kim@gmail.com").containsEntry("password_hash", null)
                 .containsEntry("same_time", true).containsEntry("handle", "go-kim").containsEntry("nickname", "KimMinseo");
-        assertThat(jdbc.queryForList("SELECT type FROM member_agreement", String.class)).containsExactlyInAnyOrder("TERMS", "PRIVACY");
+        assertThat(jdbc.queryForList("SELECT type FROM member_agreement", String.class)).containsExactlyInAnyOrder("TERMS", "PRIVACY", "AGE14");
         assertThat(browser.perform(get("/signup/verify-sent")).getResponse().getStatus()).isEqualTo(200);
         // 대기 정보는 지워졌다
         assertThat(browser.perform(get("/signup/social")).getResponse().getHeader("Location")).isEqualTo("/login?social");

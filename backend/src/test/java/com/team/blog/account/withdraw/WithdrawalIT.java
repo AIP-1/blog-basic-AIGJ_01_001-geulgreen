@@ -115,7 +115,7 @@ class WithdrawalIT extends IntegrationTestBase {
         // 같은 이메일 가입은 안내
         String signup = mockMvc.perform(post("/signup").with(csrf()).param("email", "wdgone@example.com").param("handle", "wdgone2")
                 .param("password", "Blog#2026ok").param("passwordConfirm", "Blog#2026ok").param("nickname", "다시왔다")
-                .param("agreeTerms", "true").param("agreePrivacy", "true")).andReturn().getResponse().getContentAsString();
+                .param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14")).andReturn().getResponse().getContentAsString();
         assertThat(signup).contains("탈퇴 신청한 계정이 있어요");
         // 복구: 로그인하면 복구 전용 세션, [복구하기]를 눌러야 복구
         clock.set(T.plus(Duration.ofDays(10)));
@@ -194,10 +194,10 @@ class WithdrawalIT extends IntegrationTestBase {
         mockMvc.perform(get("/wdpurge")).andExpect(status().isNotFound());
         mockMvc.perform(post("/signup").with(csrf()).param("email", "wdpurge@example.com").param("handle", "wdpurge")
                 .param("password", "Blog#2026ok").param("passwordConfirm", "Blog#2026ok").param("nickname", "새사람")
-                .param("agreeTerms", "true").param("agreePrivacy", "true")).andExpect(status().is4xxClientError());
+                .param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14")).andExpect(status().is4xxClientError());
         mockMvc.perform(post("/signup").with(csrf()).param("email", "wdpurge@example.com").param("handle", "wdpurge_2")
                 .param("password", "Blog#2026ok").param("passwordConfirm", "Blog#2026ok").param("nickname", "새사람")
-                .param("agreeTerms", "true").param("agreePrivacy", "true")).andExpect(status().isSeeOther());
+                .param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14")).andExpect(status().isSeeOther());
         // 화면: 남은 자리는 "탈퇴한 사용자"
         String page = mockMvc.perform(get("/wdpa/posts/" + aPost)).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("탈퇴한 사용자").doesNotContain("답글 달린 내 댓글").contains("B의 답글");

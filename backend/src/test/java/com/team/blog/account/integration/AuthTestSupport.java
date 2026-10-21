@@ -24,7 +24,8 @@ final class AuthTestSupport {
                 .param("handle", handle)
                 .param("password", password)
                 .param("passwordConfirm", confirm)
-                .param("nickname", nickname);
+                .param("nickname", nickname)
+                .param("ageGroup", "OVER14");
         if (terms) {
             builder.param("agreeTerms", "true");
         }

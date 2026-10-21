@@ -26,6 +26,6 @@ final class SocialTestSupport {
     static MockHttpServletRequestBuilder completeSocial(String handleBody, String nickname) {
         return post("/signup/social").with(csrf())
                 .param("handle", handleBody).param("nickname", nickname)
-                .param("agreeTerms", "true").param("agreePrivacy", "true").param("useSocialPicture", "true");
+                .param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14").param("useSocialPicture", "true");
     }
 }

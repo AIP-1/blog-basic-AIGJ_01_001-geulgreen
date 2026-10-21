@@ -28,7 +28,7 @@ public class DatabaseCleaner {
             // 강성찬 개인 확장(056)
             "tag_icon",
             // 강성찬 개인 확장(057)
-            "daily_topic", "mission_post", "writing_club", "writing_club_member", "writing_club_join",
+            "daily_topic", "mission_post", "writing_club", "writing_club_member", "writing_club_join", "prompt_mail", "guardian_consent",
             // 089 강성찬 개인 확장
             "comment_like",
             // 강성찬 개인 확장(090)
