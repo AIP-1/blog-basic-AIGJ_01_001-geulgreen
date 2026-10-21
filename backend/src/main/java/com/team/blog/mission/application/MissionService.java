@@ -50,8 +50,8 @@ public class MissionService {
     public record Stats(int total, int streak, int best, boolean doneToday) {
     }
 
-    /** 066 미션 배지(강성찬 개인 확장): {@code rule}은 아직 못 받았을 때 보이는 받는 법. */
-    public record Badge(String emoji, String name, String rule, boolean earned) {
+    /** 066 미션 배지(강성찬 개인 확장): {@code icon}은 fragments/icons 조각 이름, {@code rule}은 아직 못 받았을 때 보이는 받는 법. */
+    public record Badge(String icon, String name, String rule, boolean earned) {
     }
 
     /** 글이 미션 글이면 그 주제와 완료 여부. */
@@ -278,13 +278,13 @@ public class MissionService {
     /** 066 배지: 따로 저장하지 않고 지금 기록(완료한 날 수·최고 연속)으로 정한다. 미션 글을 지우면 빠질 수 있다. */
     public static List<Badge> badges(Stats s) {
         return List.of(
-                new Badge("🌱", "첫 미션", "미션을 처음 완료하면", s.total() >= 1),
-                new Badge("🔥", "3일 연속", "3일 연속 완료하면", s.best() >= 3),
-                new Badge("🌿", "미션 10번", "10번 완료하면", s.total() >= 10),
-                new Badge("⭐", "일주일 연속", "7일 연속 완료하면", s.best() >= 7),
-                new Badge("🌳", "미션 30번", "30번 완료하면", s.total() >= 30),
-                new Badge("👑", "한 달 연속", "30일 연속 완료하면", s.best() >= 30),
-                new Badge("🏆", "미션 100번", "100번 완료하면", s.total() >= 100));
+                new Badge("pen", "첫 글감", "글감으로 처음 쓰면", s.total() >= 1),
+                new Badge("flame", "3일 연속", "3일 연속 쓰면", s.best() >= 3),
+                new Badge("grass", "글감 10번", "10번 쓰면", s.total() >= 10),
+                new Badge("i-flag", "일주일 연속", "7일 연속 쓰면", s.best() >= 7),
+                new Badge("i-book", "글감 30번", "30번 쓰면", s.total() >= 30),
+                new Badge("sparkle", "한 달 연속", "30일 연속 쓰면", s.best() >= 30),
+                new Badge("heart", "글감 100번", "100번 쓰면", s.total() >= 100));
     }
 
     /** 오늘 내가 완료한 글(있으면 첫 글). */
