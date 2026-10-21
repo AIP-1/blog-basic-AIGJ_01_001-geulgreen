@@ -45,6 +45,13 @@ public class SeriesController {
         this.clock = clock;
     }
 
+    /** 강성찬 개인 확장(10-21): 탐색 카드의 시리즈 이름(js/post/series-labels.js). 공개 글만, 없으면 빈 객체. */
+    @GetMapping("/api/series/titles")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public java.util.Map<Long, String> titles(@org.springframework.web.bind.annotation.RequestParam(value = "ids", required = false) java.util.List<Long> ids) {
+        return series.titlesOf(ids == null ? List.of() : ids);
+    }
+
     /** 100 강성찬 개인 확장: 블로그의 시리즈 탭(머리말·탭은 홈과 같이, 비공개 계정은 프로필 윗부분만). */
     @GetMapping("/@{handle}/series")
     public String list(@PathVariable("handle") String handle, HttpServletRequest request, Model model) {

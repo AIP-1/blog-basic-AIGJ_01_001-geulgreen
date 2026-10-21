@@ -1959,9 +1959,15 @@ dialog.sheet-dialog > form, dialog.sheet-dialog > .sheet-head, .series-settings-
 }
 /* 10-19(chan "탐색이면 크기는 작게 해서 많이 추천"): 탐색 [추천]·[트렌딩] 카드는 작게 — PC 한 줄 5장(1440 기준), 휴대폰 2장,
    요약 줄은 빼고 사진(16:10)·제목·반응만. 홈·피드·태그·시리즈 탭은 그대로 */
-main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 14px; }
+/* 10-21(chan "카드가 너무 작아 읽기 힘들다"): PC는 홈과 같이 한 줄 4장(넓은 화면 오른쪽 사람 칸이 없을 때 auto-fill이 6장까지 늘던 것을 고정),
+   중간 폭 3장, 휴대폰 2장. 제목은 크게 두 줄까지, 글쓴이 줄은 작게, 시리즈 글에는 시리즈 이름 */
+main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (min-width: 1280px) { main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .explore-main .card-grid .card-excerpt { display: none; }
-.explore-main .card-grid .card-title { font-size: .98em; }
+.explore-main .card-grid .card-title { font-size: 1.12em; line-height: 1.4; }
+.explore-main .card-grid .card-top { font-size: .82em; min-height: 22px; }
+.explore-main .card-grid .card-top .avatar { width: 20px; height: 20px; }
+.card-series { margin: 0; font-size: .8em; font-weight: 600; color: var(--color-brand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 639px) {
     main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .explore-main .card-grid .post-card { font-size: .9em; }

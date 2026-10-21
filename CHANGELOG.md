@@ -7,6 +7,34 @@
 
 ---
 
+## [1.72.0] — 2026-10-21 · 개인 확장 (탐색 카드)
+
+- 탐색 추천·트렌딩: PC 한 줄 4장(좁으면 3장, 오른쪽 칸이 비어도 6장으로 늘지 않음)·폰 2장, 제목 크게 두 줄까지·글쓴이 줄 작게
+- 시리즈에 든 글 카드에 "시리즈 · 시리즈 이름"(GET /api/series/titles, 공개 글만)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**PC(1440)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-after.png) |
+
+**넓은 화면(1920)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-w-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-w-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.72.0/v1720-ex-m-after.png) |
+
+---
+
 ## [1.71.0] — 2026-10-21 · 개인 확장 (글감 화면 디자인 · 알림 모두 읽음)
 
 - 글감 화면 새 디자인: 제목·숫자 한 번씩, 선 아이콘 카드, 배지 이름 "첫 글감"·"글감 10번/30번/100번"
