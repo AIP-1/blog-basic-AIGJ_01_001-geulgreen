@@ -11,6 +11,7 @@
     <div class="auth-panel">
     <h1>이메일로 가입하기</h1>
     <p class="auth-lead">글그린에서 나만의 블로그를 시작해 보세요.</p>
+    <p class="help auth-age-note">만 14세 미만은 보호자 동의를 받아 가입할 수 있어요.</p>
 
     <form method="post" th:action="@{/signup}" novalidate class="auth-form">
 
@@ -91,6 +92,21 @@
             <input id="passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" required>
             <p class="field-error" th:if="${errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
         </div>
+
+        <!-- 10-21 chan: 나이 확인. 14세 미만은 보호자 이름·이메일을 받아 보호자 동의 메일을 보낸다(개인정보 보호법 제22조의2) -->
+        <fieldset class="field signup-age" data-age-group>
+            <legend>나이 (필수)</legend>
+            <p class="form-error" th:if="${errors['guardian'] != null}" th:text="${errors['guardian']}" role="alert" data-toast-inline></p>
+            <label><input type="radio" name="ageGroup" value="OVER14" required th:checked="${form.ageGroup() == 'OVER14'}"> 만 14세 이상이에요</label>
+            <label><input type="radio" name="ageGroup" value="UNDER14" th:checked="${form.under14()}"> 만 14세 미만이에요</label>
+            <div class="signup-guardian" data-guardian-fields th:hidden="${!form.under14()}">
+                <p class="help">14세 미만은 보호자(부모님 등)의 동의가 있어야 가입할 수 있어요. 보호자에게 동의 메일을 보내고, 보호자가 동의하면 바로 쓸 수 있어요.</p>
+                <label for="guardianName">보호자 이름</label>
+                <input id="guardianName" name="guardianName" type="text" maxlength="30" autocomplete="off" th:value="${form.guardianName()}">
+                <label for="guardianEmail">보호자 이메일</label>
+                <input id="guardianEmail" name="guardianEmail" type="email" maxlength="254" autocomplete="off" th:value="${form.guardianEmail()}">
+            </div>
+        </fieldset>
 
         <fieldset class="field signup-agree">
             <legend>약관 동의 (필수)</legend>

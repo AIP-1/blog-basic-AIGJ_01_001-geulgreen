@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.team.blog.account.application.MailSender;
 import com.team.blog.support.Browser;
@@ -53,7 +55,7 @@ class EmailSignupIT extends IntegrationTestBase {
         assertThat((String) identity.get("password_hash")).startsWith("{bcrypt}").doesNotContain(PASSWORD);
         long memberId = ((Number) identity.get("member_id")).longValue();
         assertThat(jdbc.queryForList("SELECT type FROM member_agreement WHERE member_id = ?", String.class, memberId))
-                .containsExactlyInAnyOrder("TERMS", "PRIVACY");
+                .containsExactlyInAnyOrder("TERMS", "PRIVACY", "AGE14");
         assertThat(jdbc.queryForMap("SELECT handle, nickname, nickname_changed_at FROM member WHERE id = ?", memberId))
                 .containsEntry("handle", "kimmin").containsEntry("nickname", "김민").containsEntry("nickname_changed_at", null);
 
@@ -72,13 +74,13 @@ class EmailSignupIT extends IntegrationTestBase {
         String emailOnly = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/signup")
                 .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                 .param("email", "early@x.com")).andReturn().getResponse().getContentAsString();
-        assertThat(emailOnly).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(emailOnly).doesNotContain("만 14세 이상 확인과 필수 약관 2개에 모두 동의해 주세요");
         String noPassword = mockMvc.perform(signup("early@x.com", "early1", "", "", "가나다", false, false))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(noPassword).doesNotContain("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(noPassword).doesNotContain("만 14세 이상 확인과 필수 약관 2개에 모두 동의해 주세요");
         String onlyTermsMissing = mockMvc.perform(signup("early@x.com", "early1", PASSWORD, PASSWORD, "가나다", false, false))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(onlyTermsMissing).contains("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(onlyTermsMissing).contains("만 14세 이상 확인과 필수 약관 2개에 모두 동의해 주세요");
         assertThat(count("SELECT count(*) FROM member")).isZero();
     }
 
@@ -88,9 +90,10 @@ class EmailSignupIT extends IntegrationTestBase {
         MvcResult onlyPrivacy = mockMvc.perform(signup("a1@x.com", "aaa111", PASSWORD, PASSWORD, "가나다", false, true)).andReturn();
         assertThat(onlyTerms.getResponse().getStatus()).isEqualTo(400);
         assertThat(onlyPrivacy.getResponse().getStatus()).isEqualTo(400);
-        assertThat(onlyTerms.getResponse().getContentAsString()).contains("필수 약관 2개에 모두 동의해 주세요");
+        assertThat(onlyTerms.getResponse().getContentAsString()).contains("만 14세 이상 확인과 필수 약관 2개에 모두 동의해 주세요");
         assertThat(count("SELECT count(*) FROM member")).isZero();
     }
+
 
     @Test
     void sameEmailDifferingOnlyInCaseOrSpacesIsRejected() throws Exception {

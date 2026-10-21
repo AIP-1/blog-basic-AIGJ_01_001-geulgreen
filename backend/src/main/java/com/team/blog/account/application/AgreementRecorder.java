@@ -22,18 +22,22 @@ public class AgreementRecorder {
         this.repository = repository;
     }
 
-    /** 계정을 만들기 전에 부른다. */
-    public void requireBoth(boolean agreeTerms, boolean agreePrivacy) {
-        if (!agreeTerms || !agreePrivacy) {
+    /** 계정을 만들기 전에 부른다. 만 14세 이상 확인도 필수다(10-21 chan). */
+    public void requireAll(boolean agreeTerms, boolean agreePrivacy, String ageGroup) {
+        if (!agreeTerms || !agreePrivacy || !AgeGroup.chosen(ageGroup)) {
             throw new AgreementRequiredException();
         }
     }
 
-    /** 가입 트랜잭션 안에서 {@code TERMS}·{@code PRIVACY} 두 행을 만든다. */
+    /** 가입 트랜잭션 안에서 {@code TERMS}·{@code PRIVACY}(14세 이상이면 {@code AGE14}도) 행을 만든다. 14세 미만은 보호자 동의 때 {@code GUARDIAN}. */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void recordSignupAgreements(long memberId, Instant now) {
-        repository.saveAll(List.of(
+    public void recordSignupAgreements(long memberId, Instant now, boolean over14) {
+        List<MemberAgreement> rows = new java.util.ArrayList<>(List.of(
                 new MemberAgreement(memberId, AgreementType.TERMS, now),
                 new MemberAgreement(memberId, AgreementType.PRIVACY, now)));
+        if (over14) {
+            rows.add(new MemberAgreement(memberId, AgreementType.AGE14, now));
+        }
+        repository.saveAll(rows);
     }
 }

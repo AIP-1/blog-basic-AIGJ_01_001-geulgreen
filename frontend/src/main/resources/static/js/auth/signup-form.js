@@ -18,8 +18,23 @@
     sync();
   }
 
+  // 10-21 chan: "만 14세 미만"을 고르면 보호자 이름·이메일 칸을 펼치고 필수로
+  function bindAgeGroup() {
+    var group = document.querySelector('[data-age-group]');
+    if (!group) { return; }
+    var fields = group.querySelector('[data-guardian-fields]');
+    function sync() {
+      var under = !!group.querySelector('input[name="ageGroup"][value="UNDER14"]:checked');
+      fields.hidden = !under;
+      Array.prototype.forEach.call(fields.querySelectorAll('input'), function (i) { i.required = under; });
+    }
+    Array.prototype.forEach.call(group.querySelectorAll('input[name="ageGroup"]'), function (r) { r.addEventListener('change', sync); });
+    sync();
+  }
+
   function init() {
     bindAgreeAll();
+    bindAgeGroup();
     var buttons = document.querySelectorAll('button[data-fill-handle]');
     var input = document.getElementById('handle');
     if (!input) { return; }

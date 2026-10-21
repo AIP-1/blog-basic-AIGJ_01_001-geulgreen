@@ -435,6 +435,17 @@ main.auth-page { max-width: 960px; }
 .auth-panel { padding: 48px 44px; }
 .auth-panel h1 { margin: 0 0 4px; font-size: 1.6em; }
 .auth-lead { margin: 0 0 24px; color: var(--color-text-muted); }
+.auth-age-note { margin: -18px 0 20px; }
+.signup-age > label { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.signup-guardian { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.signup-guardian[hidden] { display: none; }
+.signup-guardian > label { font-weight: 600; font-size: .92em; margin-top: 4px; }
+.signup-guardian > .help { margin: 0 0 4px; line-height: 1.5; }
+.guardian-terms { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 16px 0; padding: 16px; border: 1px solid var(--color-border); border-radius: 14px; }
+.guardian-terms dt { font-weight: 700; }
+.guardian-terms dd { margin: 0; line-height: 1.6; }
+.guardian-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 16px; }
+@media (max-width: 640px) { .guardian-terms { grid-template-columns: 1fr; } .guardian-terms dd { margin-bottom: 8px; } }
 .auth-form .field { margin: 14px 0; }
 .auth-form .field > label { font-weight: 600; font-size: .92em; }
 .auth-form > button[type=submit] { margin-top: 8px; }
@@ -456,7 +467,7 @@ main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
     .auth-card { grid-template-columns: 1fr; }
     .auth-art .cat-art { max-height: 220px; }
     .auth-panel { padding: 28px 22px; }
-    main.auth-page-single { margin: 16px; padding: 28px 20px; }
+    main.auth-page-single { margin: 16px; padding: 28px 20px; width: auto; max-width: calc(100% - 32px); box-sizing: border-box; }
 }
 
 /* 개인 블로그 머리 */

@@ -26,9 +26,11 @@ public class AccountStatusChecker {
     private final MemberRepository memberRepository;
     private final MemberSuspensionRepository suspensionRepository;
     private final Clock clock;
+    private final GuardianConsentService guardianConsent;
 
     public AccountStatusChecker(MemberRepository memberRepository, MemberSuspensionRepository suspensionRepository,
-                                Clock clock) {
+                                Clock clock, GuardianConsentService guardianConsent) {
+        this.guardianConsent = guardianConsent;
         this.memberRepository = memberRepository;
         this.suspensionRepository = suspensionRepository;
         this.clock = clock;
@@ -37,6 +39,9 @@ public class AccountStatusChecker {
     @Transactional
     public LoginStatus checkOnLogin(long memberId) {
         Instant now = clock.instant();
+        if (guardianConsent.pending(memberId)) {
+            return new LoginStatus.GuardianPending();
+        }
         Optional<MemberSuspension> current = suspensionRepository.findCurrent(memberId, now);
         if (current.isPresent()) {
             return new LoginStatus.Suspended(current.get().getEndsAt(), current.get().getReason());

@@ -58,6 +58,11 @@ public class SocialLoginSuccessHandler implements AuthenticationSuccessHandler {
         }
         SocialLoginService.ExistingMember existing = (SocialLoginService.ExistingMember) resolution;
         LoginStatus status = accountStatusChecker.checkOnLogin(existing.memberId());
+        if (status instanceof LoginStatus.GuardianPending) {
+            forgetAuthentication(request);
+            AuthResponses.seeOther(request, response, "/login?guardian");
+            return;
+        }
         if (status instanceof LoginStatus.Suspended suspended) {
             request.getSession(true).setAttribute(AuthResponses.SUSPENDED_NOTICE,
                     SuspensionNotice.text(suspended.endsAt(), suspended.reason()));
