@@ -67,7 +67,7 @@ public class ConnectionsController {
         String url = markdownProperties.siteOrigin().replaceAll("/+$", "") + "/mcp";
         String key = newKey != null ? newKey : "<연결 키>";
         model.addAttribute("mcpUrl", url);
-        model.addAttribute("claudeCode", "claude mcp add --transport http geulgreen " + url
+        model.addAttribute("claudeCode", "claude mcp add --transport http --scope user geulgreen " + url
                 + " --header \"Authorization: Bearer " + key + "\"");
         model.addAttribute("cursor", """
                 {
