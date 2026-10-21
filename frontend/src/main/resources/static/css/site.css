@@ -1949,4 +1949,4 @@ main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { 
 .blog-tabs { overflow-y: hidden; align-items: center; }
 .blog-tabs-action { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .blog-tabs-action .icon { width: 16px; height: 16px; }
-.blog-tabs .blog-tabs-action { padding: 6px 12px; }
+.blog-tabs .blog-tabs-action { padding: 4px 12px; min-height: 0; margin: 4px 1px 4px auto; line-height: 1.4; border: 1px solid var(--color-control-border); color: var(--color-text); }
