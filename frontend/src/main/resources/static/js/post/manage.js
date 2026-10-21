@@ -72,9 +72,11 @@
   function init() {
     // 휴지통 비우기: 확인만 받고 폼은 그대로 제출(서버가 돌아올 때 알림)
     Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
+      var approved = false; // [예] 뒤 다시 보내는 제출은 그대로 통과(keep-scroll.js 등 다른 submit 처리도 받게)
       form.addEventListener('submit', function (e) {
+        if (approved) { approved = false; return; }
         e.preventDefault();
-        window.ask(form.dataset.confirm, '영구 삭제', true).then(function (ok) { if (ok) { form.submit(); } });
+        window.ask(form.dataset.confirm, '영구 삭제', true).then(function (ok) { if (ok) { approved = true; form.requestSubmit(); } });
       });
     });
 
