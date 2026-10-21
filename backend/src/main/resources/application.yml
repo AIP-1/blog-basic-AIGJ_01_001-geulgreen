@@ -95,6 +95,9 @@ blog:
     handle:
       prefill-max-body-length: 30
       suggestion-batch-size: 20
+      # 강성찬 개인 확장: 바꿔도 남이 영영 못 가져가는 옛 주소(검색 등록한 관리자 블로그 주소). 지금 쓰는 동안은 영향 없음
+      permanent-holds:
+        - likekarina
       # FR-004 (08 §5) 34개. 서비스 이름 확정 시 추가(research U-1)
       reserved:
         - admin

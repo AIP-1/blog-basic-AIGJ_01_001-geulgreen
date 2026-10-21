@@ -131,7 +131,7 @@ class InstaAccountIT extends IntegrationTestBase {
         assertThat(jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, me)).isEqualTo("newname");
         // 옛 주소는 새 주소로 넘김(하위 경로·쿼리 유지)
         MvcResult redirect = mockMvc.perform(get("/oldname/guestbook?x=1")).andReturn();
-        assertThat(redirect.getResponse().getStatus()).isEqualTo(302);
+        assertThat(redirect.getResponse().getStatus()).isEqualTo(301);
         assertThat(redirect.getResponse().getRedirectedUrl()).isEqualTo("/newname/guestbook?x=1");
         assertThat(mockMvc.perform(get("/newname")).andReturn().getResponse().getContentAsString())
                 .contains("게시물", "팔로워", "팔로잉");
@@ -147,12 +147,30 @@ class InstaAccountIT extends IntegrationTestBase {
         // 기간이 지나면 다시 바꿀 수 있고, 잡아 둔 기간이 끝난 옛 주소는 남이 가져가며 넘김도 끝남
         clock.advance(Duration.ofDays(15));
         assertThat(changeHandle(me, "thirdname").getResponse().getStatus()).isEqualTo(200);
-        assertThat(mockMvc.perform(get("/oldname")).andReturn().getResponse().getStatus()).isEqualTo(302);
+        assertThat(mockMvc.perform(get("/oldname")).andReturn().getResponse().getStatus()).isEqualTo(301);
         clock.advance(Duration.ofDays(15));
         assertThat(changeHandle(other, "oldname").getResponse().getStatus()).isEqualTo(200);
         assertThat(mockMvc.perform(get("/oldname")).andReturn().getResponse().getStatus()).isEqualTo(200);
         // 이메일 가입자는 소셜 접두어 주소를 못 고름
         assertThat(changeHandle(me, "go-thirdx").getResponse().getStatus()).isEqualTo(400);
+    }
+
+    @Test
+    void permanentlyHeldOldHandleNeverGoesToSomeoneElse() throws Exception {
+        clock.set(Instant.parse("2026-10-13T00:00:00Z"));
+        long me = members.localMember("likekarina", "주인", "me@example.com", PASSWORD, true);
+        long other = members.localMember("someone", "남남이", "other@example.com", PASSWORD, true);
+        // 지금 쓰는 동안은 평소 블로그 주소 그대로
+        assertThat(mockMvc.perform(get("/likekarina")).andReturn().getResponse().getStatus()).isEqualTo(200);
+
+        assertThat(changeHandle(me, "newname").getResponse().getStatus()).isEqualTo(200);
+        clock.advance(Duration.ofDays(60));
+        assertThat(changeHandle(other, "likekarina").getResponse().getStatus()).isEqualTo(400);
+        MvcResult redirect = mockMvc.perform(get("/likekarina/posts/71")).andReturn();
+        assertThat(redirect.getResponse().getStatus()).isEqualTo(301);
+        assertThat(redirect.getResponse().getRedirectedUrl()).isEqualTo("/newname/posts/71");
+        // 본인은 되돌릴 수 있음
+        assertThat(changeHandle(me, "likekarina").getResponse().getStatus()).isEqualTo(200);
     }
 
     @Test
