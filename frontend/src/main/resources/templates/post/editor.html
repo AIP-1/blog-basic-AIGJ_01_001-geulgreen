@@ -30,10 +30,25 @@
 
     <!-- 057 강성찬 개인 확장: 미션 주제로 연 글 -->
     <p th:if="${missionTopic != null}" class="notice mission-editor-note">
-        <strong th:text="${'🗓 오늘의 미션: ' + missionTopic.title()}">오늘의 미션</strong>
+        <strong th:text="${'오늘의 글감: ' + missionTopic.title()}">오늘의 글감</strong>
         <span th:text="${missionTopic.hint()}">안내</span>
-        <span class="help">발행하면 미션 완료! 제목은 바꿔도 돼요.</span>
+        <span class="help">제목은 바꿔도 돼요.</span>
     </p>
+    <!-- 10-21 강성찬 개인 확장: 오늘의 글감(미션 대신). 빈 새 글에만, 눌러서 그 글감으로 쓰거나 닫는다(닫으면 오늘은 다시 안 보임) -->
+    <div th:if="${todayTopic != null and missionTopic == null and !published and #strings.isEmpty(post.title()) and #strings.isEmpty(post.contentMd())}"
+         class="topic-note" id="topic-note" th:data-day="${todayTopic.day()}">
+        <form method="post" th:action="@{/missions/topics/{id}/write(id=${todayTopic.id()})}" class="topic-note-pick">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit" th:title="${todayTopic.hint()}">
+                <svg th:replace="~{fragments/icons :: sparkle}"></svg>
+                <span class="topic-note-label">오늘의 글감</span>
+                <span class="topic-note-title" th:text="${todayTopic.title()}">글감</span>
+            </button>
+        </form>
+        <button type="button" class="icon-btn topic-note-close" aria-label="오늘의 글감 닫기" hidden>
+            <svg th:replace="~{fragments/icons :: close}"></svg>
+        </button>
+    </div>
     <p class="notice" th:if="${published}">발행한 글을 고치는 중이에요. 저장한 내용은 다시 발행하기 전까지 독자에게 보이지 않아요.</p>
 
     <!-- 충돌 배너(04 §2-7): 편집은 막지 않는다 -->
@@ -223,6 +238,7 @@
     <script th:src="@{/js/editor/visual-editor.js}" defer></script>
     <script th:src="@{/js/editor/format-toolbar.js}" defer></script>
     <script th:src="@{/js/editor/empty-draft.js}" defer></script>
+    <script th:src="@{/js/editor/topic-note.js}" defer></script>
     <script src="/webjars/highlightjs__cdn-assets/11.11.1/highlight.min.js" defer></script>
     <script th:src="@{/js/code-highlight.js}" defer></script>
     <script th:src="@{/js/editor/preview.js}" defer th:unless="${writeCheck}"></script>
