@@ -42,7 +42,7 @@ class SocialPictureIT extends IntegrationTestBase {
     private static MockHttpServletRequestBuilder complete(boolean usePicture, String email) {
         MockHttpServletRequestBuilder builder = post("/signup/social").with(csrf())
                 .param("handle", "kimminseo").param("nickname", "김민서")
-                .param("agreeTerms", "true").param("agreePrivacy", "true");
+                .param("agreeTerms", "true").param("agreePrivacy", "true").param("ageGroup", "OVER14");
         if (usePicture) {
             builder.param("useSocialPicture", "true");
         }

@@ -85,6 +85,13 @@ public class AuthController {
             boolean codeVerified = session != null
                     && EmailRules.normalize(form.email()).equals(session.getAttribute(SignupCodeApiController.VERIFIED_EMAIL));
             long memberId = emailSignupService.signUp(form.toCommand(), codeVerified);
+            if (form.under14()) {
+                // 10-21 chan: 14세 미만은 보호자 동의 전이라 로그인하지 않는다
+                if (session != null) {
+                    session.removeAttribute(SignupCodeApiController.VERIFIED_EMAIL);
+                }
+                return Redirects.seeOther("/signup/guardian-sent");
+            }
             loginSessionEstablisher.establish(memberId, "USER", request, response);
             if (codeVerified) {
                 HttpSession current = request.getSession(false);
@@ -96,6 +103,8 @@ public class AuthController {
             return Redirects.seeOther("/signup/verify-sent");
         } catch (AgreementRequiredException e) {
             errors.put("agreements", message(AgreementRequiredException.CODE));
+        } catch (com.team.blog.account.application.GuardianInfoException e) {
+            errors.put("guardian", e.getMessage());
         } catch (InvalidEmailException e) {
             errors.put("email", message(InvalidEmailException.CODE));
         } catch (DuplicateEmailException e) {
@@ -163,6 +172,8 @@ public class AuthController {
                 session.removeAttribute(SUSPENDED_NOTICE);
             }
             message = notice instanceof String text ? text : "정지된 계정이에요";
+        } else if (hasFlag(request, "guardian")) {
+            message = "보호자 동의를 기다리고 있어요. 보호자가 메일에서 동의하면 로그인할 수 있어요";
         } else if (hasFlag(request, "social")) {
             message = "다시 소셜 로그인해 주세요";
         }

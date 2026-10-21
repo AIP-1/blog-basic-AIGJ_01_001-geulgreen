@@ -83,7 +83,7 @@ public class SocialSignupController {
         String prefix = HandlePrefix.of(pending.provider()).value();
         String prefilled = handleService.prefill(pending.verifiedEmail(), pending.provider());
         String nickname = nicknamePolicy.suggestFromSocialName(pending.displayName()).orElse("");
-        SocialSignupForm form = new SocialSignupForm(nickname, stripPrefix(prefilled, prefix), false, false, true, null);
+        SocialSignupForm form = new SocialSignupForm(nickname, stripPrefix(prefilled, prefix), false, false, true, null, null, null, null);
         ModelAndView view = page(pending, form);
         if (nickname.isEmpty()) {
             view.addObject("nicknameHint", "닉네임을 입력해 주세요");
@@ -103,6 +103,11 @@ public class SocialSignupController {
         String handleSuggestion = null;
         try {
             SocialSignupService.Result result = socialSignupService.complete(pending, form.toCommand());
+            if (result.created() && form.under14()) {
+                // 10-21 chan: 14세 미만은 보호자 동의 전이라 로그인하지 않는다
+                clearPending(request);
+                return Redirects.seeOther("/signup/guardian-sent");
+            }
             loginSessionEstablisher.establish(result.memberId(), "USER", request, response);
             HttpSession session = request.getSession();
             session.removeAttribute(PendingSocialSignup.SESSION_ATTRIBUTE);
@@ -119,6 +124,8 @@ public class SocialSignupController {
             return Redirects.seeOther("/login?social");
         } catch (AgreementRequiredException e) {
             errors.put("agreements", message(AgreementRequiredException.CODE));
+        } catch (com.team.blog.account.application.GuardianInfoException e) {
+            errors.put("guardian", e.getMessage());
         } catch (InvalidEmailException e) {
             errors.put("email", message(InvalidEmailException.CODE));
         } catch (HandleViolationException e) {

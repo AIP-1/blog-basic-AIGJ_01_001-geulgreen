@@ -45,12 +45,13 @@ public class SocialSignupService {
     private final TransactionTemplate transactionTemplate;
     private final AuthProperties properties;
     private final Clock clock;
+    private final GuardianConsentService guardianConsent;
 
     public SocialSignupService(MemberRepository memberRepository, AuthIdentityRepository authIdentityRepository,
                                AgreementRecorder agreementRecorder, HandleService handleService,
                                NicknamePolicy nicknamePolicy, RedisTokenStore tokenStore,
                                MemberUniqueViolationTranslator translator, ApplicationEventPublisher events,
-                               TransactionTemplate transactionTemplate, AuthProperties properties, Clock clock) {
+                               TransactionTemplate transactionTemplate, AuthProperties properties, Clock clock, GuardianConsentService guardianConsent) {
         this.memberRepository = memberRepository;
         this.authIdentityRepository = authIdentityRepository;
         this.agreementRecorder = agreementRecorder;
@@ -62,6 +63,7 @@ public class SocialSignupService {
         this.transactionTemplate = transactionTemplate;
         this.properties = properties;
         this.clock = clock;
+        this.guardianConsent = guardianConsent;
     }
 
     /**
@@ -112,14 +114,22 @@ public class SocialSignupService {
         Handle handle = handleService.validateForSignup(command.handle(), pending.provider());
         submittedHandle[0] = handle;
         Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
-        agreementRecorder.requireBoth(command.agreeTerms(), command.agreePrivacy());
+        agreementRecorder.requireAll(command.agreeTerms(), command.agreePrivacy(), command.ageGroup());
+        if (command.under14()) {
+            GuardianConsentService.problem(command.guardianName(), command.guardianEmail(), email).ifPresent(msg -> {
+                throw new GuardianInfoException(msg);
+            });
+        }
 
         Instant now = clock.instant();
         Member member = memberRepository.saveAndFlush(new Member(handle, nickname, now));
         long memberId = member.getId();
         authIdentityRepository.saveAndFlush(AuthIdentity.social(memberId, pending.provider(), pending.providerUserId(),
                 email, verified ? now : null, now));
-        agreementRecorder.recordSignupAgreements(memberId, now);
+        agreementRecorder.recordSignupAgreements(memberId, now, !command.under14());
+        if (command.under14()) {
+            guardianConsent.request(memberId, command.guardianName(), command.guardianEmail(), nickname.value());
+        }
         events.publishEvent(new MemberSignedUp(memberId, pending.provider().name()));
         if (!verified) {
             String rawToken = tokenStore.issue(TokenKind.VERIFY, memberId);

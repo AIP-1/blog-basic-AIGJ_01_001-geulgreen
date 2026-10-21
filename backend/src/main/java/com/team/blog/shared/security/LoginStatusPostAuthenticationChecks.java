@@ -24,9 +24,14 @@ public class LoginStatusPostAuthenticationChecks implements UserDetailsChecker {
         if (!user.isCredentialsNonExpired()) {
             throw new CredentialsExpiredException("credentials expired");
         }
-        if (user instanceof MemberPrincipal principal
-                && accountStatusChecker.checkOnLogin(principal.memberId()) instanceof LoginStatus.Suspended s) {
-            throw new AccountSuspendedAuthenticationException(s.endsAt(), s.reason());
+        if (user instanceof MemberPrincipal principal) {
+            LoginStatus status = accountStatusChecker.checkOnLogin(principal.memberId());
+            if (status instanceof LoginStatus.Suspended s) {
+                throw new AccountSuspendedAuthenticationException(s.endsAt(), s.reason());
+            }
+            if (status instanceof LoginStatus.GuardianPending) {
+                throw new GuardianPendingAuthenticationException();
+            }
         }
     }
 }

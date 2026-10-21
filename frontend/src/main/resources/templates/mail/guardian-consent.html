@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>보호자 동의</title>
+</head>
+<body>
+<p><span th:text="${guardianName}">보호자</span>님, 안녕하세요. 글그린이에요.</p>
+<p><span th:text="${childNickname}">어린이</span>님이 글그린 블로그에 가입하면서 보호자로 이 이메일을 적었어요.
+만 14세 미만 어린이가 가입하려면 보호자의 동의가 필요해요(개인정보 보호법 제22조의2).</p>
+<ul>
+    <li>모으는 정보: 어린이의 이메일, 닉네임, 블로그 주소, 비밀번호(암호로 바꿔 보관), 쓴 글과 댓글. 보호자의 이름과 이메일(동의 확인에만 씀)</li>
+    <li>쓰는 곳: 블로그 계정을 만들고, 로그인하고, 글을 쓰고 보여 주는 데만 써요. 광고나 다른 곳에 넘기지 않아요.</li>
+    <li>보관 기간: 탈퇴할 때까지. 동의하지 않거나 기한까지 답하지 않으면 바로 지워요.</li>
+</ul>
+<p>아래 링크에서 동의 여부를 골라 주세요. <span th:text="${deadline}">기한</span>까지 쓸 수 있어요.</p>
+<p><a th:href="${link}" th:text="${link}">동의 링크</a></p>
+<p>가입을 신청한 적이 없다면 동의하지 마세요. 기한이 지나면 정보는 저절로 지워져요.</p>
+</body>
+</html>

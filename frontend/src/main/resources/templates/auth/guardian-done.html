@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>보호자 동의 · 글그린</title>
+</head>
+<body>
+<main class="auth-page auth-page-single guardian-page">
+    <th:block th:if="${result == 'agreed'}">
+        <h1>동의해 주셔서 고마워요</h1>
+        <p>이제 아이가 로그인해서 글을 쓸 수 있어요.</p>
+    </th:block>
+    <th:block th:if="${result == 'declined'}">
+        <h1>동의하지 않았어요</h1>
+        <p>아이가 적은 정보와 보호자 정보를 모두 지웠어요.</p>
+    </th:block>
+    <th:block th:if="${result == 'expired'}">
+        <h1>링크를 쓸 수 없어요</h1>
+        <p>이미 처리했거나 기한이 지난 동의 링크예요.</p>
+    </th:block>
+    <p><a class="link-btn" href="/">처음으로</a></p>
+</main>
+</body>
+</html>
