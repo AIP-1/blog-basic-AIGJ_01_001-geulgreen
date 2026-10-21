@@ -150,6 +150,25 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
                         rs.getString("first_tag")), seriesId);
     }
 
+    /**
+     * 강성찬 개인 확장(10-21): 탐색 카드에 붙일 시리즈 이름(글 번호 → 시리즈 제목). 공용 목록 조건(공개 글·공개 계정) 글만,
+     * 한 번에 최대 {@code MAX_TITLE_IDS}개.
+     */
+    public java.util.Map<Long, String> titlesOf(java.util.Collection<Long> postIds) {
+        java.util.Map<Long, String> out = new java.util.LinkedHashMap<>();
+        if (postIds.isEmpty()) {
+            return out;
+        }
+        Long[] ids = postIds.stream().distinct().limit(MAX_TITLE_IDS).toArray(Long[]::new);
+        jdbc.query("SELECT sp.post_id, s.title FROM series_post sp JOIN series s ON s.id = sp.series_id"
+                        + " JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id WHERE "
+                        + accessPolicy.publicListingCondition("p", "m") + " AND sp.post_id = ANY (?)",
+                rs -> { out.put(rs.getLong("post_id"), rs.getString("title")); }, (Object) ids);
+        return out;
+    }
+
+    static final int MAX_TITLE_IDS = 60;
+
     /** 글이 든 시리즈(없으면 빈 값). */
     public Optional<Series> ofPost(long postId) {
         return jdbc.query("SELECT s.id, s.title, s.start_zero FROM series_post sp JOIN series s ON s.id = sp.series_id WHERE sp.post_id = ?",
