@@ -128,6 +128,7 @@
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
                 <div id="notif-panel" class="notif-panel" hidden></div>
+                <p id="notif-bell-status" role="status" hidden data-toast="success"></p>
             </span>
             <!-- 홈 리뉴얼(강성찬 개인 확장): 내 프로필 메뉴(스크립트 없이 details) -->
             <details class="profile-menu" th:if="${currentMemberId != null}">

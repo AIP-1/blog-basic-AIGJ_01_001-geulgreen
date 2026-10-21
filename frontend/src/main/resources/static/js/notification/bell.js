@@ -2,6 +2,7 @@
  * 종 아이콘(017 FR-024·FR-025): 열 때와 30초마다 안 읽은 수만 확인(탭이 가려지면 멈추고, 보이면 바로 한 번). 99개 초과 "99+",
  * 화면 낭독기 이름 "안 읽은 알림 N개". 누르면 최근 10개 펼침 목록과 [모든 알림 보기]. 글자는 textContent로만 넣는다.
  * 068(강성찬 개인 확장): 펼치면 모두 읽음으로 바꾼다. 이번에 펼친 목록의 안 읽음 점은 그대로 둬서 무엇이 새것이었는지 보이게 한다.
+ * 안 읽음 점이 있으면 위에 [모두 읽음] 버튼(강성찬 개인 확장): 누르면 점까지 지우고 결과는 머리말 아래 안내로.
  */
 (function () {
   'use strict';
@@ -9,6 +10,7 @@
   var bell = document.getElementById('notif-bell');
   var badge = document.getElementById('notif-badge');
   var panel = document.getElementById('notif-panel');
+  var status = document.getElementById('notif-bell-status');
   if (!bell || !badge || !panel) { return; }
   var POLL_MS = 30000;
   var timer = null;
@@ -61,6 +63,20 @@
 
   function render(items) {
     panel.textContent = '';
+    if (items.some(function (i) { return !i.read; })) {
+      var head = el('div', 'notif-panel-head');
+      var markAll = el('button', 'btn-text btn-sm', '모두 읽음');
+      markAll.type = 'button';
+      markAll.id = 'notif-panel-read-all';
+      markAll.addEventListener('click', function () {
+        readAll(function () {
+          render(items.map(function (i) { return Object.assign({}, i, { read: true }); }));
+          say('success', '알림을 모두 읽음으로 바꿨어요');
+        }, function () { say('error', '모두 읽음으로 바꾸지 못했어요'); });
+      });
+      head.appendChild(markAll);
+      panel.appendChild(head);
+    }
     if (!items.length) {
       panel.appendChild(el('p', 'notice', '새 알림이 없어요'));
     } else {
@@ -83,10 +99,16 @@
     panel.appendChild(el('p')).appendChild(all);
   }
 
-  function readAll() {
+  function say(kind, text) {
+    if (!status) { return; }
+    status.dataset.toast = kind;
+    status.textContent = text;
+  }
+
+  function readAll(done, failed) {
     fetch('/api/notifications/read-all', { method: 'POST', credentials: 'same-origin', headers: csrf() })
-      .then(function (r) { if (r.ok) { show(0); } })
-      .catch(function () {});
+      .then(function (r) { if (!r.ok) { throw new Error(); } show(0); if (done) { done(); } })
+      .catch(function () { if (failed) { failed(); } });
   }
 
   function load() {
