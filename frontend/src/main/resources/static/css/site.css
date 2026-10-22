@@ -42,6 +42,17 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
     /* 휴대폰: 종에 붙인 알림 펼침이 화면 왼쪽 밖으로 잘려서, 머리글 너비에 맞춰 연다 */
     .site-header .notif-bell-wrap { position: static; }
     .site-header .notif-panel { left: 12px; right: 12px; width: auto; max-height: 70vh; overflow-y: auto; }
+    /* 10-22(chan): 휴대폰에서 짧은 탭·칩·링크 줄은 두 줄로 꺾지 않고 한 줄로(넘치면 옆으로 민다) */
+    .settings-nav, .manage-filter, .manage-tabs, .admin-nav, .footer-links { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; }
+    .settings-nav::-webkit-scrollbar, .manage-filter::-webkit-scrollbar, .manage-tabs::-webkit-scrollbar, .admin-nav::-webkit-scrollbar,
+    .footer-links::-webkit-scrollbar { display: none; }
+    .settings-nav a, .manage-filter a, .manage-tabs a, .admin-nav a, .footer-links a { flex: none; white-space: nowrap; }
+    .settings-nav { padding-bottom: 4px; }
+    .settings-nav a { padding: 6px 8px; font-size: .9em; }
+    .manage-filter a { padding: 4px 9px; font-size: .92em; }
+    .admin-nav a { padding: 5px 10px; font-size: .9em; }
+    .footer-links { gap: 10px; }
+    .footer-links a { font-size: .82em; }
 }
 .site-header form { margin: 0; }
 .auth-form .field { margin: 16px 0; }
