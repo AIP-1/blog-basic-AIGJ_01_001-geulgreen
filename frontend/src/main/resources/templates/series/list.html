@@ -10,7 +10,7 @@
     <th:block th:replace="~{fragments/blog-header :: header}"></th:block>
     <div th:if="${seriesList.isEmpty()}" class="empty-state">
         <p>아직 묶어 둔 시리즈가 없어요</p>
-        <p class="help" th:if="${isOwner}"><a href="/manage/series">내 글 관리의 시리즈 탭</a>이나 글쓰기 발행 설정에서 이어지는 글을 하나로 묶을 수 있어요</p>
+        <p class="help" th:if="${isOwner}">오른쪽 위 [시리즈 추가]나 글쓰기의 발행 설정에서 이어지는 글을 하나로 묶을 수 있어요</p>
     </div>
     <ul th:replace="~{series/list :: seriesCards(${seriesList})}"></ul>
     <script th:src="@{/js/follow/follow.js}" defer></script>

@@ -94,7 +94,25 @@ public final class SearchSnippet {
         return best;
     }
 
-    private static String flat(String s) {
-        return s == null ? "" : s.replaceAll("\\s+", " ").strip();
+    /**
+     * 10-22 UX 재점검: 미리보기는 마크다운 기호(#, *, `, 링크 괄호, 사진, 코드 울타리, 인용·목록 표시) 없이 글자만 보여 준다.
+     * 태그·홈 카드의 요약(ExcerptExtractor)과 같은 느낌이 되게. 검색 자체는 content_md 그대로 찾는다.
+     */
+    static String flat(String s) {
+        if (s == null) {
+            return "";
+        }
+        String t = s;
+        t = t.replaceAll("(?m)^\\s*```.*$", " ");                      // 코드 울타리 줄
+        t = t.replaceAll("!\\[[^\\]]*]\\([^)]*\\)", " ");               // 사진
+        t = t.replaceAll("\\[([^\\]]*)]\\([^)]*\\)", "$1");              // 링크 → 글자만
+        t = t.replaceAll("(?m)^\\s{0,3}#{1,6}\\s+", "");                 // 제목 #
+        t = t.replaceAll("(?m)^\\s{0,3}>\\s?", "");                       // 인용 >
+        t = t.replaceAll("(?m)^\\s*([-*+]|\\d+\\.)\\s+", "");             // 목록 표시
+        t = t.replaceAll("(?m)^\\s*([-*_])\\s*(\\1\\s*){2,}$", " ");       // 구분선
+        t = t.replace("`", "");                                       // 인라인 코드
+        t = t.replaceAll("(\\*{1,3}|_{1,3})(?=\\S)(.+?)(?<=\\S)\\1", "$2"); // 굵게·기울임
+        t = t.replaceAll("~~(.+?)~~", "$1");                           // 취소선
+        return t.replaceAll("\\s+", " ").strip();
     }
 }

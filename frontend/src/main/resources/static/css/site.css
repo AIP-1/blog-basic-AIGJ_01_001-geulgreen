@@ -71,7 +71,8 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
 .settings .readonly { color: var(--color-text-muted); }
 /* 063 강성찬 개인 확장: 설정 섹션 메뉴(넓은 화면은 왼쪽 세로 메뉴, 좁은 화면은 위쪽 가로 줄) */
 main.settings { max-width: 960px; }
-.settings-nav { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--color-border); margin: 8px 0 16px; }
+.settings-nav { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--color-border); margin: 8px 0 16px; padding-bottom: 8px; }
+.settings-back { margin: 0 0 16px; }
 .settings-nav a { flex: none; padding: 8px 12px; border-radius: 8px; color: var(--color-text-muted); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .settings-nav a:hover { color: var(--color-text); background: var(--color-surface-muted); }
 .settings-nav a[aria-current] { color: var(--color-text); background: var(--color-brand-soft); }
@@ -282,6 +283,12 @@ main.list-page { max-width: var(--page-wide); }
 .notif-unread .notif-message { font-weight: 700; }
 .notif-dot { color: var(--color-brand); margin-right: 4px; }
 .notif-time { display: block; color: var(--color-text-muted); font-size: .85em; }
+/* 10-22 UX 재점검: 알림 지우기는 작은 둥근 아이콘 버튼(기본 버튼 모양이 내용보다 눈에 띄지 않게) */
+.notif-delete button { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+    border-radius: 50%; color: var(--color-text-muted); flex: none; }
+.notif-delete button svg { width: 16px; height: 16px; }
+.notif-delete button:hover { background: var(--color-surface-muted); color: var(--color-text); }
+.notif-delete button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .notif-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 2px 8px; border-bottom: 1px solid var(--color-border); }
 .notif-panel-title { font-size: 1.02em; }
 .notif-read-all { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; padding: 5px 12px; font-size: .85em; font-weight: 600;
@@ -591,7 +598,7 @@ dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(10
 .more-button { display: inline-flex; padding: 10px 28px; border-radius: 999px; border: 1px solid var(--color-control-border);
     background: var(--color-surface); color: var(--color-text); text-decoration: none; font-weight: 600; }
 .more-button:hover { background: var(--color-surface-muted); }
-.comment-actions button { padding: 2px 10px; font-size: .82em; font-weight: 500; border-color: transparent; background: none; color: var(--color-text-muted); }
+.comment-actions button { padding: 6px 10px; min-height: 32px; font-size: .92em; font-weight: 500; border-color: transparent; background: none; color: var(--color-text-muted); }
 .comment-actions button:hover { background: var(--color-surface-muted); color: var(--color-text); }
 /* 내용이 짧아도 바닥글은 화면 아래에 */
 body { min-height: 100vh; display: flex; flex-direction: column; }
@@ -738,7 +745,27 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
     background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
 .post-settings-head { display: flex; align-items: center; justify-content: space-between; }
 .post-settings-head h2 { margin: 0; font-size: 1.1em; }
-.post-settings .teaser-box { margin: 12px 0 0; }
+.post-settings .teaser-box { margin: 0; }
+.post-settings-hint { margin: 4px 0 0; }
+.post-settings .post-settings-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.post-settings .post-settings-section h3 { margin: 0 0 4px; font-size: 1em; }
+.post-settings .post-category-form, .post-settings .series-form { margin: 12px 0 0; }
+.post-settings .post-category-form > label, .post-settings .series-form label[for="series-select"] { flex-basis: 100%; font-weight: 600; }
+.post-settings .post-category-form .field-hint { flex-basis: 100%; margin: -4px 0 2px; }
+.post-settings .series-form .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.post-settings .series-form #series-new { flex: 1 1 160px; min-width: 0; width: auto; }
+.post-settings label svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
+/* 10-22 UX 재점검: 신고 창도 발행 설정·글 설정 창과 같은 모양 */
+dialog#report-dialog { width: min(420px, calc(100% - 32px)); margin: auto; color: var(--color-text); background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
+dialog#report-dialog::backdrop { background: var(--color-overlay); }
+#report-form h2 { margin: 0 0 8px; font-size: 1.1em; }
+#report-form fieldset { border: 0; padding: 0; margin: 0 0 12px; }
+#report-form legend { font-weight: 600; margin-bottom: 4px; }
+#report-form fieldset label { padding: 6px 0; }
+#report-form > label { margin-top: 4px; font-weight: 600; }
+#report-form textarea { margin-top: 4px; }
+.report-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
 a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
@@ -953,7 +980,8 @@ main.admin-page { max-width: 1280px; }
 .admin-features li { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .admin-features code { overflow-wrap: anywhere; }
 .admin-log-table td, .admin-log-table th { text-align: left; }
-.admin-log-table { display: block; max-width: none; overflow-x: auto; }
+table.admin-log-table { display: table; width: 100%; max-width: none; }
+.admin-log-table th:last-child, .admin-log-table td:last-child { text-align: left; }
 .site-notice { background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); padding: 8px 16px;
     text-align: center; font-size: .92em; }
 .site-notice a { margin-left: 8px; }
@@ -1045,7 +1073,6 @@ main.list-page .home-cards { gap: 18px; }
 @media (min-width: 1280px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* 067 후속: 사이트 링크는 한 줄(작은 회색 글씨, 사이에 ·) */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
-.settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .side-links a { color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
 .side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
