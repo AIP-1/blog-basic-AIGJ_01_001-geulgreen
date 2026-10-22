@@ -48,15 +48,7 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
     /* 휴대폰: 종에 붙인 알림 펼침이 화면 왼쪽 밖으로 잘려서, 머리글 너비에 맞춰 연다 */
     .site-header .notif-bell-wrap { position: static; }
     .site-header .notif-panel { left: 12px; right: 12px; width: auto; max-height: 70vh; overflow-y: auto; }
-    /* 10-22(chan): 휴대폰에서 짧은 탭·칩·링크 줄은 두 줄로 꺾지 않고 한 줄로(넘치면 옆으로 민다) */
-    .settings-nav, .manage-filter, .manage-tabs, .admin-nav, .footer-links { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; }
-    .settings-nav::-webkit-scrollbar, .manage-filter::-webkit-scrollbar, .manage-tabs::-webkit-scrollbar, .admin-nav::-webkit-scrollbar,
-    .footer-links::-webkit-scrollbar { display: none; }
-    .settings-nav a, .manage-filter a, .manage-tabs a, .admin-nav a, .footer-links a { flex: none; white-space: nowrap; }
-    .settings-nav { padding-bottom: 4px; }
-    .settings-nav a { padding: 6px 8px; font-size: .9em; }
-    .manage-filter a { padding: 4px 9px; font-size: .92em; }
-    .admin-nav a { padding: 5px 10px; font-size: .9em; }
+    /* 10-22(chan): 휴대폰 한 줄 탭·칩·링크 규칙은 파일 맨 아래(뒤에 오는 기본 규칙에 덮이지 않게) */
     .site-footer .footer-links { flex: 1 1 100%; gap: 8px; justify-content: space-between; }
     .site-footer .footer-links a { font-size: .8125rem; }
 }
@@ -376,6 +368,11 @@ a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px;
 /* 089 댓글 좋아요 */
 .comment-like[aria-pressed="true"] .like-icon { color: var(--color-like); }
 .like-button[aria-pressed="true"], .like-button .like-icon { color: var(--color-like); }
+/* 10-22(chan): 글 화면 좋아요 하트도 카드처럼 선 아이콘(SVG). 내가 눌렀을 때만(글쓴이는 1개 이상일 때만) 채워진다 */
+.like-button .like-icon, .like-count .like-icon { display: inline-flex; align-items: center; }
+.like-button .like-icon .icon, .like-count .like-icon .icon { width: 1.15em; height: 1.15em; }
+.like-count .like-icon { color: var(--color-like); }
+.like-button[aria-pressed="true"] .like-icon .icon, .like-count.has-likes .like-icon .icon { fill: currentColor; }
 .list-retry, .handle-suggestion { padding: 4px 12px; font-size: .85em; }
 
 /* 입력 칸 */
@@ -1032,6 +1029,7 @@ table.admin-log-table { display: table; width: 100%; max-width: none; }
         justify-content: center; gap: 2px; width: 56px; height: 56px; padding: 0; border-radius: 999px; border: 1px solid var(--color-border);
         background: var(--color-surface); color: var(--color-text-muted); font-size: .82em; font-weight: 600; box-shadow: 0 2px 8px var(--color-shadow); }
     .post-side-actions .like-icon { font-size: 1.35em; line-height: 1; color: var(--color-like); }
+    .post-side-actions .like-icon .icon { width: 22px; height: 22px; }
     .post-side-actions .like-button:hover, .post-side-actions .share-menu > summary:hover { border-color: var(--color-control-border); color: var(--color-text); }
     .post-side-actions :is(.like-button, .share-menu > summary):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
     .post-side-actions .share-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -2090,4 +2088,18 @@ dialog.ask-dialog::backdrop { background: var(--color-overlay); }
     .menu-toggle { min-width: 44px; min-height: 44px; }
     .editor-tools button { min-width: 44px; min-height: 44px; justify-content: center; }
     .footer-links a { display: inline-flex; align-items: center; min-height: 32px; }
+}
+
+/* 10-22(chan "두 줄로 나오는 거 전부 한 줄로"): 휴대폰에서 설정 탭·내 글 필터/탭·관리 메뉴는 두 줄로 꺾지 않고 한 줄.
+   파일 맨 아래에 두는 이유: 같은 세기의 기본 규칙(.settings-nav 등)이 뒤에 오면 덮이기 때문. 넘치면 옆으로 밀리고 오른쪽 끝이 흐려져 더 있음을 알린다 */
+@media (max-width: 640px) {
+    .settings-nav, .manage-filter, .manage-tabs, .admin-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent); }
+    .settings-nav::-webkit-scrollbar, .manage-filter::-webkit-scrollbar, .manage-tabs::-webkit-scrollbar, .admin-nav::-webkit-scrollbar { display: none; }
+    .settings-nav a, .manage-filter a, .manage-tabs a, .admin-nav a { flex: none; white-space: nowrap; }
+    .settings-nav { padding-bottom: 4px; padding-right: 24px; }
+    .settings-nav a { padding: 6px 6px; font-size: .8125rem; }
+    .manage-filter a { padding: 4px 9px; font-size: .92em; }
+    .manage-tabs { gap: 14px; }
+    .admin-nav a { padding: 5px 10px; font-size: .9em; }
 }

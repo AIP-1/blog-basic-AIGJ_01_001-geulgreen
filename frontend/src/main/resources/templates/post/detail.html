@@ -154,13 +154,14 @@
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
         <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
-            <span th:if="${viewerIsAuthor}" class="like-count"><span class="like-icon">♥</span> <span class="like-number" th:text="${likeLabel}">12</span></span>
+            <!-- 10-22(chan): 글쓴이 쪽은 0개일 때 빈 하트(채워진 빨간 하트는 "내가 눌렀다"로 읽힘) -->
+            <span th:if="${viewerIsAuthor}" th:class="${post.likeCount() > 0 ? 'like-count has-likes' : 'like-count'}" class="like-count"><span class="like-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: heart}"></svg></span> <span class="like-number" th:text="${likeLabel}">12</span></span>
             <form th:unless="${viewerIsAuthor}" method="post" th:action="@{${post.url() + '/like'}}" class="like-form"
                   th:attr="data-post-id=${post.id()},data-login=${loginRedirect},data-guest=${currentMemberId == null}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="liked" th:value="${!liked}">
                 <button type="submit" class="like-button" th:attr="aria-pressed=${liked},data-like-post-id=${post.id()},data-count=${post.likeCount()},aria-label=${(liked ? '좋아요 취소 (' : '좋아요 (') + post.likeCount() + ')'}">
-                    <span class="like-icon" aria-hidden="true" th:text="${liked ? '♥' : '♡'}">♡</span>
+                    <span class="like-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: heart}"></svg></span>
                     <span class="like-number" th:text="${likeLabel}">12</span>
                 </button>
             </form>

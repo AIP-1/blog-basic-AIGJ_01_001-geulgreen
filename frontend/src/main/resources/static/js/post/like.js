@@ -35,7 +35,8 @@
     function paint() {
       button.setAttribute('aria-pressed', String(liked));
       button.setAttribute('aria-label', (liked ? '좋아요 취소 (' : '좋아요 (') + count + ')');
-      button.querySelector('.like-icon').textContent = liked ? '♥' : '♡';
+      var icon = button.querySelector('.like-icon');
+      if (icon && !icon.querySelector('svg')) { icon.textContent = liked ? '♥' : '♡'; } // SVG 하트는 aria-pressed로 CSS가 채운다
       button.querySelector('.like-number').textContent = format(count);
       form.querySelector('input[name="liked"]').value = String(!liked);
     }
