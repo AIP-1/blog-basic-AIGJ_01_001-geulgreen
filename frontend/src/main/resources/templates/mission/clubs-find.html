@@ -7,10 +7,11 @@
 <body>
 <main class="list-page mission-page">
     <!-- 10-21 chan: 방 찾기 탭. 공개 방(승인 후 참여·누구나 바로)만, 링크로만인 방은 안 보임. 비어 있으면 방 만들기·초대가 바로 -->
+    <h1>함께 쓰기</h1>
     <nav th:replace="~{mission/clubs :: clubTabs('find')}"></nav>
     <div class="club-top">
         <section class="mission-panel" aria-labelledby="clubs-open-heading">
-            <h1 id="clubs-open-heading" class="club-sub-title">방 찾기</h1>
+            <h2 id="clubs-open-heading" class="club-sub-title">방 찾기</h2>
             <p class="help club-list-lead">공개된 방이에요. '누구나 바로'는 누르면 들어가고, '승인 후 참여'는 관리자가 승인하면 들어가요</p>
             <form method="get" action="/missions/clubs/find" role="search" class="club-search">
                 <label for="club-q" class="visually-hidden">방 이름·소개로 찾기</label>

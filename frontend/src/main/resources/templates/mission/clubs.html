@@ -6,7 +6,9 @@
 </head>
 <body>
 <main class="list-page mission-page">
+    <!-- 10-22 개인 확장: 탐색·태그·피드처럼 화면 제목(함께 쓰기) 아래에 탭. 안내 칸 제목은 h2로 -->
     <!-- 10-21 chan: 함께 쓰기 — 참여 중인 방(이 화면)과 방 찾기를 탭으로 나눔. 처음 온 사람에게는 반·친구 예시와 세 단계만 -->
+    <h1>함께 쓰기</h1>
     <nav th:replace="~{mission/clubs :: clubTabs('mine')}"></nav>
     <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
     <p th:if="${listError != null}" class="notice" role="alert" data-toast="error" th:text="${listError}">오류</p>
@@ -27,7 +29,7 @@
         </section>
         <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계 -->
         <section th:if="${clubs.isEmpty()}" class="mission-panel club-onboard" aria-labelledby="club-onboard-heading">
-            <h1 id="club-onboard-heading">함께 쓰면 꾸준히 쓸 수 있어요</h1>
+            <h2 id="club-onboard-heading">함께 쓰면 꾸준히 쓸 수 있어요</h2>
             <p class="club-onboard-lead">방을 만들고 초대하면, 이번 기간에 누가 썼는지 한눈에 보여요. 따로 챙길 것 없이 글을 쓰면 저절로 '썼어요'가 돼요.</p>
             <div class="club-presets">
                 <button type="button" class="club-preset" data-preset data-open-club-form

@@ -1,6 +1,9 @@
 /* 화면 공통 스타일. 색은 theme.css의 색 역할 이름(var(--color-…))만 쓴다(024 FR-015). */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* 10-22 개인 확장: 스크롤바가 있는 화면(긴 목록)과 없는 화면(짧은 목록)을 오가면 가운데 정렬이 7~8px 옆으로 밀렸다.
+   스크롤바 자리를 늘 비워 두어 머리말·제목·카드가 화면마다 같은 자리에 선다(겹치는 스크롤바인 휴대폰·맥 트랙패드는 변화 없음) */
+html { scrollbar-gutter: stable; }
 body { margin: 0; font-family: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
        line-height: 1.7; color: var(--color-text); background: var(--color-bg); overflow-wrap: break-word; word-break: keep-all;
        -webkit-font-smoothing: antialiased; }
@@ -14,6 +17,9 @@ main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
 img { max-width: 100%; height: auto; }
 a { color: var(--color-brand); text-underline-offset: 3px; }
 h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
+/* 10-22 개인 확장: 화면 제목 높이를 하나로. 첫 줄 제목의 브라우저 기본 위 여백(약 21px) 때문에 피드·검색·설정 등이
+   탐색·태그·글감보다 아래에 있었다 → 모두 위 여백 0(main 위 안쪽 여백 32px만) */
+main > h1:first-child, main > :first-child > h1:first-child { margin-top: 0; }
 /* 시안(10-08) 머리말: 화면 폭 띠 + 가운데 --page-wide 안쪽 */
 .site-header { position: sticky; top: 0; z-index: 30; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
 .header-inner { position: relative; max-width: var(--page-wide); margin: 0 auto; padding: 12px 20px; display: flex; gap: 24px; align-items: center; }
@@ -1198,7 +1204,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-editor-note strong { margin-right: 6px; }
 /* 10-21 글감 화면 머리: 제목·날짜 줄, 오늘 쓴 상태 한 줄, 내 기록 숫자 4칸 */
 .geulgam-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; }
-.geulgam-head h1 { margin: 0; font-size: 1.75em; }
+.geulgam-head h1 { margin: 0; }
 .geulgam-head .help { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .geulgam-head .count-chip { font-size: .8em; }
 .geulgam-state { margin: -6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-weight: 600; font-size: .95em; }
@@ -1815,7 +1821,9 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-join-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
 .club-join-actions p { margin: 0; }
 /* 10-21 chan: 함께 쓰기 처음 화면(반·친구 예시, 세 단계)과 방 화면 "다음 할 일" */
-.club-onboard h1 { margin: 0; font-size: 1.6em; }
+.club-onboard h1, .club-onboard h2 { margin: 0; font-size: 1.6em; }
+/* 10-22 개인 확장: 함께 쓰기 제목 → 탭 간격을 탐색 화면과 같게 */
+main.mission-page > h1:first-child { margin-bottom: 15px; }
 .club-onboard-lead { margin: 8px 0 0; color: var(--color-text-muted); line-height: 1.6; }
 .club-presets { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 20px; }
 .club-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 18px; text-align: left; font: inherit; width: 100%; min-width: 0; box-sizing: border-box;
