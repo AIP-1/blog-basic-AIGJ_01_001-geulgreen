@@ -7,6 +7,47 @@
 
 ---
 
+## [1.74.2] — 2026-10-22 · 개인 확장 (화면 정렬)
+
+- 스크롤바가 있든 없든 화면이 옆으로 밀리지 않음(scrollbar-gutter: stable)
+- 목록 화면 제목 시작 높이 통일, 글감 제목 32px
+- 함께 쓰기에 화면 제목(탭은 그 아래)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-club-after.png) |
+
+**탐색**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-ex-after.png) |
+
+**태그**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-tags-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-tags-after.png) |
+
+**피드**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-feed-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-feed-after.png) |
+
+**글감**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-gg-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.2/v1742-gg-after.png) |
+
+---
+
 ## [1.74.1] — 2026-10-22 · 개인 확장 (휴대폰 가독성)
 
 - 태그 화면 머리가 좁은 화면 밖으로 넘치던 것 고침
