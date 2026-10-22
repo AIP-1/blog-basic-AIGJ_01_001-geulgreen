@@ -18,6 +18,11 @@
     <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
     <link rel="icon" type="image/png" sizes="32x32" th:href="@{/images/favicon-32.png}">
     <link rel="apple-touch-icon" th:href="@{/images/apple-touch-icon.png}">
+    <!-- 앱 설치(PWA): 홈 화면에 앱처럼 설치. 휴대폰 상단 막대 색은 머리글 색(--color-surface)과 같게 -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1E1C1A" media="(prefers-color-scheme: dark)">
+    <script th:src="@{/js/pwa-register.js}" defer></script>
     <th:block th:if="${pageMeta != null}">
         <meta name="description" th:content="${pageMeta.description()}">
         <link rel="canonical" th:href="${pageMeta.canonicalUrl()}">
