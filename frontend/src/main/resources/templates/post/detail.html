@@ -55,6 +55,8 @@
                 <th:block th:replace="~{fragments/author :: byline(${author})}"></th:block>
                 <span> · <time th:attr="datetime=${post.displayDate()}" th:text="${displayDate}">2026.10.02</time></span>
                 <span th:if="${editedDate != null}" class="post-edited"> · 수정됨 <time th:attr="datetime=${post.editedAt()}" th:text="${editedDate}">10월 3일</time></span>
+                <!-- 10-22 개인 확장: 읽은 수는 반응 줄이 아니라 작성자 줄 날짜 뒤에 -->
+                <span class="view-count" th:text="${' · 조회 ' + viewCount}" th:attr="title=${viewNotice}"> · 조회 1,234</span>
             </p>
             <!-- 080 강성찬 개인 확장: velog처럼 작성자 줄 오른쪽에 팔로우(내 글이면 ⋯ 메뉴) -->
             <th:block th:unless="${viewerIsAuthor}"><th:block
@@ -135,7 +137,7 @@
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
         <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
-            <span th:if="${viewerIsAuthor}" class="like-count" th:text="${'♥ ' + likeLabel}">♥ 12</span>
+            <span th:if="${viewerIsAuthor}" class="like-count"><span class="like-icon">♥</span> <span class="like-number" th:text="${likeLabel}">12</span></span>
             <form th:unless="${viewerIsAuthor}" method="post" th:action="@{${post.url() + '/like'}}" class="like-form"
                   th:attr="data-post-id=${post.id()},data-login=${loginRedirect},data-guest=${currentMemberId == null}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -147,7 +149,7 @@
             </form>
             <!-- 053 강성찬 개인 확장: 공유하기(공개 글만). 좋아요 옆 메뉴 하나로 접었다 -->
             <details th:if="${shareEnabled and pageMeta != null}" class="sort-menu share-menu share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
-                <summary><th:block th:replace="~{fragments/icons :: share}"></th:block> 공유하기</summary>
+                <summary><th:block th:replace="~{fragments/icons :: share}"></th:block> <span class="share-label">공유하기</span></summary>
                 <div class="sort-menu-panel">
                     <button type="button" class="share-copy"><th:block th:replace="~{fragments/icons :: link}"></th:block> 링크 복사</button>
                     <a target="_blank" rel="noopener noreferrer"
@@ -163,7 +165,6 @@
                 </div>
             </details>
             <span th:if="${shareEnabled and pageMeta != null}" class="help share-status" role="status" data-toast="success"></span>
-            <span class="view-count" th:text="${'조회 ' + viewCount}" th:attr="title=${viewNotice}">조회 1,234</span>
             <button type="button" th:if="${canReact}" class="report-button" th:attr="data-report-post-id=${post.id()}">신고</button>
             <span class="like-message help" role="status" hidden data-toast="success"></span>
         </div>

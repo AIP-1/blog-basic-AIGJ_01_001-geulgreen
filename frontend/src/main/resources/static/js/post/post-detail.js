@@ -61,6 +61,29 @@
     }
   }
 
+  // 10-22 개인 확장: 넓은 화면(1200px 이상)에서는 좋아요·공유를 본문 왼쪽 떠 있는 기둥(aside)으로 옮기고, 좁아지면 반응 줄 제자리로 되돌린다.
+  // 노드를 그대로 옮기므로 like.js·공유 메뉴의 이벤트는 따라간다. 스크립트가 없으면 반응 줄에 그대로 남는다
+  function sideActions() {
+    var article = document.querySelector('article.post');
+    var row = article && article.querySelector('.reaction-row');
+    if (!row || !window.matchMedia) { return; }
+    var items = Array.prototype.filter.call(row.children, function (n) { return n.matches('.like-form, .like-count, .share-menu'); });
+    if (!items.length) { return; }
+    var spots = items.map(function (n) { var c = document.createComment(''); row.insertBefore(c, n); return c; });
+    var aside = document.createElement('aside');
+    aside.className = 'post-side-actions';
+    aside.setAttribute('aria-label', '좋아요와 공유');
+    article.insertBefore(aside, article.firstChild);
+    var wide = window.matchMedia('(min-width: 1200px)');
+    function place() {
+      items.forEach(function (n, i) { if (wide.matches) { aside.appendChild(n); } else { row.insertBefore(n, spots[i].nextSibling); } });
+      aside.hidden = !wide.matches;
+    }
+    place();
+    if (wide.addEventListener) { wide.addEventListener('change', place); } else if (wide.addListener) { wide.addListener(place); }
+  }
+  sideActions();
+
   // 10-18 강성찬 개인 확장: 글 화면 안에서 가는 # 링크(목차·각주 등)는 바로 뛰지 않고 부드럽게 스크롤한다.
   // 멈추는 자리는 CSS scroll-margin-top(머리말 아래), 주소는 #으로 바꿔 뒤로 가기·공유가 그대로 된다. 움직임 줄이기 설정이면 원래대로 바로
   document.addEventListener('click', function (e) {

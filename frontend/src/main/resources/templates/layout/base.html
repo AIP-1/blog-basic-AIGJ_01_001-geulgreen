@@ -34,7 +34,7 @@
     <th:block th:if="${pageMeta == null and (notFoundPage == null or !notFoundPage) and (pageNoindex == null or !pageNoindex)}">
         <!-- 태그·시리즈·블로그 홈은 화면마다 문구(listMeta, 공개 글에서만), 나머지는 사이트 기본 문구 -->
         <th:block th:with="home=${currentPath == '/'},
-                defaultDesc=${home ? '좋은 글이 머무는 곳, 글그린. 매일 쓴 글이 잔디처럼 쌓이는 블로그예요. 시리즈로 글을 묶고, 미션으로 꾸준히 쓰고, AI 맞춤법 검사로 다듬어 보세요.' : '좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들'},
+                defaultDesc=${home ? '좋은 글이 머무는 곳, 글그린. 매일 쓴 글이 잔디처럼 쌓이는 블로그예요. 시리즈로 글을 묶고, 글감으로 꾸준히 쓰고, AI 맞춤법 검사로 다듬어 보세요.' : '좋은 글이 머무는 곳, 글그린. 다양한 사람들이 전하는 일상과 개발, 그리고 생각들'},
                 desc=${listMeta != null and !listMeta.description().isEmpty() ? listMeta.description() : defaultDesc}">
         <meta name="description" th:content="${desc}">
         <meta property="og:type" content="website">
@@ -101,7 +101,7 @@
                 <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
             </div>
         </div>
-        <!-- 항상 보이는 것: 검색, 알림 종, 좁은 화면의 메뉴 버튼(테마 전환은 061부터 설정 화면에) -->
+        <!-- 항상 보이는 것: 검색, (휴대폰) 글쓰기, 알림 종, 좁은 화면의 메뉴 버튼(테마 전환은 설정 화면에) -->
         <span class="header-quick">
             <!-- 078 강성찬 개인 확장: 검색은 이 자리에서 입력창+추천 태그로 열린다(스크립트 없이 details, 태그 메뉴 대신) -->
             <details class="search-menu">
@@ -121,9 +121,11 @@
                     <a href="/tags" class="link-btn search-menu-all">태그 전체 보기</a>
                 </div>
             </details>
-            <!-- 화면 모드 한 번에 바꾸기(라이트↔다크). 누르기 전엔 기기 설정, 누르면 설정의 "화면 테마"와 같은 곳에 저장. 스크립트가 없으면 숨김 -->
-            <button type="button" id="theme-switch" class="icon-btn theme-switch" hidden aria-label="다크 모드로 바꾸기">
-                <th:block th:replace="~{fragments/icons :: moon}"></th:block><th:block th:replace="~{fragments/icons :: sun}"></th:block></button>
+            <!-- 10-22 개인 확장: 테마 버튼 자리에 휴대폰(640px 이하)용 글쓰기 펜 버튼. 넓은 화면은 .menu-account의 글쓰기 버튼 -->
+            <form th:if="${currentMemberId != null}" method="post" action="/write" class="header-write">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="icon-btn" aria-label="새 글"><th:block th:replace="~{fragments/icons :: pen}"></th:block></button>
+            </form>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
@@ -155,7 +157,7 @@
 </header>
 <!-- 049 강성찬 개인 확장: 사이트 공지 띠 -->
 <div th:if="${siteNotice != null}" class="site-notice" role="status">
-    <span th:text="${'📢 ' + siteNotice.message()}">공지</span>
+    <svg th:replace="~{fragments/icons :: i-megaphone}"></svg><span th:text="${siteNotice.message()}">공지</span>
     <a th:if="${siteNotice.linkUrl() != null}" th:href="${siteNotice.linkUrl()}">자세히</a>
 </div>
 <div hidden id="logout-cleanup" th:if="${logoutCleanupMemberId != null}" th:attr="data-member-id=${logoutCleanupMemberId}"></div>
@@ -175,7 +177,6 @@
 <script th:src="@{/js/keep-scroll.js}" defer></script>
 <script th:src="@{/js/toast.js}" defer></script>
 <script th:src="@{/js/ask.js}" defer></script>
-<script th:src="@{/js/theme-switch.js}" defer></script>
 <script th:src="@{/js/post/card-rows.js}" defer></script>
 <script th:if="${currentMemberId != null}" th:src="@{/js/notification/bell.js}" defer></script>
 <script th:if="${currentMemberId != null}" th:src="@{/js/post/liked-hearts.js}" defer></script>

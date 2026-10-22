@@ -132,7 +132,7 @@ class AdminToolsIT extends IntegrationTestBase {
                 .with(csrf()).with(TestAuth.admin(admin))).andExpect(status().isBadRequest());
         mockMvc.perform(post("/admin/notices").param("message", "오늘 밤 점검해요").param("linkUrl", "/boss3")
                 .with(csrf()).with(TestAuth.admin(admin))).andExpect(status().is3xxRedirection());
-        assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("📢 오늘 밤 점검해요");
+        assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).contains("오늘 밤 점검해요").doesNotContain("📢");
         long noticeId = jdbc.queryForObject("SELECT id FROM site_notice WHERE active", Long.class);
         mockMvc.perform(post("/admin/notices/{id}/off", noticeId).with(csrf()).with(TestAuth.admin(admin)))
                 .andExpect(status().is3xxRedirection());

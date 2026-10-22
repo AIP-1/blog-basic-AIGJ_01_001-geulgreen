@@ -16,9 +16,9 @@
             <a th:if="${showAuthor}" class="card-author" th:href="${paths.blog(card.author().handle())}">
                 <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 24)}"></th:block>
                 <span th:text="${card.author().handle()}">아이디</span></a>
-            <!-- 시안(10-08): 첫 태그를 카드 머리에(색은 태그 길이로 4가지 중 하나) -->
-            <a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
-               th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}">태그</a>
+            <!-- 시안(10-08): 첫 태그를 카드 머리에. 10-22: 한 가지 차분한 색, 글자는 안쪽 span이 줄인다(누르는 영역 ::before가 잘리지 않게) -->
+            <a th:if="${card.firstTag() != null}" class="card-tag"
+               th:href="@{/tags/{name}(name=${card.firstTag()})}"><span th:text="${card.firstTag()}">태그</span></a>
         </p>
         <!-- 제목의 " · "는 뒤 낱말과 붙여 가운뎃점이 줄 끝에 홀로 남지 않게 -->
         <h2 class="card-title"><a class="card-link" th:href="${card.url()}" th:title="${card.title()}" th:text="${#strings.replace(card.title(), ' · ', ' ·&#160;')}">제목</a></h2>
@@ -33,7 +33,7 @@
     <!-- 10-18 강성찬 개인 확장: 사진이 없는 글은 기본 썸네일(잠자는 고양이). 화면에서만 그리고 글에는 저장하지 않는다(사진·만든 썸네일이 있으면 그쪽) -->
     <div class="card-thumb card-cover" th:if="${card.thumbnailUrl() == null}" aria-hidden="true"></div>
     <p class="card-foot">
-        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}" th:text="${'♡ ' + card.likeCount()}">♡ 12</span>
+        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}"><svg th:replace="~{fragments/icons :: heart}"></svg><span th:text="${card.likeCount()}">12</span></span>
         <span class="card-comments" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">3</span></span>
         <time class="card-date" th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2026.10.02</time>
     </p>
