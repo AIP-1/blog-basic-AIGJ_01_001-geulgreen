@@ -7,6 +7,63 @@
 
 ---
 
+## [1.73.0] — 2026-10-22 · 개인 확장 (UX 개선 7건)
+
+- 머리줄 해/달 테마 버튼 없앰(테마는 설정에서), 휴대폰 머리줄에 펜 [새 글] 버튼
+- 글 화면: [신고] 흐린 글자로 오른쪽 끝, 조회 수는 작성자 줄 날짜 뒤
+- 문구: 미션·주제 → 글감, 공지 띠 이모지 → 확성기 아이콘
+- 글 카드: 태그 한 색, 작성자·태그 누르는 영역 44px, 좋아요 하트 아이콘(누른 글은 채움)
+- 글쓰기: [변경 취소]를 [← 나가기] 옆 흐린 글자 버튼으로
+- 1200px 이상 글 화면: 좋아요·공유를 본문 왼쪽 떠 있는 기둥으로
+- 홈: 자동 불러오기 2번 뒤 [더 보기], 꼬리말 다시 보임
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**휴대폰 머리줄에 [새 글] 펜**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-home-m-after.png) |
+
+**글 화면 반응 줄**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-m-after.png) |
+
+**넓은 화면 좋아요·공유 기둥**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-w-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-post-w-after.png) |
+
+**글 카드**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-home-after.png) |
+
+**홈 끝과 꼬리말**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-end-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-end-after.png) |
+
+**글쓰기 [변경 취소]**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-edit-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.73.0/v1730-edit-after.png) |
+
+---
+
 ## [1.72.1] — 2026-10-21 · 개인 확장 (옛 블로그 주소 넘김)
 
 - 블로그 주소를 바꾼 뒤 옛 주소로 들어오면 301(영구 이동)로 새 주소에 넘김(전에는 302)
