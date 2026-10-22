@@ -26,8 +26,14 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
     display: inline-flex; align-items: center; gap: 4px; }
 .menu-main a:hover, .menu-login:hover { color: var(--color-text); background: var(--color-surface-muted); }
 .header-quick { display: flex; gap: 8px; align-items: center; flex: none; }
-.menu-toggle { background: none; border: 1px solid var(--color-border); border-radius: 10px; color: var(--color-text);
-    font: inherit; line-height: 1.6; padding: 2px 10px; cursor: pointer; }
+/* 10-22(chan): ☰는 테두리·바탕 없이 아이콘만(누르는 자리 44px은 그대로) */
+.menu-toggle { background: none; border: 0; border-radius: 999px; color: var(--color-text); display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; padding: 0; cursor: pointer; }
+.menu-toggle:hover { background: var(--color-surface-muted); }
+.menu-toggle .icon-inline { width: 20px; height: 20px; }
+.menu-toggle .icon-inline, .menu-toggle[aria-expanded="true"] .icon-menu { display: none; }
+.menu-toggle[aria-expanded="true"] .icon-inline { display: inline; }
+.menu-toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 /* 좁은 화면 + 스크립트 있음: 메뉴를 ☰ 안으로 접는다 */
 @media (max-width: 640px) {
     .header-inner { gap: 12px; }
@@ -51,8 +57,8 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
     .settings-nav a { padding: 6px 8px; font-size: .9em; }
     .manage-filter a { padding: 4px 9px; font-size: .92em; }
     .admin-nav a { padding: 5px 10px; font-size: .9em; }
-    .footer-links { gap: 10px; }
-    .footer-links a { font-size: .82em; }
+    .site-footer .footer-links { flex: 1 1 100%; gap: 8px; justify-content: space-between; }
+    .site-footer .footer-links a { font-size: .8125rem; }
 }
 .site-header form { margin: 0; }
 .auth-form .field { margin: 16px 0; }
@@ -363,7 +369,6 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .btn-block { width: 100%; padding: 12px 16px; font-size: 1em; }
 a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: .9em; }
 .follow-button[aria-pressed="true"] { color: var(--color-brand); border-color: var(--color-brand); }
-.menu-toggle { background: var(--color-surface); border: 1px solid var(--color-control-border); }
 .notif-bell, .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
     border-radius: 999px; color: var(--color-text); text-decoration: none; }
 .notif-bell:hover, .icon-btn:hover { background: var(--color-surface-muted); }
@@ -1038,8 +1043,9 @@ table.admin-log-table { display: table; width: 100%; max-width: none; }
 .menu-main a[aria-current="page"] { color: var(--color-brand); background: transparent; border-radius: 0;
     box-shadow: inset 0 -2px 0 var(--color-brand); font-weight: 700; }
 .btn-write { display: inline-flex; align-items: center; gap: 6px; }
-.profile-menu { position: relative; }
-.profile-menu summary { list-style: none; cursor: pointer; display: inline-flex; border-radius: 999px; }
+/* 10-22(chan): 사진 프로필이 줄 상자(글줄 높이) 때문에 옆 아이콘보다 2~3px 위에 뜨던 것 → 글줄 없이 가운데 */
+.profile-menu { position: relative; display: flex; align-items: center; }
+.profile-menu summary { list-style: none; cursor: pointer; display: flex; align-items: center; border-radius: 999px; line-height: 0; }
 .profile-menu summary::-webkit-details-marker { display: none; }
 .profile-menu summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .profile-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 180px; display: flex; flex-direction: column;
@@ -1095,8 +1101,11 @@ main.list-page .home-cards { gap: 18px; }
 .github-link .icon { width: 1em; height: 1em; flex: none; }
 .menu-links { display: none; }
 @media (max-width: 640px) {
-    .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
-    .site-nav .menu-links a { font-size: .82em; color: var(--color-text-muted); padding: 2px 0; }
+    /* 10-22(chan): 약관·GitHub·처리방침·릴리스 노트·문의하기를 360px에서도 한 줄에(GitHub는 마크만) */
+    .menu-links { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid var(--color-border); }
+    .site-nav .menu-links a { font-size: .8125rem; color: var(--color-text-muted); padding: 6px 0; white-space: nowrap; flex: none; display: inline-flex; align-items: center; }
+    .menu-links .github-text, .footer-links .github-text { display: none; }
+    .menu-links .github-link .icon, .footer-links .github-link .icon { width: 16px; height: 16px; }
 }
 .side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
 .side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
@@ -1732,6 +1741,13 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .home-intro-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .home-intro p { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--color-text); }
 .home-intro .icon-inline { color: var(--color-brand); width: 1.2em; height: 1.2em; }
+/* 10-22(chan "오늘의 글감 보기 카드 확인"): 휴대폰은 새싹을 첫 줄에 맞추고, 단추는 44px 높이로 카드 폭 가득 */
+@media (max-width: 639px) {
+    .home-intro p { align-items: flex-start; }
+    .home-intro .icon-inline { flex: none; margin-top: .2em; }
+    .home-intro-actions { flex: 1 1 100%; }
+    .home-intro-actions .btn { flex: 1 1 0; min-height: 44px; justify-content: center; }
+}
 .start-guide { margin: 0 0 24px; padding: 16px 18px; border-radius: 16px; background: var(--color-brand-soft); }
 .start-guide h2 { margin: 0 0 12px; font-size: 1.05em; }
 .start-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
@@ -2020,28 +2036,20 @@ dialog.sheet-dialog > form, dialog.sheet-dialog > .sheet-head, .series-settings-
    요약 줄은 빼고 사진(16:10)·제목·반응만. 홈·피드·태그·시리즈 탭은 그대로 */
 /* 10-21(chan "카드가 너무 작아 읽기 힘들다"): PC는 홈과 같이 한 줄 4장(넓은 화면 오른쪽 사람 칸이 없을 때 auto-fill이 6장까지 늘던 것을 고정),
    중간 폭 3장, 휴대폰 2장. 제목은 크게 두 줄까지, 글쓴이 줄은 작게, 시리즈 글에는 시리즈 이름 */
-main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-@media (min-width: 1280px) { main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.explore-main .card-grid .card-excerpt { display: none; }
-.explore-main .card-grid .card-title { font-size: 1.12em; line-height: 1.4; }
-.explore-main .card-grid .card-top { font-size: .82em; min-height: 22px; }
-.explore-main .card-grid .card-top .avatar { width: 20px; height: 20px; }
+/* 10-22(chan "탐색 글씨가 커서 정보가 적다 → 홈처럼 하나로"): 탐색 카드만 따로 두던 모양(요약 없음·큰 제목·휴대폰 2장 상자)을 없애고
+   홈 카드(.home-cards)와 같은 조각·같은 CSS를 그대로 쓴다. 시리즈 이름 줄만 탐색 고유 */
 .card-series { margin: 0; font-size: .8em; font-weight: 600; color: var(--color-brand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 639px) {
-    main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .explore-main .card-grid .post-card { font-size: .9em; }
-}
 /* 10-19(chan "유튜브처럼 카드 경계"): 휴대폰은 카드 상자(테두리·그림자·배경)를 빼고 글 사이는 여백으로 나눈다.
-   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. 탐색은 상자 그대로(chan 10-20), PC도 그대로.
+   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. PC는 그대로. 탐색도 10-22부터 홈과 같게.
    10-21(chan "썸네일 설명칸 위아래로 구분선"): 베이지 썸네일이 배경에 묻혀서 사진 아래와 글 사이에 얇은 선 */
 @media (max-width: 639px) {
-    .post-card:not(.explore-main *) { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
-    .post-card:not(.explore-main *):hover { transform: none; box-shadow: none; }
-    .card-link:not(.explore-main *)::after { border-radius: 0; }
-    .card-grid .post-card:not(.explore-main *), .tag-row .post-card { padding: 0; }
-    .card-grid:not(.explore-main *), main.list-page .card-grid:not(.explore-main *) { gap: 0; }
-    .card-grid .post-card:not(.explore-main *) { border-bottom: 1px solid var(--color-border); margin: 0 -20px; padding: 0 20px 18px; }
-    .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; border-bottom: 1px solid var(--color-border); }
+    .post-card { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+    .post-card:hover { transform: none; box-shadow: none; }
+    .card-link::after { border-radius: 0; }
+    .card-grid .post-card, .tag-row .post-card { padding: 0; }
+    .card-grid, main.list-page .card-grid { gap: 0; }
+    .card-grid .post-card { border-bottom: 1px solid var(--color-border); margin: 0 -20px; padding: 0 20px 18px; }
+    .card-grid .post-card > .card-thumb { margin: 0 -20px 6px; border-radius: 0; border-bottom: 1px solid var(--color-border); }
     .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
 }
 /* 10-21(chan) 강성찬 개인 확장: 프로필 탭 줄은 가로로만 넘친다(세로 1px 넘침에 스크롤 바가 생기던 것), 주인의 [시리즈 추가]는 오른쪽 끝 */
@@ -2073,14 +2081,10 @@ dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 /* 태그 화면 머리: 자동 칸이 가장 긴 줄 폭으로 늘어 화면 밖(약 58px)이 잘리던 것 */
 .tags-head { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 639px) {
-    /* 탐색 카드(휴대폰 2장): 태그 칩이 한 글자로 잘리고 글쓴이가 11px이라, 칩은 빼고 글쓴이 줄을 키운다 */
-    .explore-main .card-grid .card-tag { display: none; }
-    .explore-main .card-grid .card-top { font-size: 1.05em; }
-    .explore-main .card-grid .card-series { font-size: .9em; }
     /* 시리즈 화면: 표지가 없을 때의 빈 칸이 옆자리를 차지해 제목이 좁게 접히던 것 */
     .series-head .series-cover-empty { display: none; }
     /* 누르는 자리 44px: 머리줄 ☰, 글쓰기 사진·표 버튼, 바닥 링크 */
     .menu-toggle { min-width: 44px; min-height: 44px; }
     .editor-tools button { min-width: 44px; min-height: 44px; justify-content: center; }
-    .footer-links a { font-size: .875rem; display: inline-flex; align-items: center; min-height: 32px; }
+    .footer-links a { display: inline-flex; align-items: center; min-height: 32px; }
 }

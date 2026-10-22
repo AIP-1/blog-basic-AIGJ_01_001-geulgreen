@@ -13,7 +13,6 @@
     if (open) { nav.setAttribute('data-open', ''); } else { nav.removeAttribute('data-open'); }
     button.setAttribute('aria-expanded', String(open));
     button.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
-    button.textContent = open ? '✕' : '☰';
   }
 
   function sync() {
