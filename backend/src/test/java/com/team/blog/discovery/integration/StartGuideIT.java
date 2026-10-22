@@ -21,10 +21,12 @@ class StartGuideIT extends IntegrationTestBase {
         clock.set(Instant.parse("2026-10-16T03:00:00Z"));
         long me = members.localMember("sgnew", "새사람", "sgnew@example.com", "Blog#2026ok", true);
         String guest = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
-        assertThat(guest).contains("쓴 날이 블로그에 잔디처럼 쌓여요").contains("오늘의 글감 보기").doesNotContain("글그린 시작하기");
+        assertThat(guest).contains("쓴 날이 블로그에 잔디처럼 쌓여요").contains("오늘의 글감 보기").doesNotContain("글그린 시작하기")
+                .contains("href=\"/signup\" class=\"btn btn-primary btn-sm\">가입하고 첫 글 쓰기");
 
         String fresh = mockMvc.perform(get("/").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
-        assertThat(fresh).contains("글그린 시작하기").contains("프로필 꾸미기").contains("오늘의 글감 보기").contains("첫 글 쓰기");
+        assertThat(fresh).contains("글그린 시작하기").contains("프로필 꾸미기").contains("오늘의 글감 보기").contains("첫 글 쓰기")
+                .doesNotContain("가입하고 첫 글 쓰기").doesNotContain("header-signup");
 
         // 임시 글·휴지통 글만 있으면 그대로, 발행하면 사라짐
         posts.draft(me, "임시", "본문", 0);

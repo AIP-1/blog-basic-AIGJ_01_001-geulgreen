@@ -70,7 +70,8 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .contains("href=\"/detailmeta\"").contains("class=\"author-card-name\"").contains("글 1").contains("팔로워 0")
                 .contains("href=\"/login?redirect=/detailmeta/posts/" + id + "\"")
                 .contains("class=\"like-button\"").doesNotContain("data-visibility-option")
-                .contains("data-view-post-id=\"" + id + "\"");
+                .contains("data-view-post-id=\"" + id + "\"")
+                .contains("\"@type\":\"BlogPosting\"").contains("\"@type\":\"BreadcrumbList\"");
         String description = html.substring(html.indexOf("<meta name=\"description\" content=\"") + 34);
         assertThat(description.substring(0, description.indexOf('"')).codePointCount(0, description.indexOf('"'))).isEqualTo(160);
     }
@@ -107,7 +108,7 @@ class PostDetailPageIT extends IntegrationTestBase {
                 .andExpect(header().string("Cache-Control", "private, no-store"))
                 .andReturn().getResponse().getContentAsString();
         assertThat(html).contains("<meta name=\"robots\" content=\"noindex\">").doesNotContain("og:title")
-                .contains("2026.09.30").contains("비공개</span>").doesNotContain("🔒");
+                .doesNotContain("BlogPosting").contains("2026.09.30").contains("비공개</span>").doesNotContain("🔒");
     }
 
     @Test

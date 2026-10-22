@@ -1021,6 +1021,9 @@ main.admin-page { max-width: 1280px; }
 .header-write { display: none; margin: 0; }
 .header-write .icon-btn { border: 0; background: none; padding: 0; cursor: pointer; }
 @media (max-width: 640px) { .header-write { display: flex; } }
+/* 10-22 개인 확장: 휴대폰 머리줄 [가입하기](로그인 안 했을 때). 넓은 화면은 메뉴의 [가입하기] */
+.header-signup { display: none; }
+@media (max-width: 640px) { .header-signup { display: inline-flex; white-space: nowrap; } }
 .search-menu-panel .search-form input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-color: var(--color-focus); }
 .search-menu-title { margin: 0; font-size: .85em; font-weight: 700; color: var(--color-text-muted); }
 .search-menu-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1686,6 +1689,7 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 /* 강성찬 개인 확장(10-16): 처음 온 사람 안내 — 배너 아래 한 줄, 첫 글 전 "시작하기 3단계", 인증 완료 다음 단추 */
 .home-intro { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
     margin: -16px 0 24px; padding: 12px 18px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); }
+.home-intro-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .home-intro p { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--color-text); }
 .home-intro .icon-inline { color: var(--color-brand); width: 1.2em; height: 1.2em; }
 .start-guide { margin: 0 0 24px; padding: 16px 18px; border-radius: 16px; background: var(--color-brand-soft); }

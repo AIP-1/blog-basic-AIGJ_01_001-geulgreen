@@ -29,7 +29,11 @@
     <div class="home-intro" th:unless="${continued}">
         <p><th:block th:replace="~{fragments/icons :: grass}"></th:block>
             <span>매일 오늘의 글감으로 글을 쓰면, 쓴 날이 블로그에 잔디처럼 쌓여요.</span></p>
-        <a th:if="${missionsEnabled == true}" href="/missions" class="btn btn-sm">오늘의 글감 보기</a>
+        <span class="home-intro-actions">
+            <a th:if="${missionsEnabled == true}" href="/missions" class="btn btn-sm">오늘의 글감 보기</a>
+            <!-- 10-22 개인 확장: 로그인 안 한 사람에게 첫 화면에서 바로 가입 -->
+            <a th:if="${currentMemberId == null}" href="/signup" class="btn btn-primary btn-sm">가입하고 첫 글 쓰기</a>
+        </span>
     </div>
     <!-- 로그인했고 발행한 글이 없는 사람에게만: 시작하기 3단계(첫 글을 쓰면 사라짐) -->
     <section th:if="${showStartGuide == true and !continued}" class="start-guide" aria-labelledby="start-guide-heading">

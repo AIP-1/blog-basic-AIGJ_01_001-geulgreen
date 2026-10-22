@@ -6,6 +6,23 @@
 </head>
 <body>
 <main>
+    <!-- 10-22 개인 확장: 공개 글(pageMeta)에만 검색엔진용 구조화 데이터. 글 + 탐색경로(글그린 > 블로그 > 시리즈 > 글) -->
+    <script type="application/ld+json" th:if="${pageMeta != null}" th:inline="javascript"
+            th:with="authorName=${post.author().nickname() != null ? post.author().nickname() : post.author().handle()},
+                     blogUrl=${siteOrigin + paths.blog(post.author().handle())}">
+    {"@context":"https://schema.org","@graph":[
+      {"@type":"BlogPosting","headline":[[${pageMeta.title()}]],"description":[[${pageMeta.description()}]],
+       "image":[[${pageMeta.imageUrl()}]],"datePublished":[[${pageMeta.publishedTime()}]],
+       "dateModified":[[${pageMeta.modifiedTime() != null ? pageMeta.modifiedTime() : pageMeta.publishedTime()}]],
+       "url":[[${pageMeta.canonicalUrl()}]],"mainEntityOfPage":[[${pageMeta.canonicalUrl()}]],
+       "author":{"@type":"Person","name":[[${authorName}]],"url":[[${blogUrl}]]},
+       "publisher":{"@type":"Organization","name":"글그린","url":[[${siteOrigin + '/'}]]}},
+      {"@type":"BreadcrumbList","itemListElement":[
+        {"@type":"ListItem","position":1,"name":"글그린","item":[[${siteOrigin + '/'}]]},
+        {"@type":"ListItem","position":2,"name":[[${authorName + '의 블로그'}]],"item":[[${blogUrl}]]},
+        /*[# th:if="${postSeries != null}"]*/{"@type":"ListItem","position":3,"name":[[${postSeries.title()}]],"item":[[${blogUrl + '/series/' + postSeries.id()}]]},/*[/]*/
+        {"@type":"ListItem","position":[[${postSeries != null ? 4 : 3}]],"name":[[${pageMeta.title()}]],"item":[[${pageMeta.canonicalUrl()}]]}]}]}
+    </script>
     <article class="post" th:attr="data-post-id=${post.id()},data-view-post-id=${recordView ? post.id() : null}">
         <header class="post-head">
             <!-- 상태 배지·안내: 작성자에게만(010 FR-018~FR-020) -->
