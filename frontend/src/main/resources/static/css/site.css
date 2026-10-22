@@ -753,7 +753,9 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
 .post-settings .post-category-form > label, .post-settings .series-form label[for="series-select"] { flex-basis: 100%; font-weight: 600; }
 .post-settings .post-category-form .field-hint { flex-basis: 100%; margin: -4px 0 2px; }
 .post-settings .series-form .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.post-settings .series-form #series-new { flex: 1 1 160px; min-width: 0; width: auto; }
+.post-settings .series-form { display: block; }
+.post-settings .series-form .inline-form { width: 100%; }
+.post-settings .series-form #series-new { flex: 1 1 100%; min-width: 0; width: auto; }
 .post-settings label svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
 /* 10-22 UX 재점검: 신고 창도 발행 설정·글 설정 창과 같은 모양 */
 dialog#report-dialog { width: min(420px, calc(100% - 32px)); margin: auto; color: var(--color-text); background: var(--color-surface);
