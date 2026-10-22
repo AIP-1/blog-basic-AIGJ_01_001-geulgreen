@@ -1472,7 +1472,7 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 
 /* toast.js: 결과 안내 상자(머리말 바로 아래, 3초). JS가 켜져 있으면 원래 안내 칸은 숨긴다 */
 .toast-source { display: none !important; }
-.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; max-width: min(480px, calc(100% - 32px));
+.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; width: max-content; max-width: min(480px, calc(100% - 32px));
     padding: 10px 8px 10px 14px; border-radius: 12px; border: 1px solid var(--color-border); border-left-width: 4px;
     color: var(--color-text); box-shadow: 0 4px 16px var(--color-shadow);
     opacity: 0; transform: translate(-50%, -8px); transition: opacity .25s, transform .25s; }
