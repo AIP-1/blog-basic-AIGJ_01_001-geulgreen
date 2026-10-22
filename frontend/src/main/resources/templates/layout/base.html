@@ -126,6 +126,8 @@
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <button type="submit" class="icon-btn" aria-label="새 글"><th:block th:replace="~{fragments/icons :: pen}"></th:block></button>
             </form>
+            <!-- 10-22 개인 확장: 휴대폰에서 로그인 안 했으면 [가입하기]를 ☰ 밖에 꺼내 둔다(넓은 화면은 메뉴의 버튼) -->
+            <a th:if="${currentMemberId == null}" href="/signup" class="btn btn-primary btn-sm header-signup">가입하기</a>
             <span class="notif-bell-wrap" th:if="${currentMemberId != null}">
                 <a href="/notifications" id="notif-bell" class="notif-bell" aria-label="알림"
                    aria-haspopup="true" aria-expanded="false"><th:block th:replace="~{fragments/icons :: bell}"></th:block><span id="notif-badge" class="notif-badge" hidden></span></a>
