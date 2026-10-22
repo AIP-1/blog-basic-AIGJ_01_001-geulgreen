@@ -7,6 +7,29 @@
 
 ---
 
+## [1.74.0] — 2026-10-22 · 개인 확장 (가입 버튼 · 글 구조화 데이터)
+
+- 로그아웃 홈 소개 줄에 [가입하고 첫 글 쓰기]
+- 휴대폰 머리줄에 로그아웃일 때 [가입하기]
+- 글 화면 JSON-LD(BlogPosting + BreadcrumbList: 글그린 > 블로그 > 시리즈 > 글)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**홈(PC)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.0/v1740-home-1440-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.0/v1740-home-1440-after.png) |
+
+*휴대폰*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.0/v1740-home-390-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.0/v1740-home-390-after.png) |
+
+---
+
 ## [1.73.0] — 2026-10-22 · 개인 확장 (UX 개선 7건)
 
 - 머리줄 해/달 테마 버튼 없앰(테마는 설정에서), 휴대폰 머리줄에 펜 [새 글] 버튼
