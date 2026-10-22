@@ -28,15 +28,15 @@
     <!-- 강성찬 개인 확장(10-16): 처음 온 사람 안내. 배너 사진에 그려진 슬로건은 그대로, 그 아래에 무엇을 하는 곳인지 한 줄 -->
     <div class="home-intro" th:unless="${continued}">
         <p><th:block th:replace="~{fragments/icons :: grass}"></th:block>
-            <span>매일 오늘의 주제로 글을 쓰면, 쓴 날이 블로그에 잔디처럼 쌓여요.</span></p>
-        <a th:if="${missionsEnabled == true}" href="/missions" class="btn btn-sm">오늘의 미션 보기</a>
+            <span>매일 오늘의 글감으로 글을 쓰면, 쓴 날이 블로그에 잔디처럼 쌓여요.</span></p>
+        <a th:if="${missionsEnabled == true}" href="/missions" class="btn btn-sm">오늘의 글감 보기</a>
     </div>
     <!-- 로그인했고 발행한 글이 없는 사람에게만: 시작하기 3단계(첫 글을 쓰면 사라짐) -->
     <section th:if="${showStartGuide == true and !continued}" class="start-guide" aria-labelledby="start-guide-heading">
         <h2 id="start-guide-heading">글그린 시작하기</h2>
         <ol class="start-steps">
             <li><a href="/settings"><span class="start-no">1</span><span><strong>프로필 꾸미기</strong><span class="help">사진과 소개를 넣어요</span></span></a></li>
-            <li th:if="${missionsEnabled == true}"><a href="/missions"><span class="start-no">2</span><span><strong>오늘의 주제 보기</strong><span class="help">무엇을 쓸지 고민될 때</span></span></a></li>
+            <li th:if="${missionsEnabled == true}"><a href="/missions"><span class="start-no">2</span><span><strong>오늘의 글감 보기</strong><span class="help">무엇을 쓸지 고민될 때</span></span></a></li>
             <li>
                 <form method="post" action="/write">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -49,13 +49,8 @@
     <div class="home-main">
     <h1 class="visually-hidden">전체 글</h1>
     <!-- 086 강성찬 개인 확장: 트렌딩·새로 온 작가·추천은 탐색으로 옮겨 홈은 최신 글 하나 -->
-    <!-- 홈은 한 칸(오른쪽 칸 없음). 목록이 끝없이 이어져 꼬리말에 닿기 어려우니 넓은 화면은 사이트 링크를 제목 줄 오른쪽에(좁은 화면은 ☰ 메뉴) -->
     <div class="home-title-row">
         <h2 class="home-section-title">최신 글</h2>
-        <nav class="side-links home-links" aria-label="사이트 정보">
-            <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
-            <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
-        </nav>
     </div>
     <p th:if="${continued}"><a class="link-btn" href="/">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued}">
@@ -69,7 +64,8 @@
             <a th:unless="${currentMemberId != null}" href="/login">로그인</a>
         </div>
     </th:block>
-    <div class="card-grid home-cards" id="card-grid">
+    <!-- 10-22 개인 확장: 홈은 저절로 2번만 이어 붙이고 그 뒤는 버튼으로(꼬리말에 닿게, js/post/list-more.js) -->
+    <div class="card-grid home-cards" id="card-grid" data-auto-loads="2">
         <th:block th:each="card : ${cards}">
             <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
         </th:block>

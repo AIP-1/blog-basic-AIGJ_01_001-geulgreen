@@ -80,7 +80,7 @@
                        th:text="${#strings.isEmpty(row.title()) and !#strings.isEmpty(card.excerpt()) ? card.excerpt() : card.title()}" th:title="${card.title()}">제목</a>
                     <th:block th:replace="~{post/manage :: manageBadges}"></th:block>
                 </div>
-                <span class="manage-row-tag"><a th:if="${card.firstTag() != null}" th:class="${'card-tag chip' + (#strings.length(card.firstTag()) % 4)}"
+                <span class="manage-row-tag"><a th:if="${card.firstTag() != null}" class="card-tag"
                    th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${card.firstTag()}" th:title="${card.firstTag()}">태그</a></span>
                 <span class="manage-num" th:if="${tab == 'published'}" th:attr="aria-label=${'조회 ' + views.get(row.id())}"><svg th:replace="~{fragments/icons :: eye}"></svg><span th:text="${views.get(row.id())}">0</span></span>
                 <span class="manage-num" th:unless="${tab == 'published'}"></span>

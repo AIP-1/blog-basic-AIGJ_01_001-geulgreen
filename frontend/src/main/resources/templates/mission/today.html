@@ -134,13 +134,13 @@
         <p class="card-top">
             <a class="card-author" th:href="${paths.blog(mp.handle())}"><span th:text="${mp.handle()}">아이디</span>
                 <span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span></a>
-            <span class="card-tag chip0" th:text="${mp.topicTitle()}">주제</span>
+            <span class="card-tag" th:text="${mp.topicTitle()}">주제</span>
         </p>
         <h3 class="card-title"><a class="card-link" th:href="${mp.url()}" th:title="${mp.title()}" th:text="${#strings.replace(mp.title(), ' · ', ' ·&#160;')}">제목</a></h3>
         <p class="card-excerpt" th:if="${!mp.excerpt().isEmpty()}" th:text="${mp.excerpt()}">요약</p>
     </div>
     <p class="card-foot">
-        <span class="card-likes" th:text="${'♡ ' + mp.likeCount()}">♡ 0</span>
+        <span class="card-likes" th:attr="aria-label=${'좋아요 ' + mp.likeCount()}"><svg th:replace="~{fragments/icons :: heart}"></svg><span th:text="${mp.likeCount()}">0</span></span>
         <span class="card-comments" th:attr="aria-label=${'댓글 ' + mp.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${mp.commentCount()}">0</span></span>
         <a class="mission-post-reply" th:href="${mp.url() + '#comments'}">댓글 달기</a>
     </p>

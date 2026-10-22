@@ -10,7 +10,7 @@
         <h1>인증이 완료됐어요</h1>
         <p>이제 글을 쓰고 댓글을 남길 수 있어요.</p>
         <!-- 강성찬 개인 확장(10-16): 인증을 마친 사람을 첫 글로 이어 준다 -->
-        <p class="verify-next"><a th:if="${missionsEnabled == true}" class="btn btn-primary" href="/missions">오늘의 주제로 첫 글 쓰기</a>
+        <p class="verify-next"><a th:if="${missionsEnabled == true}" class="btn btn-primary" href="/missions">오늘의 글감으로 첫 글 쓰기</a>
             <a class="link-btn" href="/">처음으로</a></p>
     </th:block>
     <th:block th:unless="${verified}">
