@@ -2029,3 +2029,18 @@ dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 .topic-note-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .topic-note-close { flex: none; color: var(--color-text-muted); }
 
+/* 10-22 개인 확장(chan "휴대폰 가독성"): 390·360px에서 잰 결함만 고친다 */
+/* 태그 화면 머리: 자동 칸이 가장 긴 줄 폭으로 늘어 화면 밖(약 58px)이 잘리던 것 */
+.tags-head { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 639px) {
+    /* 탐색 카드(휴대폰 2장): 태그 칩이 한 글자로 잘리고 글쓴이가 11px이라, 칩은 빼고 글쓴이 줄을 키운다 */
+    .explore-main .card-grid .card-tag { display: none; }
+    .explore-main .card-grid .card-top { font-size: 1.05em; }
+    .explore-main .card-grid .card-series { font-size: .9em; }
+    /* 시리즈 화면: 표지가 없을 때의 빈 칸이 옆자리를 차지해 제목이 좁게 접히던 것 */
+    .series-head .series-cover-empty { display: none; }
+    /* 누르는 자리 44px: 머리줄 ☰, 글쓰기 사진·표 버튼, 바닥 링크 */
+    .menu-toggle { min-width: 44px; min-height: 44px; }
+    .editor-tools button { min-width: 44px; min-height: 44px; justify-content: center; }
+    .footer-links a { font-size: .875rem; display: inline-flex; align-items: center; min-height: 32px; }
+}
