@@ -7,6 +7,48 @@
 
 ---
 
+## [1.74.1] — 2026-10-22 · 개인 확장 (휴대폰 가독성)
+
+- 태그 화면 머리가 좁은 화면 밖으로 넘치던 것 고침
+- 탐색 카드(휴대폰): 태그 칩 빼고 글쓴이·시리즈 글자 키움
+- 시리즈 화면(휴대폰): 표지가 없을 때 빈 칸 없앰
+- 휴대폰 누르는 자리: ☰·글쓰기 사진/표 버튼 44px, 바닥 링크 14px
+- DB 바뀜 없음
+
+#### 전/후 사진(휴대폰 390)
+
+**탐색 카드(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ex-after.png) |
+
+**시리즈 화면(휴대폰)**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-sr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-sr-after.png) |
+
+**태그 화면 머리와 ☰ 버튼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-tags-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-tags-after.png) |
+
+**글쓰기 사진·표 버튼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ed-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ed-after.png) |
+
+**바닥 링크**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ft-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.74.1/v1741-ft-after.png) |
+
+---
+
 ## [1.74.0] — 2026-10-22 · 개인 확장 (가입 버튼 · 글 구조화 데이터)
 
 - 로그아웃 홈 소개 줄에 [가입하고 첫 글 쓰기]
