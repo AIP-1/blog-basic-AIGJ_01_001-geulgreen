@@ -7,6 +7,20 @@
 
 ---
 
+## [1.75.0] — 2026-10-22 · 개인 확장 (홈 화면 설치)
+
+- 휴대폰 홈 화면에 글그린 설치(PWA): /manifest.webmanifest, 발바닥 아이콘, theme-color
+- 서비스 워커 /sw.js: 페이지는 늘 네트워크, 끊기면 /offline.html 안내와 [다시 시도]
+- DB 바뀜 없음
+
+#### 새 화면 사진(전에는 없던 기능)
+
+| 설치한 앱 | 연결 끊김 | 연결 끊김(어두운 테마) |
+|---|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.0/v1750-standalone.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.0/v1750-offline.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.0/v1750-offline-dark.png) |
+
+---
+
 ## [1.74.2] — 2026-10-22 · 개인 확장 (화면 정렬)
 
 - 스크롤바가 있든 없든 화면이 옆으로 밀리지 않음(scrollbar-gutter: stable)
