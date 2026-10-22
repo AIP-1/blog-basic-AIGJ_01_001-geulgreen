@@ -55,9 +55,8 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(head).as(path).contains("<meta name=\"color-scheme\" content=\"light dark\">")
                 .containsPattern("<script src=\"/js/theme-init-[0-9a-f]{32}\\.js\"></script>").contains("/css/theme-");
         assertThat(head.indexOf("theme-init-")).as(path).isLessThan(head.indexOf("/css/site-"));
-        // 061 강성찬 개인 확장: 시스템·라이트·다크 고르기는 설정 화면에, 머리말에는 한 번에 바꾸는 해/달 버튼만(스크립트가 보여 줌)
-        assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"").contains("id=\"theme-switch\"")
-                .containsPattern("/js/theme-switch-[0-9a-f]{32}\\.js")
+        // 10-22: 테마 고르기는 설정 화면에만(머리말 해/달 버튼은 없앴다)
+        assertThat(html).as(path).doesNotContain("id=\"theme-toggle\"").doesNotContain("id=\"theme-switch\"")
                 .doesNotContain("<style>").doesNotContainPattern("<script>(?!</script>)");
         // 검색용 구조화 데이터(JSON-LD)는 실행되지 않는 자료라 예외
         assertThat(Pattern.compile("<script(?![^>]*\\ssrc=)(?![^>]*application/ld\\+json)[^>]*>").matcher(html).find()).as(path + " 인라인 스크립트").isFalse();

@@ -82,10 +82,6 @@
     --color-control-border: #958A7E;
     /* 031 잔디 진하기 0~4(세이지) */
     --color-grass-0: #EDE6DB; --color-grass-1: #CFE3D3; --color-grass-2: #9CC5A8; --color-grass-3: #5E9B77; --color-grass-4: #3D6B55;
-    --color-chip0-bg: #F3E9D8; --color-chip0-text: #7A5A2B;
-    --color-chip1-bg: #E3ECFA; --color-chip1-text: #2B5797;
-    --color-chip2-bg: #ECE6FA; --color-chip2-text: #5B3FA0;
-    --color-chip3-bg: #FCE7E9; --color-chip3-text: #9C2F44;
     /* 그림 색(라이트·다크 같음): 로고 발자국·고양이 그림·Google 로고 */
     --color-google-blue: #4285F4;
     --color-google-green: #34A853;
@@ -166,10 +162,6 @@
         --color-accent: #E8A56C;
         --color-control-border: #736B62;
         --color-grass-0: #2A2622; --color-grass-1: #23412F; --color-grass-2: #2F6145; --color-grass-3: #4A8A64; --color-grass-4: #7FC09A;
-        --color-chip0-bg: #33291D; --color-chip0-text: #E8CFA6;
-        --color-chip1-bg: #22303F; --color-chip1-text: #B9CDE6;
-        --color-chip2-bg: #2C2640; --color-chip2-text: #CFC2F2;
-        --color-chip3-bg: #3A2229; --color-chip3-text: #F2B8C2;
         --code-keyword: #F783AC;
         --code-string: #8CE99A;
         --code-number: #74C0FC;
@@ -236,10 +228,6 @@
     --color-accent: #E8A56C;
     --color-control-border: #736B62;
     --color-grass-0: #2A2622; --color-grass-1: #23412F; --color-grass-2: #2F6145; --color-grass-3: #4A8A64; --color-grass-4: #7FC09A;
-    --color-chip0-bg: #33291D; --color-chip0-text: #E8CFA6;
-    --color-chip1-bg: #22303F; --color-chip1-text: #B9CDE6;
-    --color-chip2-bg: #2C2640; --color-chip2-text: #CFC2F2;
-    --color-chip3-bg: #3A2229; --color-chip3-text: #F2B8C2;
     --code-keyword: #F783AC;
     --code-string: #8CE99A;
     --code-number: #74C0FC;

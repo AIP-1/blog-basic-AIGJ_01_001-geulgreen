@@ -7,6 +7,7 @@
  * 067 후속: 무한 스크롤이 되면 [더 보기] 버튼은 화면에서 숨기고(.infinite, 스크립트 없을 때만 보임) 실패할 때만 [다시 시도].
  * 091 강성찬 개인 확장: 사람이 스크롤해서 목록 끝이 화면 반 장(innerHeight의 절반) 거리 안에 들어올 때만 한 묶음씩 부른다.
  * 열자마자 연달아 부르지 않고, 첫 묶음이 화면보다 짧아 목록 끝이 이미 보일 때만 화면을 채울 만큼 부른다.
+ * 10-22 개인 확장: 목록(#card-grid)에 data-auto-loads가 있으면(홈은 2) 그만큼만 저절로 부르고, 그 뒤는 [더 보기] 버튼을 보여 꼬리말에 닿게 한다.
  */
 (function () {
   'use strict';
@@ -24,6 +25,7 @@
   }
 
   // 선 아이콘(fragments/icons.html과 같은 그림). 그림은 고정 문자열이라 innerHTML로 넣어도 안전
+  var HEART = '<path d="M12 20s-7-4.4-9.2-8.8C1.3 8.1 3.2 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3.1 1.7-1.9 3.2-3.1 5.3-3.1 3.5 0 5.4 3.6 3.9 6.7C19 15.6 12 20 12 20z"/>';
   function lineIcon(paths) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', '16'); svg.setAttribute('height', '16');
@@ -68,7 +70,7 @@
         top.appendChild(a);
       }
       if (item.firstTag) {
-        var tag = el('a', 'card-tag chip' + (item.firstTag.length % 4), item.firstTag);
+        var tag = el('a', 'card-tag'); tag.appendChild(el('span', null, item.firstTag)); // 10-22: 글자는 안쪽 span(post-card.html과 같게)
         tag.href = '/tags/' + encodeURIComponent(item.firstTag);
         top.appendChild(tag);
       }
@@ -96,7 +98,8 @@
       article.appendChild(cover);
     }
     var foot = el('p', 'card-foot');
-    var likes = el('span', 'card-likes', '♡ ' + item.likeCount); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount); foot.appendChild(likes);
+    var likes = el('span', 'card-likes'); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount);
+    likes.appendChild(lineIcon(HEART)); likes.appendChild(el('span', null, String(item.likeCount))); foot.appendChild(likes);
     var comments = el('span', 'card-comments'); comments.setAttribute('aria-label', '댓글 ' + item.commentCount);
     comments.appendChild(lineIcon('<path d="M20 12a7.5 7.5 0 0 1-11.1 6.6L4 20l1.4-4.5A7.5 7.5 0 1 1 20 12z"/>')); comments.appendChild(el('span', null, String(item.commentCount))); foot.appendChild(comments);
     var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
@@ -116,6 +119,7 @@
     var next = (box.querySelector('.more-button') || {}).dataset ? (box.querySelector('.more-button') || {}).dataset.cursor : null;
     var errorBox = box.querySelector('.list-error');
     var loading = false;
+    var autoLeft = grid.dataset.autoLoads ? Number(grid.dataset.autoLoads) : Infinity;
 
     function seen() {
       var ids = {};
@@ -173,14 +177,18 @@
 
     // 091: 목록 끝(.list-more)이 화면 아래로 반 장 거리 안에 들어오면 부른다(스크롤할 때만, 한 번에 하나)
     function near(screens) { return box.getBoundingClientRect().top < window.innerHeight * screens; }
-    function canLoad() { return next && !loading && errorBox.hidden; }
+    function canLoad() { return next && !loading && errorBox.hidden && autoLeft > 0; }
+    function autoLoad() {
+      load();
+      if (--autoLeft <= 0) { box.classList.remove('infinite'); } // 다 쓰면 [더 보기]를 보인다
+    }
     // 첫 묶음이 화면보다 짧아 목록 끝이 이미 보이면 화면을 채울 만큼만
-    function fill() { if (canLoad() && near(1)) { load(); } }
+    function fill() { if (canLoad() && near(1)) { autoLoad(); } }
     var ticking = false;
     window.addEventListener('scroll', function () {
       if (ticking) { return; }
       ticking = true;
-      setTimeout(function () { ticking = false; if (canLoad() && near(1.5)) { load(); } }, 100);
+      setTimeout(function () { ticking = false; if (canLoad() && near(1.5)) { autoLoad(); } }, 100);
     }, { passive: true });
     box.classList.add('infinite');
     fill();

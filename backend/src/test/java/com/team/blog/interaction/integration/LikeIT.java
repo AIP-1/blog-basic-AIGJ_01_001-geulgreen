@@ -162,7 +162,7 @@ class LikeIT extends IntegrationTestBase {
         assertThat(after).contains("aria-pressed=\"true\"").contains("좋아요 취소 (1)").contains("♥");
         String mine = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(author)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(mine).doesNotContain("class=\"like-button\"").contains("♥ 1");
+        assertThat(mine).doesNotContain("class=\"like-button\"").contains("class=\"like-count\"").contains("<span class=\"like-number\">1</span>");
         assertThat(mockMvc.perform(get("/likeview/posts/{id}", post)).andReturn().getResponse().getContentAsString())
                 .contains("data-guest=\"true\"").contains("class=\"like-button\"");
     }
