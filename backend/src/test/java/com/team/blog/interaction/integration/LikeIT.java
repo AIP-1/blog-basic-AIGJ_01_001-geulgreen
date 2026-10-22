@@ -154,15 +154,15 @@ class LikeIT extends IntegrationTestBase {
         long post = posts.published(author, "글", "본문", 1, T);
         String before = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(before).contains("aria-pressed=\"false\"").contains("aria-label=\"좋아요 (0)\"").contains("♡");
+        assertThat(before).contains("aria-pressed=\"false\"").contains("aria-label=\"좋아요 (0)\"").contains("class=\"like-icon\"").doesNotContain("♡");
         mockMvc.perform(post("/likeview/posts/{id}/like", post).param("liked", "true").with(csrf()).with(TestAuth.member(a)))
                 .andExpect(status().isSeeOther());
         String after = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(a)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(after).contains("aria-pressed=\"true\"").contains("좋아요 취소 (1)").contains("♥");
+        assertThat(after).contains("aria-pressed=\"true\"").contains("좋아요 취소 (1)").doesNotContain("♥");
         String mine = mockMvc.perform(get("/likeview/posts/{id}", post).with(TestAuth.member(author)))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(mine).doesNotContain("class=\"like-button\"").contains("class=\"like-count\"").contains("<span class=\"like-number\">1</span>");
+        assertThat(mine).doesNotContain("class=\"like-button\"").contains("class=\"like-count has-likes\"").contains("<span class=\"like-number\">1</span>");
         assertThat(mockMvc.perform(get("/likeview/posts/{id}", post)).andReturn().getResponse().getContentAsString())
                 .contains("data-guest=\"true\"").contains("class=\"like-button\"");
     }
