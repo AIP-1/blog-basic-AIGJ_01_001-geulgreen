@@ -640,7 +640,7 @@ html, body { overflow-x: clip; }
 .group-card h3 { margin: 0 0 8px; font-size: 1.1em; }
 .group-choice { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
 /* 031 잔디·스트릭(강성찬 개인 확장): 주 53개 × 7일, 좁은 화면에서는 가로로 밀어 본다 */
-.grass { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; }
+.grass { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; container-type: inline-size; }
 .grass-title { margin: 0 0 10px; font-size: 1em; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .grass-streak { color: var(--color-accent); font-weight: 700; }
 .grass-grid { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
@@ -649,6 +649,10 @@ html, body { overflow-x: clip; }
 .grass-day { width: 100%; aspect-ratio: 1; border-radius: 3px; background: var(--color-grass-0); }
 .grass-1 { background: var(--color-grass-1); } .grass-2 { background: var(--color-grass-2); }
 .grass-3 { background: var(--color-grass-3); } .grass-4 { background: var(--color-grass-4); }
+/* 강성찬 개인 확장(10-22): 좁은 폭에서는 옆으로 밀지 않게 최근 주만 보여 준다(칸 크기는 유지).
+   500px 아래 26주(약 6개월), 640px 아래 39주(약 9개월). 숫자 요약은 1년 그대로 */
+@container (max-width: 640px) { .grass-week:nth-last-child(n+40) { display: none; } }
+@container (max-width: 500px) { .grass-grid { gap: 2px; } .grass-week { gap: 2px; min-width: 0; } .grass-week:nth-last-child(n+27) { display: none; } }
 /* 032 작성자 통계(강성찬 개인 확장): 막대 높이는 서버가 정한 % (style 속성, 색은 역할) */
 main.stats-page { max-width: 900px; }
 .stats-totals { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
