@@ -35,12 +35,15 @@
     <section class="geulgam-topics" aria-label="글감">
         <p th:if="${topics.isEmpty()}" class="empty-state">이날은 글감이 없었어요</p>
         <ol class="topic-cards">
-            <li th:each="t, st : ${topics}" class="topic-card">
+            <li th:each="t, st : ${topics}" class="topic-card" th:classappend="${pickedTopic != null and pickedTopic.id() == t.id()} ? 'is-picked'">
                 <p class="topic-no" th:text="${'글감 ' + (st.index + 1)}">글감 1</p>
                 <h2 class="topic-title" th:text="${t.title()}">주제</h2>
                 <p class="topic-hint" th:text="${t.hint()}">안내</p>
                 <div class="topic-foot">
-                    <span class="help"><svg th:replace="~{fragments/icons :: people}"></svg> <span th:text="${t.participants() + '명 썼어요'}">0명 썼어요</span></span>
+                    <!-- 114: 쓴 사람이 있으면 눌러서 이 글감 글만 본다 -->
+                    <a th:if="${t.participants() > 0}" class="help topic-read" th:href="${topicLinkBase + 'topic=' + t.id() + '#posts'}"
+                       th:attr="aria-current=${pickedTopic != null and pickedTopic.id() == t.id() ? 'true' : null}"><svg th:replace="~{fragments/icons :: people}"></svg> <span th:text="${t.participants() + '명 썼어요'}">0명 썼어요</span></a>
+                    <span th:unless="${t.participants() > 0}" class="help"><svg th:replace="~{fragments/icons :: people}"></svg> <span>0명 썼어요</span></span>
                     <th:block th:if="${isToday}">
                         <form th:if="${currentMemberId != null}" method="post" th:action="@{/missions/topics/{id}/write(id=${t.id()})}">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -97,6 +100,12 @@
         </section>
     </div>
 
+    <!-- 114 강성찬 개인 확장: 글감 하나만 골라 보기(친구 칸·모두 칸 함께). 칩은 휴대폰에서 줄을 바꿔 모두 보인다 -->
+    <nav id="posts" th:if="${topics.size() > 1}" class="topic-filter" aria-label="글감으로 골라 보기">
+        <a th:href="${isToday ? '/missions#posts' : '/missions?date=' + day + '#posts'}" th:attr="aria-current=${pickedTopic == null ? 'page' : null}">전체</a>
+        <a th:each="t : ${topics}" th:href="${topicLinkBase + 'topic=' + t.id() + '#posts'}"
+           th:attr="aria-current=${pickedTopic != null and pickedTopic.id() == t.id() ? 'page' : null}" th:title="${t.title()}"><span th:text="${t.title()}">글감</span></a>
+    </nav>
     <section th:if="${!friendPosts.isEmpty()}" class="mission-feed" aria-labelledby="friend-feed-heading">
         <h2 id="friend-feed-heading"><svg th:replace="~{fragments/icons :: people}"></svg> <span th:text="${'친구들의 ' + (isToday ? '오늘' : '그날') + ' 글'}">친구들의 오늘 글</span></h2>
         <ul class="card-grid home-cards mission-posts">
@@ -108,7 +117,7 @@
     </section>
     <section class="mission-feed" aria-labelledby="all-feed-heading">
         <h2 id="all-feed-heading"><svg th:replace="~{fragments/icons :: sparkle}"></svg> <span th:text="${'모두의 ' + (isToday ? '오늘' : '그날') + ' 글'}">모두의 오늘 글</span></h2>
-        <p th:if="${otherPosts.isEmpty()}" class="empty-state" th:text="${isToday ? '아직 올라온 글이 없어요. 첫 글의 주인공이 되어 보세요' : '이날 올라온 다른 글이 없어요'}">아직 없어요</p>
+        <p th:if="${otherPosts.isEmpty()}" class="empty-state" th:text="${pickedTopic != null ? (friendPosts.isEmpty() ? '이 글감으로 올라온 글이 아직 없어요' : '이 글감으로 올라온 다른 글이 없어요') : (isToday ? '아직 올라온 글이 없어요. 첫 글의 주인공이 되어 보세요' : '이날 올라온 다른 글이 없어요')}">아직 없어요</p>
         <ul class="card-grid home-cards mission-posts">
             <th:block th:each="p : ${otherPosts}">
                 <li th:if="${cards.containsKey(p.postId())}" class="mission-card"><article th:replace="~{fragments/post-card :: cardWith(${cards.get(p.postId())}, ${cardDates.get(p.postId())}, true, ~{mission/today :: missionExtra(${p})})}"></article></li>
@@ -126,7 +135,7 @@
 <!-- 홈 글 카드(fragments/post-card)와 같은 모양: 글쓴이·주제 → 제목 → 요약 → 반응·댓글 달기 -->
 <!-- 086: 공용 카드 위에 붙는 미션 줄(주제·친구/내 글·댓글 달기). 모든 미션 카드에 있어 줄이 맞는다 -->
 <p th:fragment="missionExtra(mp)" class="manage-badges mission-extra">
-    <span class="badge" th:text="${mp.topicTitle()}">주제</span><span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span>
+    <a class="badge mission-topic" th:href="${topicLinkBase + 'topic=' + mp.topicId() + '#posts'}" th:text="${mp.topicTitle()}">주제</a><span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span>
     <a class="mission-post-reply" th:href="${mp.url() + '#comments'}">댓글 달기</a>
 </p>
 <li th:fragment="missionPost(mp)" class="post-card mission-post">
@@ -134,7 +143,7 @@
         <p class="card-top">
             <a class="card-author" th:href="${paths.blog(mp.handle())}"><span th:text="${mp.handle()}">아이디</span>
                 <span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span></a>
-            <span class="card-tag" th:text="${mp.topicTitle()}">주제</span>
+            <a class="card-tag" th:href="${topicLinkBase + 'topic=' + mp.topicId() + '#posts'}" th:text="${mp.topicTitle()}">주제</a>
         </p>
         <h3 class="card-title"><a class="card-link" th:href="${mp.url()}" th:title="${mp.title()}" th:text="${#strings.replace(mp.title(), ' · ', ' ·&#160;')}">제목</a></h3>
         <p class="card-excerpt" th:if="${!mp.excerpt().isEmpty()}" th:text="${mp.excerpt()}">요약</p>

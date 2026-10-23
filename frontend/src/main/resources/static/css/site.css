@@ -1242,6 +1242,20 @@ main.list-page .home-cards { gap: 18px; }
     background: var(--color-surface-muted); color: var(--color-text-muted); margin-bottom: 4px; }
 .badge-icon .icon { width: 22px; height: 22px; }
 .badge-item.is-earned .badge-icon { background: var(--color-surface); color: var(--color-brand); }
+/* 114 글감별 글 모아보기: 고른 글감 카드 테두리, "N명 썼어요" 링크, 글감 칩(줄 바꿈으로 모두 보이게), 카드 글감 꼬리표 링크 */
+.topic-card.is-picked { border-color: var(--color-brand); box-shadow: inset 0 0 0 1px var(--color-brand), 0 2px 10px var(--color-shadow); }
+.topic-read { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; color: var(--color-brand); font-weight: 600; text-decoration: none; }
+.topic-read:hover { text-decoration: underline; }
+.topic-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 -6px; scroll-margin-top: 80px; }
+/* 넓은 화면은 글감 카드와 칩이 한 화면에 보여 #posts로 옮겨도 위로 밀지 않는다(휴대폰만 칩으로 내려간다) */
+@media (min-width: 800px) { .topic-filter { scroll-margin-top: 100vh; } }
+.topic-filter a { display: inline-flex; align-items: center; max-width: 100%; min-height: 36px; padding: 4px 14px; border-radius: 999px;
+    border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); text-decoration: none; font-size: .9em; }
+.topic-filter a span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topic-filter a:hover { border-color: var(--color-control-border); }
+.topic-filter a[aria-current="page"] { background: var(--color-brand-soft); border-color: var(--color-brand); color: var(--color-brand); font-weight: 700; }
+.mission-extra .mission-topic { position: relative; z-index: 1; color: inherit; text-decoration: none; }
+.mission-extra .mission-topic:hover { text-decoration: underline; color: var(--color-text); }
 /* 친구들·모두의 글: 홈과 같은 글 카드 */
 .mission-feed { margin-top: 8px; }
 .mission-feed h2 { font-size: 1.15em; margin: 0 0 12px; }

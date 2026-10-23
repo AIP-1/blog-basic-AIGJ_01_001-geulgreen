@@ -48,7 +48,8 @@ public class MissionController {
 
     @GetMapping("/missions")
     public String page(@RequestParam(value = "date", required = false) String date,
-                       @RequestParam(value = "month", required = false) String month, Model model) {
+                       @RequestParam(value = "month", required = false) String month,
+                       @RequestParam(value = "topic", required = false) Long topic, Model model) {
         LocalDate today = missions.today();
         LocalDate day = today;
         if (date != null && !date.isBlank()) {
@@ -63,7 +64,11 @@ public class MissionController {
         }
         Optional<CurrentUser> viewer = currentUserProvider.current();
         List<MissionService.Topic> topics = missions.topics(day);
-        List<MissionService.FeedPost> feed = missions.feed(day, viewer);
+        // 114 강성찬 개인 확장: ?topic=으로 그날 글감 하나의 글만. 그날 글감이 아니면(지난 링크 등) 모두 보여 준다
+        MissionService.Topic picked = topic == null ? null : topics.stream().filter(t -> t.id() == topic).findFirst().orElse(null);
+        List<MissionService.FeedPost> feed = missions.feed(day, viewer, picked == null ? null : picked.id());
+        model.addAttribute("pickedTopic", picked);
+        model.addAttribute("topicLinkBase", day.equals(today) ? "/missions?" : "/missions?date=" + day + "&");
         model.addAttribute("day", day);
         model.addAttribute("isToday", day.equals(today));
         model.addAttribute("dayLabel", label(day));
