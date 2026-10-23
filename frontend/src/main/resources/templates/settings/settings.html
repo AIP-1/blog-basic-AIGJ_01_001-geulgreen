@@ -19,7 +19,6 @@
         <a href="#settings-display">화면</a>
         <a href="#settings-notifications">알림</a>
         <a href="#settings-ai">AI</a>
-        <a th:if="${aiConnectEnabled}" href="#settings-connections">연결</a>
     </nav>
     <div class="settings-panels">
     <div class="settings-panel" id="settings-profile">
@@ -272,10 +271,9 @@
         <p class="help" id="ai-consent-state" aria-live="polite">불러오는 중…</p>
         <button type="button" id="ai-consent-withdraw" hidden>동의 철회</button>
     </section>
-    </div>
-    <!-- 097 강성찬 개인 확장: 연결(AI 연결 등은 연결 화면에서) -->
-    <div class="settings-panel" id="settings-connections" th:if="${aiConnectEnabled}">
-    <section aria-labelledby="connections-heading">
+    <!-- 097 강성찬 개인 확장: 연결(AI 연결 등은 연결 화면에서). 10-23(chan): 따로 탭을 두지 않고 AI 탭 안 두 번째 묶음으로
+         (옛 주소 #settings-connections도 이 묶음을 열어 그대로 통한다) -->
+    <section id="settings-connections" aria-labelledby="connections-heading" th:if="${aiConnectEnabled}">
         <h2 id="connections-heading">연결</h2>
         <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요. 발행은 내가 직접 해요.</p>
         <p class="help" th:if="${aiKeys.isEmpty()}">아직 연결한 키가 없어요</p>
@@ -284,8 +282,6 @@
         </ul>
         <a href="/settings/connections" class="link-btn" th:text="${aiKeys.isEmpty()} ? 'AI에 연결하기' : '키 관리'">AI에 연결하기</a>
     </section>
-
-
     </div>
     </div>
     </div>
