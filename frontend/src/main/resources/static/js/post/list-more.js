@@ -1,7 +1,7 @@
 /*
  * [더 보기](009 FR-004~FR-009, 10 §4). 링크(?cursor=)를 가로채 API로 다음 묶음을 받아 붙인다. 이미 있는 글 번호는 건너뛴다.
  * 불러오는 중 "불러오는 중…" 비활성, 실패 "불러오지 못했어요 [다시 시도]"(같은 커서), 끝 "모든 글을 다 봤어요".
- * 글을 보러 떠날 때 붙인 카드·다음 커서·스크롤을 sessionStorage에 30분 보관하고, 같은 주소로 돌아오면 복원한다.
+ * 글을 보러 떠날 때 붙인 카드·다음 커서·스크롤을 sessionStorage에 30분 보관하고, 뒤로 가기로 같은 주소에 돌아오면 복원한다(10-22: 링크로 다시 오면 맨 위).
  * 글자는 모두 textContent로 넣는다.
  * 067 강성찬 개인 확장: 목록 끝이 화면에 가까워지면 저절로 다음 묶음을 불러온다(무한 스크롤).
  * 067 후속: 무한 스크롤이 되면 [더 보기] 버튼은 화면에서 숨기고(.infinite, 스크립트 없을 때만 보임) 실패할 때만 [다시 시도].
@@ -13,6 +13,12 @@
   'use strict';
 
   var RESTORE_MS = 30 * 60 * 1000;
+
+  function cameBack() {
+    var nav = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav) { return nav.type === 'back_forward'; }
+    return !!(window.performance && performance.navigation && performance.navigation.type === 2);
+  }
 
   function dateLabel(iso) {
     var at = new Date(iso), now = new Date(), min = Math.floor((now - at) / 60000);
@@ -193,10 +199,10 @@
     box.classList.add('infinite');
     fill();
 
-    // 복원(30분)
+    // 복원(30분). 10-22(chan): 뒤로 가기로 돌아왔을 때만. 로고·홈 메뉴로 다시 오면 맨 위부터
     try {
       var saved = JSON.parse(sessionStorage.getItem(storeKey) || 'null');
-      if (saved && Date.now() - saved.savedAt < RESTORE_MS && saved.items && saved.items.length) {
+      if (saved && cameBack() && Date.now() - saved.savedAt < RESTORE_MS && saved.items && saved.items.length) {
         append(saved.items);
         next = saved.next;
         render();

@@ -32,8 +32,14 @@ main > h1:first-child, main > :first-child > h1:first-child { margin-top: 0; }
     display: inline-flex; align-items: center; gap: 4px; }
 .menu-main a:hover, .menu-login:hover { color: var(--color-text); background: var(--color-surface-muted); }
 .header-quick { display: flex; gap: 8px; align-items: center; flex: none; }
-.menu-toggle { background: none; border: 1px solid var(--color-border); border-radius: 10px; color: var(--color-text);
-    font: inherit; line-height: 1.6; padding: 2px 10px; cursor: pointer; }
+/* 10-22(chan): ☰는 테두리·바탕 없이 아이콘만(누르는 자리 44px은 그대로) */
+.menu-toggle { background: none; border: 0; border-radius: 999px; color: var(--color-text); display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; padding: 0; cursor: pointer; }
+.menu-toggle:hover { background: var(--color-surface-muted); }
+.menu-toggle .icon-inline { width: 20px; height: 20px; }
+.menu-toggle .icon-inline, .menu-toggle[aria-expanded="true"] .icon-menu { display: none; }
+.menu-toggle[aria-expanded="true"] .icon-inline { display: inline; }
+.menu-toggle:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 /* 좁은 화면 + 스크립트 있음: 메뉴를 ☰ 안으로 접는다 */
 @media (max-width: 640px) {
     .header-inner { gap: 12px; }
@@ -48,6 +54,9 @@ main > h1:first-child, main > :first-child > h1:first-child { margin-top: 0; }
     /* 휴대폰: 종에 붙인 알림 펼침이 화면 왼쪽 밖으로 잘려서, 머리글 너비에 맞춰 연다 */
     .site-header .notif-bell-wrap { position: static; }
     .site-header .notif-panel { left: 12px; right: 12px; width: auto; max-height: 70vh; overflow-y: auto; }
+    /* 10-22(chan): 휴대폰 한 줄 탭·칩·링크 규칙은 파일 맨 아래(뒤에 오는 기본 규칙에 덮이지 않게) */
+    .site-footer .footer-links { flex: 1 1 100%; gap: 8px; justify-content: space-between; }
+    .site-footer .footer-links a { font-size: .8125rem; }
 }
 .site-header form { margin: 0; }
 .auth-form .field { margin: 16px 0; }
@@ -77,7 +86,8 @@ main > h1:first-child, main > :first-child > h1:first-child { margin-top: 0; }
 .settings .readonly { color: var(--color-text-muted); }
 /* 063 강성찬 개인 확장: 설정 섹션 메뉴(넓은 화면은 왼쪽 세로 메뉴, 좁은 화면은 위쪽 가로 줄) */
 main.settings { max-width: 960px; }
-.settings-nav { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--color-border); margin: 8px 0 16px; }
+.settings-nav { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--color-border); margin: 8px 0 16px; padding-bottom: 8px; }
+.settings-back { margin: 0 0 16px; }
 .settings-nav a { flex: none; padding: 8px 12px; border-radius: 8px; color: var(--color-text-muted); text-decoration: none; font-weight: 600; white-space: nowrap; }
 .settings-nav a:hover { color: var(--color-text); background: var(--color-surface-muted); }
 .settings-nav a[aria-current] { color: var(--color-text); background: var(--color-brand-soft); }
@@ -288,6 +298,12 @@ main.list-page { max-width: var(--page-wide); }
 .notif-unread .notif-message { font-weight: 700; }
 .notif-dot { color: var(--color-brand); margin-right: 4px; }
 .notif-time { display: block; color: var(--color-text-muted); font-size: .85em; }
+/* 10-22 UX 재점검: 알림 지우기는 작은 둥근 아이콘 버튼(기본 버튼 모양이 내용보다 눈에 띄지 않게) */
+.notif-delete button { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+    border-radius: 50%; color: var(--color-text-muted); flex: none; }
+.notif-delete button svg { width: 16px; height: 16px; }
+.notif-delete button:hover { background: var(--color-surface-muted); color: var(--color-text); }
+.notif-delete button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .notif-panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 2px 2px 8px; border-bottom: 1px solid var(--color-border); }
 .notif-panel-title { font-size: 1.02em; }
 .notif-read-all { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; padding: 5px 12px; font-size: .85em; font-weight: 600;
@@ -351,7 +367,6 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .btn-block { width: 100%; padding: 12px 16px; font-size: 1em; }
 a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: .9em; }
 .follow-button[aria-pressed="true"] { color: var(--color-brand); border-color: var(--color-brand); }
-.menu-toggle { background: var(--color-surface); border: 1px solid var(--color-control-border); }
 .notif-bell, .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
     border-radius: 999px; color: var(--color-text); text-decoration: none; }
 .notif-bell:hover, .icon-btn:hover { background: var(--color-surface-muted); }
@@ -359,6 +374,11 @@ a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px;
 /* 089 댓글 좋아요 */
 .comment-like[aria-pressed="true"] .like-icon { color: var(--color-like); }
 .like-button[aria-pressed="true"], .like-button .like-icon { color: var(--color-like); }
+/* 10-22(chan): 글 화면 좋아요 하트도 카드처럼 선 아이콘(SVG). 내가 눌렀을 때만(글쓴이는 1개 이상일 때만) 채워진다 */
+.like-button .like-icon, .like-count .like-icon { display: inline-flex; align-items: center; }
+.like-button .like-icon .icon, .like-count .like-icon .icon { width: 1.15em; height: 1.15em; }
+.like-count .like-icon { color: var(--color-like); }
+.like-button[aria-pressed="true"] .like-icon .icon, .like-count.has-likes .like-icon .icon { fill: currentColor; }
 .list-retry, .handle-suggestion { padding: 4px 12px; font-size: .85em; }
 
 /* 입력 칸 */
@@ -597,7 +617,7 @@ dialog.publish-panel { width: min(640px, calc(100% - 32px)); max-height: calc(10
 .more-button { display: inline-flex; padding: 10px 28px; border-radius: 999px; border: 1px solid var(--color-control-border);
     background: var(--color-surface); color: var(--color-text); text-decoration: none; font-weight: 600; }
 .more-button:hover { background: var(--color-surface-muted); }
-.comment-actions button { padding: 2px 10px; font-size: .82em; font-weight: 500; border-color: transparent; background: none; color: var(--color-text-muted); }
+.comment-actions button { padding: 6px 10px; min-height: 32px; font-size: .92em; font-weight: 500; border-color: transparent; background: none; color: var(--color-text-muted); }
 .comment-actions button:hover { background: var(--color-surface-muted); color: var(--color-text); }
 /* 내용이 짧아도 바닥글은 화면 아래에 */
 body { min-height: 100vh; display: flex; flex-direction: column; }
@@ -633,6 +653,9 @@ html, body { overflow-x: clip; }
 .switch { display: inline-flex; align-items: center; gap: 10px; background: none; border: 0; padding: 4px 0; font: inherit; color: inherit; cursor: pointer; }
 .switch-track { position: relative; width: 40px; height: 22px; border-radius: 11px; background: var(--color-border); transition: background .15s; }
 .switch-track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--color-surface); transition: left .15s; }
+/* 10-22(chan "이거 왜이래"): 설정의 submit 단추 전체를 초록 알약으로 칠하는 규칙(.settings form button[type=submit])이 스위치까지 덮어서
+   스위치+글자가 한 덩어리 알약이 되던 것. 스위치는 트랙만 색, 글자는 평문 */
+.settings form button[type=submit].switch, .settings form button[type=submit].switch:hover { background: none; color: inherit; border: 0; box-shadow: none; }
 .switch[aria-checked="true"] .switch-track { background: var(--color-brand); }
 .switch[aria-checked="true"] .switch-track::after { left: 21px; }
 .group-create, .group-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
@@ -640,7 +663,7 @@ html, body { overflow-x: clip; }
 .group-card h3 { margin: 0 0 8px; font-size: 1.1em; }
 .group-choice { display: inline-flex; gap: 6px; align-items: center; margin-right: 14px; }
 /* 031 잔디·스트릭(강성찬 개인 확장): 주 53개 × 7일, 좁은 화면에서는 가로로 밀어 본다 */
-.grass { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; }
+.grass { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 14px 18px; margin: 0 0 20px; container-type: inline-size; }
 .grass-title { margin: 0 0 10px; font-size: 1em; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .grass-streak { color: var(--color-accent); font-weight: 700; }
 .grass-grid { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px; }
@@ -649,6 +672,10 @@ html, body { overflow-x: clip; }
 .grass-day { width: 100%; aspect-ratio: 1; border-radius: 3px; background: var(--color-grass-0); }
 .grass-1 { background: var(--color-grass-1); } .grass-2 { background: var(--color-grass-2); }
 .grass-3 { background: var(--color-grass-3); } .grass-4 { background: var(--color-grass-4); }
+/* 강성찬 개인 확장(10-22): 좁은 폭에서는 옆으로 밀지 않게 최근 주만 보여 준다(칸 크기는 유지).
+   500px 아래 26주(약 6개월), 640px 아래 39주(약 9개월). 숫자 요약은 1년 그대로 */
+@container (max-width: 640px) { .grass-week:nth-last-child(n+40) { display: none; } }
+@container (max-width: 500px) { .grass-grid { gap: 2px; } .grass-week { gap: 2px; min-width: 0; } .grass-week:nth-last-child(n+27) { display: none; } }
 /* 032 작성자 통계(강성찬 개인 확장): 막대 높이는 서버가 정한 % (style 속성, 색은 역할) */
 main.stats-page { max-width: 900px; }
 .stats-totals { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
@@ -744,7 +771,29 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
     background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
 .post-settings-head { display: flex; align-items: center; justify-content: space-between; }
 .post-settings-head h2 { margin: 0; font-size: 1.1em; }
-.post-settings .teaser-box { margin: 12px 0 0; }
+.post-settings .teaser-box { margin: 0; }
+.post-settings-hint { margin: 4px 0 0; }
+.post-settings .post-settings-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.post-settings .post-settings-section h3 { margin: 0 0 4px; font-size: 1em; }
+.post-settings .post-category-form, .post-settings .series-form { margin: 12px 0 0; }
+.post-settings .post-category-form > label, .post-settings .series-form label[for="series-select"] { flex-basis: 100%; font-weight: 600; }
+.post-settings .post-category-form .field-hint { flex-basis: 100%; margin: -4px 0 2px; }
+.post-settings .series-form .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.post-settings .series-form { display: block; }
+.post-settings .series-form .inline-form { width: 100%; }
+.post-settings .series-form #series-new { flex: 1 1 100%; min-width: 0; width: auto; }
+.post-settings label svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 4px; }
+/* 10-22 UX 재점검: 신고 창도 발행 설정·글 설정 창과 같은 모양 */
+dialog#report-dialog { width: min(420px, calc(100% - 32px)); margin: auto; color: var(--color-text); background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: 18px; padding: 16px 20px; }
+dialog#report-dialog::backdrop { background: var(--color-overlay); }
+#report-form h2 { margin: 0 0 8px; font-size: 1.1em; }
+#report-form fieldset { border: 0; padding: 0; margin: 0 0 12px; }
+#report-form legend { font-weight: 600; margin-bottom: 4px; }
+#report-form fieldset label { padding: 6px 0; }
+#report-form > label { margin-top: 4px; font-weight: 600; }
+#report-form textarea { margin-top: 4px; }
+.report-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 a.author-byline.author-nickname { color: var(--color-text); text-decoration: none; }
 a.author-byline.author-nickname:hover { text-decoration: underline; }
 /* 075: 상자끼리 붙지 않게 간격, 미션 표시는 태그 근처에 작게 */
@@ -959,7 +1008,8 @@ main.admin-page { max-width: 1280px; }
 .admin-features li { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .admin-features code { overflow-wrap: anywhere; }
 .admin-log-table td, .admin-log-table th { text-align: left; }
-.admin-log-table { display: block; max-width: none; overflow-x: auto; }
+table.admin-log-table { display: table; width: 100%; max-width: none; }
+.admin-log-table th:last-child, .admin-log-table td:last-child { text-align: left; }
 .site-notice { background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); padding: 8px 16px;
     text-align: center; font-size: .92em; }
 .site-notice a { margin-left: 8px; }
@@ -984,11 +1034,15 @@ main.admin-page { max-width: 1280px; }
 @media (min-width: 1200px) {
     .post-side-actions:not([hidden]) { display: flex; flex-direction: column; align-items: center; gap: 12px; position: sticky; z-index: 5;
         top: calc(var(--header-h, 64px) + 24px); width: 56px; height: 0; margin-left: -104px; }
+    /* 10-22(chan): 기둥이 height:0이라 flex 자식이 내용 크기로 줄어들어 글쓴이 쪽 하트 상자가 56×48 타원이 되던 것 → 줄어들지 않게 */
+    .post-side-actions > * { flex: none; }
     .post-side-actions .like-form { margin: 0; }
+    .post-side-actions .like-number { line-height: 1; }
     .post-side-actions :is(.like-button, .like-count, .share-menu > summary) { display: flex; flex-direction: column; align-items: center;
         justify-content: center; gap: 2px; width: 56px; height: 56px; padding: 0; border-radius: 999px; border: 1px solid var(--color-border);
         background: var(--color-surface); color: var(--color-text-muted); font-size: .82em; font-weight: 600; box-shadow: 0 2px 8px var(--color-shadow); }
     .post-side-actions .like-icon { font-size: 1.35em; line-height: 1; color: var(--color-like); }
+    .post-side-actions .like-icon .icon { width: 22px; height: 22px; }
     .post-side-actions .like-button:hover, .post-side-actions .share-menu > summary:hover { border-color: var(--color-control-border); color: var(--color-text); }
     .post-side-actions :is(.like-button, .share-menu > summary):focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
     .post-side-actions .share-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -1003,8 +1057,9 @@ main.admin-page { max-width: 1280px; }
 .menu-main a[aria-current="page"] { color: var(--color-brand); background: transparent; border-radius: 0;
     box-shadow: inset 0 -2px 0 var(--color-brand); font-weight: 700; }
 .btn-write { display: inline-flex; align-items: center; gap: 6px; }
-.profile-menu { position: relative; }
-.profile-menu summary { list-style: none; cursor: pointer; display: inline-flex; border-radius: 999px; }
+/* 10-22(chan): 사진 프로필이 줄 상자(글줄 높이) 때문에 옆 아이콘보다 2~3px 위에 뜨던 것 → 글줄 없이 가운데 */
+.profile-menu { position: relative; display: flex; align-items: center; }
+.profile-menu summary { list-style: none; cursor: pointer; display: flex; align-items: center; border-radius: 999px; line-height: 0; }
 .profile-menu summary::-webkit-details-marker { display: none; }
 .profile-menu summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .profile-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 180px; display: flex; flex-direction: column;
@@ -1051,7 +1106,6 @@ main.list-page .home-cards { gap: 18px; }
 @media (min-width: 1280px) { main.list-page:not(.search-page) .home-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* 067 후속: 사이트 링크는 한 줄(작은 회색 글씨, 사이에 ·) */
 .side-links { display: flex; flex-wrap: wrap; gap: 6px 0; padding: 0 2px; font-size: .74em; }
-.settings-links { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .side-links a { color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
 .side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
@@ -1061,8 +1115,11 @@ main.list-page .home-cards { gap: 18px; }
 .github-link .icon { width: 1em; height: 1em; flex: none; }
 .menu-links { display: none; }
 @media (max-width: 640px) {
-    .menu-links { display: flex; flex-wrap: wrap; gap: 4px 12px; padding-top: 8px; border-top: 1px solid var(--color-border); }
-    .site-nav .menu-links a { font-size: .82em; color: var(--color-text-muted); padding: 2px 0; }
+    /* 10-22(chan): 약관·GitHub·처리방침·릴리스 노트·문의하기를 360px에서도 한 줄에(GitHub는 마크만) */
+    .menu-links { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid var(--color-border); }
+    .site-nav .menu-links a { font-size: .8125rem; color: var(--color-text-muted); padding: 6px 0; white-space: nowrap; flex: none; display: inline-flex; align-items: center; }
+    .menu-links .github-text, .footer-links .github-text { display: none; }
+    .menu-links .github-link .icon, .footer-links .github-link .icon { width: 16px; height: 16px; }
 }
 .side-box { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; }
 .side-box h2 { margin: 0 0 12px; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
@@ -1449,7 +1506,7 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 
 /* toast.js: 결과 안내 상자(머리말 바로 아래, 3초). JS가 켜져 있으면 원래 안내 칸은 숨긴다 */
 .toast-source { display: none !important; }
-.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; max-width: min(480px, calc(100% - 32px));
+.toast { position: fixed; left: 50%; z-index: 40; display: flex; align-items: center; gap: 10px; width: max-content; max-width: min(480px, calc(100% - 32px));
     padding: 10px 8px 10px 14px; border-radius: 12px; border: 1px solid var(--color-border); border-left-width: 4px;
     color: var(--color-text); box-shadow: 0 4px 16px var(--color-shadow);
     opacity: 0; transform: translate(-50%, -8px); transition: opacity .25s, transform .25s; }
@@ -1698,6 +1755,13 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .home-intro-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .home-intro p { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--color-text); }
 .home-intro .icon-inline { color: var(--color-brand); width: 1.2em; height: 1.2em; }
+/* 10-22(chan "오늘의 글감 보기 카드 확인"): 휴대폰은 새싹을 첫 줄에 맞추고, 단추는 44px 높이로 카드 폭 가득 */
+@media (max-width: 639px) {
+    .home-intro p { align-items: flex-start; }
+    .home-intro .icon-inline { flex: none; margin-top: .2em; }
+    .home-intro-actions { flex: 1 1 100%; }
+    .home-intro-actions .btn { flex: 1 1 0; min-height: 44px; justify-content: center; }
+}
 .start-guide { margin: 0 0 24px; padding: 16px 18px; border-radius: 16px; background: var(--color-brand-soft); }
 .start-guide h2 { margin: 0 0 12px; font-size: 1.05em; }
 .start-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
@@ -1988,28 +2052,20 @@ dialog.sheet-dialog > form, dialog.sheet-dialog > .sheet-head, .series-settings-
    요약 줄은 빼고 사진(16:10)·제목·반응만. 홈·피드·태그·시리즈 탭은 그대로 */
 /* 10-21(chan "카드가 너무 작아 읽기 힘들다"): PC는 홈과 같이 한 줄 4장(넓은 화면 오른쪽 사람 칸이 없을 때 auto-fill이 6장까지 늘던 것을 고정),
    중간 폭 3장, 휴대폰 2장. 제목은 크게 두 줄까지, 글쓴이 줄은 작게, 시리즈 글에는 시리즈 이름 */
-main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-@media (min-width: 1280px) { main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.explore-main .card-grid .card-excerpt { display: none; }
-.explore-main .card-grid .card-title { font-size: 1.12em; line-height: 1.4; }
-.explore-main .card-grid .card-top { font-size: .82em; min-height: 22px; }
-.explore-main .card-grid .card-top .avatar { width: 20px; height: 20px; }
+/* 10-22(chan "탐색 글씨가 커서 정보가 적다 → 홈처럼 하나로"): 탐색 카드만 따로 두던 모양(요약 없음·큰 제목·휴대폰 2장 상자)을 없애고
+   홈 카드(.home-cards)와 같은 조각·같은 CSS를 그대로 쓴다. 시리즈 이름 줄만 탐색 고유 */
 .card-series { margin: 0; font-size: .8em; font-weight: 600; color: var(--color-brand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 639px) {
-    main.list-page:not(.search-page) .explore-main .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .explore-main .card-grid .post-card { font-size: .9em; }
-}
 /* 10-19(chan "유튜브처럼 카드 경계"): 휴대폰은 카드 상자(테두리·그림자·배경)를 빼고 글 사이는 여백으로 나눈다.
-   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. 탐색은 상자 그대로(chan 10-20), PC도 그대로.
+   한 줄 하나 목록(홈·피드·태그·프로필)은 사진을 화면 끝까지, 태그 가로 줄은 사진만 둥글게. PC는 그대로. 탐색도 10-22부터 홈과 같게.
    10-21(chan "썸네일 설명칸 위아래로 구분선"): 베이지 썸네일이 배경에 묻혀서 사진 아래와 글 사이에 얇은 선 */
 @media (max-width: 639px) {
-    .post-card:not(.explore-main *) { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
-    .post-card:not(.explore-main *):hover { transform: none; box-shadow: none; }
-    .card-link:not(.explore-main *)::after { border-radius: 0; }
-    .card-grid .post-card:not(.explore-main *), .tag-row .post-card { padding: 0; }
-    .card-grid:not(.explore-main *), main.list-page .card-grid:not(.explore-main *) { gap: 0; }
-    .card-grid .post-card:not(.explore-main *) { border-bottom: 1px solid var(--color-border); margin: 0 -20px; padding: 0 20px 18px; }
-    .card-grid .post-card:not(.explore-main *) > .card-thumb { margin: 0 -20px 6px; border-radius: 0; border-bottom: 1px solid var(--color-border); }
+    .post-card { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+    .post-card:hover { transform: none; box-shadow: none; }
+    .card-link::after { border-radius: 0; }
+    .card-grid .post-card, .tag-row .post-card { padding: 0; }
+    .card-grid, main.list-page .card-grid { gap: 0; }
+    .card-grid .post-card { border-bottom: 1px solid var(--color-border); margin: 0 -20px; padding: 0 20px 18px; }
+    .card-grid .post-card > .card-thumb { margin: 0 -20px 6px; border-radius: 0; border-bottom: 1px solid var(--color-border); }
     .tag-row .post-card > .card-thumb { margin: 0 0 4px; border-radius: 12px; }
 }
 /* 10-21(chan) 강성찬 개인 확장: 프로필 탭 줄은 가로로만 넘친다(세로 1px 넘침에 스크롤 바가 생기던 것), 주인의 [시리즈 추가]는 오른쪽 끝 */
@@ -2041,14 +2097,24 @@ dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 /* 태그 화면 머리: 자동 칸이 가장 긴 줄 폭으로 늘어 화면 밖(약 58px)이 잘리던 것 */
 .tags-head { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 639px) {
-    /* 탐색 카드(휴대폰 2장): 태그 칩이 한 글자로 잘리고 글쓴이가 11px이라, 칩은 빼고 글쓴이 줄을 키운다 */
-    .explore-main .card-grid .card-tag { display: none; }
-    .explore-main .card-grid .card-top { font-size: 1.05em; }
-    .explore-main .card-grid .card-series { font-size: .9em; }
     /* 시리즈 화면: 표지가 없을 때의 빈 칸이 옆자리를 차지해 제목이 좁게 접히던 것 */
     .series-head .series-cover-empty { display: none; }
     /* 누르는 자리 44px: 머리줄 ☰, 글쓰기 사진·표 버튼, 바닥 링크 */
     .menu-toggle { min-width: 44px; min-height: 44px; }
     .editor-tools button { min-width: 44px; min-height: 44px; justify-content: center; }
-    .footer-links a { font-size: .875rem; display: inline-flex; align-items: center; min-height: 32px; }
+    .footer-links a { display: inline-flex; align-items: center; min-height: 32px; }
+}
+
+/* 10-22(chan "두 줄로 나오는 거 전부 한 줄로"): 휴대폰에서 설정 탭·내 글 필터/탭·관리 메뉴는 두 줄로 꺾지 않고 한 줄.
+   파일 맨 아래에 두는 이유: 같은 세기의 기본 규칙(.settings-nav 등)이 뒤에 오면 덮이기 때문. 넘치면 옆으로 밀리고 오른쪽 끝이 흐려져 더 있음을 알린다 */
+@media (max-width: 640px) {
+    .settings-nav, .manage-filter, .manage-tabs, .admin-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px;
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent); mask-image: linear-gradient(to right, black calc(100% - 24px), transparent); }
+    .settings-nav::-webkit-scrollbar, .manage-filter::-webkit-scrollbar, .manage-tabs::-webkit-scrollbar, .admin-nav::-webkit-scrollbar { display: none; }
+    .settings-nav a, .manage-filter a, .manage-tabs a, .admin-nav a { flex: none; white-space: nowrap; }
+    .settings-nav { padding-bottom: 4px; padding-right: 24px; }
+    .settings-nav a { padding: 6px 6px; font-size: .8125rem; }
+    .manage-filter a { padding: 4px 9px; font-size: .92em; }
+    .manage-tabs { gap: 14px; }
+    .admin-nav a { padding: 5px 10px; font-size: .9em; }
 }

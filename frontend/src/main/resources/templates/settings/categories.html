@@ -8,7 +8,8 @@
 <main class="friends-page">
     <h1>카테고리</h1>
     <p class="help">내 블로그 글을 주제별로 나눠요. 글 화면에서 글마다 카테고리를 하나 고를 수 있어요.
-        카테고리를 지워도 글은 그대로 남고 "분류 없음"이 돼요. <a href="/settings">설정으로</a></p>
+        카테고리를 지워도 글은 그대로 남고 "분류 없음"이 돼요.</p>
+    <p class="settings-back"><a href="/settings" class="link-btn back">설정으로</a></p>
     <form method="post" action="/settings/categories" class="group-create">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <label for="category-name">새 카테고리</label>

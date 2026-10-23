@@ -102,7 +102,7 @@
             </div>
             <!-- 067 후속(강성찬 개인 확장): 좁은 화면 ☰ 메뉴 안 사이트 링크(목록이 끝없이 이어져 꼬리말에 닿기 어려움, 비회원도) -->
             <div class="menu-links">
-                <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+                <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener" aria-label="GitHub"><th:block th:replace="~{fragments/icons :: github}"></th:block><span class="github-text">GitHub</span></a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
                 <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
             </div>
         </div>
@@ -157,7 +157,7 @@
                 </div>
             </details>
             <button type="button" id="menu-toggle" class="menu-toggle" hidden aria-expanded="false" aria-controls="site-menu"
-                    aria-label="메뉴 열기">☰</button>
+                    aria-label="메뉴 열기"><th:block th:replace="~{fragments/icons :: menu}"></th:block><svg th:replace="~{fragments/icons :: close}"></svg></button>
         </span>
     </nav>
   </div>
@@ -175,7 +175,7 @@
   <div class="footer-inner">
     <p class="footer-brand"><th:block th:replace="~{fragments/icons :: paw}"></th:block><span>글그린</span></p>
     <p class="footer-slogan">좋은 글이 머무는 곳, 글그린</p>
-    <p class="footer-links"><a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
+    <p class="footer-links"><a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener" aria-label="GitHub"><th:block th:replace="~{fragments/icons :: github}"></th:block><span class="github-text">GitHub</span></a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
         <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a></p>
   </div>
 </footer>

@@ -28,7 +28,7 @@
             </form>
             <form method="post" th:action="@{/notifications/{id}/delete(id=${n.id()})}" class="notif-delete">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" aria-label="알림 삭제">×</button>
+                <button type="submit" aria-label="알림 삭제"><svg th:replace="~{fragments/icons :: close}"></svg></button>
             </form>
         </li>
     </ul>
