@@ -7,6 +7,68 @@
 
 ---
 
+## [1.75.1] — 2026-10-23 · 개인 확장 (UX 다듬기 · 기록 한눈에)
+
+- 휴대폰 기록(잔디): 500px 아래 최근 26주, 640px 아래 39주만 보여 한 화면에
+- ☰ 테두리 제거·머리줄 아이콘 정렬, 메뉴·꼬리말 약관 줄
+- 홈·목록 한 줄 행, 글감 카드 단추, 탐색 카드를 홈 카드와 같게
+- 글 화면 좋아요 선 하트, 설정 탭 한 줄, 비공개 계정 스위치, 휴대폰 알림 토스트
+- 홈은 뒤로 가기로 돌아올 때만 스크롤 위치 복원
+- 검색 결과 요약 다듬기
+- DB 바뀜 없음
+
+#### 전/후 사진(휴대폰 390)
+
+**기록(잔디) 한눈에**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-rec-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-rec-after.png) |
+
+**머리줄과 메뉴**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-menu-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-menu-after.png) |
+
+**홈**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-home-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-home-after.png) |
+
+**글감**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-gg-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-gg-after.png) |
+
+**탐색**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-ex-after.png) |
+
+**글 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-post-after.png) |
+
+**설정**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-set-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-set-after.png) |
+
+**비공개 계정**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-priv-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.75.1/v1751-priv-after.png) |
+
+---
+
 ## [1.75.0] — 2026-10-22 · 개인 확장 (홈 화면 설치)
 
 - 휴대폰 홈 화면에 글그린 설치(PWA): /manifest.webmanifest, 발바닥 아이콘, theme-color
