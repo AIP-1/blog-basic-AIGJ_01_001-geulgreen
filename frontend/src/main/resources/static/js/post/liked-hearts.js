@@ -7,7 +7,7 @@
   'use strict';
 
   function pending() {
-    return Array.prototype.filter.call(document.querySelectorAll('.post-card[data-post-id]'), function (c) {
+    return Array.prototype.filter.call(document.querySelectorAll('.post-card[data-post-id], .feed-item[data-post-id]'), function (c) {
       return !c.dataset.likeChecked && c.querySelector('.card-likes');
     });
   }
@@ -39,7 +39,7 @@
     if ('MutationObserver' in window) {
       var timer = null;
       var mo = new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(check, 50); });
-      Array.prototype.forEach.call(document.querySelectorAll('.card-grid'), function (g) { mo.observe(g, { childList: true }); });
+      Array.prototype.forEach.call(document.querySelectorAll('.card-grid, .feed-list'), function (g) { mo.observe(g, { childList: true }); });
     }
   }
 

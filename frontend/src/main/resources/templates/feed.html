@@ -5,23 +5,37 @@
     <title>피드 · 글그린</title>
 </head>
 <body>
-<!-- 086 강성찬 개인 확장: 피드는 팔로우한 사람 글만. 추천 블로그·추천 글은 탐색으로 옮겼다 -->
-<main class="list-page">
-    <h1>피드</h1>
+<!-- 086 강성찬 개인 확장: 피드는 팔로우한 사람 글만. 추천 블로그·추천 글은 탐색으로 옮겼다
+     10-23: 홈·탐색과 달라 보이게 "친구 소식" 한 줄 목록(얼굴 줄 + 오늘·어제·이번 주 묶음 + 지난번에 본 곳 표시) -->
+<main class="list-page feed-page">
+    <div class="feed-head">
+        <h1>피드</h1>
+        <span th:if="${followingCount > 0}" class="feed-count" th:text="${'팔로우 ' + followingCount + '명'}">팔로우 4명</span>
+    </div>
+    <ul th:if="${!feedPeople.isEmpty()}" class="feed-people" aria-label="팔로우한 사람">
+        <li th:each="fp : ${feedPeople}" th:classappend="${fp.fresh()} ? 'fresh'">
+            <a th:href="${paths.blog(fp.handle())}">
+                <th:block th:replace="~{fragments/avatar :: avatar(${fp.avatar()}, 48)}"></th:block>
+                <span class="feed-people-id" th:text="${fp.handle()}">아이디</span>
+                <span th:if="${fp.fresh()}" class="visually-hidden">새 글 있음</span></a>
+        </li>
+    </ul>
     <p th:if="${continued}"><a class="link-btn" href="/feed">처음부터 보기</a></p>
     <th:block th:if="${cards.isEmpty() and !continued}">
         <div class="empty-state" th:unless="${followsAnyone}">팔로우한 사람이 없어요. 탐색에서 읽고 싶은 블로그를 찾아보세요 <a href="/explore">탐색</a></div>
         <div class="empty-state" th:if="${followsAnyone}">팔로우한 사람의 공개 글이 아직 없어요 <a href="/explore">탐색</a></div>
     </th:block>
-    <div class="card-grid" id="card-grid">
-        <th:block th:each="card : ${cards}">
-            <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
+    <ol class="feed-list" id="card-grid" data-layout="feed">
+        <th:block th:each="card, it : ${cards}" th:with="day=${cardDays.get(card.id())}">
+            <li th:if="${it.first or day != cardDays.get(cards[it.index - 1].id())}" class="feed-day"><h2 th:text="${day}">오늘</h2></li>
+            <li th:replace="~{fragments/post-card :: row(${card}, ${cardDates.get(card.id())}, ${day})}"></li>
         </th:block>
-    </div>
+    </ol>
     <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
     <!-- 목록 끝(무한 스크롤이라 다 본 뒤에야 닿는다) -->
     <p th:if="${!cards.isEmpty()}" class="feed-end">팔로우한 글을 모두 보면 탐색에서 새 글을 찾아보세요 <a href="/explore" class="btn btn-sm">탐색</a></p>
     <script th:src="@{/js/post/list-more.js}" defer></script>
+    <script th:src="@{/js/post/feed-seen.js}" defer></script>
 </main>
 </body>
 </html>

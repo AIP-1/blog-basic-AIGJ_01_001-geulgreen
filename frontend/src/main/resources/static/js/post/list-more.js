@@ -8,6 +8,7 @@
  * 091 강성찬 개인 확장: 사람이 스크롤해서 목록 끝이 화면 반 장(innerHeight의 절반) 거리 안에 들어올 때만 한 묶음씩 부른다.
  * 열자마자 연달아 부르지 않고, 첫 묶음이 화면보다 짧아 목록 끝이 이미 보일 때만 화면을 채울 만큼 부른다.
  * 10-22 개인 확장: 목록(#card-grid)에 data-auto-loads가 있으면(홈은 2) 그만큼만 저절로 부르고, 그 뒤는 [더 보기] 버튼을 보여 꼬리말에 닿게 한다.
+ * 10-23 개인 확장: 목록에 data-layout="feed"면(피드) 카드 대신 한 줄(fragments/post-card :: row)로 그리고, 날짜 묶음이 바뀌면 묶음 제목을 넣는다.
  */
 (function () {
   'use strict';
@@ -28,6 +29,15 @@
     var kst = new Date(at.getTime() + 9 * 3600 * 1000);
     function pad(n) { return (n < 10 ? '0' : '') + n; }
     return kst.getUTCFullYear() + '.' + pad(kst.getUTCMonth() + 1) + '.' + pad(kst.getUTCDate());
+  }
+
+  // 피드 묶음 이름(CardDates.day와 같은 규칙, 한국 날짜 기준)
+  function dayLabel(iso) {
+    function kstDay(d) { return Math.floor((d.getTime() + 9 * 3600 * 1000) / 86400000); }
+    var diff = kstDay(new Date()) - kstDay(new Date(iso));
+    if (diff <= 0) { return '오늘'; }
+    if (diff === 1) { return '어제'; }
+    return diff < 7 ? '이번 주' : '지난 글';
   }
 
   // 선 아이콘(fragments/icons.html과 같은 그림). 그림은 고정 문자열이라 innerHTML로 넣어도 안전
@@ -103,15 +113,52 @@
       var cover = el('div', 'card-thumb card-cover'); cover.setAttribute('aria-hidden', 'true');
       article.appendChild(cover);
     }
+    var foot = counts(item);
+    var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
+    foot.appendChild(time);
+    article.appendChild(foot);
+    return article;
+  }
+
+  function counts(item) {
     var foot = el('p', 'card-foot');
     var likes = el('span', 'card-likes'); likes.setAttribute('aria-label', '좋아요 ' + item.likeCount);
     likes.appendChild(lineIcon(HEART)); likes.appendChild(el('span', null, String(item.likeCount))); foot.appendChild(likes);
     var comments = el('span', 'card-comments'); comments.setAttribute('aria-label', '댓글 ' + item.commentCount);
     comments.appendChild(lineIcon('<path d="M20 12a7.5 7.5 0 0 1-11.1 6.6L4 20l1.4-4.5A7.5 7.5 0 1 1 20 12z"/>')); comments.appendChild(el('span', null, String(item.commentCount))); foot.appendChild(comments);
-    var time = el('time', 'card-date', dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt);
-    foot.appendChild(time);
-    article.appendChild(foot);
-    return article;
+    return foot;
+  }
+
+  // 10-23: 피드 한 줄(fragments/post-card.html의 row와 같은 모양)
+  function row(item) {
+    var li = el('li', 'feed-item' + (item.thumbnailUrl ? '' : ' no-thumb'));
+    li.dataset.postId = item.id;
+    li.dataset.day = dayLabel(item.firstPublicAt);
+    var blog = item.author.blogUrl || '/' + item.author.handle;
+    var face = el('a', 'feed-avatar'); face.href = blog; face.tabIndex = -1; face.setAttribute('aria-hidden', 'true');
+    var av = avatar(item.author); av.style.width = '40px'; av.style.height = '40px'; av.style.fontSize = '20px';
+    if (av.tagName === 'IMG') { av.width = 40; av.height = 40; }
+    face.appendChild(av); li.appendChild(face);
+    var body = el('div', 'feed-body');
+    var who = el('p', 'feed-who');
+    var handle = el('a', 'feed-handle', item.author.handle || ''); handle.href = blog; who.appendChild(handle);
+    who.appendChild(document.createTextNode(' '));
+    var time = el('time', null, dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt); who.appendChild(time);
+    if (item.firstTag) {
+      who.appendChild(document.createTextNode(' '));
+      var tag = el('a', 'card-tag'); tag.appendChild(el('span', null, item.firstTag)); tag.href = '/tags/' + encodeURIComponent(item.firstTag);
+      who.appendChild(tag);
+    }
+    body.appendChild(who);
+    var h3 = el('h3', 'feed-title'); var link = el('a', 'card-link', item.title); link.href = item.url; h3.appendChild(link); body.appendChild(h3);
+    body.appendChild(el('p', 'feed-excerpt', item.excerpt || ''));
+    body.appendChild(counts(item));
+    li.appendChild(body);
+    if (item.thumbnailUrl) {
+      var thumb = el('div', 'feed-thumb'); var img = el('img'); img.src = item.thumbnailUrl; img.alt = ''; img.loading = 'lazy';
+      thumb.appendChild(img); li.appendChild(thumb);
+    }
+    return li;
   }
 
   function init() {
@@ -120,6 +167,7 @@
     if (!box || !grid) { return; }
     var api = box.dataset.listApi;
     var showAuthor = box.dataset.showAuthor === 'true';
+    var feed = grid.dataset.layout === 'feed';
     var storeKey = 'list:' + location.pathname + location.search;
     var appended = [];
     var next = (box.querySelector('.more-button') || {}).dataset ? (box.querySelector('.more-button') || {}).dataset.cursor : null;
@@ -148,7 +196,13 @@
       var ids = seen();
       items.forEach(function (item) {
         if (ids[item.id]) { return; }
-        var node = card(item, showAuthor);
+        var node = feed ? row(item) : card(item, showAuthor);
+        if (feed) {
+          var rows = grid.querySelectorAll('.feed-item'), last = rows[rows.length - 1];
+          if (!last || last.dataset.day !== node.dataset.day) {
+            var head = el('li', 'feed-day'); head.appendChild(el('h2', null, node.dataset.day)); grid.appendChild(head);
+          }
+        }
         grid.appendChild(node);
         appended.push(item);
       });

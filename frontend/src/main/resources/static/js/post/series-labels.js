@@ -31,7 +31,7 @@
   }
 
   function init() {
-    var root = document.querySelector('.explore-main');
+    var root = document.querySelector('.explore-page');
     if (!root) { return; }
     check(root);
     if ('MutationObserver' in window) {
