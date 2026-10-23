@@ -14,7 +14,7 @@
     <nav class="settings-nav" aria-label="설정 섹션">
         <a href="#settings-profile">프로필</a>
         <a href="#settings-account">계정</a>
-        <a href="#settings-blog">블로그·사진</a>
+        <a href="#settings-blog">블로그</a>
         <a href="#settings-friends">친구</a>
         <a href="#settings-display">화면</a>
         <a href="#settings-notifications">알림</a>
@@ -289,11 +289,6 @@
     </div>
     </div>
     </div>
-    <!-- 프로필 메뉴에서 뺀 사이트 링크는 설정 맨 아래에(휴대폰은 오른쪽 칸이 없음) -->
-    <nav class="side-links settings-links" aria-label="사이트 정보">
-        <a href="/terms">이용약관</a> <a href="https://github.com/AIPKANG" class="github-link" target="_blank" rel="noopener"><th:block th:replace="~{fragments/icons :: github}"></th:block>GitHub</a> <a href="/privacy">개인정보 처리방침</a> <a href="/releases">릴리스 노트</a>
-        <a th:if="${contactPage == true}" href="/contact">문의하기</a><a th:if="${contactPage != true and contactEmail != null}" th:href="${'mailto:' + contactEmail}">문의하기</a>
-    </nav>
     <script th:src="@{/js/auth/password-rules.js}" defer></script>
     <script th:src="@{/js/profile/image-upload.js}" defer></script>
     <script th:src="@{/js/profile/image-cropper.js}" defer></script>

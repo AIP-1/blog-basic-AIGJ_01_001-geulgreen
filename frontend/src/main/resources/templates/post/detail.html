@@ -154,13 +154,14 @@
         <!-- 반응 줄(FR-012·FR-017): 좋아요(015)·신고(022)는 인증된 비작성자에게만 -->
         <div class="reaction-row">
             <!-- 015: 작성자에게는 수만, 그 밖에는 버튼(비회원·인증 전도 보임). 스크립트 없으면 폼 -->
-            <span th:if="${viewerIsAuthor}" class="like-count"><span class="like-icon">♥</span> <span class="like-number" th:text="${likeLabel}">12</span></span>
+            <!-- 10-22(chan): 글쓴이 쪽은 0개일 때 빈 하트(채워진 빨간 하트는 "내가 눌렀다"로 읽힘) -->
+            <span th:if="${viewerIsAuthor}" th:class="${post.likeCount() > 0 ? 'like-count has-likes' : 'like-count'}" class="like-count"><span class="like-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: heart}"></svg></span> <span class="like-number" th:text="${likeLabel}">12</span></span>
             <form th:unless="${viewerIsAuthor}" method="post" th:action="@{${post.url() + '/like'}}" class="like-form"
                   th:attr="data-post-id=${post.id()},data-login=${loginRedirect},data-guest=${currentMemberId == null}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="liked" th:value="${!liked}">
                 <button type="submit" class="like-button" th:attr="aria-pressed=${liked},data-like-post-id=${post.id()},data-count=${post.likeCount()},aria-label=${(liked ? '좋아요 취소 (' : '좋아요 (') + post.likeCount() + ')'}">
-                    <span class="like-icon" aria-hidden="true" th:text="${liked ? '♥' : '♡'}">♡</span>
+                    <span class="like-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: heart}"></svg></span>
                     <span class="like-number" th:text="${likeLabel}">12</span>
                 </button>
             </form>
@@ -264,7 +265,8 @@
             <h2 id="post-settings-heading">글 설정</h2>
             <form method="dialog"><button type="submit" class="btn-text" aria-label="닫기">✕</button></form>
         </div>
-            <form th:if="${myCategories != null}" class="post-category-form inline-form" method="post"
+        <p class="help post-settings-hint">카테고리·시리즈·카드 소개는 각각 따로 저장돼요.</p>
+            <form th:if="${myCategories != null}" class="post-category-form inline-form post-settings-section" method="post"
                   th:action="@{/posts/{id}/category(id=${post.id()})}">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <input type="hidden" name="back" th:value="${post.url()}">
@@ -279,11 +281,11 @@
                 <a class="help" href="/settings/categories">카테고리 관리</a>
             </form>
             <!-- 041: 글쓴이는 시리즈에 넣거나 뺀다 -->
-            <div th:if="${mySeries != null}" class="series-form">
+            <div th:if="${mySeries != null}" class="series-form post-settings-section">
                 <form class="inline-form" method="post" th:action="@{/posts/{id}/series(id=${post.id()})}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="hidden" name="back" th:value="${post.url()}">
-                    <label for="series-select">📚 시리즈</label>
+                    <label for="series-select"><svg th:replace="~{fragments/icons :: i-book}"></svg>시리즈</label>
                     <select id="series-select" name="seriesId">
                         <option value="new">새 시리즈 만들기</option>
                         <option th:each="sr : ${mySeries}" th:value="${sr.id()}" th:text="${sr.title()}"
@@ -291,7 +293,7 @@
                     </select>
                     <label for="series-new" class="visually-hidden">새 시리즈 이름</label>
                     <input id="series-new" name="newTitle" type="text" maxlength="60" placeholder="새 시리즈 이름">
-                    <button type="submit" class="btn btn-sm">넣기</button>
+                    <button type="submit" class="btn btn-sm">저장</button>
                 </form>
                 <form th:if="${postSeries != null}" class="inline-form" method="post" th:action="@{/posts/{id}/series/remove(id=${post.id()})}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -300,8 +302,8 @@
                 </form>
             </div>
             <!-- 035 강성찬 개인 확장: AI 티저(글쓴이만) — 카드의 요약 자리에 보일 한 줄 -->
-            <section th:if="${teaserBox != null}" id="teaser" class="notice teaser-box" aria-labelledby="teaser-heading">
-                <h2 id="teaser-heading">카드 한 줄 소개</h2>
+            <section th:if="${teaserBox != null}" id="teaser" class="teaser-box post-settings-section" aria-labelledby="teaser-heading">
+                <h3 id="teaser-heading">카드 한 줄 소개</h3>
                 <p class="help">글 목록 카드에 요약 대신 보여요. 비워 두면 본문 앞부분이 보여요.</p>
                 <p th:if="${teaserError != null}" class="form-error" role="alert" data-toast-inline th:text="${teaserError}">오류</p>
                 <form method="post" th:action="@{/posts/{id}/teaser(id=${post.id()})}" class="teaser-form">
@@ -309,12 +311,12 @@
                     <label for="teaser-text" class="visually-hidden">한 줄 소개</label>
                     <input id="teaser-text" name="teaser" type="text" maxlength="80"
                            th:value="${teaserDraft != null ? teaserDraft : currentTeaser}" placeholder="이 글을 한 줄로 소개해 보세요">
-                    <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                    <button type="submit" class="btn btn-sm">저장</button>
                 </form>
-                <p th:if="${teaserDraft != null}" class="help">✨ AI 제안이에요. 고쳐서 저장하거나 그대로 저장하세요.</p>
+                <p th:if="${teaserDraft != null}" class="help"><svg th:replace="~{fragments/icons :: sparkle}"></svg> AI 제안이에요. 고쳐서 저장하거나 그대로 저장하세요.</p>
                 <form th:if="${teaserConsent}" method="post" th:action="@{/posts/{id}/teaser/generate(id=${post.id()})}">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit" class="btn btn-sm">✨ AI로 만들기</button>
+                    <button type="submit" class="btn btn-sm"><svg th:replace="~{fragments/icons :: sparkle}"></svg>AI로 만들기</button>
                     <span class="help">제목과 본문 앞부분이 AI 서비스로 전송돼요(AI 태그 추천과 같은 동의)</span>
                 </form>
                 <p th:unless="${teaserConsent}" class="help">AI로 만들려면 글쓰기의 [AI 태그 추천]에서 먼저 동의해 주세요.</p>
@@ -336,8 +338,10 @@
             <label for="report-detail">설명(기타는 필수)</label>
             <textarea id="report-detail" name="detail" maxlength="200" rows="3"></textarea>
             <p class="field-error" id="report-error" role="alert"></p>
-            <button type="submit" value="send">신고</button>
-            <button type="button" id="report-cancel">취소</button>
+            <div class="report-actions">
+                <button type="button" id="report-cancel" class="btn btn-sm">취소</button>
+                <button type="submit" value="send" class="btn btn-primary btn-sm">신고</button>
+            </div>
         </form>
     </dialog>
     <p class="help" id="report-status" role="status" data-toast="success" th:if="${canReact}"></p>

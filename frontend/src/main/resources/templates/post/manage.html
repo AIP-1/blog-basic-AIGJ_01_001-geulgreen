@@ -8,10 +8,6 @@
 <main id="manage" class="list-page" th:attr="data-tab=${tab},data-visibility=${visibility},data-page=${currentPage}">
     <div class="manage-head">
         <h1>내 글</h1>
-        <form method="post" action="/write">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit">새 글</button>
-        </form>
     </div>
     <!-- 세 탭(011 FR-002·FR-006). 063 강성찬 개인 확장: 발행 글이 먼저·기본 -->
     <nav class="manage-tabs" aria-label="내 글 탭">

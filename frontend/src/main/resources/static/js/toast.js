@@ -14,6 +14,11 @@
   function top() {
     var header = document.querySelector('.site-header, .editor-bar');
     var bottom = header ? header.getBoundingClientRect().bottom : 0;
+    // 10-22 UX 재점검: 알림 창이 열려 있으면 그 밑에(휴대폰에서 창 머리를 덮지 않게)
+    var panel = document.querySelector('.notif-panel');
+    if (panel && !panel.hidden && panel.offsetParent !== null) {
+      bottom = Math.max(bottom, panel.getBoundingClientRect().bottom);
+    }
     return Math.max(12, bottom + 12);
   }
 
