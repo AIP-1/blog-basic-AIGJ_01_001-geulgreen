@@ -165,6 +165,17 @@
                     <span class="like-number" th:text="${likeLabel}">12</span>
                 </button>
             </form>
+            <!-- 10-23 chan: 저장(나만 보는 모아보기 > 저장한 글). 로그인한 사람에게만, 자기 글도 저장할 수 있다. 스크립트 없으면 폼 -->
+            <form th:if="${currentMemberId != null}" method="post" th:action="@{${post.url() + '/save'}}" class="save-form"
+                  th:attr="data-post-id=${post.id()}">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="saved" th:value="${!saved}">
+                <button type="submit" class="save-button" th:attr="aria-pressed=${saved}"
+                        th:title="${saved ? '저장 취소' : '나만 보는 모아보기에 저장'}">
+                    <span class="save-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: bookmark}"></svg></span>
+                    <span class="save-label">저장</span>
+                </button>
+            </form>
             <!-- 053 강성찬 개인 확장: 공유하기(공개 글만). 좋아요 옆 메뉴 하나로 접었다 -->
             <details th:if="${shareEnabled and pageMeta != null}" class="sort-menu share-menu share-row" th:attr="data-share-url=${pageMeta.canonicalUrl()},data-share-title=${post.title()}">
                 <summary><th:block th:replace="~{fragments/icons :: share}"></th:block> <span class="share-label">공유하기</span></summary>
@@ -359,6 +370,7 @@
     <script th:src="@{/js/post/comments.js}" defer></script>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/like.js}" defer></script>
+    <script th:src="@{/js/post/save.js}" defer></script>
     <script th:src="@{/js/follow/follow.js}" defer></script>
     <script th:if="${recordView}" th:src="@{/js/post/post-view.js}" defer></script>
 </main>

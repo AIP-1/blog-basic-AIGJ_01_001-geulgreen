@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>모아보기 · 글그린</title>
+</head>
+<body>
+<!-- 10-23 chan: 모아보기(내가 좋아요한 글·저장한 글). 나만 보는 화면, 누른 순서(최근 먼저). 카드는 홈과 같다 -->
+<main class="list-page collection-page">
+    <h1>모아보기</h1>
+    <p class="help collection-sub" th:if="${tab == 'liked'}">좋아요를 누른 글이 누른 순서대로 모여요. 이 목록은 나만 봐요.</p>
+    <p class="help collection-sub" th:if="${tab == 'saved'}">저장한 글은 나만 볼 수 있어요. 글쓴이에게 알림도 가지 않아요.</p>
+    <nav class="manage-tabs" aria-label="모아보기">
+        <a href="/me/liked" th:attr="aria-current=${tab == 'liked' ? 'page' : null}">좋아요한 글</a>
+        <a href="/me/saved" th:attr="aria-current=${tab == 'saved' ? 'page' : null}">저장한 글</a>
+    </nav>
+    <p th:if="${continued}"><a class="link-btn" th:href="${'/me/' + tab}">처음부터 보기</a></p>
+    <th:block th:if="${cards.isEmpty() and !continued}">
+        <div class="empty-state" th:if="${tab == 'liked'}">아직 좋아요를 누른 글이 없어요. 마음에 드는 글에 하트를 눌러 보세요 <a href="/explore">탐색</a></div>
+        <div class="empty-state" th:if="${tab == 'saved'}">아직 저장한 글이 없어요. 글 아래 [저장]을 누르면 여기에 모여요 <a href="/explore">탐색</a></div>
+    </th:block>
+    <div class="card-grid" id="card-grid">
+        <th:block th:each="card : ${cards}">
+            <article th:replace="~{fragments/post-card :: card(${card}, ${cardDates.get(card.id())}, true)}"></article>
+        </th:block>
+    </div>
+    <div th:replace="~{fragments/post-card :: more(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()})}"></div>
+    <script th:src="@{/js/post/list-more.js}" defer></script>
+</main>
+</body>
+</html>

@@ -162,6 +162,55 @@ public class PostListQuery {
     }
 
     /**
+     * 10-23 chan 모아보기: 내가 좋아요(post_like)·저장(post_bookmark)한 글을 누른 순서(최근 먼저)로. 커서는 (누른 시각, 글 번호).
+     * 공개 범위는 한 블로그 목록 조건(비공개 계정 글 포함)으로 거르고, 작성자 단위 막기는 {@code authorVisible}로 한 장씩 거른다
+     * (팔로우를 끊은 비공개 계정 글은 빠진다). 걸러져 한 장이 12개보다 적어도 커서는 마지막으로 읽은 행이라 다음 장은 이어진다.
+     */
+    public CardPage collected(Collected kind, long memberId, String cursor, java.util.function.LongPredicate authorVisible) {
+        Optional<FeedCursor> after = FeedCursor.decode(cursor);
+        StringBuilder sql = new StringBuilder("""
+                SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt, COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumbnail_url,
+                       p.first_public_at, p.comment_count, p.like_count, m.handle, m.nickname, m.profile_image_url, p.author_id,
+                       (SELECT t.name FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                        WHERE pt.post_id = p.id ORDER BY pt.position LIMIT 1) AS first_tag, c.created_at AS collected_at
+                FROM\s""").append(kind.table).append(" c ").append("""
+                JOIN post p ON p.id = c.post_id JOIN member m ON m.id = p.author_id
+                     LEFT JOIN post_teaser tz ON tz.post_id = p.id LEFT JOIN post_cover pcv ON pcv.post_id = p.id
+                WHERE c.member_id = ? AND p.first_public_at IS NOT NULL AND\s""").append(accessPolicy.blogListingCondition("p", "m"));
+        List<Object> args = new ArrayList<>();
+        args.add(memberId);
+        if (after.isPresent()) {
+            sql.append(" AND (c.created_at, c.post_id) < (?, ?)");
+            args.add(Timestamp.from(after.get().firstPublicAt()));
+            args.add(after.get().id());
+        }
+        sql.append(" ORDER BY c.created_at DESC, c.post_id DESC LIMIT ").append(PAGE_SIZE + 1);
+        record Row(PostCard card, long authorId, java.time.Instant collectedAt) {
+        }
+        List<Row> rows = jdbc.query(sql.toString(), (rs, n) -> new Row(card(rs, n), rs.getLong("author_id"),
+                rs.getTimestamp("collected_at").toInstant()), args.toArray());
+        boolean more = rows.size() > PAGE_SIZE;
+        List<Row> page = more ? rows.subList(0, PAGE_SIZE) : rows;
+        List<PostCard> items = page.stream().filter(r -> authorVisible.test(r.authorId())).map(Row::card).toList();
+        if (!more) {
+            return new CardPage(items, null);
+        }
+        Row last = page.get(PAGE_SIZE - 1);
+        return new CardPage(items, new FeedCursor(last.collectedAt(), last.card().id()).encode());
+    }
+
+    /** 모아보기 탭: 좋아요한 글·저장한 글. 표 이름은 이 둘로만 정해진다(사용자 입력 아님). */
+    public enum Collected {
+        LIKED("post_like"), SAVED("post_bookmark");
+
+        private final String table;
+
+        Collected(String table) {
+            this.table = table;
+        }
+    }
+
+    /**
      * 019 트렌딩: 주어진 글 중 지금 공용 목록 조건(+관리자 숨김 아님)을 만족하는 카드만, SQL 1번. 순서는 호출자가 정한다.
      */
     public java.util.Map<Long, PostCard> cardsByIds(java.util.Collection<Long> ids) {
