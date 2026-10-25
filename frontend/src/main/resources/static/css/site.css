@@ -2211,6 +2211,8 @@ main.list-page.feed-page { max-width: 768px; }
 
 /* 10-25 chan: 친구 초대 — 초대 링크로 연 화면(/i/아이디/코드)과 내 초대 링크 화면(/me/invite) */
 .invite-page .auth-panel h1 { font-size: 1.45em; line-height: 1.35; }
+.invite-page .auth-panel h1 .invite-who { display: block; }
+.invite-page .auth-panel h1 .invite-fixed { white-space: nowrap; }
 .invite-who { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
 .invite-who-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
 .invite-who-text .help { font-size: .85em; }
@@ -2232,3 +2234,4 @@ main.list-page.feed-page { max-width: 768px; }
 .invite-share .icon { width: 1em; height: 1em; flex: none; }
 .invite-share-status { min-height: 1.2em; }
 .signup-handle-note { margin: 10px 0 0; text-align: center; line-height: 1.5; }
+.signup-handle-note span { display: block; }

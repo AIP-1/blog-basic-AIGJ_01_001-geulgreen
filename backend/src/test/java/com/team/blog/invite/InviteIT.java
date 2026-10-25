@@ -53,7 +53,7 @@ class InviteIT extends IntegrationTestBase {
         MvcResult landing = browser.perform(get(path));
         assertThat(landing.getResponse().getStatus()).isEqualTo(200);
         String html = landing.getResponse().getContentAsString();
-        assertThat(html).contains("초대한이님이 함께 글 쓰자고 초대했어요").contains("우리 반 글방")
+        assertThat(html).contains("초대한이님이</span> <span class=\"invite-fixed\">함께 글 쓰자고 초대했어요").contains("우리 반 글방")
                 .contains("Google로 시작하기").contains("이메일로 시작하기").contains("/login?redirect=%2Fi%2Finviter1%2F");
 
         // 로그인하면(redirect 없이도) 초대 경로로 돌아가고, 그 화면이 바로 받아들인다
