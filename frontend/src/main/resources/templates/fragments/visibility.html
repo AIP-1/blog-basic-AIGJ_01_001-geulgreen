@@ -6,7 +6,7 @@
   아이콘은 모두 넣어 두고 data-visibility로 하나만 보인다(내 글 관리에서 공개 범위를 바꾸면 스크립트가 값만 바꾼다).
 -->
 <span th:fragment="badge(v)" class="visibility-icon" data-visibility-badge
-      th:with="label=${v == 'PRIVATE' ? '비공개' : (v == 'FRIENDS' ? '친구 공개' : (v == 'LINK' ? '링크 공개' : (v == 'GROUP' ? '그룹 공개' : '공개')))}"
+      th:with="label=${v == 'PRIVATE' ? '비공개' : (v == 'FRIENDS' ? '친한 친구만' : (v == 'LINK' ? '링크 공개' : (v == 'GROUP' ? '그룹 공개' : '공개')))}"
       th:attr="data-visibility=${v},title=${label}">
     <span class="vis vis-PRIVATE"><svg th:replace="~{fragments/icons :: lock}"></svg></span><span class="vis vis-FRIENDS vis-GROUP"><svg th:replace="~{fragments/icons :: people}"></svg></span><span class="vis vis-LINK"><svg th:replace="~{fragments/icons :: link}"></svg></span><span class="visually-hidden vis-label" th:text="${label}">공개</span>
 </span>

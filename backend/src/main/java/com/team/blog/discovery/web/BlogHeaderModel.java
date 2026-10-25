@@ -69,11 +69,9 @@ public class BlogHeaderModel {
         if (isOwner) {
             model.addAttribute("friendCount", friendQuery.count(owner.memberId()));
         }
-        // 018: 보는 사람 기준 팔로우 상태, 025·069: 친구 버튼
+        // 018: 보는 사람 기준 팔로우 상태(친한 친구는 설정에서만 고른다)
         model.addAttribute("followingOwner", viewer.map(CurrentUser::memberId)
                 .filter(id -> id != owner.memberId()).map(id -> followQuery.isFollowing(id, owner.memberId())).orElse(false));
-        model.addAttribute("friendStatus", viewer.map(v -> friendQuery.status(v.memberId(), owner.memberId()))
-                .orElse(FriendQuery.Status.NONE).name());
         return true;
     }
 

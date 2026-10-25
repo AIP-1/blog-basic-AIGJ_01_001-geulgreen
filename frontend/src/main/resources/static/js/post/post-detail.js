@@ -19,7 +19,7 @@
     var postId = article.dataset.postId;
     var status = document.getElementById('author-action-status');
     // 098: 공개 범위는 ⋯ 메뉴의 펼치는 줄(js/post/visibility-menu.js)이 저장한다. 글 화면은 상태 안내가 바뀌니 새로 그린다
-    var NOTE = { PRIVATE: '나만 볼 수 있게 바꿨어요.', FRIENDS: '친구만 볼 수 있게 바꿨어요.', LINK: '링크를 아는 사람만 볼 수 있게 바꿨어요.' };
+    var NOTE = { PRIVATE: '나만 볼 수 있게 바꿨어요.', FRIENDS: '친한 친구만 볼 수 있게 바꿨어요.', LINK: '링크를 아는 사람만 볼 수 있게 바꿨어요.' };
     document.addEventListener('visibility-changed', function (e) {
       status.textContent = NOTE[e.detail.visibility] || (e.detail.label + '로 바꿨어요.');
       window.location.reload();
