@@ -23,9 +23,10 @@
     function sync() {
       var every = Array.prototype.every.call(boxes, function (b) { return b.checked; });
       all.checked = every;
-      // 키보드로 마지막 칸을 켜서 접힐 때 포커스가 숨은 칸에 남지 않게 [펼치기]로 옮긴다
-      if (every && items && expand && items.contains(document.activeElement)) { expand.focus(); }
+      // 키보드로 마지막 칸을 켜서 접힐 때 포커스가 숨은 칸에 남지 않게 [펼치기]로 옮긴다(요약이 보인 뒤에야 포커스가 간다)
+      var moveFocus = every && items && expand && items.contains(document.activeElement);
       fold(every);
+      if (moveFocus) { expand.focus(); }
     }
     all.addEventListener('change', function () {
       for (var i = 0; i < boxes.length; i++) { boxes[i].checked = all.checked; }
