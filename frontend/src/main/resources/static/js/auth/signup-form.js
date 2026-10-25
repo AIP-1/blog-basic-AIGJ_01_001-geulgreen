@@ -6,15 +6,36 @@
 (function () {
   'use strict';
 
+  // 10-25 chan: 둘 다 켜지면 개별 동의 두 줄을 한 줄 요약으로 접는다. [펼치기]를 누르면 다시 열리고, 하나라도 끄면 자동으로 열린다
   function bindAgreeAll() {
     var all = document.querySelector('input[data-agree-all]');
     if (!all) { return; }
-    var boxes = all.closest('fieldset').querySelectorAll('input[type=checkbox]:not([data-agree-all])');
-    function sync() { all.checked = Array.prototype.every.call(boxes, function (b) { return b.checked; }); }
+    var group = all.closest('fieldset');
+    var boxes = group.querySelectorAll('input[type=checkbox]:not([data-agree-all])');
+    var items = group.querySelector('[data-agree-items]');
+    var summary = group.querySelector('[data-agree-summary]');
+    var expand = group.querySelector('[data-agree-expand]');
+    function fold(on) {
+      if (!items || !summary) { return; }
+      items.hidden = on;
+      summary.hidden = !on;
+    }
+    function sync() {
+      var every = Array.prototype.every.call(boxes, function (b) { return b.checked; });
+      all.checked = every;
+      fold(every);
+    }
     all.addEventListener('change', function () {
       for (var i = 0; i < boxes.length; i++) { boxes[i].checked = all.checked; }
+      fold(all.checked);
     });
     for (var i = 0; i < boxes.length; i++) { boxes[i].addEventListener('change', sync); }
+    if (expand) {
+      expand.addEventListener('click', function () {
+        fold(false);
+        boxes[0].focus();
+      });
+    }
     sync();
   }
 
