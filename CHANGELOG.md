@@ -7,6 +7,34 @@
 
 ---
 
+## [1.77.1] — 2026-10-25 · 개인 확장 (위 메뉴 줄이기)
+
+- 위 메뉴 5칸(홈·탐색·피드·글감·함께 쓰기)
+- 태그는 탐색·검색에서, 관리는 프로필 메뉴에서
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**위 메뉴**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-nav-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-nav-after.png) |
+
+**탐색**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-ex-after.png) |
+
+**휴대폰 메뉴**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-menu-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.1/v1771-menu-m-after.png) |
+
+---
+
 ## [1.77.0] — 2026-10-25 · 개인 확장 (글 저장·모아보기 · 주소 변경 알림)
 
 - 글 저장(북마크): 글 화면 [저장], 나만 보고 글쓴이에게 알리지 않음
