@@ -510,10 +510,17 @@ main.auth-page { max-width: 960px; }
 /* 10-25 chan: 둘 다 동의하면 개별 두 줄 대신 한 줄 요약(.agree-summary) + [펼치기] */
 .signup-agree .agree-items[hidden], .signup-agree .agree-summary[hidden] { display: none; }
 .signup-agree .agree-summary { margin: 0; font-size: .92em; color: var(--color-text-muted); line-height: 1.6; }
-/* 문장 속 링크 규칙(PR 밑줄 링크 정리와 같음): 밑줄 없이 굵은 초록, 가리키면 밑줄 */
-.signup-agree a, .signup-agree .agree-expand { color: var(--color-brand); font-weight: 600; text-decoration: none; }
-.signup-agree a:hover, .signup-agree .agree-expand:hover { text-decoration: underline; text-decoration-thickness: 1px; }
-.signup-agree .agree-expand { background: none; border: 0; padding: 0 2px; margin-left: 4px; font: inherit; font-size: inherit; font-weight: 600; cursor: pointer; }
+/* 10-25 chan: 초록 글씨·밑줄 링크 금지 → 약관 보기·처리방침 보기·펼치기는 모두 알약 버튼(a.link-btn과 같은 모양) */
+.signup-agree .agree-summary > p { margin: 0; }
+.signup-agree .agree-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+/* 펼친 상태: 알약을 옆에 두면 360~390 폭에서 문장이 어색하게 끊겨 체크 글자 아래(체크 상자만큼 들여서)에 둔다 */
+.signup-agree .agree-item { margin: 6px 0 10px; }
+.signup-agree .agree-item > label { margin: 0; }
+.signup-agree .agree-item > .link-btn { margin: 6px 0 0 26px; }
+.signup-agree button.link-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
+    border-radius: 999px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .88rem; font-weight: 600; line-height: 1.4; white-space: nowrap; cursor: pointer; }
+.signup-agree button.link-btn::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
+.signup-agree button.link-btn:hover { background: var(--color-surface-muted); }
 main.auth-page-single { max-width: 560px; margin-top: 32px; margin-bottom: 32px; background: var(--color-surface);
     border: 1px solid var(--color-border); border-radius: 28px; padding: 40px 40px 32px; box-shadow: 0 8px 28px var(--color-shadow); }
 main.auth-page-single h1 { margin-top: 0; font-size: 1.5em; }
@@ -2248,9 +2255,7 @@ main.list-page.feed-page { max-width: 768px; }
 .invite-lead { margin: 16px 0 20px; line-height: 1.6; }
 .invite-start .btn-social { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .invite-start .help { margin: 10px 0 0; text-align: center; }
-.invite-page .help a:not(.link-btn), .invite-mine .help a:not(.link-btn) { color: var(--color-brand); font-weight: 600; text-decoration: none; }
-.invite-page .help a:not(.link-btn):hover, .invite-mine .help a:not(.link-btn):hover { text-decoration: underline; text-decoration-thickness: 1px; }
-.invite-page .auth-links a.link-btn { margin-left: 6px; }
+.invite-page .auth-links a.link-btn, .invite-mine .help a.link-btn { margin-left: 6px; }
 .invite-mine .club-onboard-lead { margin-top: -8px; }
 .invite-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
 .invite-link-label { margin: 0; font-weight: 700; font-size: 1.1em; }

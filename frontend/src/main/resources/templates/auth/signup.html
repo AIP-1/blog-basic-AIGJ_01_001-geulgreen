@@ -115,12 +115,17 @@
             <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert" data-toast-inline></p>
             <label class="agree-all"><input type="checkbox" data-agree-all> 모두 동의해요</label>
             <!-- 10-25 chan: 둘 다 켜지면 두 줄을 한 줄 요약으로 접고 [펼치기]로 다시 연다(signup-form.js). 칸은 숨길 뿐 그대로 보내진다 -->
-            <p class="agree-summary" data-agree-summary hidden>이용약관·개인정보 수집·이용에 동의했어요.
-                <a href="/terms" target="_blank" rel="noopener">약관 보기</a> · <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
-                <button type="button" class="agree-expand" data-agree-expand>펼치기</button></p>
+            <div class="agree-summary" data-agree-summary hidden>
+                <p>이용약관·개인정보 수집·이용에 동의했어요.</p>
+                <p class="agree-actions"><a class="link-btn" href="/terms" target="_blank" rel="noopener">약관 보기</a>
+                    <a class="link-btn" href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
+                    <button type="button" class="link-btn agree-expand" data-agree-expand>펼치기</button></p>
+            </div>
             <div class="agree-items" data-agree-items>
-                <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수) <a href="/terms" target="_blank" rel="noopener">약관 보기</a></label>
-                <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수) <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></label>
+                <div class="agree-item"><label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수)</label>
+                    <a class="link-btn" href="/terms" target="_blank" rel="noopener">약관 보기</a></div>
+                <div class="agree-item"><label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label>
+                    <a class="link-btn" href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></div>
             </div>
         </fieldset>
 
