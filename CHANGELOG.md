@@ -7,6 +7,30 @@
 
 ---
 
+## [1.77.0] — 2026-10-25 · 개인 확장 (글 저장·모아보기 · 주소 변경 알림)
+
+- 글 저장(북마크): 글 화면 [저장], 나만 보고 글쓴이에게 알리지 않음
+- 모아보기 /me/liked·/me/saved: 좋아요한 글·저장한 글 탭
+- 블로그 주소를 바꾸면 팔로워에게 HANDLE_CHANGED 알림(바꾸기 전 주소 표시)
+- DB: V34 notification.old_handle 열·알림 종류 추가, V35 post_bookmark 표(더하기만)
+
+#### 전/후 사진
+
+**글 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-post-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-post-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-post-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-post-m-after.png) |
+
+**새 모아보기 화면**
+
+| PC | 휴대폰 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-me.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.0/v1770-me-m.png) |
+
+---
+
 ## [1.76.0] — 2026-10-25 · 개인 확장 (피드·탐색 나누기 · 글감별 글)
 
 - 피드: 팔로우한 사람 새 글을 한 줄 목록으로, 위에 팔로우한 사람
