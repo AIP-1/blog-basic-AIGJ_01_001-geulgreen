@@ -12,6 +12,7 @@ import com.team.blog.shared.error.RateLimitedException;
 import com.team.blog.shared.security.AccountGuard;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.web.BlogPaths;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -53,14 +54,16 @@ public class InviteService {
     private final FollowService follows;
     private final AccountGuard accountGuard;
     private final MemberRepository members;
+    private final Clock clock;
 
     public InviteService(BlogOwnerResolver owners, ClubService clubs, FollowService follows, AccountGuard accountGuard,
-                         MemberRepository members) {
+                         MemberRepository members, Clock clock) {
         this.owners = owners;
         this.clubs = clubs;
         this.follows = follows;
         this.accountGuard = accountGuard;
         this.members = members;
+        this.clock = clock;
     }
 
     /** 초대한 사람이 없거나(탈퇴·없는 아이디), 코드가 틀리거나, 초대한 사람이 그 방 멤버가 아니면 empty. */
@@ -121,7 +124,7 @@ public class InviteService {
     /** 내 초대 링크들: 블로그 초대 하나와 아직 끝나지 않은 내 방마다 하나. */
     public List<Link> myLinks(long memberId) {
         String myHandle = members.findById(memberId).map(Member::getHandle).orElseThrow(NotFoundException::new);
-        LocalDate today = LocalDate.now(SEOUL);
+        LocalDate today = LocalDate.now(clock.withZone(SEOUL));
         List<Link> links = new java.util.ArrayList<>();
         links.add(new Link("내 블로그로 초대", "/i/" + myHandle, Optional.empty()));
         clubs.mine(memberId).stream()
