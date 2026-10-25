@@ -7,6 +7,54 @@
 
 ---
 
+## [1.78.0] — 2026-10-25 · 개인 확장 (설정 새 디자인 · 피드·탐색 다듬기)
+
+- 설정: 기능별 탭과 카드형 화면, 알림 스위치는 누르면 바로 저장
+- 피드: 글 읽기 쉽게, 썸네일 잘리지 않게
+- 탐색 추천: 많이 읽은 글·사람·태그를 오른쪽 칸에
+- 탐색 시리즈: 큰 표지 한 줄 3개
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**설정 새 디자인**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-set-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-set-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-noti-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-noti-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-set-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-set-m-after.png) |
+
+**피드**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-feed-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-feed-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-feed-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-feed-m-after.png) |
+
+**탐색 추천**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-ex-after.png) |
+
+**탐색 시리즈**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-sr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.0/v1780-sr-after.png) |
+
+---
+
 ## [1.77.3] — 2026-10-25 · 개인 확장 (함께 쓰기 첫 화면)
 
 - 함께 쓰기 첫 화면: 세 단계 가운데 정렬, 안내 문구 짧게

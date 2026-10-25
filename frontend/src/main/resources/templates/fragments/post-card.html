@@ -40,20 +40,21 @@
 </article>
 
 <!-- 10-23 강성찬 개인 확장: 피드 한 줄(친구 소식). 얼굴·아이디·시각이 먼저, 진짜 사진이 있을 때만 작은 사진(기본 고양이 표지는 쓰지 않는다).
-     줄 전체는 제목 링크를 늘린 영역(::after)으로 글에, 얼굴·아이디·태그는 그 위에 따로. list-more.js의 row()와 같은 모양 -->
+     줄 전체는 제목 링크를 늘린 영역(::after)으로 글에, 얼굴·아이디·태그는 그 위에 따로. list-more.js의 row()와 같은 모양
+     10-25(chan "글 부분 가독성, 썸네일 잘림"): 태그는 이름 줄 끝에서 아래 반응 줄로, 사진은 표지 비율(16:10) 그대로 -->
 <li th:fragment="row(card, date, day)" class="feed-item" th:classappend="${card.thumbnailUrl() == null} ? 'no-thumb'"
     th:attr="data-post-id=${card.id()},data-day=${day}">
     <a class="feed-avatar" th:href="${paths.blog(card.author().handle())}" tabindex="-1" aria-hidden="true">
         <th:block th:replace="~{fragments/avatar :: avatar(${card.author().avatar()}, 40)}"></th:block></a>
     <div class="feed-body">
         <p class="feed-who"><a class="feed-handle" th:href="${paths.blog(card.author().handle())}" th:text="${card.author().handle()}">아이디</a>
-            <time th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2시간 전</time>
-            <a th:if="${card.firstTag() != null}" class="card-tag" th:href="@{/tags/{name}(name=${card.firstTag()})}"><span th:text="${card.firstTag()}">태그</span></a></p>
+            <time th:attr="datetime=${card.firstPublicAt()}" th:text="${date}">2시간 전</time></p>
         <h3 class="feed-title"><a class="card-link" th:href="${card.url()}" th:text="${card.title()}">제목</a></h3>
         <p class="feed-excerpt" th:text="${card.excerpt()}">요약</p>
         <p class="card-foot">
             <span class="card-likes" th:attr="aria-label=${'좋아요 ' + card.likeCount()}"><svg th:replace="~{fragments/icons :: heart}"></svg><span th:text="${card.likeCount()}">12</span></span>
             <span class="card-comments" th:attr="aria-label=${'댓글 ' + card.commentCount()}"><svg th:replace="~{fragments/icons :: comment}"></svg><span th:text="${card.commentCount()}">3</span></span>
+            <a th:if="${card.firstTag() != null}" class="feed-tag" th:href="@{/tags/{name}(name=${card.firstTag()})}" th:text="${'#' + card.firstTag()}">#태그</a>
         </p>
     </div>
     <div class="feed-thumb" th:if="${card.thumbnailUrl() != null}"><img th:src="${card.thumbnailUrl()}" alt="" loading="lazy"></div>
