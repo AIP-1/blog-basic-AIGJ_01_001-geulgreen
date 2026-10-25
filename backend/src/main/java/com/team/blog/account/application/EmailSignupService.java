@@ -106,13 +106,17 @@ public class EmailSignupService {
             throw withdrawing ? new WithdrawnAccountExistsException() : new DuplicateEmailException();
         }
         Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
-        Handle handle = handleService.validateForSignup(command.handle(), Provider.LOCAL);
+        // 10-25 chan: 가입 화면에 주소 칸이 없다 — 비어 오면 이메일 앞부분으로 만든다(설정에서 바꿀 수 있음). 보낸 값이 있으면 그대로 검사
+        String rawHandle = command.handle() == null || command.handle().isBlank()
+                ? handleService.prefill(email, Provider.LOCAL) : command.handle();
+        Handle handle = handleService.validateForSignup(rawHandle, Provider.LOCAL);
         submittedHandle[0] = handle;
         List<PasswordPolicyViolation> violations = passwordPolicy.validate(command.password(), email);
         if (!violations.isEmpty()) {
             throw new InvalidPasswordException(violations);
         }
-        if (!Objects.equals(command.password(), command.passwordConfirm())) {
+        // 비밀번호 확인 칸도 화면에서 뺐다. 보내 온 경우(예전 폼·API)만 일치를 본다
+        if (command.passwordConfirm() != null && !Objects.equals(command.password(), command.passwordConfirm())) {
             throw new PasswordMismatchException();
         }
         agreementRecorder.requireAll(command.agreeTerms(), command.agreePrivacy(), command.ageGroup());

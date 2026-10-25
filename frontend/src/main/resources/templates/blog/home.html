@@ -7,6 +7,8 @@
 <body>
 <main class="list-page">
     <th:block th:replace="~{fragments/blog-header :: header}"></th:block>
+    <!-- 10-25 chan: 초대 링크를 받아들인 뒤 안내 -->
+    <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
     <!-- 054 강성찬 개인 확장: 고정 글 -->
     <section th:if="${pinnedCard != null}" class="pinned-post shelf" aria-label="고정 글">
         <p class="pinned-label"><svg th:replace="~{fragments/icons :: pin}"></svg> 고정 글</p>

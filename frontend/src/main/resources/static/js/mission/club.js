@@ -1,4 +1,4 @@
-// 111 후보: 모임 화면 — 지우기·내보내기·나가기 확인 창, 초대 링크 복사
+// 111 후보: 모임 화면 — 지우기·내보내기·나가기 확인 창(초대 링크 복사·공유는 js/invite/share.js)
 (function () {
   'use strict';
   Array.prototype.forEach.call(document.querySelectorAll('form[data-confirm]'), function (form) {
@@ -9,13 +9,6 @@
       window.ask(form.dataset.confirm, '확인', true).then(function (ok) { if (ok) { approved = true; form.requestSubmit(); } });
     });
   });
-  var copy = document.getElementById('club-invite-copy');
-  if (copy && navigator.clipboard) {
-    copy.hidden = false;
-    copy.addEventListener('click', function () {
-      navigator.clipboard.writeText(copy.dataset.inviteUrl).then(function () { copy.lastChild.textContent = '복사했어요'; });
-    });
-  }
 })();
 // 목록 화면: 만들기 폼은 [함께 쓰기 만들기]를 눌러야 열린다(잘못 낸 값이 있으면 펼친 채)
 (function () {

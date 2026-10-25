@@ -47,7 +47,7 @@ class ClubIT extends IntegrationTestBase {
         posts.published(owner, "지난주 글", "본문", 1, NOW.minus(Duration.ofDays(6)));
         String board = mockMvc.perform(get(location).with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString();
         assertThat(board).contains("<details class=\"club-members\" open").contains("1/2명 썼어요").contains("1/4번째</span> · <span class=\"meta-part\">10월 12일 ~ 18일").contains("이번 주 글")
-                .doesNotContain("지난주 글").doesNotContain("club-count is-done").contains("/missions/clubs/join/" + code).contains("함께 쓰기에서 나가기").doesNotContain("함께 쓰기 삭제");
+                .doesNotContain("지난주 글").doesNotContain("club-count is-done").contains("/i/").contains("/" + code).contains("링크 복사").contains("함께 쓰기에서 나가기").doesNotContain("함께 쓰기 삭제");
         assertThat(mockMvc.perform(get("/missions/clubs").with(TestAuth.member(friend))).andReturn().getResponse().getContentAsString())
                 .contains("3반 모임").contains("aria-current=\"page\">함께 쓰기</a>").contains("club-state is-done").contains("멤버 2명");
         posts.published(owner, "모임장 이번 주 글", "본문", 1, NOW.minus(Duration.ofHours(1)));

@@ -111,7 +111,10 @@ public class SocialSignupService {
             email = EmailRules.normalizeAndValidate(command.email());
             verified = false;
         }
-        Handle handle = handleService.validateForSignup(command.handle(), pending.provider());
+        // 10-25 chan: 마무리 화면에 주소 칸이 없다 — 비어 오면 이메일 앞부분으로 만든다(설정에서 바꿀 수 있음)
+        String rawHandle = command.handle() == null || command.handle().isBlank()
+                ? handleService.prefill(email, pending.provider()) : command.handle();
+        Handle handle = handleService.validateForSignup(rawHandle, pending.provider());
         submittedHandle[0] = handle;
         Nickname nickname = nicknamePolicy.validate(command.nickname(), null);
         agreementRecorder.requireAll(command.agreeTerms(), command.agreePrivacy(), command.ageGroup());

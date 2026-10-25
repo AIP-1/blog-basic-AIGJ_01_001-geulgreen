@@ -19,6 +19,7 @@ import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.security.LoginSessionEstablisher;
 import com.team.blog.shared.security.RedirectTargetValidator;
+import com.team.blog.shared.web.PendingInvite;
 import com.team.blog.shared.web.Redirects;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -98,7 +99,8 @@ public class AuthController {
                 if (current != null) {
                     current.removeAttribute(SignupCodeApiController.VERIFIED_EMAIL);
                 }
-                return Redirects.seeOther("/");
+                // 10-25 chan: 초대 링크로 와서 가입했으면 초대한 사람·방으로
+                return Redirects.seeOther(PendingInvite.target(request, "/"));
             }
             return Redirects.seeOther("/signup/verify-sent");
         } catch (AgreementRequiredException e) {
