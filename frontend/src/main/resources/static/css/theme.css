@@ -19,6 +19,9 @@
     --color-thumb-empty: #F3ECE2;
     --color-code-bg: #F7F3EC;
     --color-focus: #3D6B55;
+    /* 10-25 chan: 링크. 글자색은 브랜드색, 사람이 쓴 글 속 링크 밑줄은 옅게(다크에서도 브랜드색을 따라 바뀐다) */
+    --color-link: var(--color-brand);
+    --color-link-line: color-mix(in srgb, var(--color-brand) 38%, transparent);
     --color-brand-soft: #E5EFE8;
     --color-highlight: #FFF1C2;
     --color-warning-border: #C29100;
