@@ -39,7 +39,7 @@ public class MissionService {
 
     /** 미션 글 한 줄. {@code friend}: 보는 사람이 친구로 고른 사람의 글(069). */
     public record FeedPost(long postId, String title, String excerpt, String handle, String nickname, String profileImageUrl,
-                           String topicTitle, int commentCount, int likeCount, Instant completedAt, boolean friend, boolean mine) {
+                           long topicId, String topicTitle, int commentCount, int likeCount, Instant completedAt, boolean friend, boolean mine) {
 
         public String url() {
             return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + postId;
@@ -214,27 +214,32 @@ public class MissionService {
 
     /** 그날 주제로 완료한 글 중 보는 사람이 읽을 수 있는 것(전체 공개, 친구 공개는 글쓴이가 나를 친구로 고른 경우, 본인 글은 무엇이든), 최근 순. */
     public List<FeedPost> feed(LocalDate day, Optional<CurrentUser> viewer) {
+        return feed(day, viewer, null);
+    }
+
+    /** 114 글감별 글 모아보기: {@code topicId}가 있으면 그 글감 글만(60개 제한도 그 글감 안에서). */
+    public List<FeedPost> feed(LocalDate day, Optional<CurrentUser> viewer, Long topicId) {
         long me = viewer.map(CurrentUser::memberId).orElse(-1L);
         // 069: 친구 칸은 내가 고른 친구의 글, 친구 공개 글은 글쓴이가 나를 고른 경우만
         String myFriend = "EXISTS (SELECT 1 FROM close_friend cf WHERE cf.owner_id = ? AND cf.friend_id = p.author_id)";
         String pickedMe = "EXISTS (SELECT 1 FROM close_friend cf WHERE cf.owner_id = p.author_id AND cf.friend_id = ?)";
         return jdbc.query("""
                 SELECT p.id, p.title, COALESCE(tz.teaser, p.excerpt) AS excerpt, p.comment_count, p.like_count, p.author_id,
-                       m.handle, m.nickname, m.profile_image_url, dt.title AS topic, mp.completed_at, """ + myFriend + """
+                       m.handle, m.nickname, m.profile_image_url, dt.id AS topic_id, dt.title AS topic, mp.completed_at, """ + myFriend + """
                  AS friend
                 FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id JOIN post p ON p.id = mp.post_id
                      JOIN member m ON m.id = p.author_id LEFT JOIN post_teaser tz ON tz.post_id = p.id
-                WHERE dt.day = ? AND mp.completed_at IS NOT NULL AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL
-                  AND p.hidden_at IS NULL AND m.withdrawn_at IS NULL AND """ + privacy.visibleToCondition("m", me) + """
+                WHERE dt.day = ? AND (CAST(? AS bigint) IS NULL OR dt.id = ?) AND mp.completed_at IS NOT NULL
+                  AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND m.withdrawn_at IS NULL AND """ + privacy.visibleToCondition("m", me) + """
 
                   AND (p.author_id = ? OR p.visibility = 'PUBLIC' OR (p.visibility = 'FRIENDS' AND""" + " " + pickedMe + """
                 ))
                 ORDER BY mp.completed_at DESC, p.id DESC LIMIT ?
                 """, (rs, i) -> new FeedPost(rs.getLong("id"), rs.getString("title"),
                 rs.getString("excerpt") == null ? "" : rs.getString("excerpt"), rs.getString("handle"), rs.getString("nickname"),
-                rs.getString("profile_image_url"), rs.getString("topic"), rs.getInt("comment_count"), rs.getInt("like_count"),
+                rs.getString("profile_image_url"), rs.getLong("topic_id"), rs.getString("topic"), rs.getInt("comment_count"), rs.getInt("like_count"),
                 rs.getTimestamp("completed_at").toInstant(), rs.getBoolean("friend"), rs.getLong("author_id") == me),
-                me, Date.valueOf(day), me, me, properties.feedSize());
+                me, Date.valueOf(day), topicId, topicId, me, me, properties.feedSize());
     }
 
     // ----- 내 기록 -----
