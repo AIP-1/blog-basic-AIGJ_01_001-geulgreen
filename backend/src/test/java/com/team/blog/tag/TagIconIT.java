@@ -61,11 +61,11 @@ class TagIconIT extends IntegrationTestBase {
         tag(a, "docker", 1);
         tag(b, "docker", 0);
         jdbc.update("UPDATE post SET view_count = 100 WHERE id = ?", a);
-        // 10-15 태그 화면: 제목·태그 수, 태그마다 아이콘·글 수·가로 카드 줄, 정렬(인기·이름·최근), 검색, 위 메뉴의 태그
+        // 10-15 태그 화면: 제목·태그 수, 태그마다 아이콘·글 수·가로 카드 줄, 정렬(인기·이름·최근), 검색(10-25: 위 메뉴의 태그는 뺐다)
         String html = mockMvc.perform(get("/tags")).andReturn().getResponse().getContentAsString();
         assertThat(html).contains("tags-total\">2개").contains("tag-section-name tone-blue").contains("#docker").contains("글 2편")
-                .contains("tag-section-name tone-green").contains("class=\"tag-row\"").contains("도커 정리").contains("제주 여행")
-                .contains("href=\"/tags\" aria-current=\"page\">태그</a>");
+                .contains("tag-section-name tone-green").contains("class=\"tag-row\"").contains("도커 정리").contains("제주 여행");
+        assertThat(html.substring(html.indexOf("<header"), html.indexOf("</header>"))).doesNotContain(">태그</a>");
         assertThat(jdbc.queryForObject("SELECT icon FROM tag_icon ti JOIN tag t ON t.id = ti.tag_id WHERE t.name = 'docker'",
                 String.class)).isEqualTo("whale");
         // 인기순은 글 수가 많은 docker 먼저, 최근순은 마지막 글이 더 최근인 docker(b가 a보다 늦음) 먼저

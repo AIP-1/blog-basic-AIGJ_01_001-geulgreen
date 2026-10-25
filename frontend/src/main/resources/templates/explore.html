@@ -44,7 +44,8 @@
                 <p class="follow-message help" role="status" hidden data-toast="success"></p>
             </aside>
             <section th:if="${!topTags.isEmpty()}" class="explore-tags" aria-labelledby="explore-tags-heading">
-                <h2 id="explore-tags-heading">태그로 둘러보기</h2>
+                <!-- 10-25 chan: 위 메뉴에서 태그를 빼며 태그 화면으로 가는 길을 여기에 -->
+                <div class="explore-sec-head"><h2 id="explore-tags-heading">태그로 둘러보기</h2><a href="/tags">태그 전체</a></div>
                 <p class="tag-chips"><a th:each="tg : ${topTags}" th:href="@{/tags/{name}(name=${tg.name()})}" th:text="${tg.name()}">태그</a></p>
             </section>
         </div>
