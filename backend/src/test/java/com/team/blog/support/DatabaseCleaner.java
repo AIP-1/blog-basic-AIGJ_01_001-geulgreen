@@ -33,6 +33,8 @@ public class DatabaseCleaner {
             "comment_like",
             // 10-23 모아보기: 글 저장
             "post_bookmark",
+            // 10-25 함께 쓰기 방 글감
+            "writing_club_topic", "writing_club_topic_post",
             // 강성찬 개인 확장(090)
             "inquiry",
             // 096 강성찬 개인 확장

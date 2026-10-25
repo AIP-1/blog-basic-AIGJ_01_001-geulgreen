@@ -17,8 +17,11 @@ public class MissionEditorAdvice {
     private final MissionService missions;
     private final PromptMailService prompts;
     private final CurrentUserProvider currentUserProvider;
+    private final com.team.blog.mission.application.ClubService clubs;
 
-    public MissionEditorAdvice(MissionService missions, PromptMailService prompts, CurrentUserProvider currentUserProvider) {
+    public MissionEditorAdvice(MissionService missions, PromptMailService prompts, CurrentUserProvider currentUserProvider,
+                               com.team.blog.mission.application.ClubService clubs) {
+        this.clubs = clubs;
         this.missions = missions;
         this.prompts = prompts;
         this.currentUserProvider = currentUserProvider;
@@ -37,5 +40,15 @@ public class MissionEditorAdvice {
             return null;
         }
         return missions.ofPost(Long.parseLong(id)).orElse(null);
+    }
+
+    /** 10-25 함께 쓰기 방 글감으로 연 글이면 위에 "방 글감" 안내. */
+    @ModelAttribute("clubTopic")
+    public com.team.blog.mission.application.ClubService.PostTopic clubTopic(HttpServletRequest request) {
+        if (!(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) instanceof Map<?, ?> vars)
+                || !(vars.get("postId") instanceof String id) || !id.matches("\\d{1,18}")) {
+            return null;
+        }
+        return clubs.topicOfPost(Long.parseLong(id)).orElse(null);
     }
 }
