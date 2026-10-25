@@ -19,17 +19,29 @@
             <a href="/explore?tab=series&sort=recent" th:attr="aria-current=${sort == 'recent' ? 'page' : null}">최근순</a>
         </nav>
     </div>
-    <!-- 10-23 강성찬 개인 확장(chan "홈·탐색·피드가 너무 똑같아"): 추천 탭 첫 화면 위는 카드 대신 구역 —
-         왼쪽 "이번 주 많이 읽은 글" 1~5위, 오른쪽 사람 추천(추천 블로그 + 새로 온 작가)과 태그 칩. 좁은 화면은 위아래로 -->
-    <div th:if="${!topPosts.isEmpty() or !people.isEmpty() or !topTags.isEmpty()}" class="explore-top">
-        <section th:if="${!topPosts.isEmpty()}" class="explore-rank" aria-labelledby="explore-rank-heading">
-            <div class="explore-sec-head"><h2 id="explore-rank-heading">이번 주 많이 읽은 글</h2><a href="/explore?tab=trending">트렌딩 전체</a></div>
-            <ol class="rank-list">
-                <li th:each="tp : ${topPosts}"><a th:href="${tp.url()}"><span class="rank-title" th:text="${tp.title()}">제목</span>
-                    <span class="rank-meta" th:text="${tp.author().handle() + ' · 좋아요 ' + tp.likeCount() + ' · 댓글 ' + tp.commentCount()}">아이디 · 좋아요 3</span></a></li>
-            </ol>
-        </section>
-        <div class="explore-side">
+    <!-- 104 강성찬 개인 확장: 모든 블로그의 시리즈(카드는 블로그 시리즈 탭과 같은 모양, 누르면 그 시리즈 화면) -->
+    <th:block th:if="${tab == 'series'}">
+    <p th:if="${seriesFrom > 0}"><a class="link-btn" th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null})}">처음부터 보기</a></p>
+    <p th:if="${seriesList.isEmpty()}" class="empty-state">아직 공개된 시리즈가 없어요</p>
+    <ul class="series-list" th:unless="${seriesList.isEmpty()}">
+        <th:block th:each="s : ${seriesList}"><li th:replace="~{series/list :: seriesCard(${s.url()}, ${s}, ${s.meta()})}"></li></th:block>
+    </ul>
+    <p th:if="${seriesNext != null}" class="list-more"><a class="more-button"
+        th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null},offset=${seriesNext})}">더 보기</a></p>
+    </th:block>
+    <th:block th:unless="${tab == 'series'}" th:with="hasSide=${!topPosts.isEmpty() or !people.isEmpty() or !topTags.isEmpty()}">
+    <div class="explore-body" th:classappend="${hasSide} ? 'has-side'">
+        <!-- 10-23 강성찬 개인 확장(chan "홈·탐색·피드가 너무 똑같아"): 추천 탭 첫 화면은 카드 말고도 구역을 둔다.
+             10-25(chan "이번 주 많이 읽은 글, 이런 사람, 태그는 오른쪽에 모두 묶어"): 셋을 오른쪽 한 칸으로, 왼쪽은 추천 글 카드.
+             좁은 화면은 이 칸이 카드 위(끝없는 목록 아래에 두면 닿지 못한다), 1~5위는 3위까지만 -->
+        <div th:if="${hasSide}" class="explore-side">
+            <section th:if="${!topPosts.isEmpty()}" class="explore-rank" aria-labelledby="explore-rank-heading">
+                <div class="explore-sec-head"><h2 id="explore-rank-heading">이번 주 많이 읽은 글</h2><a href="/explore?tab=trending">트렌딩 전체</a></div>
+                <ol class="rank-list">
+                    <li th:each="tp : ${topPosts}"><a th:href="${tp.url()}"><span class="rank-title" th:text="${tp.title()}">제목</span>
+                        <span class="rank-meta" th:text="${tp.author().handle() + ' · 좋아요 ' + tp.likeCount() + ' · 댓글 ' + tp.commentCount()}">아이디 · 좋아요 3</span></a></li>
+                </ol>
+            </section>
             <aside th:if="${!people.isEmpty()}" class="explore-people" aria-labelledby="explore-people-heading">
                 <h2 id="explore-people-heading">이런 사람은 어때요</h2>
                 <ul class="people-list">
@@ -49,18 +61,7 @@
                 <p class="tag-chips"><a th:each="tg : ${topTags}" th:href="@{/tags/{name}(name=${tg.name()})}" th:text="${tg.name()}">태그</a></p>
             </section>
         </div>
-    </div>
-    <!-- 104 강성찬 개인 확장: 모든 블로그의 시리즈(카드는 블로그 시리즈 탭과 같은 모양, 누르면 그 시리즈 화면) -->
-    <th:block th:if="${tab == 'series'}">
-    <p th:if="${seriesFrom > 0}"><a class="link-btn" th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null})}">처음부터 보기</a></p>
-    <p th:if="${seriesList.isEmpty()}" class="empty-state">아직 공개된 시리즈가 없어요</p>
-    <ul class="series-list" th:unless="${seriesList.isEmpty()}">
-        <th:block th:each="s : ${seriesList}"><li th:replace="~{series/list :: seriesCard(${s.url()}, ${s}, ${s.meta()})}"></li></th:block>
-    </ul>
-    <p th:if="${seriesNext != null}" class="list-more"><a class="more-button"
-        th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null},offset=${seriesNext})}">더 보기</a></p>
-    </th:block>
-    <th:block th:unless="${tab == 'series'}">
+    <div class="explore-feed">
     <h2 th:if="${tab == 'recommended' and !continued and !cards.isEmpty() and (!topPosts.isEmpty() or !people.isEmpty())}" class="explore-sec-title">추천 글</h2>
     <p th:if="${tab == 'trending'}" class="help">최근 7일 동안 반응이 많은 글 · 10분마다 갱신</p>
     <p th:if="${snapshotExpired}" class="notice" role="status" data-toast-inline>순위가 새로 바뀌었어요</p>
@@ -75,6 +76,8 @@
         </th:block>
     </div>
     <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()}, ${moreLinkBase}, ${tab == 'trending' ? '/explore?tab=trending&expired=1' : null})}"></div>
+    </div>
+    </div>
     </th:block>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:if="${seriesTab}" th:src="@{/js/post/series-labels.js}" defer></script>
