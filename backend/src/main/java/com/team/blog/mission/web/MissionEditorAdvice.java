@@ -45,7 +45,7 @@ public class MissionEditorAdvice {
     /** 10-25 함께 쓰기 방 글감으로 연 글이면 위에 "방 글감" 안내. */
     @ModelAttribute("clubTopic")
     public com.team.blog.mission.application.ClubService.PostTopic clubTopic(HttpServletRequest request) {
-        if (!(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) instanceof Map<?, ?> vars)
+        if (!missions.enabled() || !(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) instanceof Map<?, ?> vars)
                 || !(vars.get("postId") instanceof String id) || !id.matches("\\d{1,18}")) {
             return null;
         }
