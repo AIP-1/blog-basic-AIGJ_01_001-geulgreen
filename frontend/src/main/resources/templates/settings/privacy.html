@@ -5,27 +5,54 @@
     <title>비공개 계정 · 글그린</title>
 </head>
 <body>
-<!-- 073 강성찬 개인 확장: 받은 팔로우 요청(켜기·끄기 스위치는 087에서 설정 > 계정으로) -->
-<main class="friends-page">
-    <h1>비공개 계정</h1>
-    <p class="help">비공개 계정은 내가 팔로우 요청을 수락한 사람만 내 글·짧은 기록·방명록·팔로워 목록을 볼 수 있어요.
-        다른 사람에게는 프로필 윗부분만 보이고, 홈·트렌딩·태그·검색·RSS에도 내 글이 나오지 않아요. 지금 팔로워는 그대로예요.</p>
-    <p class="settings-back"><a href="/settings" class="link-btn back">설정으로</a></p>
+<!--/* 받은 팔로우 요청. 켜기·끄기 스위치는 설정 > 공개 탭에 있다.
+       10-25: 설정 본 화면과 같은 카드형(지금 상태 줄 · 켜면 달라지는 점 · 요청 목록) */-->
+<main class="set-page">
+    <a class="set-back" href="/settings#settings-privacy"><svg th:replace="~{fragments/icons :: chevron-left}"></svg>설정 · 공개</a>
+    <header class="set-head">
+        <h1>비공개 계정</h1>
+        <p class="set-lead">내가 허락한 사람만 내 글을 보게 해요.</p>
+    </header>
 
-    <p><th:block th:if="${isPrivate}"><svg th:replace="~{fragments/icons :: lock}"></svg> </th:block><span th:text="${isPrivate ? '지금은 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</span></p>
-    <p class="help">켜고 끄기는 <a href="/settings#settings-privacy">설정 &gt; 공개</a>에서 해요.</p>
+    <section class="set-card" aria-label="지금 상태">
+        <div class="set-row">
+            <span class="set-icon" th:classappend="${isPrivate} ? 'is-on'">
+                <th:block th:if="${isPrivate}"><svg th:replace="~{fragments/icons :: lock}"></svg></th:block>
+                <th:block th:unless="${isPrivate}"><svg th:replace="~{fragments/icons :: globe}"></svg></th:block>
+            </span>
+            <div class="set-row-text">
+                <p class="set-label" th:text="${isPrivate ? '지금은 비공개 계정이에요' : '지금은 공개 계정이에요'}">지금은 공개 계정이에요</p>
+                <p class="set-desc" th:text="${isPrivate ? '팔로우 요청을 수락한 사람만 내 글을 볼 수 있어요.' : '누구나 내 글을 볼 수 있어요.'}">누구나 내 글을 볼 수 있어요.</p>
+            </div>
+            <a class="set-btn-link" href="/settings#settings-privacy" th:text="${isPrivate ? '공개로 바꾸기' : '비공개로 바꾸기'}">비공개로 바꾸기</a>
+        </div>
+    </section>
 
-    <section aria-labelledby="requests-heading">
-        <h2 id="requests-heading" th:text="${'받은 팔로우 요청 ' + requests.size()}">받은 팔로우 요청 0</h2>
-        <p th:if="${requests.isEmpty()}" class="help">받은 요청이 없어요</p>
-        <ul class="follow-list">
-            <li th:each="m : ${requests}" class="follow-row">
+    <section class="set-card" aria-labelledby="private-rules-heading">
+        <h2 class="set-card-title" id="private-rules-heading">비공개 계정이 되면</h2>
+        <ul class="set-list">
+            <li class="set-row set-bullet"><svg th:replace="~{fragments/icons :: check}"></svg><span>내가 팔로우 요청을 수락한 사람만 내 글·짧은 기록·방명록·팔로워 목록을 볼 수 있어요.</span></li>
+            <li class="set-row set-bullet"><svg th:replace="~{fragments/icons :: check}"></svg><span>다른 사람에게는 프로필 윗부분만 보여요.</span></li>
+            <li class="set-row set-bullet"><svg th:replace="~{fragments/icons :: check}"></svg><span>홈·트렌딩·태그·검색·RSS에도 내 글이 나오지 않아요.</span></li>
+            <li class="set-row set-bullet"><svg th:replace="~{fragments/icons :: check}"></svg><span>지금 팔로워는 그대로예요.</span></li>
+        </ul>
+    </section>
+
+    <section class="set-card" aria-labelledby="requests-heading">
+        <h2 class="set-card-title" id="requests-heading" th:text="${'받은 팔로우 요청 ' + requests.size()}">받은 팔로우 요청 0</h2>
+        <div th:if="${requests.isEmpty()}" class="set-empty">
+            <svg th:replace="~{fragments/icons :: people}"></svg>
+            <p class="set-label">받은 요청이 없어요</p>
+            <p class="set-desc">비공개 계정일 때 누가 팔로우를 요청하면 여기에 보여요.</p>
+        </div>
+        <ul class="set-list" th:unless="${requests.isEmpty()}">
+            <li th:each="m : ${requests}" class="set-row set-person">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
-                <div class="follow-text"><p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p></div>
-                <form method="post" th:action="${'/settings/privacy/requests/' + m.handle()}" class="friend-form">
+                <div class="set-row-text"><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></div>
+                <form method="post" th:action="${'/settings/privacy/requests/' + m.handle()}" class="set-row-actions">
                     <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" name="action" value="decline" class="btn btn-sm btn-quiet">거절</button>
                     <button type="submit" name="action" value="accept" class="btn btn-primary btn-sm">수락</button>
-                    <button type="submit" name="action" value="decline" class="btn-text btn-sm">거절</button>
                 </form>
             </li>
         </ul>
