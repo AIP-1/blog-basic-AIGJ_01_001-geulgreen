@@ -66,7 +66,8 @@
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label> <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
         </fieldset>
 
-        <p class="form-error" th:if="${errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span></p>
+        <p class="form-error" th:if="${errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
+                th:if="${handleSuggestion != null and !#strings.contains(errors['handle'], handleSuggestion)}" th:text="${' ' + handleSuggestion + '는 쓸 수 있어요'}"> 대안</span></p>
         <button type="submit" class="btn btn-primary btn-block">가입 마치기</button>
         <!-- 10-25 chan: 주소 칸을 뺐다. 가입 방법 접두어(go-/gi-) + 이메일 앞부분으로 만들고 설정에서 바꾼다(SocialSignupService) -->
         <p class="help signup-handle-note" th:text="'블로그 주소는 ' + ${handlePrefix} + ' + 이메일 앞부분으로 만들어요. 가입 후 설정에서 바꿀 수 있어요.'">블로그 주소는 이메일 앞부분으로 만들어요.</p>

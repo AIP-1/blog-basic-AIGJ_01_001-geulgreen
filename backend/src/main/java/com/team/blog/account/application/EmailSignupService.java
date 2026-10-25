@@ -12,6 +12,8 @@ import com.team.blog.account.infra.AuthIdentityRepository;
 import com.team.blog.account.infra.MemberRepository;
 import com.team.blog.account.infra.RedisTokenStore;
 import com.team.blog.account.infra.TokenKind;
+import com.team.blog.shared.error.HandleTakenException;
+import com.team.blog.shared.error.HandleViolationException;
 import com.team.blog.shared.event.EmailVerified;
 import com.team.blog.shared.event.MemberSignedUp;
 import com.team.blog.shared.event.VerificationMailRequested;
@@ -83,6 +85,28 @@ public class EmailSignupService {
     /** 074 강성찬 개인 확장: {@code emailVerified}면 메일 코드로 이미 확인한 이메일이라 인증된 채로 만들고 링크 메일을 보내지 않는다. */
     public long signUp(EmailSignupCommand command, boolean emailVerified) {
         Objects.requireNonNull(command);
+        // 10-25 chan: 주소를 우리가 만든 경우(칸 없음)엔 같은 순간 다른 가입과 겹쳐도 사용자에게 묻지 않고 대안 주소로 다시 시도한다
+        boolean derived = command.handle() == null || command.handle().isBlank();
+        EmailSignupCommand attempt = command;
+        for (int tries = 0; ; tries++) {
+            try {
+                return signUpOnce(attempt, emailVerified);
+            } catch (HandleTakenException e) {
+                if (!derived || tries >= 2 || e.getSuggestion() == null) {
+                    throw e;
+                }
+                attempt = attempt.withHandle(e.getSuggestion());
+            } catch (HandleViolationException e) {
+                if (!derived || tries >= 2 || e.getSuggestion() == null
+                        || e.getCode() != com.team.blog.account.domain.HandleViolation.HANDLE_DUPLICATE) {
+                    throw e;
+                }
+                attempt = attempt.withHandle(e.getSuggestion());
+            }
+        }
+    }
+
+    private long signUpOnce(EmailSignupCommand command, boolean emailVerified) {
         Handle[] submittedHandle = new Handle[1];
         try {
             return Objects.requireNonNull(transactionTemplate.execute(status -> doSignUp(command, submittedHandle, emailVerified)));
