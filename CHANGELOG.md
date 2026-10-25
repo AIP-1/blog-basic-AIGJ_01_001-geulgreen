@@ -7,6 +7,32 @@
 
 ---
 
+## [1.78.2] — 2026-10-25 · 개인 확장 (친한 친구)
+
+- "친구"를 "친한 친구"로, 설정에서 팔로우하는 사람 중에 고르기
+- 남의 블로그 머리에는 팔로우만([친구로 넣기] 뺌)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**남의 블로그에는 팔로우만**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-m-after.png) |
+
+**친구는 "친한 친구"로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-fr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-fr-after.png) |
+
+---
+
 ## [1.78.1] — 2026-10-25 · 개인 확장 (알림 바로 저장 고침)
 
 - 설정 알림 바로 저장: 로그인이 풀려 로그인 화면으로 돌아가면 저장 실패로 보고 [저장] 다시 보이기
