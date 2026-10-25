@@ -7,6 +7,43 @@
 
 ---
 
+## [1.76.0] — 2026-10-25 · 개인 확장 (피드·탐색 나누기 · 글감별 글)
+
+- 피드: 팔로우한 사람 새 글을 한 줄 목록으로, 위에 팔로우한 사람
+- 탐색 추천 탭: 많이 읽은 글 1~5위·사람·태그 구역으로 나눠 홈과 다르게
+- 오늘의 글감: 글감을 골라 그 글감으로 쓴 글만 보기
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**피드는 친구 소식 한 줄 목록**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-feed-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-feed-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-feed-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-feed-m-after.png) |
+
+**탐색 추천 탭은 홈과 다르게**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-ex-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-ex-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-ex-m-after.png) |
+
+**글감별 글 모아보기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-gg-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.76.0/v1760-gg-after.png) |
+
+---
+
 ## [1.75.1] — 2026-10-23 · 개인 확장 (UX 다듬기 · 기록 한눈에)
 
 - 휴대폰 기록(잔디): 500px 아래 최근 26주, 640px 아래 39주만 보여 한 화면에
