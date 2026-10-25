@@ -1,5 +1,6 @@
 package com.team.blog.interaction.web;
 
+import com.team.blog.interaction.application.BookmarkService;
 import com.team.blog.interaction.application.LikeService;
 import com.team.blog.post.application.PostDetail;
 import com.team.blog.post.application.ViewCountFormat;
@@ -10,14 +11,16 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
-/** 글 상세의 좋아요 상태(015 FR-018): 내가 눌렀는지(로그인 시 PK 조회 1번)와 표시 숫자. */
+/** 글 상세의 좋아요 상태(015 FR-018): 내가 눌렀는지(로그인 시 PK 조회 1번)와 표시 숫자. 10-23: 내가 저장했는지도. */
 @Component
 public class LikeDetailSection implements PostDetailSection {
 
     private final LikeService likeService;
+    private final BookmarkService bookmarkService;
 
-    public LikeDetailSection(LikeService likeService) {
+    public LikeDetailSection(LikeService likeService, BookmarkService bookmarkService) {
         this.likeService = likeService;
+        this.bookmarkService = bookmarkService;
     }
 
     @Override
@@ -26,5 +29,6 @@ public class LikeDetailSection implements PostDetailSection {
                 .orElse(false);
         model.addAttribute("liked", liked);
         model.addAttribute("likeLabel", ViewCountFormat.format(post.likeCount()));
+        model.addAttribute("saved", viewer.map(v -> bookmarkService.savedBy(post.id(), v.memberId())).orElse(false));
     }
 }
