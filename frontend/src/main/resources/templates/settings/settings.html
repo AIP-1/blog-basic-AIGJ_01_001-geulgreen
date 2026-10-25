@@ -10,14 +10,14 @@
     <noscript><p class="notice">이 화면은 JavaScript가 필요해요.</p></noscript>
 
     <!-- 063 강성찬 개인 확장: 설정을 섹션으로 묶고 옆 메뉴에서 골라 봄(스크립트가 없으면 모두 펼쳐 보임) -->
+    <!-- 10-25(chan): 한 줄짜리 탭(블로그·친구·화면)이 빈 화면으로 보여 5개로 묶음. 친구는 계정(공개 범위 옆), 화면 테마는 블로그 탭으로.
+         옛 주소(#settings-friends·#settings-display·#settings-connections)는 그 묶음이 든 탭을 열고 그 자리로 내려간다 -->
     <div class="settings-layout">
     <nav class="settings-nav" aria-label="설정 섹션">
         <a href="#settings-profile">프로필</a>
         <a href="#settings-account">계정</a>
-        <a href="#settings-blog">블로그</a>
-        <a href="#settings-friends">친구</a>
-        <a href="#settings-display">화면</a>
         <a href="#settings-notifications">알림</a>
+        <a href="#settings-blog">블로그·화면</a>
         <a href="#settings-ai">AI</a>
     </nav>
     <div class="settings-panels">
@@ -161,6 +161,11 @@
             <p class="form-status" id="visibility-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
+    <section id="settings-friends" aria-labelledby="friends-heading">
+        <h2 id="friends-heading">친구</h2>
+        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구·그룹 관리</a>
+            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">받은 팔로우 요청</a></th:block></p>
+    </section>
     <!-- 073·087 강성찬 개인 확장: 비공개 계정 스위치(받은 요청 목록은 /settings/privacy) -->
     <section th:if="${privateAccountsEnabled}" aria-labelledby="private-heading">
         <h2 id="private-heading">비공개 계정</h2>
@@ -185,45 +190,11 @@
 
 
     </div>
-    <div class="settings-panel" id="settings-blog">
-    <!-- 037·041 강성찬 개인 확장 -->
-    <section aria-labelledby="blog-organize-heading">
-        <h2 id="blog-organize-heading">블로그 정리</h2>
-        <p class="help"><a href="/settings/categories">카테고리 관리</a> · 시리즈는 글 화면에서 만들고 넣어요</p>
-    </section>
-
-    <!-- 008 사진 저장 공간(FR-027) -->
-    <section aria-labelledby="storage-heading">
-        <h2 id="storage-heading">사진 저장 공간</h2>
-        <p id="storage-usage" class="help" aria-live="polite">불러오는 중…</p>
-        <p class="help">한 사람당 1GB, 하루 200장까지 올릴 수 있어요. 지운 글의 사진은 정리 작업이 지울 때 공간이 돌아와요.</p>
-    </section>
-    </div>
-    <div class="settings-panel" id="settings-friends">
-    <section aria-labelledby="friends-heading">
-        <h2 id="friends-heading">친구</h2>
-        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구·그룹 관리</a>
-            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">받은 팔로우 요청</a></th:block></p>
-    </section>
-    </div>
-    <div class="settings-panel" id="settings-display">
-    <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
-    <section aria-labelledby="theme-heading" id="theme-setting" hidden>
-        <h2 id="theme-heading">화면 테마</h2>
-        <fieldset class="theme-choices">
-            <legend class="visually-hidden">화면 테마</legend>
-            <label><input type="radio" name="theme" value="system"> 시스템 설정(기기를 따라가요)</label>
-            <label><input type="radio" name="theme" value="light"> 라이트</label>
-            <label><input type="radio" name="theme" value="dark"> 다크</label>
-        </fieldset>
-        <p class="help">고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요. 로그아웃해도 그대로예요.</p>
-    </section>
-    </div>
     <div class="settings-panel" id="settings-notifications">
     <!-- 017 알림 종류 끄기(FR-031) -->
     <section aria-labelledby="notification-heading">
         <h2 id="notification-heading">알림</h2>
-        <form method="post" action="/settings/notifications" id="notification-settings">
+        <form method="post" action="/settings/notifications" id="notification-settings" data-autosave="#notification-status">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="field" th:each="opt : ${notificationLabels}">
                 <label>
@@ -232,7 +203,7 @@
                     <span th:text="${opt.value}">종류</span>
                 </label>
             </div>
-            <p class="help">운영 알림(신고 결과·숨김)은 끌 수 없어요</p>
+            <p class="help">운영 알림(신고 결과·숨김)은 끌 수 없어요. 누르면 바로 저장돼요.</p>
             <button type="submit">알림 설정 저장</button>
             <p class="form-status" id="notification-status" aria-live="polite" data-toast="success"></p>
         </form>
@@ -240,7 +211,7 @@
     <!-- 10-21 강성찬 개인 확장: 저녁 글감 메일(기본 꺼짐). 그날 글을 안 쓴 날에만 저녁 8시에 한 통 -->
     <section th:if="${promptMailOn != null}" aria-labelledby="prompt-mail-heading">
         <h2 id="prompt-mail-heading">저녁 글감 메일</h2>
-        <form method="post" action="/settings/prompt-mail">
+        <form method="post" action="/settings/prompt-mail" data-autosave="#prompt-mail-status">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <div class="field">
                 <label>
@@ -250,6 +221,7 @@
             </div>
             <p class="help">저녁 8시에 한 통만 보내요. 그날 글을 발행했으면 보내지 않아요. 보내는 사람은 "글그린"이에요.</p>
             <button type="submit">저장</button>
+            <p class="form-status" id="prompt-mail-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
     <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
@@ -263,6 +235,33 @@
         </form>
     </section>
 
+    </div>
+    <div class="settings-panel" id="settings-blog">
+    <!-- 037·041 강성찬 개인 확장 -->
+    <section aria-labelledby="blog-organize-heading">
+        <h2 id="blog-organize-heading">블로그 정리</h2>
+        <p class="help"><a href="/settings/categories">카테고리 관리</a> · 시리즈는 글 화면에서 만들고 넣어요</p>
+    </section>
+
+    <!-- 008 사진 저장 공간(FR-027) -->
+    <section aria-labelledby="storage-heading">
+        <h2 id="storage-heading">사진 저장 공간</h2>
+        <p id="storage-usage" class="help" aria-live="polite">불러오는 중…</p>
+        <p class="help">한 사람당 1GB, 하루 200장까지 올릴 수 있어요. 지운 글의 사진은 정리 작업이 지울 때 공간이 돌아와요.</p>
+    </section>
+    <div id="settings-display">
+    <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
+    <section aria-labelledby="theme-heading" id="theme-setting" hidden>
+        <h2 id="theme-heading">화면 테마</h2>
+        <fieldset class="theme-choices">
+            <legend class="visually-hidden">화면 테마</legend>
+            <label><input type="radio" name="theme" value="system"> 시스템 설정(기기를 따라가요)</label>
+            <label><input type="radio" name="theme" value="light"> 라이트</label>
+            <label><input type="radio" name="theme" value="dark"> 다크</label>
+        </fieldset>
+        <p class="help">고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요. 로그아웃해도 그대로예요.</p>
+    </section>
+    </div>
     </div>
     <div class="settings-panel" id="settings-ai">
     <!-- 021 AI 전송 동의 철회(FR-010) -->
@@ -293,6 +292,7 @@
     <script th:src="@{/js/account/ai-consent.js}" defer></script>
     <script th:src="@{/js/theme-toggle.js}" defer></script>
     <script th:src="@{/js/profile/settings-sections.js}" defer></script>
+    <script th:src="@{/js/settings/autosave.js}" defer></script>
     <script th:if="${handleChangeEnabled}" th:src="@{/js/account/availability.js}" defer></script>
     <script th:if="${handleChangeEnabled}" th:src="@{/js/account/handle-change.js}" defer></script>
 </main>

@@ -43,9 +43,10 @@ class ThemeIT extends IntegrationTestBase {
         assertThat(settings).contains("id=\"theme-setting\" hidden").contains("value=\"system\"").contains("value=\"light\"")
                 .contains("value=\"dark\"").contains("/js/theme-toggle-");
         mockMvc.perform(get("/js/theme-toggle.js")).andExpect(status().isOk());
-        // 063: 설정 섹션 메뉴, 화면 테마는 [화면] 섹션 안
-        assertThat(settings).contains("class=\"settings-nav\"").contains("href=\"#settings-display\"")
-                .contains("/js/profile/settings-sections-");
+        // 063: 설정 섹션 메뉴. 10-25: 화면 테마는 [블로그·화면] 탭 안 묶음(옛 주소 #settings-display는 그 묶음을 연다)
+        assertThat(settings).contains("class=\"settings-nav\"").contains("href=\"#settings-blog\"")
+                .doesNotContain("href=\"#settings-display\"").contains("/js/profile/settings-sections-");
+        assertThat(settings.indexOf("id=\"settings-blog\"")).isLessThan(settings.indexOf("id=\"settings-display\""));
         assertThat(settings.indexOf("id=\"settings-display\"")).isLessThan(settings.indexOf("id=\"theme-setting\""));
         mockMvc.perform(get("/js/profile/settings-sections.js")).andExpect(status().isOk());
     }
