@@ -58,11 +58,14 @@ public class SocialSignupController {
     private final MessageSource messageSource;
     private final Clock clock;
     private final SocialPictureUrlPolicy pictureUrlPolicy;
+    private final com.team.blog.account.application.SignupProperties signupProperties;
 
     public SocialSignupController(SocialSignupService socialSignupService, SocialLoginService socialLoginService,
                                   HandleService handleService, NicknamePolicy nicknamePolicy,
                                   LoginSessionEstablisher loginSessionEstablisher, AuthProperties properties,
-                                  MessageSource messageSource, Clock clock, ProfileProperties profileProperties) {
+                                  MessageSource messageSource, Clock clock, ProfileProperties profileProperties,
+                                  com.team.blog.account.application.SignupProperties signupProperties) {
+        this.signupProperties = signupProperties;
         this.socialSignupService = socialSignupService;
         this.socialLoginService = socialLoginService;
         this.handleService = handleService;
@@ -170,6 +173,7 @@ public class SocialSignupController {
         view.addObject("providerName", providerName(pending.provider()));
         view.addObject("handlePrefix", HandlePrefix.of(pending.provider()).value());
         view.addObject("needsEmail", !pending.hasVerifiedEmail());
+        view.addObject("simpleSignup", signupProperties.simple());
         view.addObject("pictureUrl", picture(pending).orElse(null));
         view.addObject("sameEmailProviders", sameEmail.stream().map(SocialSignupController::providerName).toList());
         return view;

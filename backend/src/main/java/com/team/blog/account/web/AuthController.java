@@ -49,10 +49,13 @@ public class AuthController {
     private final CurrentUserProvider currentUserProvider;
     private final MessageSource messageSource;
     private final InstaAccountProperties insta;
+    private final com.team.blog.account.application.SignupProperties signupProperties;
 
     public AuthController(EmailSignupService emailSignupService, EmailVerificationService emailVerificationService,
                           LoginSessionEstablisher loginSessionEstablisher, CurrentUserProvider currentUserProvider,
-                          MessageSource messageSource, InstaAccountProperties insta) {
+                          MessageSource messageSource, InstaAccountProperties insta,
+                          com.team.blog.account.application.SignupProperties signupProperties) {
+        this.signupProperties = signupProperties;
         this.insta = insta;
         this.emailSignupService = emailSignupService;
         this.emailVerificationService = emailVerificationService;
@@ -233,6 +236,7 @@ public class AuthController {
     /** 074: 가입 화면이 코드 단계를 보일지, 이 이메일을 이미 코드로 확인했는지. */
     private void addCodeState(ModelAndView view, HttpServletRequest request, String email) {
         view.addObject("instaSignup", insta.enabled());
+        view.addObject("simpleSignup", signupProperties.simple());
         HttpSession session = request.getSession(false);
         Object verified = session == null ? null : session.getAttribute(SignupCodeApiController.VERIFIED_EMAIL);
         view.addObject("codeVerifiedEmail", verified != null && (email == null || verified.equals(EmailRules.normalize(email)))

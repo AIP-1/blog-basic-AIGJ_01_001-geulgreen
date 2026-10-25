@@ -26,7 +26,10 @@
     if (native && canShare) {
       native.hidden = false;
       native.addEventListener('click', function () {
-        navigator.share({ title: title, text: '글그린에서 같이 글 써요', url: url }).catch(function () {});
+        navigator.share({ title: title, text: '글그린에서 같이 글 써요', url: url }).catch(function (e) {
+          // 사용자가 공유 창을 닫은 건(AbortError) 조용히, 그 밖의 실패는 복사로 안내
+          if (!e || e.name !== 'AbortError') { say('공유하지 못했어요. 링크 복사를 눌러 주세요'); }
+        });
       });
     }
   });

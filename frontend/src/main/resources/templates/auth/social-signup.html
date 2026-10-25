@@ -26,6 +26,28 @@
             <p class="field-error" th:if="${errors['email'] != null}" th:text="${errors['email']}" role="alert"></p>
         </div>
 
+        <!-- 10-25 chan: 간소화(blog.account.signup.simple)를 끄면 돌아오는 주소 칸 -->
+        <div class="field" th:unless="${simpleSignup}">
+            <label for="handle">블로그 주소</label>
+            <div class="handle-input">
+                <span aria-hidden="true" th:text="${siteHost + '/'}">blog.example.com/</span><strong th:text="${handlePrefix}">go-</strong>
+                <input id="handle" name="handle" type="text" required maxlength="36"
+                       data-handle-field th:attr="data-prefix-locked=${handlePrefix}"
+                       data-availability="handle" data-availability-target="#handle-status"
+                       inputmode="latin" autocapitalize="off" autocomplete="off" spellcheck="false" lang="en"
+                       th:value="${form.handle}" aria-describedby="handle-help handle-status">
+            </div>
+            <p id="handle-help" class="help"><span th:text="${handlePrefix}">go-</span>는 가입 방법을 나타내는 고정 글자예요.</p>
+            <p class="warning">⚠ 블로그 주소는 가입 후 바꿀 수 없어요.</p>
+            <p id="handle-status" class="availability" aria-live="polite"></p>
+            <p class="field-error" th:if="${errors['handle'] != null}" role="alert">
+                <span th:text="${errors['handle']}">오류</span>
+                <button type="button" class="handle-suggestion" th:if="${handleSuggestion != null}"
+                        th:attr="data-fill-handle=${handleSuggestion}"
+                        th:text="${handleSuggestion} + '는 어떠세요?'">대안</button>
+            </p>
+        </div>
+
         <div class="field">
             <label for="nickname">닉네임</label>
             <input id="nickname" name="nickname" type="text" maxlength="30" required
@@ -66,14 +88,15 @@
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label> <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
         </fieldset>
 
-        <p class="form-error" th:if="${errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
+        <p class="form-error" th:if="${simpleSignup and errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
                 th:if="${handleSuggestion != null and !#strings.contains(errors['handle'], handleSuggestion)}" th:text="${' ' + handleSuggestion + '는 쓸 수 있어요'}"> 대안</span></p>
         <button type="submit" class="btn btn-primary btn-block">가입 마치기</button>
         <!-- 10-25 chan: 주소 칸을 뺐다. 가입 방법 접두어(go-/gi-) + 이메일 앞부분으로 만들고 설정에서 바꾼다(SocialSignupService) -->
-        <p class="help signup-handle-note" th:text="'블로그 주소는 ' + ${handlePrefix} + ' + 이메일 앞부분으로 만들어요. 가입 후 설정에서 바꿀 수 있어요.'">블로그 주소는 이메일 앞부분으로 만들어요.</p>
+        <p class="help signup-handle-note" th:if="${simpleSignup}" th:text="'블로그 주소는 ' + ${handlePrefix} + ' + 이메일 앞부분으로 만들어요. 가입 후 설정에서 바꿀 수 있어요.'">블로그 주소는 이메일 앞부분으로 만들어요.</p>
     </form>
 
     <script th:src="@{/js/account/availability.js}" defer></script>
+    <script th:unless="${simpleSignup}" th:src="@{/js/account/handle-field.js}" defer></script>
     <script th:src="@{/js/auth/signup-form.js}" defer></script>
 </main>
 </body>

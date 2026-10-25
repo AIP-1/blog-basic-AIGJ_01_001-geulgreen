@@ -49,6 +49,27 @@
             <p class="field-error" th:if="${errors['nickname'] != null}" th:text="${errors['nickname']}" role="alert"></p>
         </div>
 
+        <!-- 10-25 chan: 간소화(blog.account.signup.simple)를 끄면 돌아오는 주소 칸 -->
+        <div class="field" th:unless="${simpleSignup}">
+            <label for="handle">블로그 주소</label>
+            <div class="handle-input">
+                <span aria-hidden="true" th:text="${siteHost + '/'}">blog.example.com/</span>
+                <input id="handle" name="handle" type="text" required maxlength="36"
+                       data-handle-field data-email-source="#email"
+                       data-availability="handle" data-availability-target="#handle-status"
+                       inputmode="latin" autocapitalize="off" autocomplete="off" spellcheck="false" lang="en"
+                       th:value="${form.handle}" aria-describedby="handle-help handle-status">
+            </div>
+            <p id="handle-help" class="help" th:text="${instaSignup} ? '이메일 앞부분으로 채웠어요. 가입 후 설정에서 14일에 두 번까지 바꿀 수 있어요.' : '이메일 앞부분으로 채웠어요. ⚠ 가입 후에는 바꿀 수 없어요.'">이메일 앞부분으로 채웠어요.</p>
+            <p id="handle-status" class="availability" aria-live="polite"></p>
+            <p class="field-error" th:if="${errors['handle'] != null}" role="alert">
+                <span th:text="${errors['handle']}">오류</span>
+                <button type="button" class="handle-suggestion" th:if="${handleSuggestion != null}"
+                        th:attr="data-fill-handle=${handleSuggestion}"
+                        th:text="${handleSuggestion} + '는 어떠세요?'">대안</button>
+            </p>
+        </div>
+
         <div class="field signup-password">
             <label for="password">비밀번호</label>
             <input id="password" name="password" type="password" autocomplete="new-password" required
@@ -65,6 +86,12 @@
             <ul class="field-error" th:if="${!passwordErrors.isEmpty()}" role="alert">
                 <li th:each="msg : ${passwordErrors}" th:text="${msg}">오류</li>
             </ul>
+            <p class="field-error" th:if="${simpleSignup and errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
+        </div>
+
+        <div class="field" th:unless="${simpleSignup}">
+            <label for="passwordConfirm">비밀번호 확인</label>
+            <input id="passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" required>
             <p class="field-error" th:if="${errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
         </div>
 
@@ -91,11 +118,12 @@
             <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수) <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></label>
         </fieldset>
 
-        <p class="form-error" th:if="${errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
+        <p class="form-error" th:if="${simpleSignup and errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
                 th:if="${handleSuggestion != null and !#strings.contains(errors['handle'], handleSuggestion)}" th:text="${' ' + handleSuggestion + '는 쓸 수 있어요'}"> 대안</span></p>
         <button type="submit" class="btn btn-primary btn-block">가입하기</button>
         <!-- 10-25 chan: 주소·비밀번호 확인 칸을 뺐다. 주소는 이메일 앞부분으로 만들고 설정에서 바꾼다(EmailSignupService) -->
-        <p class="help signup-handle-note" th:text="${instaSignup} ? '블로그 주소는 이메일 앞부분으로 만들어요. 가입 후 설정에서 바꿀 수 있어요.' : '블로그 주소는 이메일 앞부분으로 만들어요.'">블로그 주소는 이메일 앞부분으로 만들어요.</p>
+        <!-- 주소 바꾸기는 074 인스타식 계정(blog.insta-account.enabled)에 딸린 기능이라 꺼져 있으면 "바꿀 수 없어요"로 -->
+        <p class="help signup-handle-note" th:if="${simpleSignup}" th:text="${instaSignup} ? '블로그 주소는 이메일 앞부분으로 만들어요. 가입 후 설정에서 바꿀 수 있어요.' : '블로그 주소는 이메일 앞부분으로 만들어요. 가입 후에는 바꿀 수 없어요.'">블로그 주소는 이메일 앞부분으로 만들어요.</p>
         </div>
     </form>
     <!-- 074: 소셜 가입도 같은 카드에서 -->
@@ -111,6 +139,7 @@
   </div>
 
     <script th:src="@{/js/account/availability.js}" defer></script>
+    <script th:unless="${simpleSignup}" th:src="@{/js/account/handle-field.js}" defer></script>
     <script th:src="@{/js/auth/password-rules.js}" defer></script>
     <script th:src="@{/js/auth/signup-form.js}" defer></script>
     <script th:if="${instaSignup}" th:src="@{/js/auth/signup-code.js}" defer></script>

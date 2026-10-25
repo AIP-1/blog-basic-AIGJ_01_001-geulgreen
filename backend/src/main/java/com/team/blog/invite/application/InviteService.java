@@ -63,7 +63,7 @@ public class InviteService {
         this.members = members;
     }
 
-    /** 초대한 사람이 없거나(탈퇴·없는 아이디) 코드가 틀리면 empty. */
+    /** 초대한 사람이 없거나(탈퇴·없는 아이디), 코드가 틀리거나, 초대한 사람이 그 방 멤버가 아니면 empty. */
     public Optional<Invite> find(String handle, String code) {
         Optional<BlogOwner> inviter = owners.resolve(handle);
         if (inviter.isEmpty()) {
@@ -72,7 +72,10 @@ public class InviteService {
         if (code == null) {
             return Optional.of(new Invite(inviter.get(), Optional.empty()));
         }
-        return clubs.byInvite(code).map(club -> new Invite(inviter.get(), Optional.of(club)));
+        // 아이디와 코드를 따로 조합해 남의 방 링크에 내 아이디를 붙이지 못하게: 초대한 사람이 그 방 멤버일 때만
+        return clubs.byInvite(code)
+                .filter(club -> clubs.isMember(club.id(), inviter.get().memberId()))
+                .map(club -> new Invite(inviter.get(), Optional.of(club)));
     }
 
     /**

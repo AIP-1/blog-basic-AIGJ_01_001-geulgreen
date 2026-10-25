@@ -38,6 +38,7 @@ public class SocialSignupService {
     private final AuthIdentityRepository authIdentityRepository;
     private final AgreementRecorder agreementRecorder;
     private final HandleService handleService;
+    private final SignupProperties signupProperties;
     private final NicknamePolicy nicknamePolicy;
     private final RedisTokenStore tokenStore;
     private final MemberUniqueViolationTranslator translator;
@@ -51,11 +52,13 @@ public class SocialSignupService {
                                AgreementRecorder agreementRecorder, HandleService handleService,
                                NicknamePolicy nicknamePolicy, RedisTokenStore tokenStore,
                                MemberUniqueViolationTranslator translator, ApplicationEventPublisher events,
-                               TransactionTemplate transactionTemplate, AuthProperties properties, Clock clock, GuardianConsentService guardianConsent) {
+                               TransactionTemplate transactionTemplate, AuthProperties properties, Clock clock, GuardianConsentService guardianConsent,
+                               SignupProperties signupProperties) {
         this.memberRepository = memberRepository;
         this.authIdentityRepository = authIdentityRepository;
         this.agreementRecorder = agreementRecorder;
         this.handleService = handleService;
+        this.signupProperties = signupProperties;
         this.nicknamePolicy = nicknamePolicy;
         this.tokenStore = tokenStore;
         this.translator = translator;
@@ -112,7 +115,7 @@ public class SocialSignupService {
             verified = false;
         }
         // 10-25 chan: 마무리 화면에 주소 칸이 없다 — 비어 오면 이메일 앞부분으로 만든다(설정에서 바꿀 수 있음)
-        String rawHandle = command.handle() == null || command.handle().isBlank()
+        String rawHandle = signupProperties.simple() && (command.handle() == null || command.handle().isBlank())
                 ? handleService.prefill(email, pending.provider()) : command.handle();
         Handle handle = handleService.validateForSignup(rawHandle, pending.provider());
         submittedHandle[0] = handle;

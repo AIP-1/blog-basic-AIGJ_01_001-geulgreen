@@ -1,5 +1,6 @@
 package com.team.blog.invite.web;
 
+import com.team.blog.invite.application.InviteProperties;
 import com.team.blog.invite.application.InviteService;
 import com.team.blog.shared.error.LoginRequiredException;
 import com.team.blog.shared.error.NotFoundException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +29,10 @@ import org.springframework.web.servlet.view.RedirectView;
  *       가입·로그인이 끝나면 여기로 돌아와 바로 받아들인다.</li>
  *   <li>회원: 같은 화면에 [함께 시작하기] 버튼 하나. 누르면 초대한 사람을 팔로우하고 방에 들어간다.</li>
  * </ul>
- * {@code i}는 한 글자라 블로그 주소 형식이 아니어서 예약어 없이도 블로그 경로로 읽히지 않는다.
+ * {@code i}는 한 글자라 블로그 주소 형식이 아니어서 예약어 없이도 블로그 경로로 읽히지 않는다. 끄기: {@code blog.invite.enabled=false}({@link InviteProperties}).
  */
 @Controller
+@ConditionalOnProperty(name = "blog.invite.enabled", havingValue = "true", matchIfMissing = true)
 public class InviteController {
 
     private final InviteService invites;

@@ -95,6 +95,11 @@ class InviteIT extends IntegrationTestBase {
         long inviter = members.localMember("inviter3", "세번째", "inviter3@example.com", PASSWORD, true);
         assertThat(mockMvc.perform(get("/i/nobody_here")).andReturn().getResponse().getStatus()).isEqualTo(404);
         assertThat(mockMvc.perform(get("/i/inviter3/wrongcode")).andReturn().getResponse().getStatus()).isEqualTo(404);
+        // 남의 방 코드에 내 아이디를 붙인 링크는 없는 링크(초대한 사람이 그 방 멤버일 때만)
+        long other = members.localMember("otherowner", "남의방장", "otherowner@example.com", PASSWORD, true);
+        long club = createLinkClub(other, "남의 방");
+        assertThat(mockMvc.perform(get("/i/inviter3/" + code(club))).andReturn().getResponse().getStatus()).isEqualTo(404);
+        assertThat(mockMvc.perform(get("/i/otherowner/" + code(club))).andReturn().getResponse().getStatus()).isEqualTo(200);
         assertThat(inviter).isPositive();
     }
 
