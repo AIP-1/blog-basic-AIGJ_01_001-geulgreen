@@ -114,6 +114,32 @@ class InviteIT extends IntegrationTestBase {
     }
 
     @Test
+    void emailSignupFromInviteJoinsClubAfterMailVerification() throws Exception {
+        long inviter = members.localMember("inviter4", "초대넷", "inviter4@example.com", PASSWORD, true);
+        long club = createLinkClub(inviter, "인증 글방");
+        String path = "/i/inviter4/" + code(club);
+
+        Browser browser = new Browser(mockMvc);
+        assertThat(browser.perform(get(path)).getResponse().getStatus()).isEqualTo(200);
+        // 코드 확인 없이 이메일로 가입: 인증 메일 안내로 가고, 초대 경로는 세션에 남아 있다
+        MvcResult signup = browser.perform(post("/signup").with(csrf()).param("email", "newbie4@example.com").param("password", PASSWORD)
+                .param("nickname", "새친구넷").param("ageGroup", "OVER14").param("agreeTerms", "true").param("agreePrivacy", "true"));
+        assertThat(signup.getResponse().getStatus()).isEqualTo(303);
+        assertThat(signup.getResponse().getHeader("Location")).isEqualTo("/signup/verify-sent");
+        long newbie = jdbc.queryForObject("SELECT member_id FROM auth_identity WHERE email = 'newbie4@example.com'", Long.class);
+
+        // 메일의 인증 링크를 같은 브라우저에서 열면 결과 화면 대신 초대로 돌아가고, 거기서 방에 들어간다
+        String token = mailpit.awaitMessagesTo("newbie4@example.com", 1).get(0).token("/auth/verify").orElseThrow();
+        MvcResult verify = browser.perform(get("/auth/verify").param("token", token));
+        assertThat(verify.getResponse().getStatus()).isEqualTo(302);
+        assertThat(verify.getResponse().getHeader("Location")).isEqualTo(path);
+        MvcResult accepted = browser.perform(get(path));
+        assertThat(accepted.getResponse().getHeader("Location")).isEqualTo("/missions/clubs/" + club);
+        assertThat(follows(newbie, inviter)).isTrue();
+        assertThat(member(club, newbie)).isTrue();
+    }
+
+    @Test
     void signupWithoutHandleAndPasswordConfirmDerivesHandleFromEmail() throws Exception {
         MvcResult first = mockMvc.perform(post("/signup").with(csrf()).param("email", "friendly@example.com").param("password", PASSWORD)
                 .param("nickname", "친구하나").param("ageGroup", "OVER14").param("agreeTerms", "true").param("agreePrivacy", "true")).andReturn();

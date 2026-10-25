@@ -208,10 +208,16 @@ public class AuthController {
     // ----- 인증 -----
 
     @GetMapping("/auth/verify")
-    public ModelAndView verify(@RequestParam(name = "token", required = false) String token) {
+    public ModelAndView verify(@RequestParam(name = "token", required = false) String token, HttpServletRequest request) {
         EmailVerificationService.VerifyResult result = emailVerificationService.verify(token);
+        boolean verified = result == EmailVerificationService.VerifyResult.VERIFIED;
+        // 10-25 chan: 초대 링크로 와서 메일 인증까지 마쳤으면 결과 화면 대신 그 초대로(방 참여는 인증 뒤에만 되므로 여기서 이어 준다)
+        String invite = verified ? PendingInvite.path(request.getSession(false)) : null;
+        if (invite != null) {
+            return new ModelAndView("redirect:" + invite);
+        }
         ModelAndView view = new ModelAndView("auth/verify-result");
-        view.addObject("verified", result == EmailVerificationService.VerifyResult.VERIFIED);
+        view.addObject("verified", verified);
         view.addObject("loggedIn", currentUserProvider.current().isPresent());
         return view;
     }
