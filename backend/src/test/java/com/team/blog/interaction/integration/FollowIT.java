@@ -196,6 +196,9 @@ class FollowIT extends IntegrationTestBase {
         String page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
         assertThat(page).contains("피드글14").contains("?cursor=").doesNotContain("모르는 사람").doesNotContain("추천 블로그")
                 .contains("class=\"feed-end\"");
+        // 10-23: 피드는 카드 칸이 아니라 한 줄 목록 + 얼굴 줄 + 날짜 묶음(홈·탐색과 다른 모양)
+        assertThat(page).contains("data-layout=\"feed\"").contains("class=\"feed-item").contains("class=\"feed-people\"")
+                .contains("fdwriter1").contains("class=\"feed-day\"").contains("팔로우 2명").doesNotContain("card-cover");
         // 068 추천 블로그(086부터 탐색): 팔로우 안 한 작가만, 나와 팔로우한 사람은 빼고. 추천 글에도 팔로우한 사람 글은 없음
         jdbc.update("UPDATE post SET like_count = 1000000 WHERE author_id = ?", stranger);
         page = mockMvc.perform(get("/explore").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();

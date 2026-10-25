@@ -8,23 +8,6 @@
 <!-- 079 강성찬 개인 확장: 탐색. 086: 추천을 한곳에(피드 형식: 사람 줄 + 글 카드 목록), 홈의 트렌딩·새로 온 작가도 여기로 -->
 <main class="list-page explore-page">
     <h1>탐색</h1>
-    <!-- 10-15 정리(강성찬 개인 확장): 글이 주인공. 사람 추천(추천 블로그 + 새로 온 작가, 같은 사람은 한 번)은 한 칸으로 —
-         넓은 화면은 오른쪽 칸, 좁은 화면은 탭 아래 가로 한 줄. "태그 전체 보기"는 위 메뉴 태그와 겹쳐 뺐다 -->
-    <div class="explore-layout" th:classappend="${people.isEmpty()} ? 'no-people'">
-    <aside th:if="${!people.isEmpty()}" class="explore-people" aria-labelledby="explore-people-heading">
-        <h2 id="explore-people-heading">이런 사람은 어때요</h2>
-        <ul class="people-list">
-            <li th:each="pp : ${people}" class="person-row">
-                <a th:href="${paths.blog(pp.handle())}" class="person-link">
-                    <th:block th:replace="~{fragments/avatar :: avatar(${pp.avatar()}, 32)}"></th:block>
-                    <span class="person-text"><span class="person-id" th:text="${pp.handle()}">아이디</span>
-                        <span th:if="${pp.newcomer()}" class="person-new">새 작가</span></span></a>
-                <th:block th:replace="~{fragments/follow :: button(${pp.handle()}, false, ${currentMemberId != null}, '/login', '/explore')}"></th:block>
-            </li>
-        </ul>
-        <p class="follow-message help" role="status" hidden data-toast="success"></p>
-    </aside>
-    <div class="explore-main">
     <div class="home-tabs-row">
         <nav class="manage-tabs home-tabs" aria-label="탐색 탭">
             <a href="/explore" th:attr="aria-current=${tab == 'recommended' ? 'page' : null}">추천</a>
@@ -35,6 +18,36 @@
             <a href="/explore?tab=series" th:attr="aria-current=${sort == 'popular' ? 'page' : null}">인기순</a>
             <a href="/explore?tab=series&sort=recent" th:attr="aria-current=${sort == 'recent' ? 'page' : null}">최근순</a>
         </nav>
+    </div>
+    <!-- 10-23 강성찬 개인 확장(chan "홈·탐색·피드가 너무 똑같아"): 추천 탭 첫 화면 위는 카드 대신 구역 —
+         왼쪽 "이번 주 많이 읽은 글" 1~5위, 오른쪽 사람 추천(추천 블로그 + 새로 온 작가)과 태그 칩. 좁은 화면은 위아래로 -->
+    <div th:if="${!topPosts.isEmpty() or !people.isEmpty() or !topTags.isEmpty()}" class="explore-top">
+        <section th:if="${!topPosts.isEmpty()}" class="explore-rank" aria-labelledby="explore-rank-heading">
+            <div class="explore-sec-head"><h2 id="explore-rank-heading">이번 주 많이 읽은 글</h2><a href="/explore?tab=trending">트렌딩 전체</a></div>
+            <ol class="rank-list">
+                <li th:each="tp : ${topPosts}"><a th:href="${tp.url()}"><span class="rank-title" th:text="${tp.title()}">제목</span>
+                    <span class="rank-meta" th:text="${tp.author().handle() + ' · 좋아요 ' + tp.likeCount() + ' · 댓글 ' + tp.commentCount()}">아이디 · 좋아요 3</span></a></li>
+            </ol>
+        </section>
+        <div class="explore-side">
+            <aside th:if="${!people.isEmpty()}" class="explore-people" aria-labelledby="explore-people-heading">
+                <h2 id="explore-people-heading">이런 사람은 어때요</h2>
+                <ul class="people-list">
+                    <li th:each="pp : ${people}" class="person-row">
+                        <a th:href="${paths.blog(pp.handle())}" class="person-link">
+                            <th:block th:replace="~{fragments/avatar :: avatar(${pp.avatar()}, 32)}"></th:block>
+                            <span class="person-text"><span class="person-id" th:text="${pp.handle()}">아이디</span>
+                                <span th:if="${pp.newcomer()}" class="person-new">새 작가</span></span></a>
+                        <th:block th:replace="~{fragments/follow :: button(${pp.handle()}, false, ${currentMemberId != null}, '/login', '/explore')}"></th:block>
+                    </li>
+                </ul>
+                <p class="follow-message help" role="status" hidden data-toast="success"></p>
+            </aside>
+            <section th:if="${!topTags.isEmpty()}" class="explore-tags" aria-labelledby="explore-tags-heading">
+                <h2 id="explore-tags-heading">태그로 둘러보기</h2>
+                <p class="tag-chips"><a th:each="tg : ${topTags}" th:href="@{/tags/{name}(name=${tg.name()})}" th:text="${tg.name()}">태그</a></p>
+            </section>
+        </div>
     </div>
     <!-- 104 강성찬 개인 확장: 모든 블로그의 시리즈(카드는 블로그 시리즈 탭과 같은 모양, 누르면 그 시리즈 화면) -->
     <th:block th:if="${tab == 'series'}">
@@ -47,6 +60,7 @@
         th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null},offset=${seriesNext})}">더 보기</a></p>
     </th:block>
     <th:block th:unless="${tab == 'series'}">
+    <h2 th:if="${tab == 'recommended' and !continued and !cards.isEmpty() and (!topPosts.isEmpty() or !people.isEmpty())}" class="explore-sec-title">추천 글</h2>
     <p th:if="${tab == 'trending'}" class="help">최근 7일 동안 반응이 많은 글 · 10분마다 갱신</p>
     <p th:if="${snapshotExpired}" class="notice" role="status" data-toast-inline>순위가 새로 바뀌었어요</p>
     <p th:if="${continued}"><a class="link-btn" th:href="${tab == 'trending' ? '/explore?tab=trending' : '/explore'}">처음부터 보기</a></p>
@@ -61,8 +75,6 @@
     </div>
     <div th:replace="~{fragments/post-card :: moreWith(${nextCursor}, ${listApi}, true, ${!cards.isEmpty()}, ${moreLinkBase}, ${tab == 'trending' ? '/explore?tab=trending&expired=1' : null})}"></div>
     </th:block>
-    </div>
-    </div>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:if="${seriesTab}" th:src="@{/js/post/series-labels.js}" defer></script>
     <script th:src="@{/js/post/home-tabs.js}" defer></script>

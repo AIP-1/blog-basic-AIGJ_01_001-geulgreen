@@ -20,7 +20,7 @@
 
   function mark(grid) {
     // 탐색 카드는 요약을 빼서 늘려 채울 글이 없다: 목록 전체를 가장 큰 카드에 맞추면 빈칸만 생기니 줄마다 높이만 맞춘다(그리드 기본)
-    if (grid.closest('.explore-main')) { return; }
+    if (grid.closest('.explore-page')) { return; }
     var items = Array.prototype.slice.call(grid.children);
     var cards = items.map(function (n) { return n.matches('.post-card') ? n : n.querySelector('.post-card'); });
     // 처음 모양으로 되돌린 뒤 잰다
