@@ -30,7 +30,15 @@
       history.replaceState(null, '', '#' + panel.id);
     });
   });
-  window.addEventListener('hashchange', function () { show(panelFor(location.hash)); });
+  // 10-25: 탭을 합친 뒤 옛 주소(#settings-friends 등)는 탭 안의 한 묶음을 가리킨다. 그 탭을 연 다음 그 자리로 내려간다
+  function open(hash) {
+    var panel = panelFor(hash);
+    show(panel);
+    var target = hash && document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (target && target !== panel && panel.contains(target)) { target.scrollIntoView({ block: 'start' }); }
+  }
+
+  window.addEventListener('hashchange', function () { open(location.hash); });
   root.classList.add('is-sectioned');
-  show(panelFor(location.hash));
+  open(location.hash);
 })();
