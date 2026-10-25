@@ -60,7 +60,7 @@ class FirstPublicCheerIT extends IntegrationTestBase {
         assertThat(count(fan, "FIRST_PUBLIC")).isZero();
         String list = mockMvc.perform(get("/api/notifications").with(TestAuth.member(friend))).andReturn().getResponse()
                 .getContentAsString();
-        assertThat(list).contains("친구에게만 보여 주던").contains("한 달 전에 쓴 친구 글");
+        assertThat(list).contains("친한 친구에게만 보여 주던").contains("한 달 전에 쓴 친구 글");
         // 처음 공개된 순간이 최초 공개 시각 → 홈 맨 위
         String all = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
         String home = all.substring(all.indexOf("id=\"card-grid\"")); // 카드 목록만(036 새로 온 작가 영역 제외)

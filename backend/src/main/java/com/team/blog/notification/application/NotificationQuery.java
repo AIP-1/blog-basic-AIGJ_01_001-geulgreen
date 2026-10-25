@@ -164,7 +164,7 @@ public class NotificationQuery {
             case LIKE -> commentId != null
                     ? onComment(rs, p, commentUrl, pv -> who(actorName, others) + " 회원님의 댓글을 좋아해요: " + pv)
                     : onPost(p, who(actorName, others) + " 「" + p.title() + "」을(를) 좋아해요");
-            case FIRST_PUBLIC -> onPost(p, actorName + "님이 친구에게만 보여 주던 「" + p.title() + "」을(를) 모두에게 공개했어요");
+            case FIRST_PUBLIC -> onPost(p, actorName + "님이 친한 친구에게만 보여 주던 「" + p.title() + "」을(를) 모두에게 공개했어요");
             case MISSION_DONE -> onPost(p, actorName + "님이 오늘의 미션 글을 올렸어요: 「" + p.title() + "」");
             // 108 강성찬 개인 확장: 시리즈에 든 글이면 "새 편"으로(읽을 때 시리즈를 보므로 발행 뒤 넣어도 맞다)
             // 113 후속: 한 번에 여러 편(actor_count = 함께 올린 글 수)

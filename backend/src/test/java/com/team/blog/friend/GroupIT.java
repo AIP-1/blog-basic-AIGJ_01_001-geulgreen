@@ -92,7 +92,7 @@ class GroupIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/settings/groups").with(TestAuth.member(owner))).andReturn().getResponse()
                 .getHeader("Location")).isEqualTo("/settings/friends#groups");
         assertThat(mockMvc.perform(get("/settings/friends").with(TestAuth.member(owner))).andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString()).contains("내 친구 0").contains("id=\"groups\"").contains("아직 그룹이 없어요");
+                .andReturn().getResponse().getContentAsString()).contains("내 친한 친구 0").contains("id=\"groups\"").contains("아직 그룹이 없어요");
         assertThat(mockMvc.perform(get("/settings/friends")).andReturn().getResponse().getHeader("Location")).contains("/login");
         assertThat(mockMvc.perform(post("/settings/groups").param("name", "동아리").with(csrf()).with(TestAuth.member(owner)))
                 .andReturn().getResponse().getHeader("Location")).isEqualTo("/settings/friends#groups");
