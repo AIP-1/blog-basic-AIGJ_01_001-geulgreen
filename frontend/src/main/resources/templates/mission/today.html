@@ -30,7 +30,7 @@
         <th:block th:unless="${myStats.doneToday()}">오늘은 아직 안 썼어요</th:block>
         <span class="geulgam-streak" th:if="${myStats.streak() > 0}"><svg th:replace="~{fragments/icons :: flame}"></svg> <span th:text="${myStats.streak() + '일 연속'}">1일 연속</span></span>
     </p>
-    <p class="geulgam-state" th:if="${myStats == null}">로그인하면 내 기록과 배지를 모을 수 있어요 <a class="link-btn" href="/login?redirect=/missions">로그인</a></p>
+    <p class="geulgam-state geulgam-login" th:if="${myStats == null}"><span>로그인하면 내 기록과 배지를 모을 수 있어요</span><a class="link-btn" href="/login?redirect=/missions">로그인</a></p>
 
     <section class="geulgam-topics" aria-label="글감">
         <p th:if="${topics.isEmpty()}" class="empty-state">이날은 글감이 없었어요</p>
