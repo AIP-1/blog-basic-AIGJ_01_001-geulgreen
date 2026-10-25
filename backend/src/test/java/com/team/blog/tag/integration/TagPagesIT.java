@@ -125,8 +125,8 @@ class TagPagesIT extends IntegrationTestBase {
         tagged(a, "2", T, "java");
         String html = mockMvc.perform(get("/search")).andReturn().getResponse().getContentAsString();
         String header = html.substring(html.indexOf("<header"), html.indexOf("</header>"));
-        // 10-15: 위 메뉴에 태그가 다시 생겼다(태그 화면을 새로 꾸미며, chan)
-        assertThat(header).contains("href=\"/tags\">태그</a>")
+        // 10-15에 위 메뉴에 태그가 다시 생겼다가 10-25에 다시 뺐다(chan: 메뉴 줄이기). 태그 화면은 이 패널에서 닿는다
+        assertThat(header).doesNotContain(">태그</a>")
                 .contains("class=\"search-menu\"").contains("action=\"/search\"").contains("name=\"q\"")
                 .contains("href=\"/tags/java\"").contains("#java").contains("#spring")
                 .contains("href=\"/tags\" class=\"link-btn search-menu-all\"");
