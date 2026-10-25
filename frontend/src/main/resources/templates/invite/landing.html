@@ -12,7 +12,7 @@
     <div class="auth-panel">
     <p class="mission-eyebrow">글그린 초대</p>
     <!-- 10-25 chan: 이름 뒤에서 줄을 나누고 둘째 줄은 고정 문장이라 한 줄로 -->
-    <h1><span class="invite-who" th:text="${who.displayName() + '님이'}">○○님이</span> <span class="invite-fixed">함께 글 쓰자고 초대했어요</span></h1>
+    <h1><span class="invite-name" th:text="${who.displayName() + '님이'}">○○님이</span> <span class="invite-fixed">함께 글 쓰자고 초대했어요</span></h1>
     <p class="invite-who">
         <th:block th:replace="~{fragments/avatar :: avatar(${who.avatar()}, 40)}"></th:block>
         <span class="invite-who-text"><strong th:text="${who.displayName()}">이름</strong><span class="help" th:text="${who.handle()}">아이디</span></span>

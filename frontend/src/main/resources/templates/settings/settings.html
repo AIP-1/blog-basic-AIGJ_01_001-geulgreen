@@ -9,37 +9,46 @@
     <h1>설정</h1>
     <noscript><p class="notice">이 화면은 JavaScript가 필요해요.</p></noscript>
 
-    <!-- 063 강성찬 개인 확장: 설정을 섹션으로 묶고 옆 메뉴에서 골라 봄(스크립트가 없으면 모두 펼쳐 보임) -->
+    <!-- 063 강성찬 개인 확장: 설정을 섹션으로 묶고 옆 메뉴에서 골라 봄(스크립트가 없으면 모두 펼쳐 보임).
+         10-25(chan "디자인 싹 갈아엎어줘"): 기능별 6개 탭(프로필·계정·공개·알림·블로그·화면·AI), 탭마다 카드 묶음.
+         한 묶음 = 카드(.set-card) 하나, 한 설정 = 줄(.set-row) 하나(왼쪽 이름·설명, 오른쪽 스위치·버튼). 밑줄 링크 대신 화살표 줄(.set-link).
+         옛 주소(#settings-friends·#settings-display·#settings-connections)는 그 카드가 든 탭을 열고 그 자리로 내려간다 -->
     <div class="settings-layout">
     <nav class="settings-nav" aria-label="설정 섹션">
-        <a href="#settings-profile">프로필</a>
-        <a href="#settings-account">계정</a>
-        <a href="#settings-blog">블로그</a>
-        <a href="#settings-friends">친구</a>
-        <a href="#settings-display">화면</a>
-        <a href="#settings-notifications">알림</a>
-        <a href="#settings-ai">AI</a>
-        <a th:if="${aiConnectEnabled}" href="#settings-connections">연결</a>
+        <a href="#settings-profile"><svg th:replace="~{fragments/icons :: people}"></svg><span>프로필</span></a>
+        <a href="#settings-account"><svg th:replace="~{fragments/icons :: gear}"></svg><span>계정</span></a>
+        <a href="#settings-privacy"><svg th:replace="~{fragments/icons :: eye}"></svg><span>공개</span></a>
+        <a href="#settings-notifications"><svg th:replace="~{fragments/icons :: bell}"></svg><span>알림</span></a>
+        <a href="#settings-blog"><svg th:replace="~{fragments/icons :: folder}"></svg><span>블로그·화면</span></a>
+        <a href="#settings-ai"><svg th:replace="~{fragments/icons :: sparkle}"></svg><span>AI</span></a>
     </nav>
     <div class="settings-panels">
+
+    <!-- ===== 프로필 (11 §2) ===== -->
     <div class="settings-panel" id="settings-profile">
-    <!-- 프로필 (11 §2) -->
-    <section aria-labelledby="profile-heading">
+    <header class="set-head">
         <h2 id="profile-heading">프로필</h2>
+        <p class="set-lead">다른 사람이 내 블로그에서 보는 모습이에요.</p>
+    </header>
+    <section class="set-card" aria-labelledby="profile-heading">
         <form id="profile-form" novalidate
               th:attr="data-image-id=${profile.profileImageId()},data-nickname=${profile.nickname()}">
-            <div class="field profile-image-row">
+            <div class="profile-image-row set-row">
                 <span id="profile-avatar" th:attr="data-handle=${profile.handle()}">
                     <th:block th:replace="~{fragments/avatar :: avatar(${avatar}, 96)}"></th:block>
                 </span>
-                <div>
+                <div class="set-row-text">
+                    <span class="set-label">프로필 사진</span>
+                    <span class="set-desc" th:unless="${profile.emailVerified()}" id="profile-image-unverified">이메일 인증 후 사진을 올릴 수 있어요</span>
+                    <span class="set-desc" th:if="${profile.emailVerified()}">어디서나 동그랗게 보여요</span>
+                    <p class="field-error" data-error-for="profileImageId" role="alert"></p>
+                </div>
+                <div class="set-row-actions">
                     <th:block th:if="${profile.emailVerified()}">
                         <input type="file" id="profile-image-file" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
-                        <button type="button" id="profile-image-pick">이미지 변경</button>
+                        <button type="button" id="profile-image-pick">사진 바꾸기</button>
                     </th:block>
-                    <p class="help" th:unless="${profile.emailVerified()}" id="profile-image-unverified">이메일 인증 후 사진을 올릴 수 있어요</p>
-                    <button type="button" id="profile-image-reset">기본 이미지로</button>
-                    <p class="field-error" data-error-for="profileImageId" role="alert"></p>
+                    <button type="button" id="profile-image-reset" class="btn-quiet">기본 이미지로</button>
                 </div>
             </div>
 
@@ -56,7 +65,7 @@
                 <p class="help" id="cropper-status" aria-live="polite"></p>
             </div>
 
-            <div class="field">
+            <div class="field set-field">
                 <label for="nickname">닉네임</label>
                 <input id="nickname" name="nickname" type="text" maxlength="30" autocomplete="off"
                        th:value="${profile.nickname()}" th:disabled="${nicknameNextAllowed != null}"
@@ -66,27 +75,34 @@
                 <p class="field-error" data-error-for="nickname" role="alert"></p>
             </div>
 
-            <div class="field">
+            <div class="field set-field">
                 <label for="bio">소개</label>
                 <textarea id="bio" name="bio" rows="4" th:text="${profile.bio()}" aria-describedby="bio-count"></textarea>
-                <p class="help"><span id="bio-count">0</span> / 200</p>
+                <p class="help set-count"><span id="bio-count">0</span> / 200</p>
                 <p class="field-error" data-error-for="bio" role="alert"></p>
             </div>
 
-            <div class="field" th:unless="${handleChangeEnabled}">
-                <span>블로그 주소</span>
+            <div class="set-row" th:unless="${handleChangeEnabled}">
+                <div class="set-row-text">
+                    <span class="set-label">블로그 주소</span>
+                    <span class="set-desc">변경할 수 없어요</span>
+                </div>
                 <span class="readonly" th:text="'@' + ${profile.handle()}">@주소</span>
-                <span class="help">(변경할 수 없어요)</span>
             </div>
 
-            <button type="submit">저장</button>
-            <p class="form-status" id="profile-status" aria-live="polite" data-toast="success"></p>
+            <div class="set-actions">
+                <p class="form-status" id="profile-status" aria-live="polite" data-toast="success"></p>
+                <button type="submit">저장</button>
+            </div>
         </form>
+    </section>
 
-        <!-- 074 강성찬 개인 확장: 블로그 주소(아이디) 바꾸기. 14일에 두 번, 예전 주소는 14일 동안 나만 되돌릴 수 있고 옛 주소로 오면 새 주소로 넘김 -->
-        <form id="handle-form" novalidate th:if="${handleChangeEnabled}">
-            <div class="field">
-                <label for="new-handle">블로그 주소(아이디)</label>
+    <!-- 074 강성찬 개인 확장: 블로그 주소(아이디) 바꾸기. 14일에 두 번, 예전 주소는 14일 동안 나만 되돌릴 수 있고 옛 주소로 오면 새 주소로 넘김 -->
+    <section class="set-card" th:if="${handleChangeEnabled}" aria-labelledby="handle-heading">
+        <h3 class="set-card-title" id="handle-heading">블로그 주소</h3>
+        <form id="handle-form" novalidate>
+            <div class="field set-field">
+                <label for="new-handle" class="visually-hidden">블로그 주소(아이디)</label>
                 <div class="handle-input">
                     <span aria-hidden="true" class="handle-prefix" th:text="${siteHost + '/'}">/</span>
                     <input id="new-handle" name="handle" type="text" maxlength="39" autocapitalize="off" autocomplete="off"
@@ -100,192 +116,251 @@
                 <p id="new-handle-status" class="availability" aria-live="polite"></p>
                 <p class="field-error" data-error-for="handle" role="alert"></p>
             </div>
-            <button type="submit" th:disabled="${handleNextAllowed != null}">주소 바꾸기</button>
-            <p class="form-status" id="handle-status" aria-live="polite" data-toast="success"></p>
+            <div class="set-actions">
+                <p class="form-status" id="handle-status" aria-live="polite" data-toast="success"></p>
+                <button type="submit" th:disabled="${handleNextAllowed != null}">주소 바꾸기</button>
+            </div>
         </form>
     </section>
-
     </div>
+
+    <!-- ===== 계정 (11 §6) ===== -->
     <div class="settings-panel" id="settings-account">
-    <!-- 계정 (11 §6) -->
-    <section aria-labelledby="account-heading">
+    <header class="set-head">
         <h2 id="account-heading">계정</h2>
-        <div class="field">
-            <span>이메일</span> <span class="readonly" th:text="${profile.email()}">email</span>
-            <span class="help">(변경할 수 없어요)</span>
+        <p class="set-lead">로그인과 계정 관리예요.</p>
+    </header>
+    <section class="set-card" aria-labelledby="login-heading">
+        <h3 class="set-card-title" id="login-heading">로그인 정보</h3>
+        <div class="set-row field">
+            <div class="set-row-text"><span class="set-label">이메일</span><span class="set-desc">변경할 수 없어요</span></div>
+            <span class="readonly" th:text="${profile.email()}">email</span>
         </div>
-        <div class="field">
-            <span>로그인 수단</span>
+        <div class="set-row field">
+            <div class="set-row-text"><span class="set-label">로그인 수단</span></div>
             <span class="readonly" id="login-provider"
                   th:text="${profile.provider() == 'GOOGLE' ? 'Google' : (profile.provider() == 'GITHUB' ? 'GitHub' : '이메일')}">이메일</span>
         </div>
+        <details class="set-details" th:if="${profile.passwordChangeSupported()}">
+            <summary class="set-row">
+                <span class="set-row-text"><span class="set-label">비밀번호 변경</span><span class="set-desc">8~16자, 영문·숫자·특수문자 포함</span></span>
+                <svg th:replace="~{fragments/icons :: chevron}"></svg>
+            </summary>
+            <form id="password-form" novalidate>
+                <div class="field set-field">
+                    <label for="current-password">현재 비밀번호</label>
+                    <input id="current-password" name="currentPassword" type="password" autocomplete="current-password" maxlength="64">
+                    <p class="field-error" data-error-for="currentPassword" role="alert"></p>
+                </div>
+                <div class="field set-field">
+                    <label for="new-password">새 비밀번호</label>
+                    <input id="new-password" name="newPassword" type="password" autocomplete="new-password" maxlength="64"
+                           data-password-rules="#password-rules" aria-describedby="password-rules">
+                    <ul id="password-rules" class="password-rules help">
+                        <li data-rule="length">8~16자 (최대 16자)</li>
+                        <li data-rule="letter">영문 1자 이상</li>
+                        <li data-rule="digit">숫자 1자 이상</li>
+                        <li data-rule="special">특수문자 1자 이상</li>
+                    </ul>
+                    <p class="field-error" data-error-for="newPassword" role="alert"></p>
+                </div>
+                <div class="field set-field">
+                    <label for="new-password-confirm">새 비밀번호 확인</label>
+                    <input id="new-password-confirm" name="newPasswordConfirm" type="password" autocomplete="new-password" maxlength="64">
+                    <p class="field-error" data-error-for="newPasswordConfirm" role="alert"></p>
+                </div>
+                <div class="set-actions">
+                    <p class="form-status" id="password-status" aria-live="polite" data-toast="success"></p>
+                    <button type="submit">비밀번호 변경</button>
+                </div>
+            </form>
+        </details>
+    </section>
+    <!-- 회원 탈퇴 진입점(FR-029, 처리는 023) -->
+    <section class="set-card set-card-danger" aria-labelledby="withdraw-heading">
+        <div class="set-row">
+            <div class="set-row-text">
+                <h3 class="set-label" id="withdraw-heading">회원 탈퇴</h3>
+                <span class="set-desc">탈퇴하면 30일 동안 복구할 수 있고, 그 뒤 익명 처리돼요.</span>
+            </div>
+            <a id="withdraw-link" class="set-btn-danger" href="/settings/withdraw">탈퇴하기</a>
+        </div>
+    </section>
+    </div>
 
-        <form id="password-form" novalidate th:if="${profile.passwordChangeSupported()}">
-            <h3>비밀번호 변경</h3>
-            <div class="field">
-                <label for="current-password">현재 비밀번호</label>
-                <input id="current-password" name="currentPassword" type="password" autocomplete="current-password" maxlength="64">
-                <p class="field-error" data-error-for="currentPassword" role="alert"></p>
-            </div>
-            <div class="field">
-                <label for="new-password">새 비밀번호</label>
-                <input id="new-password" name="newPassword" type="password" autocomplete="new-password" maxlength="64"
-                       data-password-rules="#password-rules" aria-describedby="password-rules">
-                <ul id="password-rules" class="password-rules help">
-                    <li data-rule="length">8~16자 (최대 16자)</li>
-                    <li data-rule="letter">영문 1자 이상</li>
-                    <li data-rule="digit">숫자 1자 이상</li>
-                    <li data-rule="special">특수문자 1자 이상</li>
-                </ul>
-                <p class="field-error" data-error-for="newPassword" role="alert"></p>
-            </div>
-            <div class="field">
-                <label for="new-password-confirm">새 비밀번호 확인</label>
-                <input id="new-password-confirm" name="newPasswordConfirm" type="password" autocomplete="new-password" maxlength="64">
-                <p class="field-error" data-error-for="newPasswordConfirm" role="alert"></p>
-            </div>
-            <button type="submit">비밀번호 변경</button>
-            <p class="form-status" id="password-status" aria-live="polite" data-toast="success"></p>
-        </form>
-
+    <!-- ===== 공개 범위·친구 ===== -->
+    <div class="settings-panel" id="settings-privacy">
+    <header class="set-head">
+        <h2 id="privacy-heading">공개</h2>
+        <p class="set-lead">누가 내 글을 볼 수 있는지 정해요.</p>
+    </header>
+    <section class="set-card" aria-labelledby="visibility-heading">
+        <h3 class="set-card-title" id="visibility-heading">새 글 기본 공개 범위</h3>
         <form id="visibility-form" novalidate>
-            <fieldset class="field">
-                <legend>새 글 기본 공개 범위</legend>
+            <fieldset class="segmented">
+                <legend class="visually-hidden">새 글 기본 공개 범위</legend>
                 <label><input type="radio" name="defaultVisibility" value="PUBLIC"
-                              th:checked="${profile.defaultVisibility() == 'PUBLIC'}"> 전체 공개</label>
+                              th:checked="${profile.defaultVisibility() == 'PUBLIC'}"><span>전체 공개</span></label>
                 <label><input type="radio" name="defaultVisibility" value="FRIENDS"
-                              th:checked="${profile.defaultVisibility() == 'FRIENDS'}"> 친구 공개</label>
+                              th:checked="${profile.defaultVisibility() == 'FRIENDS'}"><span>친구 공개</span></label>
                 <label><input type="radio" name="defaultVisibility" value="PRIVATE"
-                              th:checked="${profile.defaultVisibility() == 'PRIVATE'}"> 나만 보기</label>
+                              th:checked="${profile.defaultVisibility() == 'PRIVATE'}"><span>나만 보기</span></label>
             </fieldset>
+            <p class="set-desc">새 글을 쓸 때 처음 골라져 있는 값이에요. 글마다 바꿀 수 있어요.</p>
             <p class="field-error" data-error-for="defaultVisibility" role="alert"></p>
             <p class="form-status" id="visibility-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
     <!-- 073·087 강성찬 개인 확장: 비공개 계정 스위치(받은 요청 목록은 /settings/privacy) -->
-    <section th:if="${privateAccountsEnabled}" aria-labelledby="private-heading">
-        <h2 id="private-heading">비공개 계정</h2>
-        <form method="post" action="/settings/privacy" class="privacy-form">
+    <section class="set-card" th:if="${privateAccountsEnabled}" aria-labelledby="private-heading">
+        <form method="post" action="/settings/privacy" class="privacy-form set-row">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <input type="hidden" name="back" value="/settings#settings-account">
+            <input type="hidden" name="back" value="/settings#settings-privacy">
+            <div class="set-row-text">
+                <h3 class="set-label" id="private-heading">비공개 계정</h3>
+                <span class="set-desc" id="private-help">켜면 내가 팔로우 요청을 수락한 사람만 내 글을 봐요. 지금 팔로워는 그대로이고, 끄면 대기 중 요청은 모두 수락돼요.</span>
+            </div>
             <button type="submit" name="private" th:value="${!isPrivateAccount}" class="switch" role="switch"
-                    th:attr="aria-checked=${isPrivateAccount}" aria-describedby="private-help">
+                    th:attr="aria-checked=${isPrivateAccount}" aria-labelledby="private-heading" aria-describedby="private-help">
                 <span class="switch-track" aria-hidden="true"></span>
-                <span><th:block th:if="${isPrivateAccount}"><svg th:replace="~{fragments/icons :: lock}"></svg> </th:block><span th:text="${isPrivateAccount ? '비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span></span>
+                <span class="visually-hidden" th:text="${isPrivateAccount ? '비공개 계정 켜짐' : '비공개 계정 꺼짐'}">비공개 계정 꺼짐</span>
             </button>
         </form>
-        <p class="help" id="private-help">켜면 내가 팔로우 요청을 수락한 사람만 내 글을 봐요. 지금 팔로워는 그대로이고, 끄면 대기 중 요청은 모두 수락돼요.
-            <a href="/settings/privacy">받은 팔로우 요청</a></p>
     </section>
-    <!-- 회원 탈퇴 진입점(FR-029, 처리는 023) -->
-    <section aria-labelledby="withdraw-heading">
-        <h2 id="withdraw-heading">회원 탈퇴</h2>
-        <p class="help">탈퇴하면 30일 동안 복구할 수 있고, 그 뒤 익명 처리돼요.</p>
-        <a id="withdraw-link" href="/settings/withdraw">회원 탈퇴</a>
+    <section class="set-card" id="settings-friends" aria-labelledby="friends-heading">
+        <h3 class="set-card-title" id="friends-heading">친구</h3>
+        <a class="set-row set-link" href="/settings/friends">
+            <span class="set-row-text"><span class="set-label">친구·그룹 관리</span><span class="set-desc">친구 공개 글은 나와 내가 넣은 친구만 봐요</span></span>
+            <svg th:replace="~{fragments/icons :: chevron}"></svg>
+        </a>
+        <a class="set-row set-link" href="/settings/privacy" th:if="${privateAccountsEnabled}">
+            <span class="set-row-text"><span class="set-label">받은 팔로우 요청</span></span>
+            <svg th:replace="~{fragments/icons :: chevron}"></svg>
+        </a>
     </section>
+    </div>
 
-
-    </div>
-    <div class="settings-panel" id="settings-blog">
-    <!-- 037·041 강성찬 개인 확장 -->
-    <section aria-labelledby="blog-organize-heading">
-        <h2 id="blog-organize-heading">블로그 정리</h2>
-        <p class="help"><a href="/settings/categories">카테고리 관리</a> · 시리즈는 글 화면에서 만들고 넣어요</p>
-    </section>
-
-    <!-- 008 사진 저장 공간(FR-027) -->
-    <section aria-labelledby="storage-heading">
-        <h2 id="storage-heading">사진 저장 공간</h2>
-        <p id="storage-usage" class="help" aria-live="polite">불러오는 중…</p>
-        <p class="help">한 사람당 1GB, 하루 200장까지 올릴 수 있어요. 지운 글의 사진은 정리 작업이 지울 때 공간이 돌아와요.</p>
-    </section>
-    </div>
-    <div class="settings-panel" id="settings-friends">
-    <section aria-labelledby="friends-heading">
-        <h2 id="friends-heading">친구</h2>
-        <p class="help">친구 공개 글은 나와, 내가 친구로 넣은 사람만 볼 수 있어요. <a href="/settings/friends">친구·그룹 관리</a>
-            <th:block th:if="${privateAccountsEnabled}"> · <a href="/settings/privacy">받은 팔로우 요청</a></th:block></p>
-    </section>
-    </div>
-    <div class="settings-panel" id="settings-display">
-    <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
-    <section aria-labelledby="theme-heading" id="theme-setting" hidden>
-        <h2 id="theme-heading">화면 테마</h2>
-        <fieldset class="theme-choices">
-            <legend class="visually-hidden">화면 테마</legend>
-            <label><input type="radio" name="theme" value="system"> 시스템 설정(기기를 따라가요)</label>
-            <label><input type="radio" name="theme" value="light"> 라이트</label>
-            <label><input type="radio" name="theme" value="dark"> 다크</label>
-        </fieldset>
-        <p class="help">고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요. 로그아웃해도 그대로예요.</p>
-    </section>
-    </div>
+    <!-- ===== 알림 ===== -->
     <div class="settings-panel" id="settings-notifications">
+    <header class="set-head">
+        <h2 id="notifications-panel-heading">알림</h2>
+        <p class="set-lead">받을 소식을 골라요.<span data-autosave-hint hidden> 누르면 바로 저장돼요.</span></p>
+    </header>
     <!-- 017 알림 종류 끄기(FR-031) -->
-    <section aria-labelledby="notification-heading">
-        <h2 id="notification-heading">알림</h2>
-        <form method="post" action="/settings/notifications" id="notification-settings">
+    <section class="set-card" aria-labelledby="notification-heading">
+        <h3 class="set-card-title" id="notification-heading">사이트 알림</h3>
+        <form method="post" action="/settings/notifications" id="notification-settings" data-autosave="#notification-status">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <div class="field" th:each="opt : ${notificationLabels}">
-                <label>
-                    <input type="checkbox" th:name="${opt.key}" value="on"
-                           th:checked="${notificationSettings.getOrDefault(opt.key, true)}">
-                    <span th:text="${opt.value}">종류</span>
-                </label>
+            <label class="set-row set-toggle" th:each="opt : ${notificationLabels}">
+                <span class="set-label" th:text="${opt.value}">종류</span>
+                <input type="checkbox" role="switch" th:name="${opt.key}" value="on"
+                       th:checked="${notificationSettings.getOrDefault(opt.key, true)}">
+            </label>
+            <p class="set-desc set-foot">운영 알림(신고 결과·숨김)은 끌 수 없어요</p>
+            <div class="set-actions">
+                <p class="form-status" id="notification-status" aria-live="polite" data-toast="success"></p>
+                <button type="submit">알림 설정 저장</button>
             </div>
-            <p class="help">운영 알림(신고 결과·숨김)은 끌 수 없어요</p>
-            <button type="submit">알림 설정 저장</button>
-            <p class="form-status" id="notification-status" aria-live="polite" data-toast="success"></p>
         </form>
     </section>
     <!-- 10-21 강성찬 개인 확장: 저녁 글감 메일(기본 꺼짐). 그날 글을 안 쓴 날에만 저녁 8시에 한 통 -->
-    <section th:if="${promptMailOn != null}" aria-labelledby="prompt-mail-heading">
-        <h2 id="prompt-mail-heading">저녁 글감 메일</h2>
-        <form method="post" action="/settings/prompt-mail">
+    <section class="set-card" th:if="${promptMailOn != null}" aria-labelledby="prompt-mail-heading">
+        <h3 class="set-card-title" id="prompt-mail-heading">저녁 글감 메일</h3>
+        <form method="post" action="/settings/prompt-mail" data-autosave="#prompt-mail-status">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <div class="field">
-                <label>
-                    <input type="checkbox" name="on" value="on" th:checked="${promptMailOn}">
-                    <span>글을 안 쓴 날 저녁에 오늘의 글감 메일 받기</span>
-                </label>
+            <label class="set-row set-toggle">
+                <span class="set-row-text">
+                    <span class="set-label">글을 안 쓴 날 저녁에 오늘의 글감 메일 받기</span>
+                    <span class="set-desc">저녁 8시에 한 통만 보내요. 그날 글을 발행했으면 보내지 않아요. 보내는 사람은 "글그린"이에요.</span>
+                </span>
+                <input type="checkbox" role="switch" name="on" value="on" th:checked="${promptMailOn}">
+            </label>
+            <div class="set-actions">
+                <p class="form-status" id="prompt-mail-status" aria-live="polite" data-toast="success"></p>
+                <button type="submit">저장</button>
             </div>
-            <p class="help">저녁 8시에 한 통만 보내요. 그날 글을 발행했으면 보내지 않아요. 보내는 사람은 "글그린"이에요.</p>
-            <button type="submit">저장</button>
         </form>
     </section>
     <!-- 096 강성찬 개인 확장: 텔레그램 알림(관리자에게 새 문의·가입·신고). 토큰이 없거나 관리자가 아니면 숨김 -->
-    <section th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
-        <h2 id="telegram-heading">텔레그램 알림</h2>
-        <p class="help" th:text="${telegramLinked ? '연결됐어요. 새 문의·새 가입·새 신고가 텔레그램으로 와요.' : '연결하면 새 문의·새 가입·새 신고를 텔레그램으로 받아요. 누르면 봇이 열리고, [시작]을 누르면 연결돼요.'}">안내</p>
-        <p th:if="${param.telegram != null}" class="field-error" role="alert" data-toast="error">봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
-        <form method="post" th:action="${telegramLinked ? '/settings/telegram/unlink' : '/settings/telegram/link'}">
+    <section class="set-card" th:if="${telegramLinked != null}" aria-labelledby="telegram-heading">
+        <form method="post" class="set-row" th:action="${telegramLinked ? '/settings/telegram/unlink' : '/settings/telegram/link'}">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button type="submit" th:text="${telegramLinked ? '연결 끊기' : '텔레그램 연결'}">텔레그램 연결</button>
+            <div class="set-row-text">
+                <h3 class="set-label" id="telegram-heading">텔레그램 알림</h3>
+                <span class="set-desc" th:text="${telegramLinked ? '연결됐어요. 새 문의·새 가입·새 신고가 텔레그램으로 와요.' : '연결하면 새 문의·새 가입·새 신고를 텔레그램으로 받아요. 누르면 봇이 열리고, [시작]을 누르면 연결돼요.'}">안내</span>
+                <p th:if="${param.telegram != null}" class="field-error" role="alert" data-toast="error">봇 정보를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>
+            </div>
+            <button type="submit" class="set-btn" th:text="${telegramLinked ? '연결 끊기' : '텔레그램 연결'}">텔레그램 연결</button>
         </form>
     </section>
-
     </div>
+
+    <!-- ===== 블로그·화면 ===== -->
+    <div class="settings-panel" id="settings-blog">
+    <header class="set-head">
+        <h2 id="blog-heading">블로그·화면</h2>
+        <p class="set-lead">글 정리와 이 기기에서 보이는 모습이에요.</p>
+    </header>
+    <!-- 037·041 강성찬 개인 확장 -->
+    <section class="set-card" aria-labelledby="blog-organize-heading">
+        <h3 class="set-card-title" id="blog-organize-heading">블로그 정리</h3>
+        <a class="set-row set-link" href="/settings/categories">
+            <span class="set-row-text"><span class="set-label">카테고리 관리</span><span class="set-desc">시리즈는 글 화면에서 만들고 넣어요</span></span>
+            <svg th:replace="~{fragments/icons :: chevron}"></svg>
+        </a>
+    </section>
+    <!-- 008 사진 저장 공간(FR-027) -->
+    <section class="set-card" aria-labelledby="storage-heading">
+        <h3 class="set-card-title" id="storage-heading">사진 저장 공간</h3>
+        <div class="usage-bar" aria-hidden="true"><span id="storage-bar"></span></div>
+        <p id="storage-usage" class="set-label-sm" aria-live="polite">불러오는 중…</p>
+        <p class="set-desc">한 사람당 1GB, 하루 200장까지 올릴 수 있어요. 지운 글의 사진은 정리 작업이 지울 때 공간이 돌아와요.</p>
+    </section>
+    <!-- 061 강성찬 개인 확장: 화면 테마(024의 머리말 버튼을 개인 설정으로 옮김). 이 기기 브라우저에 저장, 스크립트가 없으면 숨김 -->
+    <div id="settings-display">
+    <section class="set-card" aria-labelledby="theme-heading" id="theme-setting" hidden>
+        <h3 class="set-card-title" id="theme-heading">화면 테마</h3>
+        <fieldset class="segmented theme-choices">
+            <legend class="visually-hidden">화면 테마</legend>
+            <label><input type="radio" name="theme" value="system"><span>시스템</span></label>
+            <label><input type="radio" name="theme" value="light"><span>라이트</span></label>
+            <label><input type="radio" name="theme" value="dark"><span>다크</span></label>
+        </fieldset>
+        <p class="set-desc">시스템은 기기 설정을 따라가요. 고르면 바로 바뀌고 이 기기의 브라우저에 저장돼요.</p>
+    </section>
+    </div>
+    </div>
+
+    <!-- ===== AI ===== -->
     <div class="settings-panel" id="settings-ai">
+    <header class="set-head">
+        <h2 id="ai-panel-heading">AI</h2>
+        <p class="set-lead">AI가 도와주는 기능이에요. 발행은 언제나 내가 직접 해요.</p>
+    </header>
     <!-- 021 AI 전송 동의 철회(FR-010) -->
-    <section aria-labelledby="ai-heading">
-        <h2 id="ai-heading">AI 태그 추천</h2>
-        <p class="help" id="ai-consent-state" aria-live="polite">불러오는 중…</p>
-        <button type="button" id="ai-consent-withdraw" hidden>동의 철회</button>
+    <section class="set-card" aria-labelledby="ai-heading">
+        <div class="set-row">
+            <div class="set-row-text">
+                <h3 class="set-label" id="ai-heading">AI 태그 추천</h3>
+                <span class="set-desc" id="ai-consent-state" aria-live="polite">불러오는 중…</span>
+            </div>
+            <button type="button" id="ai-consent-withdraw" class="set-btn" hidden>동의 철회</button>
+        </div>
     </section>
-    </div>
-    <!-- 097 강성찬 개인 확장: 연결(AI 연결 등은 연결 화면에서) -->
-    <div class="settings-panel" id="settings-connections" th:if="${aiConnectEnabled}">
-    <section aria-labelledby="connections-heading">
-        <h2 id="connections-heading">연결</h2>
-        <p class="help">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요. 발행은 내가 직접 해요.</p>
-        <p class="help" th:if="${aiKeys.isEmpty()}">아직 연결한 키가 없어요</p>
-        <ul class="help" th:unless="${aiKeys.isEmpty()}">
-            <li th:each="k : ${aiKeys}" th:text="${k}">키 이름 · 마지막 사용</li>
+    <!-- 097 강성찬 개인 확장: 연결(AI 연결 등은 연결 화면에서). 10-23(chan): 따로 탭을 두지 않고 AI 탭 안 두 번째 묶음으로
+         (옛 주소 #settings-connections도 이 묶음을 열어 그대로 통한다) -->
+    <section class="set-card" id="settings-connections" aria-labelledby="connections-heading" th:if="${aiConnectEnabled}">
+        <h3 class="set-card-title" id="connections-heading">연결</h3>
+        <p class="set-desc">Claude·Cursor에 글그린을 연결하면 AI와 나눈 이야기를 임시글로 정리해 줘요.</p>
+        <p class="set-row set-desc" th:if="${aiKeys.isEmpty()}">아직 연결한 키가 없어요</p>
+        <ul class="set-list" th:unless="${aiKeys.isEmpty()}">
+            <li class="set-row" th:each="k : ${aiKeys}" th:text="${k}">키 이름 · 마지막 사용</li>
         </ul>
-        <a href="/settings/connections" class="link-btn" th:text="${aiKeys.isEmpty()} ? 'AI에 연결하기' : '키 관리'">AI에 연결하기</a>
+        <a href="/settings/connections" class="set-row set-link">
+            <span class="set-label" th:text="${aiKeys.isEmpty()} ? 'AI에 연결하기' : '키 관리'">AI에 연결하기</span>
+            <svg th:replace="~{fragments/icons :: chevron}"></svg>
+        </a>
     </section>
-
-
     </div>
     </div>
     </div>
@@ -297,6 +372,7 @@
     <script th:src="@{/js/account/ai-consent.js}" defer></script>
     <script th:src="@{/js/theme-toggle.js}" defer></script>
     <script th:src="@{/js/profile/settings-sections.js}" defer></script>
+    <script th:src="@{/js/settings/autosave.js}" defer></script>
     <script th:if="${handleChangeEnabled}" th:src="@{/js/account/availability.js}" defer></script>
     <script th:if="${handleChangeEnabled}" th:src="@{/js/account/handle-change.js}" defer></script>
 </main>

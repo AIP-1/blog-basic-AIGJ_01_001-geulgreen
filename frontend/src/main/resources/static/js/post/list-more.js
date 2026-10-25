@@ -144,15 +144,15 @@
     var handle = el('a', 'feed-handle', item.author.handle || ''); handle.href = blog; who.appendChild(handle);
     who.appendChild(document.createTextNode(' '));
     var time = el('time', null, dateLabel(item.firstPublicAt)); time.setAttribute('datetime', item.firstPublicAt); who.appendChild(time);
-    if (item.firstTag) {
-      who.appendChild(document.createTextNode(' '));
-      var tag = el('a', 'card-tag'); tag.appendChild(el('span', null, item.firstTag)); tag.href = '/tags/' + encodeURIComponent(item.firstTag);
-      who.appendChild(tag);
-    }
     body.appendChild(who);
     var h3 = el('h3', 'feed-title'); var link = el('a', 'card-link', item.title); link.href = item.url; h3.appendChild(link); body.appendChild(h3);
     body.appendChild(el('p', 'feed-excerpt', item.excerpt || ''));
-    body.appendChild(counts(item));
+    var foot = counts(item);
+    if (item.firstTag) {
+      var tag = el('a', 'feed-tag', '#' + item.firstTag); tag.href = '/tags/' + encodeURIComponent(item.firstTag);
+      foot.appendChild(tag);
+    }
+    body.appendChild(foot);
     li.appendChild(body);
     if (item.thumbnailUrl) {
       var thumb = el('div', 'feed-thumb'); var img = el('img'); img.src = item.thumbnailUrl; img.alt = ''; img.loading = 'lazy';

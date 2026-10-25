@@ -27,30 +27,30 @@
                 </li>
             </ul>
         </section>
-        <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계 -->
+        <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계. 10-25 chan: 문구는 짧게, 세 단계는 가운데 정렬 -->
         <section th:if="${clubs.isEmpty()}" class="mission-panel club-onboard" aria-labelledby="club-onboard-heading">
-            <h2 id="club-onboard-heading">함께 쓰면 꾸준히 쓸 수 있어요</h2>
-            <p class="club-onboard-lead">방을 만들고 초대하면, 이번 기간에 누가 썼는지 한눈에 보여요. 따로 챙길 것 없이 글을 쓰면 저절로 '썼어요'가 돼요.</p>
+            <h2 id="club-onboard-heading">함께 쓰면 꾸준해져요</h2>
+            <p class="club-onboard-lead">누가 썼는지 한눈에 보여요.</p>
             <div class="club-presets">
                 <button type="button" class="club-preset" data-preset data-open-club-form
                         data-name="우리 반 글쓰기" data-intro="한 주에 한 편, 우리 반 이야기를 써요" data-every="7" data-mode="APPROVAL" data-cap="30">
                     <strong>반 친구들과</strong>
-                    <span class="help">선생님이 방을 만들고 학생들을 초대해요. 일주일에 한 편처럼 규칙을 정하고, 들어오는 사람은 선생님이 확인해요.</span>
+                    <span class="help">선생님이 만들고, 일주일에 한 편씩 써요.</span>
                     <span class="club-preset-go">반 방 만들기</span>
                 </button>
                 <button type="button" class="club-preset" data-preset data-open-club-form
                         data-name="" data-intro="사흘에 한 편, 서로 응원하며 써요" data-every="3" data-mode="LINK" data-cap="10">
                     <strong>친구들과</strong>
-                    <span class="help">친한 친구 몇 명과 사흘에 한 편씩 써요. 초대 링크를 받은 친구만 들어와요.</span>
+                    <span class="help">친구 몇 명과 사흘에 한 편씩 써요.</span>
                     <span class="club-preset-go">친구 방 만들기</span>
                 </button>
             </div>
             <ol class="club-steps">
-                <li><strong>방 만들기</strong><span class="help">이름과 규칙(며칠에 한 편)만 정하면 돼요</span></li>
-                <li><strong>초대하기</strong><span class="help">초대 링크를 단톡방이나 알림장에 보내요</span></li>
-                <li><strong>글 쓰기</strong><span class="help">기간 안에 전체 공개로 쓰면 '썼어요'가 돼요</span></li>
+                <li><strong>방 만들기</strong><span class="help">이름과 규칙만 정해요</span></li>
+                <li><strong>초대하기</strong><span class="help">친구에게 링크를 보내요</span></li>
+                <li><strong>글 쓰기</strong><span class="help">쓰면 저절로 세져요</span></li>
             </ol>
-            <p class="help club-onboard-find">이미 있는 방에 들어가고 싶다면 <a href="/missions/clubs/find">방 찾기</a>에서 찾아보세요</p>
+            <p class="help club-onboard-find">이미 있는 방은 <a href="/missions/clubs/find">방 찾기</a>에서 찾아요</p>
         </section>
         <section th:unless="${clubs.isEmpty()}" class="mission-panel" aria-labelledby="clubs-heading">
             <div class="club-list-head">

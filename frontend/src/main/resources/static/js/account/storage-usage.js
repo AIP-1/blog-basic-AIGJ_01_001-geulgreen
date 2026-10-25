@@ -14,6 +14,13 @@
         target.textContent = '저장 공간 ' + gb(u.usedBytes) + ' / ' + gb(u.quotaBytes) + ' · 오늘 올린 사진 '
           + u.todayCount + ' / ' + u.dailyLimit + '장';
         if (u.usedBytes * 10 >= u.quotaBytes * 9) { target.textContent += ' (90% 넘게 썼어요)'; }
+        // 10-25: 설정 카드의 막대(있을 때만). 조금이라도 썼으면 보이게 최소 2%
+        var bar = document.getElementById('storage-bar');
+        if (bar && u.quotaBytes > 0) {
+          var pct = Math.min(100, u.usedBytes * 100 / u.quotaBytes);
+          bar.style.width = (u.usedBytes > 0 ? Math.max(2, pct) : 0) + '%';
+          if (pct >= 90) { bar.classList.add('is-full'); }
+        }
       }).catch(function () { target.textContent = '사용량을 불러오지 못했어요.'; });
   }
 

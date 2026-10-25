@@ -1418,12 +1418,14 @@ main.list-page .home-cards { gap: 18px; }
 .explore-people .follow-button, .explore-people .follow-button:not([aria-pressed="true"]) { padding: 3px 10px; font-size: .78em; background: transparent;
     border: 1px solid var(--color-brand); color: var(--color-brand); }
 .explore-people .follow-button:not([aria-pressed="true"]):hover { background: var(--color-brand-soft); color: var(--color-brand); }
-.explore-top { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
-.explore-side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+/* 10-25(chan "많이 읽은 글·사람·태그는 오른쪽에 모두 묶어"): 넓은 화면은 왼쪽 추천 글 카드 + 오른쪽 한 칸, 좁은 화면은 이 칸이 카드 위 */
+.explore-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.explore-feed { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.explore-side { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
 .explore-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .explore-sec-head a { font-size: .85em; font-weight: 600; color: var(--color-text-muted); text-decoration: none; white-space: nowrap; }
 .explore-sec-head a:hover { color: var(--color-brand); }
-.explore-sec-title { margin-top: 8px !important; }
+.explore-sec-title { margin: 0 !important; }
 .rank-list { list-style: none; margin: 0; padding: 0; counter-reset: rank; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; }
 .rank-list li { counter-increment: rank; border-bottom: 1px solid var(--color-border); }
 .rank-list li:last-child { border-bottom: 0; }
@@ -1442,11 +1444,22 @@ main.list-page .home-cards { gap: 18px; }
     .tag-chips::-webkit-scrollbar { display: none; }
     .tag-chips a { flex: none; }
 }
+@media (max-width: 899px) {
+    /* 휴대폰: 카드가 덜 밀려나게 1~5위는 3위까지 */
+    .explore-side .rank-list li:nth-child(n+4) { display: none; }
+}
 @media (min-width: 900px) {
-    .explore-top { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 28px; }
-    .explore-top:not(:has(.explore-rank)) { grid-template-columns: minmax(0, 1fr); }
+    .explore-body.has-side { grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; }
+    .explore-body.has-side .explore-side { order: 2; }
     .explore-side .people-list { flex-direction: column; overflow: visible; }
     .explore-side .person-row { justify-content: space-between; }
+    .explore-side .rank-list a { grid-template-columns: 26px minmax(0, 1fr); padding: 10px 14px; }
+    .explore-side .rank-list a::before { font-size: 1.25em; }
+    /* 오른쪽 칸만큼 좁아진 카드 칸: 900~1279는 한 줄 2장, 1280부터 3장(홈은 4장 그대로) */
+    main.list-page:not(.search-page) .explore-body.has-side .home-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1280px) {
+    main.list-page:not(.search-page) .explore-body.has-side .home-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* 086: 피드는 목록 끝에 탐색으로 가는 한 줄 */
 .feed-end { margin: 8px 0 24px; text-align: center; color: var(--color-text-muted); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
@@ -1942,11 +1955,15 @@ main.mission-page > h1:first-child { margin-bottom: 15px; }
 .club-preset strong { font-size: 1.05em; }
 .club-preset .help { line-height: 1.5; }
 .club-preset-go { margin-top: 4px; font-weight: 600; color: var(--color-brand); }
-.club-steps { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0 0; padding: 0; }
-.club-steps li { counter-increment: step; display: flex; flex-direction: column; gap: 2px; padding-top: 34px; position: relative; }
-.club-steps li::before { content: counter(step); position: absolute; top: 0; left: 0; width: 26px; height: 26px; border-radius: 50%;
+/* 10-25 chan "맨 아래 설명 가운데 맞춤": 세 단계는 가운데 정렬, 번호 사이를 선으로 잇고, 휴대폰에서도 세 칸 한 줄 */
+.club-steps { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 24px 0 0; padding: 20px 0 0;
+  border-top: 1px solid var(--color-border); }
+.club-steps li { counter-increment: step; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 36px 6px 0; position: relative; text-align: center; }
+.club-steps li::before { content: counter(step); position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border-radius: 50%;
   display: grid; place-items: center; font-size: .85em; font-weight: 700; color: var(--color-on-fill); background: var(--color-brand-fill); }
-.club-onboard-find { margin: 18px 0 0; }
+.club-steps li:not(:last-child)::after { content: ""; position: absolute; top: 14px; left: calc(50% + 22px); width: calc(100% - 44px); height: 1px; background: var(--color-border); }
+.club-steps .help { line-height: 1.5; word-break: keep-all; }
+.club-onboard-find { margin: 24px 0 0; text-align: center; }
 .club-next { border-color: var(--color-brand); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .club-next.is-done { border-color: var(--color-border); }
 .club-next-title { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 1.1em; font-weight: 700; }
@@ -1961,7 +1978,7 @@ main.mission-page > h1:first-child { margin-bottom: 15px; }
 .club-more > summary .icon { width: 1em; height: 1em; }
 .club-more[open] > summary .icon { transform: rotate(90deg); }
 .club-more > * + * { margin-top: 12px; }
-@media (max-width: 640px) { .club-presets, .club-steps { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .club-presets { grid-template-columns: 1fr; } }
 .club-preset, .club-preset * { white-space: normal; overflow-wrap: anywhere; }
 /* 10-18 강성찬 개인 확장(chan "기본 썸네일, 고양이 사진으로"): 사진 없는 글 카드의 기본 썸네일. 링크 미리보기(og:image)와 같은
    잠자는 고양이 사진을 16:10으로 잘라 쓰고, 어두운 화면은 같은 고양이의 밤 사진(소개 영역 hero-night의 오른쪽, 글자 없는 쪽).
@@ -2179,39 +2196,40 @@ main.list-page.feed-page { max-width: 768px; }
 .feed-people-id { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .feed-list { list-style: none; margin: 8px 0 0; padding: 0; }
 .feed-day h2 { margin: 22px 0 0; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); font-size: .85em; font-weight: 700; color: var(--color-text-muted); }
-.feed-item { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 96px; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+.feed-item { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 160px; gap: 14px; align-items: start; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
 .feed-item.no-thumb { grid-template-columns: 40px minmax(0, 1fr); }
 .feed-item:hover .feed-title a { text-decoration: underline; }
-.feed-avatar, .feed-handle, .feed-who .card-tag { position: relative; z-index: 1; }
-.feed-body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.feed-avatar, .feed-handle, .feed-tag { position: relative; z-index: 1; }
+.feed-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .feed-who { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: .88em; color: var(--color-text-muted); }
 .feed-handle { color: var(--color-text); font-weight: 700; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .feed-who time { flex: none; white-space: nowrap; }
 .feed-who time::before { content: "· "; }
-.feed-who .card-tag { margin-left: auto; flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.feed-title { margin: 0; font-size: 1.08em; line-height: 1.4; }
+.feed-title { margin: 0; font-size: 1.2em; font-weight: 700; line-height: 1.45; letter-spacing: -.01em; word-break: keep-all; overflow-wrap: anywhere; }
 .feed-title a { color: var(--color-text); text-decoration: none; }
 .feed-title .card-link::after { border-radius: 0; }
-.feed-excerpt { margin: 0; color: var(--color-text-muted); font-size: .92em; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+.feed-excerpt { margin: 0; color: var(--color-text-muted); font-size: .95em; line-height: 1.75; word-break: keep-all; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
-.feed-item .card-foot { margin-top: 4px; }
-.feed-thumb { width: 96px; height: 96px; border-radius: 12px; overflow: hidden; background: var(--color-thumb-empty); }
+.feed-item .card-foot { margin-top: 2px; }
+.feed-tag { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-muted); font-size: .95em; text-decoration: none; }
+.feed-tag:hover { color: var(--color-brand); }
+.feed-thumb { width: 160px; aspect-ratio: 16 / 10; margin-top: 2px; border-radius: 10px; overflow: hidden; background: var(--color-thumb-empty); border: 1px solid var(--color-border); }
 .feed-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .feed-mark { display: flex; align-items: center; gap: 10px; margin: 18px 0 0; color: var(--color-brand); font-size: .85em; font-weight: 600; }
 .feed-mark::before, .feed-mark::after { content: ""; flex: 1; border-top: 1px dashed var(--color-brand); }
 @media (max-width: 480px) {
-    .feed-item { grid-template-columns: 36px minmax(0, 1fr) 72px; gap: 10px; }
+    .feed-item { grid-template-columns: 36px minmax(0, 1fr) 96px; gap: 10px; padding: 16px 0; }
     .feed-item.no-thumb { grid-template-columns: 36px minmax(0, 1fr); }
     .feed-avatar .avatar { width: 36px !important; height: 36px !important; }
-    .feed-thumb { width: 72px; height: 72px; }
+    .feed-thumb { width: 96px; }
+    .feed-title { font-size: 1.1em; }
+    .feed-excerpt { font-size: .92em; line-height: 1.65; }
     .feed-people li { width: 56px; }
-    /* 좁은 화면은 누가·언제가 먼저: 태그는 빼서 아이디·시각이 한 줄에 */
-    .feed-who .card-tag { display: none; }
 }
 
 /* 10-25 chan: 친구 초대 — 초대 링크로 연 화면(/i/아이디/코드)과 내 초대 링크 화면(/me/invite) */
 .invite-page .auth-panel h1 { font-size: 1.45em; line-height: 1.35; }
-.invite-page .auth-panel h1 .invite-who { display: block; }
+.invite-page .auth-panel h1 .invite-name { display: block; }
 .invite-page .auth-panel h1 .invite-fixed { white-space: nowrap; }
 .invite-who { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; }
 .invite-who-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
@@ -2235,3 +2253,106 @@ main.list-page.feed-page { max-width: 768px; }
 .invite-share-status { min-height: 1.2em; }
 .signup-handle-note { margin: 10px 0 0; text-align: center; line-height: 1.5; }
 .signup-handle-note span { display: block; }
+/* 10-25 개인 확장(chan "설정 디자인 싹 갈아엎어줘, 기능별로 묶고 초록 밑줄 별로"): 설정 = 탭마다 카드 묶음.
+   카드(.set-card) 하나 = 기능 하나, 줄(.set-row) 하나 = 설정 하나(왼쪽 이름·설명, 오른쪽 스위치·버튼). 밑줄 링크 대신 화살표 줄(.set-link).
+   파일 맨 아래: 위쪽 .settings section·.settings form button[type=submit] 같은 예전 규칙을 덮어야 해서 */
+.settings-layout .settings-nav a { display: flex; align-items: center; gap: 10px; }
+.settings-layout .settings-nav svg { width: 18px; height: 18px; flex: none; color: var(--color-text-muted); }
+.settings-layout .settings-nav a[aria-current] svg { color: var(--color-brand); }
+.settings-layout .set-head { margin: 0 0 16px; }
+.settings-layout .set-head h2 { margin: 0; font-size: 1.5rem; }
+.settings-layout .set-lead { margin: 4px 0 0; color: var(--color-text-muted); }
+.settings-layout section.set-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px;
+    padding: 6px 20px; margin: 0 0 16px; box-shadow: 0 1px 2px var(--color-shadow); }
+.settings-layout .set-card-title { margin: 14px 0 2px; font-size: .8125rem; font-weight: 700; color: var(--color-text-muted); letter-spacing: .02em; }
+.settings-layout .set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; margin: 0;
+    border-top: 1px solid var(--color-border); }
+.settings-layout .set-card-title + .set-row, .settings-layout .set-card-title + form > .set-row:first-of-type,
+.settings-layout .set-card > .set-row:first-child, .settings-layout .set-card > form.set-row:first-child,
+.settings-layout .set-card > form:first-child > .set-row:first-child { border-top: 0; }
+.settings-layout .set-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.settings-layout .set-label { margin: 0; font-size: 1rem; font-weight: 600; color: var(--color-text); }
+.settings-layout .set-label-sm { margin: 8px 0 4px; font-size: .9375rem; font-weight: 600; }
+.settings-layout .set-desc { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--color-text-muted); }
+.settings-layout .set-desc.set-foot, .settings-layout .set-card > .set-desc { margin: 4px 0 12px; }
+.settings-layout .readonly { color: var(--color-text-muted); text-align: right; overflow-wrap: anywhere; }
+.settings-layout .set-row-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.settings-layout .set-field { margin: 14px 0; }
+.settings-layout .set-field > label { font-weight: 600; }
+.settings-layout .set-field input[type=text], .settings-layout .set-field input[type=password], .settings-layout .set-field textarea { max-width: none; }
+.settings-layout .set-count { text-align: right; margin: 4px 0 0; }
+.settings-layout .set-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 4px 0 14px; }
+.settings-layout .set-actions .form-status { margin: 0; }
+/* 바로 저장하는 폼(알림)은 [저장]을 숨기니 아래 빈칸도 접는다 */
+.settings-layout .set-actions:has(button[hidden]) { padding: 0 0 8px; }
+.settings-layout .profile-image-row { flex-wrap: nowrap; }
+/* 화살표 줄: 줄 전체가 눌리는 칸, 밑줄 없음 */
+.settings-layout a.set-link { color: inherit; text-decoration: none; margin: 0 -20px; padding: 14px 20px; }
+.settings-layout a.set-link:hover { background: var(--color-surface-muted); text-decoration: none; }
+.settings-layout a.set-link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.settings-layout .set-link .menu-chevron, .settings-layout .set-details .menu-chevron { flex: none; width: 18px; height: 18px; color: var(--color-text-muted); }
+.settings-layout .set-card > a.set-link:last-child { border-radius: 0 0 15px 15px; margin-bottom: -6px; padding-bottom: 20px; }
+/* 접히는 줄(비밀번호 변경) */
+.settings-layout .set-details > summary { list-style: none; cursor: pointer; }
+.settings-layout .set-details > summary::-webkit-details-marker { display: none; }
+.settings-layout .set-details[open] > summary .menu-chevron { transform: rotate(90deg); }
+.settings-layout .set-details .menu-chevron { transition: transform .15s; }
+/* 버튼: 저장류만 초록, 줄 끝 버튼은 테두리, 탈퇴는 빨강 글자 */
+.settings-layout .btn-quiet, .settings-layout .btn-quiet:hover { border-color: transparent; background: none; color: var(--color-text-muted); }
+.settings-layout .btn-quiet:hover { color: var(--color-text); background: var(--color-surface-muted); }
+.settings-layout form button[type=submit].set-btn { background: var(--color-surface); border-color: var(--color-control-border); color: var(--color-text); }
+.settings-layout form button[type=submit].set-btn:hover { background: var(--color-surface-muted); color: var(--color-text); }
+.settings-layout .set-btn, .settings-layout .set-btn-danger { flex: none; }
+.settings-layout a.set-btn-danger { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; text-decoration: none; white-space: nowrap;
+    border: 1px solid var(--color-danger-soft); background: var(--color-danger-soft); color: var(--color-danger); font-weight: 600; }
+.settings-layout a.set-btn-danger:hover { border-color: var(--color-danger); text-decoration: none; }
+/* 체크 칸 = 스위치(알림) */
+.settings-layout .set-toggle { cursor: pointer; }
+.settings-layout .set-toggle input[type=checkbox] { appearance: none; -webkit-appearance: none; flex: none; position: relative; margin: 0;
+    width: 44px; height: 26px; border-radius: 13px; background: var(--color-border); cursor: pointer; transition: background .15s; vertical-align: middle; }
+.settings-layout .set-toggle input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--color-surface); box-shadow: 0 1px 2px var(--color-shadow); transition: left .15s; }
+.settings-layout .set-toggle input[type=checkbox]:checked { background: var(--color-brand-fill); }
+.settings-layout .set-toggle input[type=checkbox]:checked::after { left: 21px; }
+.settings-layout .set-toggle input[type=checkbox]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* 비공개 계정 스위치도 같은 크기 */
+.settings-layout .switch { flex: none; padding: 0; }
+.settings-layout .switch-track { width: 44px; height: 26px; border-radius: 13px; }
+.settings-layout .switch-track::after { width: 20px; height: 20px; }
+.settings-layout .switch[aria-checked="true"] .switch-track { background: var(--color-brand-fill); }
+.settings-layout .switch[aria-checked="true"] .switch-track::after { left: 21px; }
+/* 고르기 칸(공개 범위·테마): 알약 안 칸 셋 */
+.settings-layout fieldset.segmented { display: flex; gap: 4px; padding: 4px; margin: 10px 0 8px; border: 0; border-radius: 999px; background: var(--color-surface-muted); max-width: 420px; }
+.settings-layout .segmented label { flex: 1 1 0; position: relative; display: flex; justify-content: center; align-items: center; min-height: 40px; padding: 0 10px;
+    border-radius: 999px; cursor: pointer; color: var(--color-text-muted); font-weight: 600; white-space: nowrap; }
+.settings-layout .segmented input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.settings-layout .segmented label:has(input:checked) { background: var(--color-surface); color: var(--color-text); box-shadow: 0 1px 3px var(--color-shadow); }
+.settings-layout .segmented label:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+/* 저장 공간 막대 */
+.settings-layout .usage-bar { height: 8px; margin: 12px 0 0; border-radius: 4px; background: var(--color-surface-muted); overflow: hidden; }
+.settings-layout .usage-bar > span { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--color-brand-fill); transition: width .3s; }
+.settings-layout .usage-bar > span.is-full { background: var(--color-danger); }
+.settings-layout .set-list { list-style: none; margin: 0; padding: 0; }
+.settings-layout .set-list .set-row { font-size: .9375rem; }
+.settings-layout .set-card-danger .set-label { color: var(--color-danger); }
+@media (max-width: 640px) {
+    .settings-layout section.set-card { padding: 4px 16px; border-radius: 14px; }
+    .settings-layout a.set-link { margin: 0 -16px; padding: 14px 16px; }
+    .settings-layout .settings-nav svg { display: none; }
+    .settings-layout .settings-nav a { gap: 0; }
+    .settings-layout .set-head h2 { font-size: 1.25rem; }
+    .settings-layout .profile-image-row { flex-wrap: wrap; }
+    .settings-layout .profile-image-row .set-row-actions { flex-basis: 100%; justify-content: flex-start; }
+    .settings-layout fieldset.segmented { max-width: none; }
+}
+/* 10-25(chan "시리즈는 가로로 많으니까 집중도가 떨어져"): 탐색 시리즈 탭만 큰 표지 카드. 한 줄 3장(좁으면 2·1장),
+   표지는 16:10 그대로 위에, 이름·설명·정보는 한 줄씩. 블로그 시리즈 탭·홈 선반의 작은 카드는 그대로 */
+.explore-page .series-list { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (min-width: 600px) { .explore-page .series-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .explore-page .series-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.explore-page .series-card a { display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden; }
+.explore-page .series-card .series-cover { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 0; border-bottom: 1px solid var(--color-border); }
+.explore-page .series-card .series-cover-empty .icon { width: 36px; height: 36px; }
+.explore-page .series-card-text { gap: 4px; padding: 14px 18px 16px; }
+.explore-page .series-card strong { font-size: 1.08em; line-height: 1.4; }
+.explore-page .series-card .help { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
