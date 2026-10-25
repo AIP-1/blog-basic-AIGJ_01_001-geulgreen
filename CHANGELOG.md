@@ -7,6 +7,34 @@
 
 ---
 
+## [1.77.3] — 2026-10-25 · 개인 확장 (함께 쓰기 첫 화면)
+
+- 함께 쓰기 첫 화면: 세 단계 가운데 정렬, 안내 문구 짧게
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.3/v1773-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.3/v1773-club-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.77.3/v1773-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.3/v1773-club-m-after.png) |
+
+---
+
+## [1.77.2] — 2026-10-25 · 개인 확장 (설정 AI·연결 탭 합치기)
+
+- 설정 [연결] 탭을 [AI] 탭 안으로(옛 #settings-connections 주소도 같은 곳)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.77.2/v1772-ai-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.2/v1772-ai-after.png) |
+| ![](https://github.com/practicech/blog/releases/download/v1.77.2/v1772-set-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.77.2/v1772-set-m-after.png) |
+
+---
+
 ## [1.77.1] — 2026-10-25 · 개인 확장 (위 메뉴 줄이기)
 
 - 위 메뉴 5칸(홈·탐색·피드·글감·함께 쓰기)
