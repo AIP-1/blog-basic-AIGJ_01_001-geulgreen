@@ -87,7 +87,7 @@ class PostAccessMatrixIT extends IntegrationTestBase {
         for (MockHttpServletResponse response : new MockHttpServletResponse[] {hidden, missing}) {
             String html = response.getContentAsString();
             assertThat(html).contains("<meta property=\"og:title\" content=\"볼 수 없는 글이에요\">")
-                    .contains("친구 공개·비공개 글이거나 삭제된 글입니다.").contains("<meta name=\"robots\" content=\"noindex\">")
+                    .contains("친한 친구만 보는 글, 비공개 글이거나 삭제된 글입니다.").contains("<meta name=\"robots\" content=\"noindex\">")
                     .doesNotContain("비밀 제목");
             assertThat(response.getHeader("Cache-Control")).contains("no-store");
         }

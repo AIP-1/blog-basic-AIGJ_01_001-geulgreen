@@ -202,7 +202,7 @@
                 <label><input type="radio" name="defaultVisibility" value="PUBLIC"
                               th:checked="${profile.defaultVisibility() == 'PUBLIC'}"><span>전체 공개</span></label>
                 <label><input type="radio" name="defaultVisibility" value="FRIENDS"
-                              th:checked="${profile.defaultVisibility() == 'FRIENDS'}"><span>친구 공개</span></label>
+                              th:checked="${profile.defaultVisibility() == 'FRIENDS'}"><span>친한 친구만</span></label>
                 <label><input type="radio" name="defaultVisibility" value="PRIVATE"
                               th:checked="${profile.defaultVisibility() == 'PRIVATE'}"><span>나만 보기</span></label>
             </fieldset>
@@ -228,9 +228,9 @@
         </form>
     </section>
     <section class="set-card" id="settings-friends" aria-labelledby="friends-heading">
-        <h3 class="set-card-title" id="friends-heading">친구</h3>
+        <h3 class="set-card-title" id="friends-heading">친한 친구</h3>
         <a class="set-row set-link" href="/settings/friends">
-            <span class="set-row-text"><span class="set-label">친구·그룹 관리</span><span class="set-desc">친구 공개 글은 나와 내가 넣은 친구만 봐요</span></span>
+            <span class="set-row-text"><span class="set-label">친한 친구·그룹 관리</span><span class="set-desc">"친한 친구만" 글은 나와 내가 고른 친한 친구만 봐요</span></span>
             <svg th:replace="~{fragments/icons :: chevron}"></svg>
         </a>
         <a class="set-row set-link" href="/settings/privacy" th:if="${privateAccountsEnabled}">

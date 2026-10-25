@@ -113,7 +113,7 @@
       if (!badge) { return; }
       var v = e.detail.visibility;
       // 아이콘은 data-visibility로 CSS가 고른다(fragments/visibility.html)
-      var label = v === 'PRIVATE' ? '비공개' : (v === 'FRIENDS' ? '친구 공개' : (v === 'LINK' ? '링크 공개' : (v === 'GROUP' ? '그룹 공개' : '공개')));
+      var label = v === 'PRIVATE' ? '비공개' : (v === 'FRIENDS' ? '친한 친구만' : (v === 'LINK' ? '링크 공개' : (v === 'GROUP' ? '그룹 공개' : '공개')));
       badge.dataset.visibility = v;
       badge.querySelector('.vis-label').textContent = label;
       badge.title = label;
@@ -140,7 +140,7 @@
   }
 
   // 109 강성찬 개인 확장: 여러 글 골라 한 번에. 줄마다 쓰는 API를 차례로 부르고, 된 줄은 지우거나(휴지통·복원·영구 삭제) 표시를 바꾼다
-  var LABELS = { PUBLIC: '전체 공개', FRIENDS: '친구 공개', LINK: '링크 공개', GROUP: '그룹 공개', PRIVATE: '나만 보기' };
+  var LABELS = { PUBLIC: '전체 공개', FRIENDS: '친한 친구만', LINK: '링크 공개', GROUP: '그룹 공개', PRIVATE: '나만 보기' };
   var DONE = { trash: '개를 휴지통으로 옮겼어요', restore: '개를 복원했어요. 발행 글 탭이나 임시글 탭에서 볼 수 있어요', purge: '개를 영구 삭제했어요' };
 
   function initBulk() {

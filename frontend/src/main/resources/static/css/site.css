@@ -646,7 +646,6 @@ body > main + .site-footer, body > div + .site-footer { margin-top: auto; }
 html, body { overflow-x: clip; }
 /* 025 친구(강성찬 개인 확장) */
 .friend-form { display: inline-flex; gap: 6px; align-items: center; margin: 0 0 0 6px; }
-.friend-badge { color: var(--color-brand); font-weight: 600; font-size: .9em; }
 .friend-search { display: flex; gap: 6px; margin: 0 0 12px; }
 .friend-search input { flex: 1; min-width: 0; }
 .friends-page section { margin: 24px 0; }

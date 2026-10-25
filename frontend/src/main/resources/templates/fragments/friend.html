@@ -2,18 +2,17 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 <!--
-  친한 친구 버튼(025·069 강성찬 개인 확장). status = NONE / FOLLOWING / FRIENDS (보는 사람 기준, 내가 상대를 팔로우하면 FOLLOWING).
-  내가 팔로우하는 사람만 친구로 넣을 수 있고, 상대 수락도 알림도 없다. 스크립트 없이 폼으로 동작한다.
+  친한 친구 넣기·빼기 버튼(025·069 강성찬 개인 확장). 설정 > 친한 친구 목록에서만 쓴다(블로그 상단에는 두지 않는다).
+  status = FOLLOWING(내가 팔로우하는 사람, 넣기) / FRIENDS(이미 친한 친구, 빼기). 상대 수락도 알림도 없다. 스크립트 없이 폼으로 동작한다.
 -->
 <th:block th:fragment="button(handle, status, back)">
     <form th:if="${status == 'FOLLOWING' or status == 'FRIENDS'}" method="post" th:action="${paths.blog(handle) + '/friend'}" class="friend-form">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <input type="hidden" name="back" th:value="${back}">
-        <button th:if="${status == 'FOLLOWING'}" type="submit" name="action" value="add" class="btn btn-sm">친구로 넣기</button>
-        <th:block th:if="${status == 'FRIENDS'}">
-            <span class="friend-badge">친구 ✓</span>
-            <button type="submit" name="action" value="remove" class="btn-text btn-sm">친구에서 빼기</button>
-        </th:block>
+        <button th:if="${status == 'FOLLOWING'}" type="submit" name="action" value="add" class="btn btn-sm"
+                th:attr="aria-label=${handle + ' 친한 친구로 넣기'}">넣기</button>
+        <button th:if="${status == 'FRIENDS'}" type="submit" name="action" value="remove" class="btn-text btn-sm"
+                th:attr="aria-label=${handle + ' 친한 친구에서 빼기'}">빼기</button>
     </form>
 </th:block>
 </body>
