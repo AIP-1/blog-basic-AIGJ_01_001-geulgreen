@@ -31,6 +31,8 @@ public class DatabaseCleaner {
             "daily_topic", "mission_post", "writing_club", "writing_club_member", "writing_club_join", "prompt_mail", "guardian_consent",
             // 089 강성찬 개인 확장
             "comment_like",
+            // 10-23 모아보기: 글 저장
+            "post_bookmark",
             // 강성찬 개인 확장(090)
             "inquiry",
             // 096 강성찬 개인 확장

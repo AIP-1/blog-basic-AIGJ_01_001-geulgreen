@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * 023 익명 처리 단계: 20 남의 글에 쓴 댓글(답글이 달린 것은 자리만, 나머지는 삭제, 댓글 수 다시 세기), 30 내가 누른 좋아요(수 다시 세기),
+ * 023 익명 처리 단계: 20 남의 글에 쓴 댓글(답글이 달린 것은 자리만, 나머지는 삭제, 댓글 수 다시 세기), 30 내가 누른 좋아요(수 다시 세기)·저장,
  * 60 팔로우 양방향. 수는 실제 남은 행으로 다시 센다(FR-030).
  */
 public final class InteractionPurgeSteps {
@@ -84,6 +84,7 @@ public final class InteractionPurgeSteps {
         @Override
         public void purge(long memberId) {
             jdbc.update("DELETE FROM comment_like WHERE member_id = ?", memberId); // 089
+            jdbc.update("DELETE FROM post_bookmark WHERE member_id = ?", memberId); // 10-23 저장(나만 보는 목록)
             List<Long> posts = jdbc.queryForList("DELETE FROM post_like WHERE member_id = ? RETURNING post_id", Long.class, memberId);
             if (!posts.isEmpty()) { // NOSONAR 오탐: Spring 조회 결과는 null이 아니다(빈 목록이나 예외)
                 jdbc.update("""

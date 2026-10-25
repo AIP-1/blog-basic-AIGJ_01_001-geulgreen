@@ -61,18 +61,18 @@
     }
   }
 
-  // 10-22 개인 확장: 넓은 화면(1200px 이상)에서는 좋아요·공유를 본문 왼쪽 떠 있는 기둥(aside)으로 옮기고, 좁아지면 반응 줄 제자리로 되돌린다.
+  // 10-22 개인 확장: 넓은 화면(1200px 이상)에서는 좋아요·저장(10-23)·공유를 본문 왼쪽 떠 있는 기둥(aside)으로 옮기고, 좁아지면 반응 줄 제자리로 되돌린다.
   // 노드를 그대로 옮기므로 like.js·공유 메뉴의 이벤트는 따라간다. 스크립트가 없으면 반응 줄에 그대로 남는다
   function sideActions() {
     var article = document.querySelector('article.post');
     var row = article && article.querySelector('.reaction-row');
     if (!row || !window.matchMedia) { return; }
-    var items = Array.prototype.filter.call(row.children, function (n) { return n.matches('.like-form, .like-count, .share-menu'); });
+    var items = Array.prototype.filter.call(row.children, function (n) { return n.matches('.like-form, .like-count, .save-form, .share-menu'); });
     if (!items.length) { return; }
     var spots = items.map(function (n) { var c = document.createComment(''); row.insertBefore(c, n); return c; });
     var aside = document.createElement('aside');
     aside.className = 'post-side-actions';
-    aside.setAttribute('aria-label', '좋아요와 공유');
+    aside.setAttribute('aria-label', '좋아요, 저장, 공유');
     article.insertBefore(aside, article.firstChild);
     var wide = window.matchMedia('(min-width: 1200px)');
     function place() {
