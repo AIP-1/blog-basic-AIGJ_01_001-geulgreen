@@ -42,9 +42,13 @@ class DailyMissionIT extends IntegrationTestBase {
     }
 
     private void publish(long who, long postId, String visibility) throws Exception {
+        publish(who, postId, visibility, "오늘의 미션 글");
+    }
+
+    private void publish(long who, long postId, String visibility, String title) throws Exception {
         mockMvc.perform(post("/api/posts/{id}/publish", postId).with(csrf()).with(TestAuth.member(who))
                 .header("Idempotency-Key", "mission-" + postId).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"title\":\"오늘의 미션 글\",\"contentMd\":\"미션 글 본문이에요\",\"tags\":[],\"visibility\":\"" + visibility
+                .content("{\"title\":\"" + title + "\",\"contentMd\":\"미션 글 본문이에요\",\"tags\":[],\"visibility\":\"" + visibility
                         + "\",\"baseVersion\":0}")).andExpect(status().isOk());
     }
 
@@ -101,6 +105,28 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions?date=2026-10-12", friend)).contains("그날의 글감과 글이에요").contains("오늘의 미션 글");
         assertThat(page("/missions", friend)).contains("10월 12일");
         mockMvc.perform(get("/missions?date=2026-12-31")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void pickOneTopicShowsOnlyItsPosts() throws Exception {
+        // 114 글감별 글 모아보기: ?topic=으로 그 글감 글만, 그날 글감이 아니면 모두
+        clock.set(T);
+        long first = member("mstopica");
+        long second = member("mstopicb");
+        List<MissionService.Topic> topics = missions.topics(DAY);
+        publish(first, startWriting(first, topics.get(0).id()), "PUBLIC", "첫째 글감으로 쓴 글");
+        publish(second, startWriting(second, topics.get(1).id()), "PUBLIC", "둘째 글감으로 쓴 글");
+        String all = page("/missions", null);
+        assertThat(all).contains("첫째 글감으로 쓴 글").contains("둘째 글감으로 쓴 글").contains("글감으로 골라 보기")
+                .contains("/missions?topic=" + topics.get(0).id() + "#posts");
+        String picked = page("/missions?topic=" + topics.get(1).id(), null);
+        assertThat(picked).contains("둘째 글감으로 쓴 글").doesNotContain("첫째 글감으로 쓴 글").contains("is-picked");
+        assertThat(page("/missions?topic=" + topics.get(2).id(), null)).doesNotContain("글감으로 쓴 글").contains("이 글감으로 올라온 글이 아직 없어요");
+        assertThat(page("/missions?topic=999999", null)).contains("첫째 글감으로 쓴 글").contains("둘째 글감으로 쓴 글").doesNotContain("is-picked");
+        // 지난날 화면에서도 날짜를 지킨 채로 고른다
+        clock.set(T.plusSeconds(24 * 3600));
+        assertThat(page("/missions?date=2026-10-12&topic=" + topics.get(0).id(), null)).contains("첫째 글감으로 쓴 글")
+                .doesNotContain("둘째 글감으로 쓴 글").contains("/missions?date=2026-10-12&amp;topic=" + topics.get(1).id() + "#posts");
     }
 
     @Test

@@ -28,7 +28,9 @@ class ExploreIT extends IntegrationTestBase {
                 .contains("<span>exwriter</span>").doesNotContain("탐색작가")
                 // 새로 온 작가는 "새 작가" 표시로 같은 칸에, 탭 옆 "태그 전체 보기"는 위 메뉴 태그와 겹쳐 뺌
                 .contains("person-new\">새 작가").doesNotContain("explore-tags-link").doesNotContain("side-pills")
-                .doesNotContain("feed-recommended").doesNotContain("newcomers-heading");
+                .doesNotContain("feed-recommended").doesNotContain("newcomers-heading")
+                // 10-23: 추천 탭 첫 화면 위는 구역(사람 추천·태그 칩 등), 그 아래 "추천 글" 카드
+                .contains("class=\"explore-top\"").contains("class=\"explore-side\"");
         String home = mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString();
         // 홈 오른쪽 "둘러보기" 칸은 뺌(탐색은 머리말 메뉴로)
         assertThat(home).contains("href=\"/explore\"").doesNotContain("탐색에서 더 보기").doesNotContain("side-rec-list").doesNotContain("newcomers-heading")

@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * 086(강성찬 개인 확장): 피드 형식으로. 위에 추천 블로그 줄(팔로우 버튼), 아래 추천 글 카드 목록(무한 스크롤, 커서는 추천 위치).
  * 추천 글은 내 글·팔로우한 사람 글(피드에 나옴)을 뺀 077 규칙 순서.
  * 086: 홈에 있던 [트렌딩] 탭(019, 스냅샷 커서)과 새로 온 작가(036)도 여기로. 인기 태그는 검색 창·/tags에만(여기는 링크).
+ * 10-23(강성찬 개인 확장, chan "홈·탐색·피드가 너무 똑같아"): 추천 탭 첫 화면 위에 "이번 주 많이 읽은 글" 1~5위 목록과
+ * 사람 추천·태그 칩을 두 칸으로 두고, 그 아래 추천 글 카드(홈과 같은 카드). 홈·피드와 달리 "새로 찾기" 모양.
  */
 @Controller // NOSONAR /explore 화면(뷰 이름)과 JSON API를 함께 내므로 @RestController가 아니다
 public class ExploreController {
@@ -41,11 +43,14 @@ public class ExploreController {
     private final CurrentUserProvider currentUserProvider;
     private final Clock clock;
     private final SeriesService seriesService;
+    private final com.team.blog.discovery.application.TagBrowseQuery tagBrowseQuery;
 
     public ExploreController(RecommendedPostQuery recommendedPostQuery, RecommendedBlogQuery recommendedBlogQuery,
                              NewcomerQuery newcomerQuery, TrendingService trendingService, PostListQuery listQuery,
-                             CurrentUserProvider currentUserProvider, Clock clock, SeriesService seriesService) {
+                             CurrentUserProvider currentUserProvider, Clock clock, SeriesService seriesService,
+                             com.team.blog.discovery.application.TagBrowseQuery tagBrowseQuery) {
         this.seriesService = seriesService;
+        this.tagBrowseQuery = tagBrowseQuery;
         this.recommendedPostQuery = recommendedPostQuery;
         this.recommendedBlogQuery = recommendedBlogQuery;
         this.newcomerQuery = newcomerQuery;
@@ -74,6 +79,8 @@ public class ExploreController {
             model.addAttribute("seriesNext", rows.size() > SeriesService.BROWSE_PAGE ? from + SeriesService.BROWSE_PAGE : null);
             model.addAttribute("seriesFrom", from);
             model.addAttribute("people", List.of());
+            model.addAttribute("topPosts", List.of());
+            model.addAttribute("topTags", List.of());
             return "explore";
         }
         long viewer = viewer();
@@ -96,6 +103,8 @@ public class ExploreController {
         model.addAttribute("moreLinkBase", trending ? "?tab=trending&cursor=" : "?cursor=");
         boolean firstRecommended = !trending && !continued;
         model.addAttribute("people", firstRecommended ? people(viewer) : List.of());
+        model.addAttribute("topPosts", firstRecommended ? topPosts() : List.of());
+        model.addAttribute("topTags", firstRecommended ? tagBrowseQuery.byViews(TOP_TAGS) : List.of());
         return "explore";
     }
 
@@ -114,6 +123,18 @@ public class ExploreController {
         recommendedBlogQuery.forMember(viewer).forEach(b -> out.putIfAbsent(b.handle(), new Person(b.handle(), b.avatar(), fresh.contains(b.handle()))));
         newcomers.forEach(n -> out.putIfAbsent(n.handle(), new Person(n.handle(), n.avatar(), true)));
         return out.values().stream().limit(PEOPLE).toList();
+    }
+
+    static final int TOP_POSTS = 5;
+    static final int TOP_TAGS = 8;
+
+    /** 이번 주 많이 읽은 글: 트렌딩 스냅샷 앞 {@value #TOP_POSTS}개. 순위가 비었거나 사라졌으면 그 칸을 숨긴다. */
+    private List<PostCard> topPosts() {
+        try {
+            return trendingService.page(null).items().stream().limit(TOP_POSTS).toList();
+        } catch (SnapshotExpiredException | PostContentException e) {
+            return List.of();
+        }
     }
 
     @GetMapping("/api/explore")
