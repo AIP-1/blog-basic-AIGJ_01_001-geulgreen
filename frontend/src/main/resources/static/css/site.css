@@ -1754,7 +1754,7 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .club-card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .club-card-top { display: flex; align-items: center; gap: 8px; }
 .club-card-name { font-size: 1.05em; }
-.club-card-top .club-state, .club-card-top .badge { margin-left: auto; }
+.club-card-top .badge { margin-left: auto; }
 .club-card-intro { color: var(--color-text); }
 .club-empty { margin-top: 14px; padding: 28px 16px; border: 1px dashed var(--color-border); border-radius: 16px; text-align: center; }
 .club-empty p { margin: 0 0 6px; }
@@ -1776,13 +1776,7 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .club-head h1 { margin: 0; }
 .club-head .club-intro { margin: 6px 0 0; }
 .club-meta { margin: 6px 0 0; }
-.club-period { margin-top: 20px; }
-.club-period-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0; }
-.club-count { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
-.club-count.is-done { color: var(--color-brand); }
-.club-count .icon, .club-state .icon, #club-posts-heading .icon, #club-invite-copy .icon { width: 1em; height: 1em; flex: none; }
-.club-progress { height: 6px; margin-top: 10px; border-radius: 999px; background: var(--color-grass-0); overflow: hidden; }
-.club-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--color-grass-3); }
+#club-invite-copy .icon { width: 1em; height: 1em; flex: none; }
 .club-members { margin-top: 16px; }
 .club-members > summary { display: flex; align-items: center; gap: 6px; padding: 8px 0; cursor: pointer; list-style: none;
   font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
@@ -1796,17 +1790,10 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .club-member-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .club-member-text .help { font-size: .85em; }
 .club-member-name { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.club-state { flex: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: .85em;
-  color: var(--color-text-muted); background: var(--color-surface-muted); }
-.club-state.is-done { color: var(--color-brand); background: var(--color-grass-1); }
 .club-remove { font-size: .85em; color: var(--color-text-muted); white-space: nowrap; }
-.club-invite-card h2 { margin: 0; font-size: 1.15em; }
-.club-invite-card > .help { margin: 6px 0 0; }
 #club-invite-copy { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; }
 #club-invite-copy[hidden] { display: none; }
 .club-invite-url { margin: 8px 0 0; font-size: .8em; word-break: break-all; }
-#club-posts-heading { display: flex; align-items: center; gap: 8px; }
-.club-actions { display: flex; justify-content: flex-end; }
 .club-join .btn { margin-top: 8px; }
 /* 강성찬 개인 확장(10-16): 처음 온 사람 안내 — 배너 아래 한 줄, 첫 글 전 "시작하기 3단계", 인증 완료 다음 단추 */
 .home-intro { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
@@ -1965,14 +1952,6 @@ main.mission-page > h1:first-child { margin-bottom: 15px; }
 .club-steps li:not(:last-child)::after { content: ""; position: absolute; top: 14px; left: calc(50% + 22px); width: calc(100% - 44px); height: 1px; background: var(--color-border); }
 .club-steps .help { line-height: 1.5; word-break: keep-all; }
 .club-onboard-find { margin: 24px 0 0; text-align: center; }
-.club-next { border-color: var(--color-brand); display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.club-next.is-done { border-color: var(--color-border); }
-.club-next-title { margin: 0; display: flex; align-items: center; gap: 6px; font-size: 1.1em; font-weight: 700; }
-.club-next-title .icon { width: 1em; height: 1em; color: var(--color-brand); }
-.club-next > .help { margin: 0; }
-.club-next form, .club-next > .btn { margin-top: 8px; }
-.club-next .btn .icon { width: 1em; height: 1em; }
-.club-next .btn { display: inline-flex; align-items: center; gap: 6px; }
 .club-more { margin-top: 12px; }
 .club-more > summary { display: flex; align-items: center; gap: 6px; padding: 8px 0; cursor: pointer; list-style: none; font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
 .club-more > summary::-webkit-details-marker { display: none; }
@@ -2434,3 +2413,121 @@ main.set-page { max-width: 760px; }
 .explore-page .series-card-text { gap: 4px; padding: 14px 18px 16px; }
 .explore-page .series-card strong { font-size: 1.08em; line-height: 1.4; }
 .explore-page .series-card .help { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 10-25 강성찬 개인 확장: 함께 쓰기를 오픈채팅방처럼. 방 화면은 가운데 720px 대화창 + 오른쪽 260px(멤버·초대·관리), 휴대폰은 한 줄 + 아래 고정 [글 쓰기] */
+.room { display: grid; grid-template-columns: minmax(0, 720px) 260px; gap: 56px; justify-content: center; align-items: start; width: 100%; }
+.room-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.room-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 4px 2px 0; }
+.room-head-text { flex: 1; min-width: 0; }
+.room-head h1 { margin: 0 0 6px; font-size: 1.75em; line-height: 1.25; }
+.room-head .help { margin: 0; }
+.room-today { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .92em; }
+.room-today-text { white-space: nowrap; }
+.room-faces { display: flex; }
+.room-faces > span { position: relative; display: inline-flex; margin-right: -6px; border: 2px solid var(--color-bg); border-radius: 999px; }
+.room-faces > span.is-today::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px; border-radius: 999px;
+  background: var(--color-success); border: 2px solid var(--color-bg); }
+.room-head-actions { display: flex; gap: 8px; }
+.room-head-actions .btn, .room-invite-m, .room-write-bar .btn, .room-pin-write .btn { display: inline-flex; align-items: center; gap: 6px; }
+.room-head-actions .icon, .room-invite-m .icon, .room-write-bar .icon { width: 1em; height: 1em; }
+.room-invite-m { display: none; }
+.room-pin { position: relative; background: var(--color-surface); border-radius: 16px; box-shadow: 0 1px 3px var(--color-shadow); }
+.room-pin > details > summary { display: flex; align-items: center; gap: 12px; padding: 12px 140px 12px 16px; cursor: pointer; list-style: none; }
+.room-pin.is-empty > details > summary { padding-right: 16px; }
+.room-pin > details > summary::-webkit-details-marker { display: none; }
+.room-pin-icon { flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--color-brand-soft); color: var(--color-brand);
+  display: inline-flex; align-items: center; justify-content: center; }
+.room-pin-icon .icon { width: 16px; height: 16px; }
+.room-pin-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.room-pin-label { font-size: .78em; color: var(--color-text-muted); }
+.room-pin-title { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-pin-title .help { font-weight: 400; font-size: .85em; }
+.room-pin.is-empty .room-pin-title { font-weight: 600; color: var(--color-text-muted); }
+.room-pin-write { position: absolute; top: 12px; right: 14px; }
+.room-pin-body { padding: 0 16px 16px 60px; display: flex; flex-direction: column; gap: 10px; }
+.room-pin-body > p { margin: 0; }
+.room-pin-body > form > .btn-text { padding-left: 0; padding-right: 0; }
+.room-topic-form { padding-top: 12px; border-top: 1px solid var(--color-border); }
+.room-sub { margin: 6px 0 0; font-size: .85em; color: var(--color-text-muted); font-weight: 600; }
+.room-past { list-style: none; margin: 0; padding: 0; }
+.room-past li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--color-border); font-size: .92em; }
+.room-past-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-empty { margin: 8px 0 0; }
+.room-stream { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 22px; }
+.room-day, .room-sys { display: flex; justify-content: center; }
+.room-day { margin-top: 10px; }
+.room-sys { margin: -6px 0; }
+.room-day span, .room-sys span { font-size: .78em; color: var(--color-text-muted); background: var(--color-surface-muted); border-radius: 999px; padding: 3px 12px;
+  text-align: center; }
+.room-msg { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; }
+.room-msg-face { display: inline-flex; align-self: start; text-decoration: none; }
+.room-msg-who { display: flex; align-items: center; gap: 8px; font-size: .88em; margin-bottom: 6px; min-width: 0; }
+.room-msg-who .help { font-size: .9em; white-space: nowrap; }
+.room-bubble { display: grid; grid-template-columns: minmax(0, 1fr) 120px; gap: 18px; align-items: center; padding: 16px 18px; color: inherit; text-decoration: none;
+  background: var(--color-surface); border-radius: 4px 20px 20px 20px; box-shadow: 0 1px 3px var(--color-shadow); transition: box-shadow .15s ease; }
+.room-bubble:hover { box-shadow: 0 4px 14px var(--color-shadow); }
+.room-bubble.no-thumb { grid-template-columns: minmax(0, 1fr); }
+.room-bubble-text { display: flex; flex-direction: column; min-width: 0; }
+.room-bubble strong { font-size: 1.04em; line-height: 1.45; overflow-wrap: anywhere; }
+.room-ex { margin-top: 4px; color: var(--color-text-muted); font-size: .9em; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.room-bubble img { width: 120px; height: 80px; object-fit: cover; border-radius: 12px; }
+.room-react { display: flex; gap: 12px; margin-top: 6px; padding-left: 4px; font-size: .8em; color: var(--color-text-muted); }
+.room-react .icon { width: 13px; height: 13px; vertical-align: -2px; }
+.room-chip { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; font-size: .78em; font-weight: 600; color: var(--color-brand);
+  background: var(--color-brand-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-chip .icon { width: 11px; height: 11px; flex: none; }
+.room-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 28px; padding-top: 8px; min-width: 0; }
+.room-side h2 { margin: 0; font-size: .85em; color: var(--color-text-muted); font-weight: 600; }
+.room-members > summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; margin-bottom: 12px; color: var(--color-text-muted); }
+.room-members > summary::-webkit-details-marker { display: none; }
+.room-members > summary .icon { width: 1em; height: 1em; }
+.room-members[open] > summary .icon { transform: rotate(90deg); }
+.room-member-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.room-member-list li { display: flex; align-items: center; gap: 10px; font-size: .92em; }
+.room-member { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.room-member-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-state { font-size: .8em; color: var(--color-text-muted); white-space: nowrap; }
+.room-state.is-today { color: var(--color-brand); font-weight: 600; }
+.room-invite > .help { margin: 8px 0 0; font-size: .88em; }
+.room-owner h2 { margin-bottom: 4px; }
+.room-leave { display: flex; }
+.room-write-bar { display: none; }
+/* 방 목록: 카톡 대화방 목록처럼 */
+.room-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.room-list li + li { border-top: 1px solid var(--color-border); }
+.room-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 4px; color: inherit; text-decoration: none; }
+.room-icon { width: 48px; height: 48px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-fill);
+  font-weight: 700; font-size: 1.15em; background: var(--avatar-c0); }
+.room-c1 { background: var(--avatar-c1); } .room-c2 { background: var(--avatar-c2); } .room-c3 { background: var(--avatar-c3); }
+.room-c4 { background: var(--avatar-c4); } .room-c5 { background: var(--avatar-c5); } .room-c6 { background: var(--avatar-c6); } .room-c7 { background: var(--avatar-c7); }
+.room-row-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.room-row-top { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.room-row-top strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-row-last { color: var(--color-text-muted); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-row-text .room-chip { align-self: flex-start; }
+.room-row-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: .85em; }
+.room-new { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: var(--color-brand-fill); color: var(--color-on-fill);
+  font-size: .85em; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 960px) {
+    .room { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+    .room-side { position: static; }
+    .room-head-actions form { display: none; }
+    .room-write-bar { display: flex; align-items: center; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+        padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--color-surface); border-top: 1px solid var(--color-border); }
+    .room-write-hint { flex: 1; min-width: 0; color: var(--color-text-muted); font-size: .92em; background: var(--color-surface-muted); border-radius: 999px;
+        padding: 10px 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    main.club-room-page { padding-bottom: 88px; }
+}
+@media (max-width: 480px) {
+    .room-head h1 { font-size: 1.45em; }
+    .room-head-actions { display: none; }
+    .room-invite-m { display: inline-flex; margin-left: auto; }
+    .room-long { display: none; }
+    .room-pin > details > summary { padding-right: 84px; }
+    .room-pin-body { padding-left: 16px; }
+    .room-bubble { grid-template-columns: minmax(0, 1fr) 76px; gap: 12px; padding: 13px 14px; }
+    .room-bubble img { width: 76px; height: 76px; }
+    .room-ex { -webkit-line-clamp: 1; }
+    .room-msg { grid-template-columns: 32px minmax(0, 1fr); gap: 10px; }
+    .room-msg-face .avatar { width: 32px; height: 32px; }
+    .room-stream { gap: 18px; }
+}

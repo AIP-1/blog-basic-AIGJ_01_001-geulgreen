@@ -12,7 +12,7 @@
         <p class="mission-eyebrow">함께 쓰기 초대</p>
         <h1 id="club-join-heading" th:text="${club.name()}">함께 쓰기</h1>
         <p th:if="${!club.intro().isEmpty()}" th:text="${club.intro()}">소개</p>
-        <p class="help"><th:block th:replace="~{fragments/meta :: parts(${club.everyDays() + '일에 1편 · ' + club.memberCount() + '명 · ' + #temporals.format(club.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(club.endDate(), 'M월 d일')})}"></th:block></p>
+        <p class="help" th:text="${'멤버 ' + club.memberCount() + '명 · 멤버들이 쓴 글이 한 방에 모여요'}">멤버</p>
         <p th:if="${club.joinMode() == 'APPROVAL'}" class="help">승인 후 참여 방이에요. 관리자가 승인하면 들어가요</p>
         <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
         <form method="post" th:action="@{/missions/clubs/join/{code}(code=${club.inviteCode()})}">
