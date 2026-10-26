@@ -869,7 +869,6 @@ a.author-byline.author-nickname:hover { text-decoration: underline; }
 .series-cards > li { display: flex; }
 .series-cards > li > .post-card { flex: 1; }
 .secret-check { display: inline-flex; gap: 6px; align-items: center; margin: 6px 0; font-size: .92em; }
-.schedule-field input[type="datetime-local"] { margin-top: 6px; }
 /* 045~050 관리자 화면 확장·사이트 공지(강성찬 개인 확장) */
 /* 098 관리자 틀(강성찬 개인 확장): 넓은 화면은 왼쪽 묶음 메뉴 + 오른쪽 내용, 좁은 화면은 위에 가로 메뉴 */
 main.admin-page { max-width: 1280px; }
@@ -1765,6 +1764,39 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: center; }
+/* 10-26 예약 발행 카드(강성찬 개인 확장): 설정 화면 카드 줄처럼. 스위치 줄 + 날짜·시각 칸 + 알약 버튼, 잡힌 예약은 맨 위 줄 */
+.schedule-card { border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface); padding: 0 16px; }
+.schedule-card > * + * { border-top: 1px solid var(--color-border); }
+.schedule-card [hidden] { display: none; }
+.schedule-row, .schedule-current { display: flex; align-items: center; gap: 12px; padding: 14px 0; margin: 0; }
+.schedule-row { cursor: pointer; }
+.schedule-text { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+.schedule-label, .schedule-when { font-weight: 600; color: var(--color-text); }
+.schedule-sub { font-size: .875rem; line-height: 1.45; color: var(--color-text-muted); }
+.schedule-icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+    background: var(--color-brand-soft); color: var(--color-brand); }
+dialog.publish-panel .schedule-icon .icon { width: 20px; height: 20px; }
+.schedule-row input[type=checkbox] { appearance: none; -webkit-appearance: none; flex: none; position: relative; margin: 0;
+    width: 44px; height: 26px; border-radius: 13px; background: var(--color-border); cursor: pointer; transition: background .15s; }
+.schedule-row input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--color-surface); box-shadow: 0 1px 2px var(--color-shadow); transition: left .15s; }
+.schedule-row input[type=checkbox]:checked { background: var(--color-brand-fill); }
+.schedule-row input[type=checkbox]:checked::after { left: 21px; }
+.schedule-row input[type=checkbox]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.schedule-pick { padding: 14px 0 16px; }
+dialog.publish-panel .schedule-pick-label { display: block; margin: 0 0 6px; font-size: .875rem; font-weight: 600; color: var(--color-text-muted); }
+.schedule-pick input[type=datetime-local] { width: 100%; max-width: none; box-sizing: border-box; font: inherit; font-variant-numeric: tabular-nums;
+    padding: 10px 12px; border: 1px solid var(--color-control-border); border-radius: 10px; background: var(--color-surface); color: var(--color-text); }
+.schedule-pick input[type=datetime-local]:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.schedule-quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+button.schedule-pill { flex: none; display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid var(--color-control-border); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .875rem; font-weight: 600; cursor: pointer; }
+button.schedule-pill:hover { background: var(--color-surface-muted); color: var(--color-text); }
+@media (max-width: 480px) {
+    .schedule-current { flex-wrap: wrap; }
+    .schedule-current .schedule-text { flex-basis: calc(100% - 48px); }
+    .schedule-current #schedule-cancel { margin-left: 48px; }
+}
 
 /* 103 후속(10-16 chan "4줄로"): 사진 카드 요약은 4줄 + …(사진 16:10은 그대로). 사진 없는 카드는 그대로(같은 줄 높이만큼 채움) */
 .card-grid .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 3; line-clamp: 3; } /* 10-16 오후 chan "3줄 정도": 4 → 3 */
