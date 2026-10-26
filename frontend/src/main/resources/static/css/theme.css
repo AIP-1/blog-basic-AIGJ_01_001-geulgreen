@@ -19,6 +19,9 @@
     --color-thumb-empty: #F3ECE2;
     --color-code-bg: #F7F3EC;
     --color-focus: #3D6B55;
+    /* 10-25 chan: 초록 글씨·초록 밑줄 링크를 쓰지 않는다. 링크 글자는 본문 글자색, 사람이 쓴 글 속 링크 밑줄만 옅은 회색(다크에서도 글자색을 따라 바뀐다) */
+    --color-link: var(--color-text);
+    --color-link-line: color-mix(in srgb, var(--color-text) 35%, transparent);
     --color-brand-soft: #E5EFE8;
     --color-highlight: #FFF1C2;
     --color-warning-border: #C29100;

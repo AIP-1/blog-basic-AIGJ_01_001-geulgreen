@@ -15,7 +15,22 @@ th { white-space: nowrap; }
 :root { --page-wide: 1440px; }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
 img { max-width: 100%; height: auto; }
-a { color: var(--color-brand); text-underline-offset: 3px; }
+/* 10-25 chan: 초록 글씨·밑줄 링크를 쓰지 않는다. 링크는 문장 밖으로 빼서 .link-btn(알약 + ›)·버튼·화살표 줄로,
+   결과 안내 상자에는 링크를 넣지 않는다(10-26). 어쩔 수 없이 문장에 남는 링크는 본문 글자색 굵은 글자(가리키면 밑줄),
+   사람이 쓴 글(본문·댓글·소개·약관)만 옅은 회색 밑줄을 남겨 링크인 줄 알게 한다.
+   :where()로 점수를 0으로 두어 클래스가 붙은 링크(카드·메뉴·버튼)는 각자 스타일을 그대로 쓴다 */
+a { color: var(--color-link); text-underline-offset: 3px; }
+:where(a:not(:hover)) { text-decoration: none; }
+/* 문장 속 링크(본문 칸의 문단·도움말·표·목록)만 굵게: 글자색이 같아도 링크인 줄 알게. 머리말·바닥글·메뉴는 그대로 */
+:where(main p:not([class]), main .help, main li:not([class]), main td, main label, main .stat-total) > a:not([class]) { font-weight: 600; }
+:where(a:hover) { text-decoration: underline; text-decoration-thickness: 1px; }
+:where(a:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: 4px; }
+.post-body a, .comment-content a, .note-content a, .profile-bio a, .author-card-bio a, .legal-doc section a {
+    color: inherit; font-weight: inherit; text-decoration: underline; text-decoration-color: var(--color-link-line);
+    text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.post-body a:hover, .comment-content a:hover, .note-content a:hover, .profile-bio a:hover, .author-card-bio a:hover,
+.legal-doc section a:hover { text-decoration-color: currentColor; }
+.post-body a:has(> img) { text-decoration: none; }
 h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
 /* 10-22 개인 확장: 화면 제목 높이를 하나로. 첫 줄 제목의 브라우저 기본 위 여백(약 21px) 때문에 피드·검색·설정 등이
    탐색·태그·글감보다 아래에 있었다 → 모두 위 여백 0(main 위 안쪽 여백 32px만) */
@@ -507,6 +522,11 @@ main.auth-page { max-width: 960px; }
 .g-blue { fill: var(--color-google-blue); } .g-green { fill: var(--color-google-green); }
 .g-yellow { fill: var(--color-google-yellow); } .g-red { fill: var(--color-google-red); }
 .auth-links { text-align: center; color: var(--color-text-muted); font-size: .9em; margin: 20px 0 0; }
+/* 10-25 chan: 로그인·가입 아래 질문 줄. 테두리 알약 대신 글자색 굵은 글자 + › (두 줄 모양을 똑같이) */
+.auth-links + .auth-links { margin-top: 6px; }
+.auth-links a { display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; color: var(--color-text); font-weight: 700; text-decoration: none; }
+.auth-links a::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
+.auth-links a:hover { text-decoration: underline; }
 /* 070 가입 화면 덜어내기(강성찬 개인 확장): 비밀번호 규칙은 칸을 누르거나 입력하면 보임, "모두 동의" 아래로 개별 동의 */
 .signup-password:not(:focus-within):has(input:placeholder-shown) .password-rules { display: none; }
 .signup-agree label { display: block; margin: 4px 0; }
@@ -1309,7 +1329,9 @@ main.list-page .home-cards { gap: 18px; }
 .geulgam-head .count-chip { font-size: .8em; }
 .geulgam-state { margin: -6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-weight: 600; font-size: .95em; }
 .geulgam-state.is-done { color: var(--color-brand); }
-.geulgam-state a { color: var(--color-brand); }
+.geulgam-state a:not(.link-btn) { color: var(--color-brand); }
+/* 10-25 chan: 로그인 전 안내는 글 아래 줄에 [로그인 ›] 알약(통계 화면과 같은 모양) */
+.geulgam-login { flex-direction: column; align-items: flex-start; gap: 10px; }
 .geulgam-streak { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-muted); font-weight: 500; }
 .geulgam-streak .icon { width: 16px; height: 16px; }
 .topic-write .icon { width: 15px; height: 15px; }
@@ -1492,7 +1514,7 @@ main.list-page .home-cards { gap: 18px; }
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .person-nickname { display: block; }
 .newcomer-who, .comment-author { max-width: 100%; min-width: 0; }
-/* 혼자 떨어진 동작용 링크(처음부터 보기, 돌아가기, 전체 보기 등)는 작은 알약 버튼 + 화살표(문장 안 링크는 밑줄 글자 그대로). 색은 토큰만 */
+/* 혼자 떨어진 동작용 링크(처음부터 보기, 돌아가기, 전체 보기 등)는 작은 알약 버튼 + 화살표(10-25: 문장 안 링크도 밑줄 대신 굵은 초록 글자). 색은 토큰만 */
 a.link-btn, .empty-state a:not([class]) { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
     border-radius: 999px; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-size: .88rem; font-weight: 600;
     line-height: 1.4; white-space: nowrap; vertical-align: middle; transition: background .15s ease; }
