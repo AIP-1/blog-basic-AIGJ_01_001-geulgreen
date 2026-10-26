@@ -31,5 +31,20 @@
         </span>
     </a>
 </li>
+<!-- 114 강성찬 개인 확장: 탐색 시리즈 탭 한 줄(목록형). 표지가 모두 같은 베이지라 표지만으로는 구별이 안 돼서,
+     이름·설명 아래에 앞 세 편 제목을 한 줄로 보여 무엇을 담았는지 먼저 알린다. 오른쪽은 글 수 -->
+<li th:fragment="browseRow(s)" class="series-row">
+    <a th:href="${s.url()}">
+        <img th:if="${s.coverUrl() != null}" class="sr-cover" th:src="${s.coverUrl()}" alt="" loading="lazy">
+        <span th:unless="${s.coverUrl() != null}" class="sr-cover sr-blank" aria-hidden="true"><span th:text="${s.title()}">시리즈</span></span>
+        <span class="sr-body">
+            <strong class="sr-title" th:text="${s.title()}">시리즈</strong>
+            <span th:if="${s.description() != null}" class="sr-desc" th:text="${s.description()}">설명</span>
+            <span th:unless="${s.peek().isEmpty()}" class="sr-peek"><th:block th:each="p, st : ${s.peek()}"><span class="sr-no" th:text="${st.count}">1</span>&nbsp;<th:block th:text="${p.title()}">글</th:block><th:block th:unless="${st.last}"> · </th:block></th:block></span>
+            <span class="sr-foot"><th:block th:text="${s.handle()}"></th:block><th:block th:if="${s.latestLabel() != null and !s.latestLabel().isEmpty()}"> · <th:block th:text="${s.latestLabel()}"></th:block><span class="sr-upd"> 업데이트</span></th:block></span>
+        </span>
+        <span class="sr-count"><b th:text="${s.postCount()}">5</b>편</span>
+    </a>
+</li>
 </body>
 </html>
