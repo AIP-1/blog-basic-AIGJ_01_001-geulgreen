@@ -17,20 +17,32 @@
                     <span class="st st-info" th:text="${inquiry.kindLabel()}">종류</span></h2>
                 <p class="snapshot" th:text="${inquiry.content()}">내용</p>
             </section>
-            <section class="admin-panel" th:if="${inquiry.done()}" aria-labelledby="inquiry-reply-heading">
-                <h2 id="inquiry-reply-heading">보낸 답장 <span class="panel-sub" th:if="${inquiry.repliedAt() != null}"
-                    th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.repliedAt())}">시각</span></h2>
-                <p class="snapshot" th:text="${inquiry.reply()}">답장</p>
+            <section class="admin-panel" th:unless="${messages.isEmpty()}" aria-labelledby="inquiry-thread-heading">
+                <h2 id="inquiry-thread-heading">주고받은 답장</h2>
+                <ol class="inquiry-thread">
+                    <li th:each="m : ${messages}" th:class="${m.fromAdmin()} ? 'inquiry-msg from-admin' : 'inquiry-msg'">
+                        <p class="inquiry-who"><strong th:text="${m.fromAdmin()} ? '관리자' : '보낸 사람'">관리자</strong>
+                            <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(m.createdAt())}">시각</span></p>
+                        <p class="inquiry-body" th:text="${m.body()}">답장</p>
+                    </li>
+                </ol>
             </section>
-            <section class="admin-panel" th:unless="${inquiry.done()}" aria-labelledby="inquiry-form-heading">
+            <section class="admin-panel" aria-labelledby="inquiry-form-heading">
                 <h2 id="inquiry-form-heading">답장하기</h2>
-                <form method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="admin-form">
+                <form method="post" th:action="@{/admin/inquiries/{id}/reply(id=${inquiry.id()})}" class="admin-form" id="inquiry-reply-form">
                     <input th:replace="~{fragments/admin-list :: csrf}">
                     <p th:if="${error != null}" class="form-error" role="alert" data-toast="error" th:text="${error}">오류</p>
                     <label for="inquiry-reply" class="visually-hidden">답장</label>
                     <textarea id="inquiry-reply" name="reply" required maxlength="3000" rows="8" th:text="${replyDraft}"></textarea>
-                    <div class="admin-form-bar"><button type="submit" class="btn btn-primary btn-sm">답장 보내고 처리 완료</button></div>
+                    <p class="help" th:text="${inquiry.memberHandle() != null} ? '보낸 회원의 내 문의에 보이고, 알림과 메일이 같이 가요. 회원은 거기서 다시 답할 수 있어요' : '비회원 문의라 메일로만 가요'">안내</p>
                 </form>
+                <div class="admin-form-bar">
+                    <form th:unless="${inquiry.done()}" method="post" th:action="@{/admin/inquiries/{id}/close(id=${inquiry.id()})}">
+                        <input th:replace="~{fragments/admin-list :: csrf}">
+                        <button type="submit" class="btn btn-sm">답장 없이 처리 완료</button>
+                    </form>
+                    <button type="submit" form="inquiry-reply-form" class="btn btn-primary btn-sm">답장 보내기</button>
+                </div>
             </section>
         </div>
         <div class="admin-detail-side">

@@ -118,7 +118,7 @@ public class NotificationQuery {
         Integer others = (type == NotificationType.LIKE || type == NotificationType.FOLLOW || type == NotificationType.FRIEND_REQUEST || type == NotificationType.FOLLOW_REQUEST) ? Math.max(0, count - 1) : null;
         Body body = body(rs, type, postPart(rs, user), actor.name(), others);
         boolean noActor = type == NotificationType.REPORT_RESOLVED || type == NotificationType.CONTENT_HIDDEN || type == NotificationType.INQUIRY
-                || type == NotificationType.INQUIRY_REPLIED;
+                || type == NotificationType.INQUIRY_REPLIED || type == NotificationType.INQUIRY_FOLLOWUP;
         return new NotificationItem(rs.getLong("id"), type.name(), read, updatedAt, CardDates.label(updatedAt, now),
                 noActor ? null : actor.actor(), others, body.post(), body.preview(), rs.getString("result"), body.message(), body.url());
     }
@@ -177,6 +177,8 @@ public class NotificationQuery {
             case FOLLOW_REQUEST -> new Body(null, null, who(actorName, others) + " 팔로우를 요청했어요", "/settings/privacy");
             case INQUIRY -> new Body(null, null, "새 문의가 왔어요. 문의함에서 확인해 주세요", "/admin/inquiries");
             case INQUIRY_REPLIED -> new Body(null, null, "보내신 문의에 답장이 왔어요", "/contact/mine/" + rs.getLong("inquiry_id"));
+            case INQUIRY_FOLLOWUP -> new Body(null, null, "문의를 보낸 분이 다시 답했어요. 문의함에서 확인해 주세요",
+                    "/admin/inquiries/" + rs.getLong("inquiry_id"));
             case CLUB_INVITE -> new Body(null, null, actorName + "님이 함께 쓰기 「" + rs.getString("club_name") + "」에 초대했어요",
                     "/missions/clubs/" + rs.getLong("club_id"));
             case CLUB_REQUEST -> new Body(null, null, actorName + "님이 함께 쓰기 「" + rs.getString("club_name") + "」에 참여를 요청했어요",

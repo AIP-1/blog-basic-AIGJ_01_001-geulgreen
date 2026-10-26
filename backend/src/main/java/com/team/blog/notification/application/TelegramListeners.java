@@ -1,5 +1,6 @@
 package com.team.blog.notification.application;
 
+import com.team.blog.shared.event.InquiryFollowedUp;
 import com.team.blog.shared.event.InquiryReceived;
 import com.team.blog.shared.event.MemberSignedUp;
 import com.team.blog.shared.event.ReportReceived;
@@ -29,6 +30,16 @@ public class TelegramListeners {
     public void on(InquiryReceived e) {
         if (telegram.active()) {
             dispatcher.submit("telegram inquiry " + e.inquiryId(), () -> telegram.toAdmins("📮 새 문의: "
+                    + jdbc.queryForObject("SELECT title FROM inquiry WHERE id = ?", String.class, e.inquiryId())
+                    + "\n" + telegram.siteOrigin() + "/admin/inquiries/" + e.inquiryId()));
+        }
+    }
+
+    /** 10-26: 보낸 회원이 문의에 다시 답함(새 문의와 같은 모양, 내용은 보내지 않는다). */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(InquiryFollowedUp e) {
+        if (telegram.active()) {
+            dispatcher.submit("telegram inquiry followup " + e.inquiryId(), () -> telegram.toAdmins("📮 문의에 다시 답함: "
                     + jdbc.queryForObject("SELECT title FROM inquiry WHERE id = ?", String.class, e.inquiryId())
                     + "\n" + telegram.siteOrigin() + "/admin/inquiries/" + e.inquiryId()));
         }
