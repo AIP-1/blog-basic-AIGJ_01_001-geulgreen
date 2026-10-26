@@ -5,26 +5,40 @@
     <title th:text="${inquiry.title()}">내 문의</title>
 </head>
 <body>
-<!-- 099 강성찬 개인 확장: 내 문의 하나(보낸 내용과 관리자 답장) -->
+<!-- 099 강성찬 개인 확장: 내 문의 하나. 10-26: 보낸 내용과 오간 답장을 대화로 보여 주고, 여기서 바로 다시 답한다 -->
 <main class="settings">
     <h1>문의하기</h1>
     <nav th:replace="~{contact/tabs :: tabs('mine')}"></nav>
-    <h2 th:text="${inquiry.title()}">제목</h2>
-    <p>
-        <span class="badge" th:text="${inquiry.done()} ? '답변 완료' : '답변 대기'">답변 대기</span>
-        <span class="badge" th:text="${inquiry.kindLabel()}">종류</span>
-        <span class="help" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.createdAt())}">시각</span>
-    </p>
-    <p class="snapshot" th:text="${inquiry.content()}">내용</p>
-    <section aria-labelledby="mine-reply">
-        <h2 id="mine-reply">답장</h2>
-        <th:block th:if="${inquiry.done()}">
-            <p class="help" th:if="${inquiry.repliedAt() != null}" th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.repliedAt())}">시각</p>
-            <p class="snapshot" th:text="${inquiry.reply()}">답장</p>
-        </th:block>
-        <p th:unless="${inquiry.done()}" class="help">아직 답장이 없어요. 답장이 오면 알림과 메일로 알려 드려요.</p>
-    </section>
-    <p><a href="/contact/mine">내 문의 목록으로</a></p>
+    <p class="inquiry-back"><a class="link-btn back" href="/contact/mine">내 문의 목록</a></p>
+    <div class="inquiry-head">
+        <h2 th:text="${inquiry.title()}">제목</h2>
+        <p class="inquiry-meta">
+            <span th:class="${inquiry.done()} ? 'badge badge-done' : 'badge'" th:text="${inquiry.done()} ? '답변 완료' : '답변 대기'">답변 대기</span>
+            <span class="badge" th:text="${inquiry.kindLabel()}">종류</span>
+        </p>
+    </div>
+    <ol class="inquiry-thread" aria-label="문의 대화">
+        <li class="inquiry-msg">
+            <p class="inquiry-who"><strong>나</strong>
+                <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(inquiry.createdAt())}">시각</span></p>
+            <p class="inquiry-body" th:text="${inquiry.content()}">내용</p>
+        </li>
+        <li th:each="m : ${messages}" th:class="${m.fromAdmin()} ? 'inquiry-msg from-admin' : 'inquiry-msg'">
+            <p class="inquiry-who"><strong th:text="${m.fromAdmin()} ? '글그린' : '나'">글그린</strong>
+                <span th:text="${T(com.team.blog.shared.web.KoreanDateFormatter).dateTime(m.createdAt())}">시각</span></p>
+            <p class="inquiry-body" th:text="${m.body()}">답장</p>
+        </li>
+    </ol>
+    <p th:unless="${inquiry.done()}" class="help inquiry-wait">답장이 오면 알림과 메일로 알려 드려요.</p>
+    <p th:if="${param.sent != null}" class="notice" role="status" data-toast="success">보냈어요</p>
+    <form method="post" th:action="@{/contact/mine/{id}/reply(id=${inquiry.id()})}" class="inquiry-reply-form">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <label for="mine-reply"><strong>답장하기</strong></label>
+        <p th:if="${error != null}" class="form-error" role="alert" data-toast="error" th:text="${error}">오류</p>
+        <textarea id="mine-reply" name="reply" required th:maxlength="${contentMax}" rows="5"
+                  placeholder="더 궁금한 점이나 덧붙일 내용을 적어 주세요" th:text="${replyDraft}"></textarea>
+        <div class="inquiry-reply-bar"><button type="submit">답장 보내기</button></div>
+    </form>
 </main>
 </body>
 </html>

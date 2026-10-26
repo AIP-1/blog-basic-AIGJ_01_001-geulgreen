@@ -112,16 +112,16 @@ public class NotificationWriter {
         return true;
     }
 
-    /** 099 문의 답장 알림: 운영 알림처럼 끌 수 없고, 그 문의로 가게 번호를 담는다. */
-    public boolean inquiryReplied(long receiverId, long inquiryId) {
-        if (!eligible(receiverId, null, NotificationType.INQUIRY_REPLIED, null)) {
+    /** 099 문의 답장 알림(10-26: 다시 답하기 알림도): 운영 알림처럼 끌 수 없고, 그 문의로 가게 번호를 담는다. */
+    public boolean inquiry(long receiverId, NotificationType type, long inquiryId) {
+        if (!eligible(receiverId, null, type, null)) {
             return false;
         }
         Timestamp now = now();
         jdbc.update("""
                 INSERT INTO notification (receiver_id, type, inquiry_id, actor_count, created_at, updated_at)
-                VALUES (?, 'INQUIRY_REPLIED', ?, 0, ?, ?)
-                """, receiverId, inquiryId, now, now);
+                VALUES (?, ?, ?, 0, ?, ?)
+                """, receiverId, type.name(), inquiryId, now, now);
         return true;
     }
 

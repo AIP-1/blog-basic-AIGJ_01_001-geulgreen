@@ -7,6 +7,7 @@ import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -82,10 +83,31 @@ public class ContactController {
 
     @GetMapping("/contact/mine/{id}")
     public String mineOne(@PathVariable long id, Model model, HttpServletResponse response) {
+        return mineOne(id, model, response, null, null);
+    }
+
+    private String mineOne(long id, Model model, HttpServletResponse response, String draft, String error) {
         response.setHeader("Cache-Control", "private, no-store");
         model.addAttribute("pageNoindex", true);
         model.addAttribute("inquiry", inquiries.mine(currentUserProvider.current(), id));
+        model.addAttribute("messages", inquiries.messages(id));
+        model.addAttribute("replyDraft", draft);
+        model.addAttribute("error", error);
+        model.addAttribute("contentMax", InquiryService.CONTENT_MAX);
         return "contact/mine-detail";
+    }
+
+    /** 10-26 보낸 회원이 내 문의에서 다시 답한다. */
+    @PostMapping("/contact/mine/{id}/reply")
+    public ModelAndView followUp(@PathVariable long id, @RequestParam(value = "reply", required = false) String reply,
+                                 Model model, HttpServletResponse response) {
+        try {
+            inquiries.followUp(currentUserProvider.current(), id, reply);
+            return new ModelAndView(seeOther("/contact/mine/" + id + "?sent=1"));
+        } catch (InquiryService.Rejected e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return new ModelAndView(mineOne(id, model, response, reply, e.getMessage()));
+        }
     }
 
     @GetMapping("/admin/inquiries")
@@ -107,6 +129,9 @@ public class ContactController {
     private String inquiry(long id, Model model, HttpServletResponse response, String reply, String error) {
         noStore(response, model);
         model.addAttribute("inquiry", inquiries.get(currentUserProvider.current(), id));
+        List<InquiryService.Message> messages = inquiries.messages(id);
+        model.addAttribute("messages", messages);
+        model.addAttribute("lastMessageId", messages.isEmpty() ? 0 : messages.get(messages.size() - 1).id());
         model.addAttribute("replyDraft", reply);
         model.addAttribute("error", error);
         return "admin/inquiry";
@@ -122,6 +147,17 @@ public class ContactController {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return new ModelAndView(inquiry(id, model, response, reply, e.getMessage()));
         }
+    }
+
+    /** 10-26 답장 없이 처리 완료. */
+    @PostMapping("/admin/inquiries/{id}/close")
+    public ModelAndView close(@PathVariable long id, @RequestParam(value = "lastMessageId", defaultValue = "0") long lastMessageId,
+                              Model model, HttpServletResponse response) {
+        if (inquiries.close(currentUserProvider.current(), id, lastMessageId)) {
+            return new ModelAndView(seeOther("/admin/inquiries/" + id));
+        }
+        response.setStatus(HttpServletResponse.SC_CONFLICT);
+        return new ModelAndView(inquiry(id, model, response, null, "그 사이 보낸 사람이 다시 답했어요. 새 답장을 확인해 주세요"));
     }
 
     private static void noStore(HttpServletResponse response, Model model) {

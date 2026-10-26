@@ -94,7 +94,7 @@ class ContactIT extends IntegrationTestBase {
                 .doesNotContain("답장 보내고 처리 완료");
         var mail = mailpit.awaitMessagesTo("guest@example.com", 1).get(0);
         assertThat(mail.subject()).contains("비회원 문의");
-        assertThat(mail.text()).contains("고쳤어요. 다시 해 보세요").contains("로그인이 안 돼요");
+        assertThat(mail.text()).contains("고쳤어요. 다시 해 보세요").contains("로그인이 안 돼요").doesNotContain("내 문의에서 답장하기");
 
         // 탈퇴 정리: 그 회원의 문의만 지움
         purge.purge(user);
