@@ -39,6 +39,7 @@
                 <div class="admin-form-bar">
                     <form th:unless="${inquiry.done()}" method="post" th:action="@{/admin/inquiries/{id}/close(id=${inquiry.id()})}">
                         <input th:replace="~{fragments/admin-list :: csrf}">
+                        <input type="hidden" name="lastMessageId" th:value="${lastMessageId}">
                         <button type="submit" class="btn btn-sm">답장 없이 처리 완료</button>
                     </form>
                     <button type="submit" form="inquiry-reply-form" class="btn btn-primary btn-sm">답장 보내기</button>

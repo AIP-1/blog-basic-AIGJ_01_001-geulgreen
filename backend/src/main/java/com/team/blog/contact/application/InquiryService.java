@@ -185,13 +185,19 @@ public class InquiryService {
                         "mineLink", member.isEmpty() ? "" : authProperties.mail().linkBaseUrl() + "/contact/mine/" + id));
     }
 
-    /** 10-26 답장 없이 처리 완료(고맙다는 다시 답하기처럼 더 답할 게 없을 때). */
-    public void close(Optional<CurrentUser> current, long id) {
+    /**
+     * 10-26 답장 없이 처리 완료(고맙다는 다시 답하기처럼 더 답할 게 없을 때). seenLastMessageId는 관리자가 본 화면의 마지막 대화 줄
+     * 번호(없으면 0): 그 뒤에 보낸 사람이 다시 답했다면 닫지 않는다. @return 닫았으면 true
+     */
+    public boolean close(Optional<CurrentUser> current, long id, long seenLastMessageId) {
         get(current, id);
-        jdbc.update("UPDATE inquiry SET status = 'DONE' WHERE id = ?", id);
+        return jdbc.update("UPDATE inquiry SET status = 'DONE' WHERE id = ?"
+                + " AND (SELECT coalesce(max(m.id), 0) FROM inquiry_message m WHERE m.inquiry_id = ?) = ?", id, id,
+                seenLastMessageId) > 0;
     }
 
-    /** 10-26 보낸 회원이 내 문의에서 다시 답한다: 대화에 더하고 새 문의로 돌려 관리자에게 알린다. 횟수 제한은 새 문의와 같이 센다. */
+    /** 10-26 보낸 회원이 내 문의에서 다시 답한다: 대화에 더하고 새 문의로 돌려 관리자에게 알린다.
+     * 횟수 제한은 새 문의(IP별)와 따로 회원별로 센다(다시 답하기가 새 문의 몫을 쓰지 않게). */
     public void followUp(Optional<CurrentUser> current, long id, String rawBody) {
         Inquiry inquiry = mine(current, id);
         String text = body(rawBody, "답장");

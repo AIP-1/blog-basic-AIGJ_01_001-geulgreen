@@ -7,6 +7,7 @@ import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.web.ClientIpResolver;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -128,7 +129,9 @@ public class ContactController {
     private String inquiry(long id, Model model, HttpServletResponse response, String reply, String error) {
         noStore(response, model);
         model.addAttribute("inquiry", inquiries.get(currentUserProvider.current(), id));
-        model.addAttribute("messages", inquiries.messages(id));
+        List<InquiryService.Message> messages = inquiries.messages(id);
+        model.addAttribute("messages", messages);
+        model.addAttribute("lastMessageId", messages.isEmpty() ? 0 : messages.get(messages.size() - 1).id());
         model.addAttribute("replyDraft", reply);
         model.addAttribute("error", error);
         return "admin/inquiry";
@@ -148,9 +151,13 @@ public class ContactController {
 
     /** 10-26 답장 없이 처리 완료. */
     @PostMapping("/admin/inquiries/{id}/close")
-    public ModelAndView close(@PathVariable long id) {
-        inquiries.close(currentUserProvider.current(), id);
-        return new ModelAndView(seeOther("/admin/inquiries/" + id));
+    public ModelAndView close(@PathVariable long id, @RequestParam(value = "lastMessageId", defaultValue = "0") long lastMessageId,
+                              Model model, HttpServletResponse response) {
+        if (inquiries.close(currentUserProvider.current(), id, lastMessageId)) {
+            return new ModelAndView(seeOther("/admin/inquiries/" + id));
+        }
+        response.setStatus(HttpServletResponse.SC_CONFLICT);
+        return new ModelAndView(inquiry(id, model, response, null, "그 사이 보낸 사람이 다시 답했어요. 새 답장을 확인해 주세요"));
     }
 
     private static void noStore(HttpServletResponse response, Model model) {

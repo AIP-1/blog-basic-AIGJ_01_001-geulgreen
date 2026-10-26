@@ -110,8 +110,14 @@ class MyInquiriesIT extends IntegrationTestBase {
         // 고맙다는 답장처럼 더 답할 게 없으면 답장 없이 처리 완료
         mockMvc.perform(post("/contact/mine/{id}/reply", id).param("reply", "고마워요").with(csrf())
                 .with(TestAuth.member(me))).andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/admin/inquiries/{id}/close", id).with(csrf()).with(TestAuth.admin(admin)))
-                .andExpect(status().is3xxRedirection());
+        long seen = jdbc.queryForObject("SELECT max(id) FROM inquiry_message WHERE inquiry_id = ?", Long.class, id);
+        // 관리자가 화면을 본 뒤 보낸 사람이 또 답했다면 예전 화면의 처리 완료는 막는다
+        mockMvc.perform(post("/admin/inquiries/{id}/close", id).param("lastMessageId", String.valueOf(seen - 1)).with(csrf())
+                .with(TestAuth.admin(admin))).andExpect(status().isConflict());
+        assertThat(jdbc.queryForObject("SELECT status FROM inquiry WHERE id = ?", String.class, id)).isEqualTo("NEW");
+        assertThat(page("/admin/inquiries/" + id, TestAuth.admin(admin))).contains("name=\"lastMessageId\" value=\"" + seen + "\"");
+        mockMvc.perform(post("/admin/inquiries/{id}/close", id).param("lastMessageId", String.valueOf(seen)).with(csrf())
+                .with(TestAuth.admin(admin))).andExpect(status().is3xxRedirection());
         assertThat(jdbc.queryForObject("SELECT status FROM inquiry WHERE id = ?", String.class, id)).isEqualTo("DONE");
         // 관리자가 아니면 처리 완료도 못 한다(없는 주소와 같은 404)
         mockMvc.perform(post("/admin/inquiries/{id}/close", id).with(csrf()).with(TestAuth.member(me)))
