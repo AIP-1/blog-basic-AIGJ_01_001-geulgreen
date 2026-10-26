@@ -156,9 +156,13 @@ public class ClubService {
     private final org.springframework.context.ApplicationEventPublisher events;
     private final com.team.blog.post.application.PostDraftService drafts;
 
+    private final com.team.blog.post.application.PostAccessPolicy accessPolicy;
+
     public ClubService(JdbcTemplate jdbc, AccountGuard accountGuard, Clock clock,
                        org.springframework.context.ApplicationEventPublisher events,
-                       com.team.blog.post.application.PostDraftService drafts) {
+                       com.team.blog.post.application.PostDraftService drafts,
+                       com.team.blog.post.application.PostAccessPolicy accessPolicy) {
+        this.accessPolicy = accessPolicy;
         this.jdbc = jdbc;
         this.accountGuard = accountGuard;
         this.clock = clock;
@@ -486,7 +490,8 @@ public class ClubService {
                 SELECT p.id, p.title, p.first_public_at, mb.handle, mb.nickname, mb.profile_image_url
                 FROM writing_club_topic_post tp JOIN post p ON p.id = tp.post_id JOIN member mb ON mb.id = p.author_id
                 JOIN writing_club_member m ON m.club_id = ? AND m.member_id = p.author_id
-                WHERE tp.topic_id = ? AND p.id <> ? AND """ + " " + PUBLIC + """
+                WHERE tp.topic_id = ? AND p.id <> ? AND p.first_public_at IS NOT NULL AND """ + " "
+                + accessPolicy.publicListingCondition("p", "mb") + """
                  ORDER BY p.first_public_at DESC LIMIT
                 """ + " " + BAND_POSTS,
                 (rs, i) -> new BandPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getString("nickname"),
