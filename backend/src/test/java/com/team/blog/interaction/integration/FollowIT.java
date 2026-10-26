@@ -220,6 +220,31 @@ class FollowIT extends IntegrationTestBase {
         assertThat(mockMvc.perform(get("/")).andReturn().getResponse().getContentAsString()).doesNotContain("href=\"/feed\"");
     }
 
+    @Test
+    void feedFaceRowShowsRecentWritersFirstAndLinksToFullList() throws Exception {
+        // 10-26(chan "팔로우가 1000명이 넘어가면"): 얼굴 줄은 최근 팔로우 순이 아니라 마지막 글이 최근인 순 20명 + [전체 N명]
+        clock.set(T);
+        long me = member("frreader");
+        long early = member("frearly");
+        jdbc.update("INSERT INTO follow (follower_id, followee_id, created_at) VALUES (?, ?, ?)", me, early,
+                Timestamp.from(T.minusSeconds(86_400 * 30)));
+        for (int i = 0; i < 21; i++) {
+            long w = member("frw" + i);
+            jdbc.update("INSERT INTO follow (follower_id, followee_id) VALUES (?, ?)", me, w);
+            posts.published(w, "얼굴줄" + i, "본문", 1, T.minusSeconds(86_400L * 3 + i));
+        }
+        // 맨 처음 팔로우한 사람이 방금 글을 썼다: 줄 맨 앞, 24시간 안이라 테두리
+        posts.published(early, "방금 쓴 글", "본문", 1, T.minusSeconds(60));
+        String page = mockMvc.perform(get("/feed").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString();
+        String row = page.substring(page.indexOf("class=\"feed-people\""), page.indexOf("</ul>", page.indexOf("class=\"feed-people\"")));
+        assertThat(row.indexOf("frearly")).isPositive().isLessThan(row.indexOf("frw0"));
+        assertThat(row).contains("class=\"fresh\"").doesNotContain("frw20\"")
+                .contains("class=\"feed-people-more\"").contains("+2").contains("전체 22명")
+                .contains("href=\"/frreader/following\"");
+        assertThat(row.split("class=\"feed-people-id\"", -1).length - 1).isEqualTo(21);
+        assertThat(page).contains("feed-fold");
+    }
+
     private static void collect(String body, Set<Long> seen) {
         Matcher m = Pattern.compile("\"url\":\"/[a-z0-9_]+/posts/(\\d+)\"").matcher(body);
         while (m.find()) {

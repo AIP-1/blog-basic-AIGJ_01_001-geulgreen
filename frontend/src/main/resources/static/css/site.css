@@ -2262,7 +2262,8 @@ dialog.ask-dialog::backdrop { background: var(--color-overlay); }
 main.list-page.feed-page { max-width: 768px; }
 .feed-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .feed-head h1 { margin: 0; }
-.feed-count { color: var(--color-text-muted); font-size: .9em; }
+.feed-count { color: var(--color-text-muted); font-size: .9em; text-decoration: none; }
+.feed-count:hover { color: var(--color-text); }
 .feed-people { list-style: none; margin: 14px 0 0; padding: 4px 2px 6px; display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
 .feed-people::-webkit-scrollbar { display: none; }
 .feed-people li { flex: none; width: 60px; }
@@ -2271,10 +2272,19 @@ main.list-page.feed-page { max-width: 768px; }
 .feed-people li.fresh .avatar { box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-brand); }
 .feed-people li.fresh a { color: var(--color-text); font-weight: 600; }
 .feed-people-id { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed-people-plus { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface);
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3px var(--color-border); color: var(--color-text-muted); font-size: 1.15em; font-weight: 700; }
+.feed-people-more a:hover .feed-people-plus { color: var(--color-text); }
 .feed-list { list-style: none; margin: 8px 0 0; padding: 0; }
 .feed-day h2 { margin: 22px 0 0; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); font-size: .85em; font-weight: 700; color: var(--color-text-muted); }
 .feed-item { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 160px; gap: 14px; align-items: start; padding: 20px 0; border-bottom: 1px solid var(--color-border); }
 .feed-item.no-thumb { grid-template-columns: 40px minmax(0, 1fr); }
+/* 10-26: 같은 사람 글 3개째부터 접기(feed-fold.js). 버튼은 이름 칸에 맞춰 들여 쓰고 링크 색·밑줄 없이 */
+.feed-item.feed-folded { display: none; }
+.feed-fold { padding: 10px 0 12px 54px; border-bottom: 1px solid var(--color-border); }
+.feed-fold-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--color-border); border-radius: 999px;
+    background: var(--color-surface); color: var(--color-text-muted); font: inherit; font-size: .88em; cursor: pointer; }
+.feed-fold-btn:hover { color: var(--color-text); border-color: var(--color-text-muted); }
 .feed-item:hover .feed-title a { text-decoration: underline; }
 .feed-avatar, .feed-handle, .feed-tag { position: relative; z-index: 1; }
 .feed-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
@@ -2302,6 +2312,7 @@ main.list-page.feed-page { max-width: 768px; }
     .feed-title { font-size: 1.1em; }
     .feed-excerpt { font-size: .92em; line-height: 1.65; }
     .feed-people li { width: 56px; }
+    .feed-fold { padding-left: 50px; }
 }
 
 /* 10-25 chan: 친구 초대 — 초대 링크로 연 화면(/i/아이디/코드)과 내 초대 링크 화면(/me/invite) */
