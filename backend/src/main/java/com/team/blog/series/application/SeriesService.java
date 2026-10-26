@@ -89,7 +89,11 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
 
     /** 탐색 시리즈 탭에 보일 한 줄: 누구의 시리즈인지와 공개 글 수. */
     public record Browse(long id, String title, String handle, long postCount, String description, String coverUrl,
-                         String latestLabel) {
+                         String latestLabel, List<Peek> peek) {
+
+        /** 114: 탐색 시리즈 카드에 미리 보일 앞쪽 글(넣은 순서, 최대 {@code PEEK}편). */
+        public record Peek(long id, String title, String thumb, String url) {
+        }
 
         public String meta() {
             return handle + " · 글 " + postCount + "편" + (latestLabel == null || latestLabel.isEmpty() ? "" : " · " + latestLabel + " 업데이트");
@@ -101,6 +105,7 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
     }
 
     public static final int BROWSE_PAGE = 60;
+    public static final int PEEK = 3;
 
     /**
      * 104 강성찬 개인 확장: 모든 블로그의 시리즈(공용 목록 조건 글이 1편 이상). popular = 좋아요 합 → 글 수 → 최근 글,
@@ -108,7 +113,7 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
      */
     public List<Browse> browse(String sort, int offset, int limit) {
         String order = "recent".equals(sort) ? "latest DESC, s.id DESC" : "likes DESC, cnt DESC, latest DESC, s.id DESC";
-        return jdbc.query("SELECT s.id, s.title, s.description, " + coverSql(accessPolicy.publicListingCondition("cpost", "cm"))
+        List<Browse> rows = jdbc.query("SELECT s.id, s.title, s.description, " + coverSql(accessPolicy.publicListingCondition("cpost", "cm"))
                         + ", owner.handle, count(*) AS cnt, sum(p.like_count) AS likes,"
                         + " max(COALESCE(p.first_public_at, p.published_at)) AS latest FROM series s"
                         + " JOIN member owner ON owner.id = s.member_id JOIN series_post sp ON sp.series_id = s.id"
@@ -116,7 +121,24 @@ public class SeriesService implements com.team.blog.media.application.ImageRefer
                         + accessPolicy.publicListingCondition("p", "m")
                         + " GROUP BY s.id, s.title, s.description, s.cover_url, owner.handle ORDER BY " + order + " OFFSET ? LIMIT ?",
                 (rs, i) -> new Browse(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getLong("cnt"),
-                        rs.getString("description"), rs.getString("cover"), label(rs.getTimestamp("latest"))), offset, limit);
+                        rs.getString("description"), rs.getString("cover"), label(rs.getTimestamp("latest")), List.of()), offset, limit);
+        if (rows.isEmpty()) {
+            return rows;
+        }
+        java.util.Map<Long, List<Browse.Peek>> peeks = new java.util.HashMap<>();
+        jdbc.query("SELECT series_id, id, title, thumb, handle FROM (SELECT sp.series_id, p.id, p.title, m.handle,"
+                        + " COALESCE(pcv.thumb_url, p.thumbnail_url) AS thumb,"
+                        + " row_number() OVER (PARTITION BY sp.series_id ORDER BY sp.position, p.id) AS n"
+                        + " FROM series_post sp JOIN post p ON p.id = sp.post_id JOIN member m ON m.id = p.author_id"
+                        + " LEFT JOIN post_cover pcv ON pcv.post_id = p.id WHERE sp.series_id = ANY (?) AND "
+                        + accessPolicy.publicListingCondition("p", "m") + ") t WHERE n <= " + PEEK + " ORDER BY series_id, n",
+                rs -> {
+                    peeks.computeIfAbsent(rs.getLong("series_id"), k -> new java.util.ArrayList<>()).add(new Browse.Peek(rs.getLong("id"),
+                            rs.getString("title"), rs.getString("thumb"),
+                            com.team.blog.shared.web.BlogPaths.of(rs.getString("handle")) + "/posts/" + rs.getLong("id")));
+                }, (Object) rows.stream().map(Browse::id).toArray(Long[]::new));
+        return rows.stream().map(b -> new Browse(b.id(), b.title(), b.handle(), b.postCount(), b.description(), b.coverUrl(),
+                b.latestLabel(), peeks.getOrDefault(b.id(), List.of()))).toList();
     }
 
     public Optional<Series> find(long memberId, long seriesId) {
