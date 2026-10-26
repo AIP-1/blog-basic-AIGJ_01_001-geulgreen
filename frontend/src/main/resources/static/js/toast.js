@@ -49,15 +49,7 @@
     current = box;
     // 넣은 뒤 글을 채워야 화면 낭독기가 읽는다
     var nodes = Array.prototype.map.call(source.childNodes, function (n) { return n.cloneNode(true); }); // 안내 속 링크(로그인 등)도 그대로
-    // 10-25 chan: 안내 속 링크는 문장에서 빼서 닫기 단추 앞의 작은 버튼으로(밑줄 글자 대신)
-    var actions = nodes.filter(function (n) { return n.nodeType === 1 && n.tagName === 'A'; });
-    actions.forEach(function (a) { a.className = 'toast-action'; });
-    var texts = nodes.filter(function (n) { return actions.indexOf(n) < 0; });
-    timers.push(setTimeout(function () {
-      texts.forEach(function (n) { msg.appendChild(n); });
-      actions.forEach(function (a) { box.insertBefore(a, close); });
-      box.classList.add('toast-in');
-    }, 30));
+    timers.push(setTimeout(function () { nodes.forEach(function (n) { msg.appendChild(n); }); box.classList.add('toast-in'); }, 30));
     timers.push(setTimeout(function () { box.classList.remove('toast-in'); }, SHOW_MS));
     timers.push(setTimeout(clear, SHOW_MS + 500));
   }

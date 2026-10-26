@@ -16,7 +16,7 @@ th { white-space: nowrap; }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
 img { max-width: 100%; height: auto; }
 /* 10-25 chan: 초록 글씨·밑줄 링크를 쓰지 않는다. 링크는 문장 밖으로 빼서 .link-btn(알약 + ›)·버튼·화살표 줄로,
-   결과 상자 속 링크는 .toast-action 버튼. 어쩔 수 없이 문장에 남는 링크는 본문 글자색 굵은 글자(가리키면 밑줄),
+   결과 안내 상자에는 링크를 넣지 않는다(10-26). 어쩔 수 없이 문장에 남는 링크는 본문 글자색 굵은 글자(가리키면 밑줄),
    사람이 쓴 글(본문·댓글·소개·약관)만 옅은 회색 밑줄을 남겨 링크인 줄 알게 한다.
    :where()로 점수를 0으로 두어 클래스가 붙은 링크(카드·메뉴·버튼)는 각자 스타일을 그대로 쓴다 */
 a { color: var(--color-link); text-underline-offset: 3px; }
@@ -1595,12 +1595,6 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .toast-in { opacity: 1; transform: translate(-50%, 0); }
 .toast-success { background: var(--color-success-soft); border-left-color: var(--color-success); }
 .toast-error { background: var(--color-danger-soft); border-left-color: var(--color-danger); }
-/* 10-25 chan: 안내 속 링크(모아보기·로그인)는 문장 밖 오른쪽 글자 단추로(toast.js가 옮긴다). 테두리 없이 세로 줄로만 나눈다 */
-.toast-action { flex: none; display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; padding: 2px 4px 2px 14px;
-    border-left: 1px solid var(--color-border); color: var(--color-text); font-size: .95em; font-weight: 700; line-height: 1.4;
-    text-decoration: none; white-space: nowrap; }
-.toast-action::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
-.toast-action:hover { text-decoration: underline; }
 .toast-close { flex: none; border: 0; background: none; color: var(--color-text-muted); font-size: 1.1em; line-height: 1; padding: 4px 6px; cursor: pointer; }
 .handle-input input[readonly] { background: var(--color-surface-muted); color: var(--color-text-muted); cursor: not-allowed; }
 .handle-prefix { color: var(--color-text-muted); }

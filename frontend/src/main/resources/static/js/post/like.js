@@ -74,8 +74,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (form.dataset.guest === 'true') {
-        var a = document.createElement('a'); a.href = form.dataset.login; a.textContent = '로그인';
-        say(['로그인하면 좋아요를 누를 수 있어요 ', a]);
+        say(['로그인하면 좋아요를 누를 수 있어요']);
         return;
       }
       liked = !liked;
