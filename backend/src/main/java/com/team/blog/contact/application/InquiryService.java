@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * 090 문의하기(강성찬 개인 확장): 문의 저장(IP마다 한 시간 횟수 제한), 관리자 문의함, 답장 메일.
@@ -81,12 +82,14 @@ public class InquiryService {
     private final Clock clock;
     private final AccountGuard accountGuard;
     private final AuthProperties authProperties;
+    private final TransactionTemplate tx;
 
     public InquiryService(JdbcTemplate jdbc, RedisRateLimiter rateLimiter, ContactProperties properties, AdminGuard adminGuard,
                           MailSender mailSender, ApplicationEventPublisher events, Clock clock,
-                          AccountGuard accountGuard, AuthProperties authProperties) {
+                          AccountGuard accountGuard, AuthProperties authProperties, TransactionTemplate tx) {
         this.accountGuard = accountGuard;
         this.authProperties = authProperties;
+        this.tx = tx;
         this.jdbc = jdbc;
         this.rateLimiter = rateLimiter;
         this.properties = properties;
@@ -164,14 +167,19 @@ public class InquiryService {
         CurrentUser admin = adminGuard.requireAdmin(current);
         Inquiry inquiry = get(current, id);
         String reply = body(rawReply, "답장");
-        Timestamp now = Timestamp.from(clock.instant());
-        jdbc.update("INSERT INTO inquiry_message (inquiry_id, author_id, from_admin, body, created_at) VALUES (?, ?, true, ?, ?)",
-                id, admin.memberId(), reply, now);
-        jdbc.update("UPDATE inquiry SET status = 'DONE', reply = ?, replied_by = ?, replied_at = ? WHERE id = ?", reply,
-                admin.memberId(), now, id);
-        List<Long> member = jdbc.queryForList("SELECT member_id FROM inquiry WHERE id = ? AND member_id IS NOT NULL",
-                Long.class, id);
-        member.forEach(memberId -> events.publishEvent(new InquiryReplied(id, memberId)));
+        // 대화 줄과 상태는 문의 줄을 잠근 한 트랜잭션에서(동시에 온 다시 답하기가 상태를 덮어쓰지 않게). 메일은 커밋 뒤에
+        List<Long> member = tx.execute(status -> {
+            lock(id);
+            Timestamp now = Timestamp.from(clock.instant());
+            jdbc.update("INSERT INTO inquiry_message (inquiry_id, author_id, from_admin, body, created_at) VALUES (?, ?, true, ?, ?)",
+                    id, admin.memberId(), reply, now);
+            jdbc.update("UPDATE inquiry SET status = 'DONE', reply = ?, replied_by = ?, replied_at = ? WHERE id = ?", reply,
+                    admin.memberId(), now, id);
+            List<Long> owner = jdbc.queryForList("SELECT member_id FROM inquiry WHERE id = ? AND member_id IS NOT NULL",
+                    Long.class, id);
+            owner.forEach(memberId -> events.publishEvent(new InquiryReplied(id, memberId)));
+            return owner;
+        });
         mailSender.send(inquiry.email(), "[글그린] 문의에 답장드려요: " + inquiry.title(), "mail/inquiry-reply",
                 Map.of("title", inquiry.title(), "content", inquiry.content(), "reply", reply,
                         "mineLink", member.isEmpty() ? "" : authProperties.mail().linkBaseUrl() + "/contact/mine/" + id));
@@ -192,10 +200,17 @@ public class InquiryService {
                 Duration.ofHours(1)).allowed()) {
             throw new Rejected("답장을 너무 많이 보냈어요. 한 시간 뒤에 다시 보내 주세요");
         }
-        jdbc.update("INSERT INTO inquiry_message (inquiry_id, author_id, from_admin, body, created_at) VALUES (?, ?, false, ?, ?)",
-                inquiry.id(), memberId, text, Timestamp.from(clock.instant()));
-        jdbc.update("UPDATE inquiry SET status = 'NEW' WHERE id = ?", inquiry.id());
-        events.publishEvent(new InquiryFollowedUp(inquiry.id()));
+        tx.executeWithoutResult(status -> {
+            lock(inquiry.id());
+            jdbc.update("INSERT INTO inquiry_message (inquiry_id, author_id, from_admin, body, created_at) VALUES (?, ?, false, ?, ?)",
+                    inquiry.id(), memberId, text, Timestamp.from(clock.instant()));
+            jdbc.update("UPDATE inquiry SET status = 'NEW' WHERE id = ?", inquiry.id());
+            events.publishEvent(new InquiryFollowedUp(inquiry.id()));
+        });
+    }
+
+    private void lock(long id) {
+        jdbc.queryForList("SELECT id FROM inquiry WHERE id = ? FOR UPDATE", Long.class, id);
     }
 
     private static String body(String raw, String what) {
