@@ -16,6 +16,7 @@
   'use strict';
   var dialog = document.querySelector('[data-club-form]');
   if (!dialog || typeof dialog.showModal !== 'function') { return; }
+  dialog.classList.add('is-enhanced'); // 스크립트가 있으면 :target 펼침 대신 창으로
   var f = dialog.querySelector('form');
   var types = dialog.querySelectorAll('[data-club-type]');
   var radios = f.querySelectorAll('input[name="joinMode"]');
