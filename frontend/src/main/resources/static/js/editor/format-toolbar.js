@@ -504,8 +504,8 @@
     aiView.appendChild(aiActions);
     var consentBox = el('div', 'fmt-consent');
     consentBox.appendChild(el('p', 'help', '고른 글이 외부 AI 서비스(Google Gemini, 무료 등급)로 전송돼요. 무료 등급에서는 Google이 보낸 내용을 '
-      + '서비스 개선에 쓰고 사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요. '
-      + '<a href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a>'));
+      + '서비스 개선에 쓰고 사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요.'));
+    consentBox.appendChild(el('p', null, '<a class="link-btn" href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a>'));
     consentBox.appendChild(button('btn btn-primary btn-sm', '동의하고 쓰기', null, { aiDo: 'agree' }));
     aiView.appendChild(consentBox);
 

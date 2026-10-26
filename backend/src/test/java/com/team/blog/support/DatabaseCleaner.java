@@ -36,7 +36,7 @@ public class DatabaseCleaner {
             // 10-25 함께 쓰기 방 글감
             "writing_club_topic", "writing_club_topic_post",
             // 강성찬 개인 확장(090)
-            "inquiry",
+            "inquiry", "inquiry_message",
             // 096 강성찬 개인 확장
             "telegram_link",
             // 097 강성찬 개인 확장

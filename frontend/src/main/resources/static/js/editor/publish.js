@@ -249,21 +249,32 @@
     var scheduleField = panel.querySelector('.schedule-field');
     var scheduleOn = document.getElementById('schedule-on');
     var scheduleAt = document.getElementById('schedule-at');
+    var schedulePick = document.getElementById('schedule-pick');
+    var scheduleCurrent = document.getElementById('schedule-current');
     var scheduleStatus = document.getElementById('schedule-status');
     var scheduleCancel = document.getElementById('schedule-cancel');
+    var scheduled = null; // 지금 잡혀 있는 예약 {publishAt}
     function two(n) { return (n < 10 ? '0' : '') + n; }
     function localValue(d) {
       return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()) + 'T' + two(d.getHours()) + ':' + two(d.getMinutes());
     }
+    // 10-26: 초(":00")는 빼고 "10월 27일 (화) 오전 11:16"처럼
+    function whenText(iso) {
+      return new Date(iso).toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: 'numeric', minute: '2-digit' });
+    }
     function showSchedule(sch) {
       if (!scheduleField) { return; }
-      if (sch) {
-        scheduleStatus.textContent = new Date(sch.publishAt).toLocaleString('ko-KR') + '에 발행될 예정이에요';
-        scheduleCancel.hidden = false;
-      } else {
-        scheduleStatus.textContent = '';
-        scheduleCancel.hidden = true;
-      }
+      scheduled = sch || null;
+      scheduleCurrent.hidden = !scheduled;
+      scheduleCancel.hidden = !scheduled;
+      scheduleStatus.textContent = scheduled ? whenText(scheduled.publishAt) : '';
+    }
+    function quickTime(kind) {
+      var d = new Date();
+      if (kind === 'hour') { d.setTime(d.getTime() + 60 * 60 * 1000); return d; }
+      d.setDate(d.getDate() + 1);
+      d.setHours(kind === 'morning' ? 9 : 20, 0, 0, 0);
+      return d;
     }
     if (scheduleField) {
       var schedulePostId = scheduleField.dataset.postId;
@@ -271,9 +282,13 @@
         .then(function (r) { return r.status === 200 ? r.json() : null; })
         .then(showSchedule, function () {});
       scheduleOn.addEventListener('change', function () {
-        scheduleAt.hidden = !scheduleOn.checked;
-        if (scheduleOn.checked && !scheduleAt.value) { scheduleAt.value = localValue(new Date(Date.now() + 60 * 60 * 1000)); }
+        schedulePick.hidden = !scheduleOn.checked;
+        // 10-26: 예약이 이미 있으면 그 시각을, 없으면 1시간 뒤를 채운다(칸과 위 줄 시각이 달라 보이던 문제)
+        if (scheduleOn.checked) { scheduleAt.value = localValue(scheduled ? new Date(scheduled.publishAt) : quickTime('hour')); }
         submit.textContent = scheduleOn.checked ? '예약하기' : '발행';
+      });
+      schedulePick.querySelectorAll('[data-quick]').forEach(function (b) {
+        b.addEventListener('click', function () { scheduleAt.value = localValue(quickTime(b.dataset.quick)); });
       });
       scheduleCancel.addEventListener('click', function () {
         fetch('/api/posts/' + schedulePostId + '/schedule', { method: 'DELETE', headers: csrfHeaders('x'), credentials: 'same-origin' })
@@ -296,8 +311,15 @@
         if (!r.ok) { showErrors([{ message: r.data.message || '예약하지 못했어요' }]); return; }
         showSchedule(r.data);
         scheduleOn.checked = false;
-        scheduleAt.hidden = true;
+        schedulePick.hidden = true;
         submit.textContent = '발행';
+        // 10-26: 예약이 끝나면 창을 닫고 위쪽 안내 상자로 알린다(창이 열린 채면 안내 상자가 창 뒤에 가린다)
+        closePanel();
+        var notice = document.getElementById('editor-notice');
+        if (notice) {
+          notice.dataset.toast = 'success';
+          notice.textContent = '예약했어요. ' + whenText(r.data.publishAt) + '에 발행돼요';
+        }
       }, function () {
         submit.disabled = false;
         showErrors([{ message: '연결되지 않아 예약하지 못했어요' }]);

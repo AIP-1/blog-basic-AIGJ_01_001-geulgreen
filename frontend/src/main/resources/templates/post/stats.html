@@ -7,7 +7,8 @@
 <body>
 <main class="stats-page">
     <h1>통계</h1>
-    <p class="help">나만 볼 수 있어요. 조회수는 같은 사람의 반복 방문·내 방문·검색 로봇을 빼고 센 값이에요. <a href="/manage/posts">내 글로</a></p>
+    <p class="help">나만 볼 수 있어요. 조회수는 같은 사람의 반복 방문·내 방문·검색 로봇을 빼고 센 값이에요.</p>
+    <p><a class="link-btn back" href="/manage/posts">내 글 관리</a></p>
     <ul class="stats-totals">
         <li><span class="stats-number" th:text="${stats.totals().posts()}">0</span><span>발행 글</span></li>
         <li><span class="stats-number" th:text="${stats.totals().views()}">0</span><span>전체 조회</span></li>

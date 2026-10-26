@@ -22,7 +22,9 @@ public enum NotificationType {
     /** 내 함께 쓰기에 참여 요청이 옴(111 후속, 강성찬 개인 확장). 승인할 일이라 끌 수 없다. */
     CLUB_REQUEST,
     /** 팔로우하는 사람이 블로그 주소를 바꿈(강성찬 개인 확장, 인스타처럼). */
-    HANDLE_CHANGED;
+    HANDLE_CHANGED,
+    /** 보낸 회원이 문의에 다시 답함(10-26, 강성찬 개인 확장): 관리자에게. 처리해야 하는 일이라 끌 수 없다. */
+    INQUIRY_FOLLOWUP;
 
     public static final List<NotificationType> MUTABLE = List.of(COMMENT, REPLY, LIKE, FOLLOW, NEW_POST);
 

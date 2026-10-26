@@ -19,7 +19,7 @@
         <form method="post" th:action="@{/auth/verify/resend}" th:if="${loggedIn}">
             <button type="submit">인증 메일 다시 보내기</button>
         </form>
-        <p th:unless="${loggedIn}"><a href="/login?redirect=/signup/verify-sent">[인증 메일 다시 보내기]</a> (로그인 후)</p>
+        <p th:unless="${loggedIn}"><a class="btn btn-primary" href="/login?redirect=/signup/verify-sent">로그인하고 인증 메일 다시 보내기</a></p>
     </th:block>
 </main>
 </body>

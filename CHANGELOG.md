@@ -7,6 +7,62 @@
 
 ---
 
+## [1.79.3] — 2026-10-26 · 개인 확장 (탐색 시리즈 목록 · 문의 대화 · 예약 발행 · 링크 모양)
+
+- 탐색 시리즈 탭: 한 줄 목록, 앞 세 편 제목
+- 문의 대화: 관리자·보낸 회원이 사이트 안에서 여러 번 주고받기, 다시 답하면 관리자 알림
+- 예약 발행: 스위치·카드, 빠른 고르기 버튼, 예약하면 창 닫힘
+- 링크 모양: 떨어진 링크는 알약 버튼, 안내 상자는 글자만, 문장 속 링크는 굵은 글자
+- DB: V37 문의 대화 표 추가, 예전 답장은 대화의 첫 답장으로 옮김(더하기만)
+
+#### 전/후 사진
+
+**탐색 시리즈는 목록으로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sr-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sr-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sr-m-after.png) |
+
+**문의를 사이트 안에서 주고받아요**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-mine-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-mine-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-mine-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-mine-m-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-admin-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-admin-after.png) |
+
+**예약 발행 다듬기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sched-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-sched-after.png) |
+
+**밑줄 링크 대신 알약 버튼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-save-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-save-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-login-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-login-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-stats-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.3/v1793-stats-after.png) |
+
+---
+
 ## [1.79.2] — 2026-10-26 · 개인 확장 (함께 쓰기 목록 · 홈 사진)
 
 - 함께 쓰기 목록: 공개방·비공개방 카드, [방 만들기]는 창으로, 링크 모양 정리

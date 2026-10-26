@@ -96,7 +96,8 @@
             <p id="spell-status" class="help" role="status"></p>
             <div id="spell-consent" hidden>
                 <p class="help">본문이 외부 AI 서비스(Google Gemini, 무료 등급)로 전송돼요. 무료 등급에서는 Google이 보낸 내용을 서비스 개선에 쓰고
-                    사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요. <a href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a></p>
+                    사람이 검토할 수 있어요. 개인정보·비밀이 든 글은 보내지 마세요.</p>
+                <p><a class="link-btn" href="/privacy#pv-ai" target="_blank" rel="noopener">개인정보 처리방침</a></p>
                 <button type="button" id="spell-agree" class="btn btn-primary btn-sm">동의하고 검사하기</button>
             </div>
             <ul id="spell-fixes"></ul>
@@ -190,14 +191,35 @@
             <!-- 110 강성찬 개인 확장: 썸네일 만들기(미리 보고 저장하면 카드 대표 사진이 된다) -->
             <dialog th:replace="~{fragments/thumb-dialog :: dialog('시리즈 이름과 오늘 날짜가 함께 들어가요. 저장하면 이 글의 카드 대표 사진이 돼요.')}"></dialog>
         </div>
-        <!-- 042 강성찬 개인 확장: 예약 발행(임시글만) -->
+        <!-- 042 강성찬 개인 확장: 예약 발행(임시글만). 10-26 카드 모양으로 다시: 스위치 줄 + 날짜·시각 칸 + 빠른 고르기 알약, 잡힌 예약은 위 줄로 -->
         <div class="field schedule-field" th:if="${scheduleEnabled and !published}" th:attr="data-post-id=${post.postId()}">
             <p class="field-label">예약 발행</p>
-            <label class="check-row"><input type="checkbox" id="schedule-on"> <svg th:replace="~{fragments/icons :: clock}"></svg>정한 시각에 발행하기</label>
-            <label for="schedule-at" class="visually-hidden">발행할 날짜와 시각</label>
-            <input type="datetime-local" id="schedule-at" hidden>
-            <p class="help" id="schedule-status" role="status"></p>
-            <button type="button" id="schedule-cancel" class="btn-text" hidden>예약 취소</button>
+            <div class="schedule-card">
+                <div class="schedule-current" id="schedule-current" hidden>
+                    <span class="schedule-icon"><svg th:replace="~{fragments/icons :: clock}"></svg></span>
+                    <span class="schedule-text">
+                        <span class="schedule-when" id="schedule-status" role="status"></span>
+                        <span class="schedule-sub">예약됨 · 이때 지금 내용으로 발행돼요</span>
+                    </span>
+                    <button type="button" id="schedule-cancel" class="schedule-pill" hidden>예약 취소</button>
+                </div>
+                <label class="schedule-row" for="schedule-on">
+                    <span class="schedule-text">
+                        <span class="schedule-label" id="schedule-on-label">정한 시각에 발행하기</span>
+                        <span class="schedule-sub">켜면 [발행] 대신 [예약하기]가 돼요</span>
+                    </span>
+                    <input type="checkbox" role="switch" id="schedule-on">
+                </label>
+                <div class="schedule-pick" id="schedule-pick" hidden>
+                    <label for="schedule-at" class="schedule-pick-label">발행할 날짜와 시각</label>
+                    <input type="datetime-local" id="schedule-at">
+                    <div class="schedule-quick" role="group" aria-label="빠르게 고르기">
+                        <button type="button" class="schedule-pill" data-quick="hour">1시간 뒤</button>
+                        <button type="button" class="schedule-pill" data-quick="morning">내일 아침 9시</button>
+                        <button type="button" class="schedule-pill" data-quick="evening">내일 저녁 8시</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <ul id="publish-errors" class="field-error" role="alert"></ul>
         <div class="pp-actions">

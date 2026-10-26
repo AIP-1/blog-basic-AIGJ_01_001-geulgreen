@@ -9,6 +9,7 @@ import com.team.blog.shared.event.CommentLiked;
 import com.team.blog.shared.event.CommentUnliked;
 import com.team.blog.shared.event.FollowRequested;
 import com.team.blog.shared.event.HandleChanged;
+import com.team.blog.shared.event.InquiryFollowedUp;
 import com.team.blog.shared.event.InquiryReceived;
 import com.team.blog.shared.event.InquiryReplied;
 import com.team.blog.shared.event.MemberFollowed;
@@ -102,7 +103,16 @@ public class NotificationListeners {
     /** 099 강성찬 개인 확장: 문의 답장 → 보낸 회원에게. */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void on(InquiryReplied e) {
-        dispatcher.submit("inquiry replied " + e.inquiryId(), () -> writer.inquiryReplied(e.memberId(), e.inquiryId()));
+        dispatcher.submit("inquiry replied " + e.inquiryId(), () -> writer.inquiry(e.memberId(),
+                NotificationType.INQUIRY_REPLIED, e.inquiryId()));
+    }
+
+    /** 10-26 강성찬 개인 확장: 보낸 회원이 문의에 다시 답함 → 관리자 모두에게, 그 문의로. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(InquiryFollowedUp e) {
+        dispatcher.submit("inquiry followup " + e.inquiryId(), () -> jdbc.queryForList(
+                "SELECT id FROM member WHERE role = 'ADMIN' AND withdrawn_at IS NULL", Long.class)
+                .forEach(admin -> writer.inquiry(admin, NotificationType.INQUIRY_FOLLOWUP, e.inquiryId())));
     }
 
     /** 111 후속 강성찬 개인 확장: 함께 쓰기 초대 → 받은 사람, 참여 요청 → 만든 사람. */
