@@ -1,6 +1,6 @@
 /*
  * 10-23 chan: 글 저장 버튼. 누르면 바로 채우고/비우고 PUT(저장)·DELETE(취소)를 보낸다. 실패하면 되돌린다.
- * 저장하면 "모아보기에서 볼 수 있어요" 안내(반응 줄 알림 자리). 스크립트가 없으면 폼이 그대로 제출된다.
+ * 저장하면 "저장했어요" 안내(반응 줄 알림 자리). 10-26 chan: 안내 상자에는 링크를 넣지 않는다(모아보기는 프로필 메뉴). 스크립트가 없으면 폼이 그대로 제출된다.
  */
 (function () {
   'use strict';
@@ -46,8 +46,7 @@
         .then(function (res) {
           if (!res.ok) { var err = new Error(String(res.status)); err.status = res.status; throw err; }
           if (want) {
-            var a = document.createElement('a'); a.href = '/me/saved'; a.textContent = '모아보기';
-            say(['저장했어요. ', a, '에서 볼 수 있어요'], 'success');
+            say(['저장했어요'], 'success');
           } else {
             say(['저장을 취소했어요'], 'success');
           }

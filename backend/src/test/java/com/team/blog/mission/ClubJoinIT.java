@@ -163,9 +163,10 @@ class ClubJoinIT extends IntegrationTestBase {
         clock.set(NOW);
         long me = members.localMember("nexter", "다음할일", "nexter@example.com", "Blog#2026ok", true);
         long mate = members.localMember("nextmate", "짝꿍이", "nextmate@example.com", "Blog#2026ok", true);
-        // 처음 화면: 반·친구 예시와 세 단계, 방 찾기는 따로
-        assertThat(page("/missions/clubs", me)).contains("함께 쓰면 꾸준해져요").contains("반 방 만들기").contains("친구 방 만들기")
-                .contains("href=\"/missions/clubs/find\"").doesNotContain("방 이름·소개로 찾기");
+        // 처음 화면: 한 줄 설명과 [방 만들기]·[방 찾기]. 공개방·비공개방과 세 단계는 만들기 창(dialog) 안
+        assertThat(page("/missions/clubs", me)).contains("함께 쓰면 꾸준해져요").contains("class=\"link-btn\" href=\"/missions/clubs/find\"")
+                .containsPattern("(?s)<dialog id=\"club-new\".*공개방.*비공개방.*class=\"club-steps\".*</dialog>")
+                .doesNotContain("반 방 만들기").doesNotContain("방 이름·소개로 찾기");
         // 만들기 폼은 csrf 칸을 직접 넣어야 한다(th:action이 아니어서)
         assertThat(page("/missions/clubs", me)).containsPattern("action=\"/missions/clubs\" class=\"club-form\">\\s*<input type=\"hidden\" name=\"_csrf\"");
         assertThat(page("/missions/clubs/find", me)).contains("아직 공개된 방이 없어요").contains("방 만들기").contains("방 이름·소개로 찾기");

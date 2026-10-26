@@ -23,8 +23,8 @@
     <th:block th:if="${tab == 'series'}">
     <p th:if="${seriesFrom > 0}"><a class="link-btn" th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null})}">처음부터 보기</a></p>
     <p th:if="${seriesList.isEmpty()}" class="empty-state">아직 공개된 시리즈가 없어요</p>
-    <ul class="series-list" th:unless="${seriesList.isEmpty()}">
-        <th:block th:each="s : ${seriesList}"><li th:replace="~{series/list :: seriesCard(${s.url()}, ${s}, ${s.meta()})}"></li></th:block>
+    <ul class="series-shelf" th:unless="${seriesList.isEmpty()}">
+        <th:block th:each="s : ${seriesList}"><li th:replace="~{series/list :: browseRow(${s})}"></li></th:block>
     </ul>
     <p th:if="${seriesNext != null}" class="list-more"><a class="more-button"
         th:href="@{/explore(tab='series',sort=${sort == 'recent' ? 'recent' : null},offset=${seriesNext})}">더 보기</a></p>

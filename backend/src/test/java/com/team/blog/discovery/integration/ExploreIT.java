@@ -75,7 +75,10 @@ class ExploreIT extends IntegrationTestBase {
 
         String popular = mockMvc.perform(get("/explore?tab=series")).andReturn().getResponse().getContentAsString();
         assertThat(popular).contains("href=\"/explore?tab=series\" aria-current=\"page\">시리즈</a>")
-                .contains("sera</span> · <span class=\"meta-part\">글 1편").contains("serb</span> · <span class=\"meta-part\">글 2편").doesNotContain("숨은 시리즈")
+                .contains("<span class=\"sr-foot\">sera").contains("<span class=\"sr-foot\">serb").contains("<b>1</b>편").contains("<b>2</b>편")
+                .doesNotContain("숨은 시리즈")
+                // 114: 앞 세 편 제목을 한 줄로(공개 글만)
+                .contains("<span class=\"sr-no\">1</span>&nbsp;새 글 1 · <span class=\"sr-no\">2</span>&nbsp;새 글 2").doesNotContain("&nbsp;비공개 글")
                 .doesNotContain("class=\"post-card\"").doesNotContain("이런 사람은 어때요");
         assertThat(popular.indexOf("인기 시리즈")).isLessThan(popular.indexOf("최근 시리즈"));
         String recent = mockMvc.perform(get("/explore?tab=series&sort=recent")).andReturn().getResponse().getContentAsString();

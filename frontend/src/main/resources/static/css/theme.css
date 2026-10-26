@@ -19,6 +19,9 @@
     --color-thumb-empty: #F3ECE2;
     --color-code-bg: #F7F3EC;
     --color-focus: #3D6B55;
+    /* 10-25 chan: 초록 글씨·초록 밑줄 링크를 쓰지 않는다. 링크 글자는 본문 글자색, 사람이 쓴 글 속 링크 밑줄만 옅은 회색(다크에서도 글자색을 따라 바뀐다) */
+    --color-link: var(--color-text);
+    --color-link-line: color-mix(in srgb, var(--color-text) 35%, transparent);
     --color-brand-soft: #E5EFE8;
     --color-highlight: #FFF1C2;
     --color-warning-border: #C29100;
@@ -40,6 +43,8 @@
     --color-hero-from: #FFF4E4;
     --color-cat-art-bg: #FCF2E6;
     --color-cat-art-text: #5C4A3D;
+    --color-cover-bg: #F6F1E7; /* 114: 시리즈 표지 없는 책 — 공부 글 표지 규칙과 같은 바탕·글자 */
+    --color-cover-text: #2F6B4F;
     --tone-green-bg: #EAF4E4;
     --tone-green-fg: #4E8A3E;
     --tone-pink-bg: #FBEAEA;
@@ -138,6 +143,8 @@
         --color-hero-from: #2A2420;
         --color-cat-art-bg: #2E3758; /* 밤 고양이 그림 바탕 */
         --color-cat-art-text: #5C4A3D;
+        --color-cover-bg: #24302A;
+        --color-cover-text: #A8D5BA;
         --tone-green-bg: #22301F;
         --tone-green-fg: #9BD08A;
         --tone-pink-bg: #3A2229;
@@ -204,6 +211,8 @@
     --color-hero-from: #2A2420;
     --color-cat-art-bg: #2E3758; /* 밤 고양이 그림 바탕 */
     --color-cat-art-text: #5C4A3D;
+    --color-cover-bg: #24302A;
+    --color-cover-text: #A8D5BA;
     --tone-green-bg: #22301F;
     --tone-green-fg: #9BD08A;
     --tone-pink-bg: #3A2229;

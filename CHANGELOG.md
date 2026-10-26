@@ -7,6 +7,36 @@
 
 ---
 
+## [1.79.2] — 2026-10-26 · 개인 확장 (함께 쓰기 목록 · 홈 사진)
+
+- 함께 쓰기 목록: 공개방·비공개방 카드, [방 만들기]는 창으로, 링크 모양 정리
+- 휴대폰 홈 맨 위 사진 둥근 모서리(PC 그대로)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기 목록**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-new-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-new-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-clubs-m-after.png) |
+
+**휴대폰 홈 사진 둥근 모서리**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-home-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.2/v1792-home-m-after.png) |
+
+---
+
 ## [1.79.1] — 2026-10-26 · 개인 확장 (친구 초대 링크 · 간단 가입)
 
 - 초대 링크 `/i/주소[/방 코드]`: 가입하면 바로 팔로우·방 참여, 휴대폰 공유
