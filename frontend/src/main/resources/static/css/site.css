@@ -437,7 +437,9 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
 /* 사진 배너(static/images/hero.webp, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
    검색창만 사진의 문구 아래(가로 18.5%, 세로 72%)에 얹는다. 비율을 그대로 지켜 문구 위치가 어긋나지 않게 한다 */
-.hero-photo { background: url("/images/hero.webp") center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
+/* 사진 주소는 --hero-photo 하나로 두고 다크 모드는 이 값만 바꾼다(폰에서는 ::before가 같은 값을 쓴다) */
+.hero-photo { --hero-photo: url("/images/hero.webp");
+    background: var(--hero-photo) center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
 .hero-photo .hero-inner { position: absolute; inset: 0; max-width: none; padding: 0; min-height: 0; display: block; }
 .hero-photo .hero-slogan, .hero-photo .hero-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hero-photo .hero-search { position: absolute; left: 18.5%; top: 70%; width: 34%; min-width: 240px; max-width: none; }
@@ -458,9 +460,11 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
 @media (max-width: 720px) {
     .hero-inner { grid-template-columns: 1fr; padding: 32px 20px 8px; min-height: 0; }
     /* 좁은 화면: 사진 속 문구는 너무 작아 읽을 수 없으니 사진은 고양이 쪽(오른쪽)만 위에 보이고,
-       문구는 실제 글자로 사진 아래에 보여 준다. 검색창은 그 아래 */
-    .hero-photo { aspect-ratio: auto; background-size: auto 200px; background-position: 100% 0; padding-top: 200px; padding-bottom: 16px;
-        background-color: var(--color-hero-from); }
+       문구는 실제 글자로 사진 아래에 보여 준다. 검색창은 그 아래.
+       사진은 띠 가장자리에 붙이지 않고 12px 안쪽에 네 모서리를 둥글게 깎아 얹는다(chan 10-26: 네모 반듯해 보임) */
+    .hero-photo { aspect-ratio: auto; background: var(--color-hero-from); padding-top: 212px; padding-bottom: 16px; }
+    .hero-photo::before { content: ""; position: absolute; top: 12px; left: 12px; right: 12px; height: 200px; border-radius: 16px;
+        background: var(--hero-photo) 100% 0 / auto 100% no-repeat; }
     .hero-photo .hero-inner { position: static; padding: 20px 20px 0; }
     .hero-photo .hero-slogan, .hero-photo .hero-sub { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
     .hero-photo .hero-slogan { font-size: 2em; margin-bottom: 8px; }
@@ -1547,11 +1551,11 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .tag-sections-more.loading a { display: none; }
 /* 다크 모드는 같은 장면의 밤 그림(배너·고양이, chan이 준 그림 10-15). 시스템 다크 + 설정의 화면 테마 둘 다 따름 */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .hero-photo { background-image: url("/images/hero-night.webp"); }
+    :root:not([data-theme="light"]) .hero-photo { --hero-photo: url("/images/hero-night.webp"); }
     :root:not([data-theme="light"]) img.art-day { display: none !important; }
 }
 @media not all and (prefers-color-scheme: dark) { :root:not([data-theme="dark"]) img.art-night { display: none !important; } }
-:root[data-theme="dark"] .hero-photo { background-image: url("/images/hero-night.webp"); }
+:root[data-theme="dark"] .hero-photo { --hero-photo: url("/images/hero-night.webp"); }
 :root[data-theme="dark"] img.art-day, :root[data-theme="light"] img.art-night { display: none !important; }
 /* 100 강성찬 개인 확장: 블로그 탭(홈·글·시리즈) — 폰에서도 한 줄 */
 .blog-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 16px 0 24px; }
