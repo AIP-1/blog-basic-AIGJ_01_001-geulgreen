@@ -27,13 +27,48 @@
                 </li>
             </ul>
         </section>
-        <!-- 10-26 chan: 방이 없으면 한 줄 설명과 [방 만들기]·[방 찾기]만. 방 종류(공개방·비공개방)와 세 단계는 [방 만들기]를 누르면 뜨는 창 안으로 -->
-        <section th:if="${rooms.isEmpty()}" class="mission-panel club-empty" aria-labelledby="club-empty-heading">
-            <h2 id="club-empty-heading">함께 쓰면 꾸준해져요</h2>
-            <p class="help">친구들 글이 한 방에 모여요. 방을 만들거나, 열린 방을 찾아 들어가요.</p>
-            <div class="club-empty-actions">
-                <a href="#club-new" class="btn btn-primary btn-sm" data-open-club-form>방 만들기</a>
-                <a class="link-btn" href="/missions/clubs/find">방 찾기</a>
+        <!-- 10-26 chan: 방이 없으면 들어가도록 이끈다. 맨 위 글그린 공식 방 카드와 큰 [들어가기](한 번에 바로 참여),
+             아래 열린 방 몇 개(한 줄씩 [들어가기]/[참여 요청]), 맨 아래 [방 만들기]와 방 찾기 알약. 방 종류와 세 단계는 [방 만들기] 창 안 -->
+        <section th:if="${rooms.isEmpty()}" class="club-welcome" aria-labelledby="club-empty-heading">
+            <h2 id="club-empty-heading">친구들과 같이 쓰면 꾸준해져요</h2>
+            <p class="help">방에 들어가면 같은 글감으로 함께 쓰고, 서로 쓴 글이 한곳에 모여요.</p>
+            <div th:if="${official != null}" class="club-official">
+                <span class="room-icon club-official-icon" aria-hidden="true"><th:block th:replace="~{fragments/icons :: paw}"></th:block></span>
+                <div class="club-official-text">
+                    <p class="club-official-name"><strong th:text="${official.name()}">글그린</strong><span class="badge">공식</span></p>
+                    <p th:if="${!official.intro().isEmpty()}" class="club-official-intro" th:text="${official.intro()}">소개</p>
+                    <p class="help club-official-meta"><th:block th:replace="~{fragments/meta :: parts(${'멤버 ' + official.memberCount() + '명'
+                            + (officialToday > 0 ? ' · 오늘 ' + officialToday + '명이 썼어요' : '')
+                            + (officialTopic != null ? ' · 방 글감 「' + officialTopic.title() + '」' : '')})}"></th:block></p>
+                </div>
+                <form method="post" th:action="@{/missions/clubs/{id}/join(id=${official.id()})}" class="club-official-join">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-primary club-join-big" th:disabled="${official.full()}"
+                            th:text="${official.full() ? '정원이 다 찼어요' : '들어가기'}">들어가기</button>
+                </form>
+            </div>
+            <th:block th:unless="${openRooms.isEmpty()}">
+                <h3 class="club-welcome-sub">열린 방</h3>
+                <ul class="club-open-list">
+                    <li th:each="c : ${openRooms}">
+                        <a class="club-open-row" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
+                            <span class="room-icon" th:classappend="${'room-c' + (c.id() % 8)}" aria-hidden="true" th:text="${c.name().substring(0, 1)}">방</span>
+                            <span class="club-open-text"><strong th:text="${c.name()}">방</strong>
+                                <span class="help" th:text="${(c.intro().isEmpty() ? '' : c.intro() + ' · ') + '멤버 ' + c.memberCount() + '명'}">소개</span></span>
+                        </a>
+                        <form method="post" th:action="@{/missions/clubs/{id}/join(id=${c.id()})}">
+                            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-sm" th:text="${c.joinMode() == 'OPEN' ? '들어가기' : '참여 요청'}">들어가기</button>
+                        </form>
+                    </li>
+                </ul>
+            </th:block>
+            <div class="club-welcome-foot">
+                <span class="help" th:text="${official != null or !openRooms.isEmpty() ? '친구끼리 쓰고 싶다면' : '반 친구, 동아리 친구와 같이'}">친구끼리 쓰고 싶다면</span>
+                <div class="club-empty-actions">
+                    <a href="#club-new" class="btn" th:classappend="${official == null and openRooms.isEmpty()} ? 'btn-primary club-join-big'" data-open-club-form>방 만들기</a>
+                    <a class="link-btn" href="/missions/clubs/find">방 찾기</a>
+                </div>
             </div>
         </section>
         <!-- 10-25 chan: 카톡 대화방 목록처럼 — 마지막 글, 시간, 새 글 수. 최근에 글이 올라온 방이 위 -->

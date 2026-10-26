@@ -579,7 +579,28 @@ public class ClubService {
         return new Preview(club, state, invited);
     }
 
-    /** 공개 함께 쓰기에서 [참여하기](누구나 바로) 또는 [참여 요청](승인 후 참여). 들어갔으면 {@code true}. */
+    /**
+     * 10-26 글그린 공식 방: 운영자(관리자 계정)가 만든 공개방 중 가장 먼저 만든 것. 방이 없는 사람의 첫 화면 맨 위에 보이고,
+     * 승인 방식이어도 [들어가기] 한 번에 바로 들어온다(몰래 넣지는 않는다: 14세 미만 회원·방 알림·멤버 목록 노출).
+     */
+    public Optional<Club> official() {
+        return jdbc.query(SELECT + """
+                 JOIN member o ON o.id = c.owner_id
+                 WHERE c.join_mode <> 'LINK' AND o.role = 'ADMIN' AND o.status = 'ACTIVE' AND o.withdrawn_at IS NULL
+                 ORDER BY c.created_at, c.id LIMIT 1
+                """, (rs, i) -> club(rs)).stream().findFirst();
+    }
+
+    /** 방 소개 카드 한 줄: 오늘(한국 날짜) 이 방 멤버 중 전체 공개 글을 쓴 사람 수. */
+    public int wroteToday(long clubId) {
+        Integer n = jdbc.queryForObject("""
+                SELECT count(DISTINCT p.author_id) FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
+                WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date = ?",
+                Integer.class, clubId, Date.valueOf(today()));
+        return n == null ? 0 : n;
+    }
+
+    /** 공개 함께 쓰기에서 [참여하기](누구나 바로) 또는 [참여 요청](승인 후 참여). 들어갔으면 {@code true}. 공식 방은 언제나 바로. */
     @Transactional
     public boolean joinListed(Optional<CurrentUser> current, long clubId) {
         CurrentUser me = accountGuard.requireWritable(current);
@@ -587,7 +608,7 @@ public class ClubService {
         if (LINK.equals(club.joinMode())) {
             throw new NotFoundException();
         }
-        if (OPEN.equals(club.joinMode())) {
+        if (OPEN.equals(club.joinMode()) || official().map(o -> o.id() == clubId).orElse(false)) {
             addMember(club, me.memberId());
             return true;
         }

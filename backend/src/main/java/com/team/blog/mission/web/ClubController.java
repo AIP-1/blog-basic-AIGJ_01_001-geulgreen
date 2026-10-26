@@ -27,6 +27,9 @@ import org.springframework.web.servlet.view.RedirectView;
 @ConditionalOnProperty(name = "blog.missions.enabled", havingValue = "true", matchIfMissing = true)
 public class ClubController {
 
+    /** 방이 없는 사람의 첫 화면에 보여 줄 열린 방 수. */
+    static final int OPEN_ROOMS = 3;
+
     private static final java.time.ZoneId SEOUL = java.time.ZoneId.of("Asia/Seoul");
 
     private final ClubService clubs;
@@ -60,6 +63,17 @@ public class ClubController {
         }
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP));
+        }
+        // 10-26 chan: 방이 없으면 들어가도록 이끈다 — 맨 위 글그린 공식 방(큰 [들어가기]), 아래 열린 방 몇 개
+        if (rooms.isEmpty()) {
+            Optional<ClubService.Club> official = clubs.official();
+            official.ifPresent(o -> {
+                model.addAttribute("official", o);
+                model.addAttribute("officialToday", clubs.wroteToday(o.id()));
+                model.addAttribute("officialTopic", clubs.topics(o.id(), 1).stream().findFirst().orElse(null));
+            });
+            model.addAttribute("openRooms", clubs.listed(null).stream()
+                    .filter(c -> official.map(o -> o.id() != c.id()).orElse(true)).filter(c -> !c.full()).limit(OPEN_ROOMS).toList());
         }
         return "mission/clubs";
     }

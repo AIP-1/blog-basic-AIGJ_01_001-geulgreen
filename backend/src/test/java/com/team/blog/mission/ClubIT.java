@@ -184,6 +184,38 @@ class ClubIT extends IntegrationTestBase {
     }
 
     @Test
+    void emptyScreenLeadsIntoOfficialRoomWithOneClick() throws Exception {
+        clock.set(NOW);
+        long admin = members.localMember("officialadmin", "운영자", "officialadmin@example.com", "Blog#2026ok", true);
+        jdbc.update("UPDATE member SET role = 'ADMIN' WHERE id = ?", admin);
+        long host = members.localMember("openhost", "열린방장", "openhost@example.com", "Blog#2026ok", true);
+        long newbie = members.localMember("newbie", "새싹", "newbie@example.com", "Blog#2026ok", true);
+        // 공식 방이 없으면 열린 방과 [방 만들기]만
+        String open = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(host))
+                .param("name", "고양이 일기").param("joinMode", "OPEN")).andReturn().getResponse().getRedirectedUrl();
+        assertThat(page("/missions/clubs", newbie)).contains("친구들과 같이 쓰면 꾸준해져요").contains("고양이 일기").doesNotContain("club-official");
+        // 운영자가 만든 공개방(승인 방식)이 공식 방: 맨 위 카드, [들어가기] 한 번에 승인 없이 바로 들어온다
+        String official = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(admin))
+                .param("name", "글그린").param("intro", "모두 함께").param("joinMode", "APPROVAL")).andReturn().getResponse().getRedirectedUrl();
+        String empty = page("/missions/clubs", newbie);
+        assertThat(empty).contains("club-official").contains("글그린").contains(">공식<").contains("action=\"" + official + "/join\"")
+                .contains("고양이 일기");
+        mockMvc.perform(post(official + "/join").with(csrf()).with(TestAuth.member(newbie)));
+        long officialId = Long.parseLong(official.substring(official.lastIndexOf('/') + 1));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_member WHERE club_id = ? AND member_id = ?", Integer.class,
+                officialId, newbie)).isEqualTo(1);
+        // 방이 생기면 첫 화면 대신 방 목록
+        assertThat(page("/missions/clubs", newbie)).doesNotContain("club-official").contains("참여 중인 방");
+        // 운영자가 아닌 사람의 승인 방은 그대로 요청
+        String approval = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(host))
+                .param("name", "책 한 줄").param("joinMode", "APPROVAL")).andReturn().getResponse().getRedirectedUrl();
+        mockMvc.perform(post(approval + "/join").with(csrf()).with(TestAuth.member(newbie)));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_member m JOIN writing_club c ON c.id = m.club_id WHERE c.name = '책 한 줄' AND m.member_id = ?",
+                Integer.class, newbie)).isZero();
+        assertThat(open).isNotNull();
+    }
+
+    @Test
     void oldRoomsWithEndedPeriodOpenAgain() throws Exception {
         clock.set(NOW);
         long owner = members.localMember("oldowner", "옛방장", "oldowner@example.com", "Blog#2026ok", true);
