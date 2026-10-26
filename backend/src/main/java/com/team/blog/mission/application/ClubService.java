@@ -591,6 +591,15 @@ public class ClubService {
                 """, (rs, i) -> club(rs)).stream().findFirst();
     }
 
+    /** 방이 없는 사람의 첫 화면: 정원이 남은 공개방 최근 것부터 {@code limit}개({@code excludeId} 방은 빼고). */
+    public List<Club> openToJoin(long excludeId, int limit) {
+        return jdbc.query(SELECT + """
+                 WHERE c.join_mode <> 'LINK' AND c.id <> ?
+                   AND (SELECT count(*) FROM writing_club_member m3 WHERE m3.club_id = c.id) < c.member_cap
+                 ORDER BY c.created_at DESC, c.id DESC LIMIT ?
+                """, (rs, i) -> club(rs), excludeId, limit);
+    }
+
     /** 방 소개 카드 한 줄: 오늘(한국 날짜) 이 방 멤버 중 전체 공개 글을 쓴 사람 수. */
     public int wroteToday(long clubId) {
         Integer n = jdbc.queryForObject("""

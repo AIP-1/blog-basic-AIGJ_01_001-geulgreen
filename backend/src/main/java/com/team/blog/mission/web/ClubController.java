@@ -72,8 +72,7 @@ public class ClubController {
                 model.addAttribute("officialToday", clubs.wroteToday(o.id()));
                 model.addAttribute("officialTopic", clubs.topics(o.id(), 1).stream().findFirst().orElse(null));
             });
-            model.addAttribute("openRooms", clubs.listed(null).stream()
-                    .filter(c -> official.map(o -> o.id() != c.id()).orElse(true)).filter(c -> !c.full()).limit(OPEN_ROOMS).toList());
+            model.addAttribute("openRooms", clubs.openToJoin(official.map(ClubService.Club::id).orElse(0L), OPEN_ROOMS));
         }
         return "mission/clubs";
     }
