@@ -7,6 +7,59 @@
 
 ---
 
+## [1.79.0] — 2026-10-26 · 개인 확장 (함께 쓰기 오픈채팅방 · 탐색 오른쪽 칸 · 설정 하위 화면)
+
+- 함께 쓰기 방: 기간 없이 오픈채팅방처럼, 멤버 글이 대화처럼, 방 글감 고정, 방 목록에 새 글 수
+- 탐색 추천 오른쪽 칸이 스크롤을 따라옴(PC)
+- 설정 하위 화면(비공개 계정·친한 친구·카테고리·연결·탈퇴) 카드형
+- DB: V36 방 글감 표·멤버 마지막 본 때 칸 추가(더하기만, 기간 칸은 남기고 안 씀)
+
+#### 전/후 사진
+
+**함께 쓰기 방이 오픈채팅방처럼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-m-after.png) |
+
+**탐색 오른쪽 칸이 따라와요**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-ex-after.png) |
+
+**설정 하위 화면도 카드형**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-spriv-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-spriv-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sfr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sfr-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sconn-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sconn-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-swd-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-swd-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-m-after.png) |
+
+---
+
 ## [1.78.2] — 2026-10-25 · 개인 확장 (친한 친구)
 
 - "친구"를 "친한 친구"로, 설정에서 팔로우하는 사람 중에 고르기
