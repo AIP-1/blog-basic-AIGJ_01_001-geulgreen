@@ -464,7 +464,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
        사진은 띠 가장자리에 붙이지 않고 12px 안쪽에 네 모서리를 둥글게 깎아 얹는다(chan 10-26: 네모 반듯해 보임) */
     .hero-photo { aspect-ratio: auto; background: var(--color-hero-from); padding-top: 212px; padding-bottom: 16px; }
     .hero-photo::before { content: ""; position: absolute; top: 12px; left: 12px; right: 12px; height: 200px; border-radius: 16px;
-        background: var(--hero-photo) 100% 0 / auto 100% no-repeat; }
+        background: var(--hero-photo) 100% 0 / cover no-repeat; }
     .hero-photo .hero-inner { position: static; padding: 20px 20px 0; }
     .hero-photo .hero-slogan, .hero-photo .hero-sub { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
     .hero-photo .hero-slogan { font-size: 2em; margin-bottom: 8px; }
