@@ -58,7 +58,7 @@ class ClubIT extends IntegrationTestBase {
                 .contains("aria-current=\"page\">함께 쓰기</a>").doesNotContain("이번 기간");
         String board = page(location, friend);
         assertThat(board).contains("오늘 <strong>1명</strong>이 썼어요").contains("이번 주 글").doesNotContain("지난주 글")
-                .contains("반친구님이 들어왔어요").contains("/missions/clubs/join/" + code).contains("함께 쓰기에서 나가기")
+                .contains("반친구님이 들어왔어요").contains("/i/").contains("/" + code).contains("링크 복사").contains("함께 쓰기에서 나가기")
                 .doesNotContain("함께 쓰기 삭제").doesNotContain("이번 기간").doesNotContain("번째");
         // 멤버 줄: 마지막으로 쓴 때(친구 오늘, 모임장 6일 전)
         assertThat(board).containsPattern("(?s)반친구</span>.*?</a>\\s*<span class=\"room-state is-today\">오늘 씀</span>")

@@ -123,10 +123,12 @@
             <section class="room-invite" aria-labelledby="club-invite-heading">
                 <h2 id="club-invite-heading">초대하기</h2>
                 <p class="help" th:text="${c.joinMode() == 'APPROVAL' ? '링크를 보내면 참여 요청이 오고, 관리자가 승인하면 들어와요' : '링크를 받은 사람은 누르면 바로 들어와요'}">링크 안내</p>
-                <button type="button" id="club-invite-copy" class="btn btn-sm" hidden
-                        th:attr="data-invite-url=${siteOrigin + '/missions/clubs/join/' + c.inviteCode()}"><th:block
-                        th:replace="~{fragments/icons :: link}"></th:block>초대 링크 복사</button>
-                <p class="help club-invite-url" th:text="${siteOrigin + '/missions/clubs/join/' + c.inviteCode()}">주소</p>
+                <!-- 10-25 chan: 링크는 /i/내아이디/코드 — 친구가 가입하면 나를 팔로우하고 이 방에 들어온다. 휴대폰에서는 [공유하기]도 -->
+                <div class="club-invite-link" th:with="inviteUrl=${inviteEnabled and currentAvatar != null ? siteOrigin + '/i/' + currentAvatar.handle() + '/' + c.inviteCode() : siteOrigin + '/missions/clubs/join/' + c.inviteCode()}"
+                     th:attr="data-invite-url=${inviteUrl},data-invite-title=${'함께 쓰기 ' + c.name()}">
+                    <p class="help club-invite-url" th:text="${inviteUrl}">주소</p>
+                    <th:block th:replace="~{invite/share :: buttons}"></th:block>
+                </div>
                 <form th:if="${!candidates.isEmpty()}" method="post" th:action="@{/missions/clubs/{id}/invite(id=${c.id()})}" class="club-picker">
                     <details class="club-members">
                         <summary><span th:text="${'글그린 친구 고르기 · ' + candidates.size() + '명'}">고르기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
@@ -211,6 +213,7 @@
         <button type="submit" class="btn btn-primary btn-sm"><th:block th:replace="~{fragments/icons :: pen}"></th:block>글 쓰기</button>
     </form>
     <script th:src="@{/js/mission/club.js}" defer></script>
+    <script th:src="@{/js/invite/share.js}" defer></script>
 </main>
 </body>
 </html>

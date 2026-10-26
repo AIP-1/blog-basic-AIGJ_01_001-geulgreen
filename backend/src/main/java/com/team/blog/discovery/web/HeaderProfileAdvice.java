@@ -16,18 +16,27 @@ public class HeaderProfileAdvice {
     private final JdbcTemplate jdbc;
     private final String contactEmail;
     private final boolean contactPage;
+    private final boolean inviteEnabled;
     private final com.team.blog.post.application.TagListingQuery tagListingQuery;
 
     public HeaderProfileAdvice(CurrentUserProvider currentUserProvider, JdbcTemplate jdbc,
                                com.team.blog.post.application.TagListingQuery tagListingQuery,
                                @org.springframework.beans.factory.annotation.Value("${blog.contact.enabled:true}") boolean contactPage,
-                               @org.springframework.beans.factory.annotation.Value("${blog.contact.email:blogeulgreen@gmail.com}") String contactEmail) {
+                               @org.springframework.beans.factory.annotation.Value("${blog.contact.email:blogeulgreen@gmail.com}") String contactEmail,
+                               @org.springframework.beans.factory.annotation.Value("${blog.invite.enabled:true}") boolean inviteEnabled) {
+        this.inviteEnabled = inviteEnabled;
         this.contactPage = contactPage;
         this.currentUserProvider = currentUserProvider;
         this.tagListingQuery = tagListingQuery;
         this.jdbc = jdbc;
         // 090: 사이트 문의 주소만 쓴다. 관리자 지정 주소(blog.admin.emails)는 개인 주소라 화면에 내보내지 않는다.
         this.contactEmail = contactEmail.isBlank() ? null : contactEmail.strip();
+    }
+
+    /** 10-25 chan: 친구 초대 켜짐 여부(프로필 메뉴 [친구 초대], 함께 쓰기 방 초대 칸 링크). */
+    @ModelAttribute("inviteEnabled")
+    public boolean inviteEnabled() {
+        return inviteEnabled;
     }
 
     @ModelAttribute("currentAvatar")

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${invite.inviter().displayName() + '님의 초대 · 글그린'}">초대 · 글그린</title>
+</head>
+<body>
+<!-- 10-25 chan: 친구 초대 링크로 연 화면. 비회원은 가입 버튼 두 개, 회원은 [함께 시작하기] 하나 -->
+<main class="auth-page invite-page" th:with="who=${invite.inviter()}, club=${invite.club().orElse(null)}">
+  <div class="auth-card">
+    <div class="auth-art"><th:block th:replace="~{fragments/icons :: cat}"></th:block></div>
+    <div class="auth-panel">
+    <p class="mission-eyebrow">글그린 초대</p>
+    <!-- 10-25 chan: 이름 뒤에서 줄을 나누고 둘째 줄은 고정 문장이라 한 줄로 -->
+    <h1><span class="invite-name" th:text="${who.displayName() + '님이'}">○○님이</span> <span class="invite-fixed">함께 글 쓰자고 초대했어요</span></h1>
+    <p class="invite-who">
+        <th:block th:replace="~{fragments/avatar :: avatar(${who.avatar()}, 40)}"></th:block>
+        <span class="invite-who-text"><strong th:text="${who.displayName()}">이름</strong><span class="help" th:text="${who.handle()}">아이디</span></span>
+    </p>
+    <section th:if="${club != null}" class="invite-club" aria-label="함께 쓰기 방">
+        <p class="invite-club-label">함께 쓰기</p>
+        <p class="invite-club-name" th:text="${club.name()}">방 이름</p>
+        <p th:if="${!club.intro().isEmpty()}" class="help" th:text="${club.intro()}">소개</p>
+        <p class="help" th:text="${'멤버 ' + club.memberCount() + '명'}">멤버 1명</p>
+    </section>
+    <!-- 방 안내는 참여 방식에 맞춰: 승인형은 요청만 들어가고, 이메일 가입은 메일 인증 뒤에 들어간다(InviteService.accept) -->
+    <p class="auth-lead invite-lead" th:with="name=${who.displayName()},
+          approval=${club != null and club.joinMode() == 'APPROVAL'},
+          clubText=${approval ? '님을 팔로우하고 이 방에 참여를 요청해요. 관리자가 승인하면 들어가요.' : '님을 팔로우하고 이 방에 들어가요. 이메일로 가입하면 메일 인증을 마친 뒤에 들어가요.'}"
+       th:text="${club != null} ? ${'글그린은 친구·반이 같이 글 쓰는 습관 공간이에요. 시작하면 ' + name + clubText} : ${'글그린은 친구·반이 같이 글 쓰는 습관 공간이에요. 시작하면 ' + name + '님을 팔로우해서 새 글이 피드에 보여요.'}">안내</p>
+
+    <!-- 비회원: 가입 방법 두 가지만. 로그인은 작은 글씨 -->
+    <th:block th:if="${currentMemberId == null}">
+    <div class="social-login invite-start">
+        <a class="btn btn-social" href="/oauth2/authorization/google"><th:block th:replace="~{fragments/icons :: google}"></th:block>Google로 시작하기</a>
+        <a class="btn btn-primary btn-block" href="/signup">이메일로 시작하기</a>
+    </div>
+    <p class="auth-links">이미 계정이 있나요? <a class="link-btn" th:href="${loginUrl}">로그인</a></p>
+    </th:block>
+
+    <!-- 회원: 한 번 누르면 끝 -->
+    <th:block th:if="${currentMemberId != null}">
+    <p th:if="${self}" class="help">내 초대 링크예요. 친구에게 보내면 이 화면이 보여요.</p>
+    <p th:if="${self}" class="invite-self-link"><a class="link-btn" href="/me/invite">내 초대 링크 보기</a></p>
+    <form th:unless="${self}" method="post" th:action="@{${invite.path()}}" class="invite-start">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="btn btn-primary btn-block">함께 시작하기</button>
+        <p class="help" th:with="name=${who.displayName()}, approval=${club != null and club.joinMode() == 'APPROVAL'}"
+           th:text="${club == null} ? ${name + '님을 팔로우해요'} : (${approval} ? ${name + '님을 팔로우하고 참여를 요청해요. 관리자가 승인하면 들어가요'} : ${name + '님을 팔로우하고 방에 들어가요'})">설명</p>
+    </form>
+    </th:block>
+    </div>
+  </div>
+</main>
+</body>
+</html>

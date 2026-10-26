@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- 10-25 chan: 초대 링크 [복사] [공유] 버튼 조각. 부모 요소의 data-invite-url·data-invite-title을 js/invite/share.js가 읽는다.
+     공유 버튼은 손가락 기기(휴대폰)에서 navigator.share가 있을 때만 보인다 -->
+<div th:fragment="buttons" class="invite-share">
+    <button type="button" class="btn btn-primary btn-sm invite-copy"><th:block th:replace="~{fragments/icons :: link}"></th:block><span>링크 복사</span></button>
+    <button type="button" class="btn btn-sm invite-native" hidden><th:block th:replace="~{fragments/icons :: share}"></th:block><span>공유하기</span></button>
+    <span class="help invite-share-status" role="status" aria-live="polite"></span>
+</div>
+</body>
+</html>
