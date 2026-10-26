@@ -135,14 +135,14 @@
 <!-- 홈 글 카드(fragments/post-card)와 같은 모양: 글쓴이·주제 → 제목 → 요약 → 반응·댓글 달기 -->
 <!-- 086: 공용 카드 위에 붙는 미션 줄(주제·친구/내 글·댓글 달기). 모든 미션 카드에 있어 줄이 맞는다 -->
 <p th:fragment="missionExtra(mp)" class="manage-badges mission-extra">
-    <a class="badge mission-topic" th:href="${topicLinkBase + 'topic=' + mp.topicId() + '#posts'}" th:text="${mp.topicTitle()}">주제</a><span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span>
+    <a class="badge mission-topic" th:href="${topicLinkBase + 'topic=' + mp.topicId() + '#posts'}" th:text="${mp.topicTitle()}">주제</a><span th:if="${mp.friend()}" class="badge">친한 친구</span><span th:if="${mp.mine()}" class="badge">내 글</span>
     <a class="mission-post-reply" th:href="${mp.url() + '#comments'}">댓글 달기</a>
 </p>
 <li th:fragment="missionPost(mp)" class="post-card mission-post">
     <div class="card-body">
         <p class="card-top">
             <a class="card-author" th:href="${paths.blog(mp.handle())}"><span th:text="${mp.handle()}">아이디</span>
-                <span th:if="${mp.friend()}" class="badge">친구</span><span th:if="${mp.mine()}" class="badge">내 글</span></a>
+                <span th:if="${mp.friend()}" class="badge">친한 친구</span><span th:if="${mp.mine()}" class="badge">내 글</span></a>
             <a class="card-tag" th:href="${topicLinkBase + 'topic=' + mp.topicId() + '#posts'}" th:text="${mp.topicTitle()}">주제</a>
         </p>
         <h3 class="card-title"><a class="card-link" th:href="${mp.url()}" th:title="${mp.title()}" th:text="${#strings.replace(mp.title(), ' · ', ' ·&#160;')}">제목</a></h3>

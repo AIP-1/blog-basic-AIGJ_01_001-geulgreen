@@ -28,7 +28,6 @@
     var f = form.querySelector('form');
     f.elements.name.value = b.dataset.name;
     f.elements.intro.value = b.dataset.intro;
-    f.elements.everyDays.value = b.dataset.every;
     f.elements.memberCap.value = b.dataset.cap;
     Array.prototype.forEach.call(f.querySelectorAll('input[name="joinMode"]'), function (r) { r.checked = r.value === b.dataset.mode; });
   }

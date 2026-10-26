@@ -2,70 +2,83 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>친구·그룹 · 글그린</title>
+    <title>친한 친구·그룹 · 글그린</title>
 </head>
 <body>
-<main class="friends-page">
-    <h1>친구·그룹</h1>
-    <p class="help">내가 팔로우하는 사람 중에서 친구를 골라 넣어요. 친구 공개 글은 나와 내가 넣은 친구만 볼 수 있어요.
-        상대가 나를 팔로우하지 않아도 되고, 팔로우를 끊으면 친구에서도 빠져요.
-        넣고 빼도 상대에게 알리지 않고, 목록은 나만 볼 수 있어요.
-        <a href="#groups">친구 그룹</a></p>
-    <p class="settings-back"><a href="/settings" class="link-btn back">설정으로</a></p>
+<!--/* 친한 친구 고르기와 그룹(예전 /settings/groups). 10-25: 설정 본 화면과 같은 카드형 */-->
+<main class="set-page">
+    <a class="set-back" href="/settings#settings-friends"><svg th:replace="~{fragments/icons :: chevron-left}"></svg>설정 · 공개</a>
+    <header class="set-head">
+        <h1>친한 친구·그룹</h1>
+        <p class="set-lead">"친한 친구만" 글을 볼 사람을 골라요. 목록은 나만 보고, 상대에게 알림이 가지 않아요.</p>
+    </header>
 
-    <section aria-labelledby="friends-heading">
-        <h2 id="friends-heading" th:text="${'내 친구 ' + friends.size()}">내 친구 0</h2>
-        <p th:if="${friends.isEmpty()}" class="help">아직 친구가 없어요. 아래 내가 팔로우하는 사람 중에서 넣어 보세요</p>
-        <ul class="follow-list">
-            <li th:each="m : ${friends}" class="follow-row">
+    <section class="set-card" aria-labelledby="friends-heading">
+        <h2 class="set-card-title" id="friends-heading" th:text="${'내 친한 친구 ' + friends.size()}">내 친한 친구 0</h2>
+        <div th:if="${friends.isEmpty()}" class="set-empty">
+            <svg th:replace="~{fragments/icons :: people}"></svg>
+            <p class="set-label">아직 친한 친구가 없어요</p>
+            <p class="set-desc">아래 내가 팔로우하는 사람 중에서 골라 보세요.</p>
+        </div>
+        <ul class="set-list" th:unless="${friends.isEmpty()}">
+            <li th:each="m : ${friends}" class="set-row set-person">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
-                <div class="follow-text"><p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p></div>
+                <div class="set-row-text"><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></div>
                 <th:block th:replace="~{fragments/friend :: button(${m.handle()}, 'FRIENDS', '/settings/friends')}"></th:block>
             </li>
         </ul>
     </section>
 
-    <section aria-labelledby="candidates-heading">
-        <h2 id="candidates-heading" th:text="${'내가 팔로우하는 사람 ' + candidates.size()}">내가 팔로우하는 사람 0</h2>
-        <form method="get" action="/settings/friends" class="friend-search" role="search">
+    <section class="set-card" aria-labelledby="candidates-heading">
+        <h2 class="set-card-title" id="candidates-heading" th:text="${'내가 팔로우하는 사람 ' + candidates.size()}">내가 팔로우하는 사람 0</h2>
+        <form method="get" action="/settings/friends" class="set-search" role="search">
             <label for="friend-q" class="visually-hidden">팔로우하는 사람 찾기</label>
+            <svg th:replace="~{fragments/icons :: search}"></svg>
             <input id="friend-q" type="search" name="q" th:value="${q}" placeholder="주소나 별명으로 찾기">
             <button type="submit" class="btn btn-sm">찾기</button>
         </form>
-        <p th:if="${candidates.isEmpty()}" class="help" th:text="${q.isEmpty() ? '친구로 넣을 수 있는 사람이 없어요. 먼저 팔로우해 보세요' : '찾는 사람이 없어요'}">친구로 넣을 수 있는 사람이 없어요</p>
-        <ul class="follow-list">
-            <li th:each="m : ${candidates}" class="follow-row">
+        <p th:if="${candidates.isEmpty()}" class="set-desc set-note" th:text="${q.isEmpty() ? '고를 수 있는 사람이 없어요. 먼저 팔로우해 보세요' : '찾는 사람이 없어요'}">고를 수 있는 사람이 없어요</p>
+        <ul class="set-list" th:unless="${candidates.isEmpty()}">
+            <li th:each="m : ${candidates}" class="set-row set-person">
                 <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 40)}"></th:block>
-                <div class="follow-text"><p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p></div>
+                <div class="set-row-text"><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></div>
                 <th:block th:replace="~{fragments/friend :: button(${m.handle()}, 'FOLLOWING', '/settings/friends')}"></th:block>
             </li>
         </ul>
+        <p class="set-desc set-foot">팔로우를 끊으면 친한 친구에서도 빠져요.</p>
     </section>
-    <!-- 030·087 강성찬 개인 확장: 친구 그룹(예전 /settings/groups) -->
-    <section id="groups" aria-labelledby="groups-heading">
-        <h2 id="groups-heading">친구 그룹</h2>
-        <p class="help">친구를 그룹으로 묶으면, 글을 "그룹 공개"로 올려 고른 그룹에만 보여 줄 수 있어요. 그룹은 나만 볼 수 있어요.</p>
-        <form method="post" action="/settings/groups" class="group-create">
+
+    <section id="groups" class="set-card" aria-labelledby="groups-heading">
+        <h2 class="set-card-title" id="groups-heading">그룹</h2>
+        <p class="set-desc">친한 친구를 그룹으로 묶으면, 글을 "그룹 공개"로 올려 고른 그룹에만 보여 줄 수 있어요. 그룹은 나만 볼 수 있어요.</p>
+        <form method="post" action="/settings/groups" class="set-inline">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <label for="group-name">새 그룹 이름</label>
-            <input id="group-name" name="name" type="text" maxlength="20" required placeholder="예: 대학 친구">
+            <label for="group-name" class="visually-hidden">새 그룹 이름</label>
+            <input id="group-name" name="name" type="text" maxlength="20" required placeholder="새 그룹 이름 (예: 대학 친구)">
             <button type="submit" class="btn btn-primary btn-sm">그룹 만들기</button>
         </form>
 
-        <p th:if="${groups.isEmpty()}" class="help">아직 그룹이 없어요</p>
-        <section th:each="g : ${groups}" class="group-card" th:attr="aria-label=${g.name()}">
-            <h3 th:text="${g.name() + ' ' + g.members().size() + '명'}">그룹 0명</h3>
-            <ul class="follow-list">
-                <li th:each="m : ${g.members()}" class="follow-row">
+        <p th:if="${groups.isEmpty()}" class="set-desc set-note">아직 그룹이 없어요</p>
+        <section th:each="g : ${groups}" class="set-group" th:attr="aria-label=${g.name()}">
+            <div class="set-group-head">
+                <h3 th:text="${g.name()}">그룹</h3>
+                <span class="set-count-chip" th:text="${g.members().size() + '명'}">0명</span>
+                <form method="post" th:action="@{/settings/groups/{g}/delete(g=${g.id()})}">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="btn btn-sm btn-quiet set-danger-text">그룹 지우기</button>
+                </form>
+            </div>
+            <ul class="set-list">
+                <li th:each="m : ${g.members()}" class="set-row set-person">
                     <th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 32)}"></th:block>
-                    <div class="follow-text"><p><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></p></div>
+                    <div class="set-row-text"><th:block th:replace="~{fragments/author :: person(${m.handle()}, ${m.nickname()})}"></th:block></div>
                     <form method="post" th:action="@{/settings/groups/{g}/members/{m}/remove(g=${g.id()},m=${m.memberId()})}">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                         <button type="submit" class="btn-text btn-sm">빼기</button>
                     </form>
                 </li>
             </ul>
-            <form method="post" th:action="@{/settings/groups/{g}/members(g=${g.id()})}" th:if="${!friends.isEmpty()}" class="group-add">
+            <form method="post" th:action="@{/settings/groups/{g}/members(g=${g.id()})}" th:if="${!friends.isEmpty()}" class="set-inline">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <label th:for="${'add-' + g.id()}" class="visually-hidden">넣을 친구</label>
                 <select th:id="${'add-' + g.id()}" name="memberId">
@@ -73,11 +86,7 @@
                 </select>
                 <button type="submit" class="btn btn-sm">친구 넣기</button>
             </form>
-            <p th:if="${friends.isEmpty()}" class="help">그룹에는 친구만 넣을 수 있어요. 먼저 위에서 친구를 넣어 보세요</p>
-            <form method="post" th:action="@{/settings/groups/{g}/delete(g=${g.id()})}">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="btn btn-danger btn-sm">그룹 지우기</button>
-            </form>
+            <p th:if="${friends.isEmpty()}" class="set-desc set-note">그룹에는 친한 친구만 넣을 수 있어요. 먼저 위에서 친한 친구를 골라 보세요</p>
         </section>
     </section>
 </main>

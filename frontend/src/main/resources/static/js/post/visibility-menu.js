@@ -5,7 +5,7 @@
  */
 (function () {
   'use strict';
-  var LABELS = { PUBLIC: '전체 공개', FRIENDS: '친구 공개', LINK: '링크 공개', GROUP: '그룹 공개', PRIVATE: '나만 보기' };
+  var LABELS = { PUBLIC: '전체 공개', FRIENDS: '친한 친구만', LINK: '링크 공개', GROUP: '그룹 공개', PRIVATE: '나만 보기' };
 
   function headers() {
     var h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };

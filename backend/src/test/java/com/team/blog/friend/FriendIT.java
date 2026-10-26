@@ -142,20 +142,17 @@ class FriendIT extends IntegrationTestBase {
     }
 
     @Test
-    void blogHeaderShowsAddButtonOnlyForPeopleIFollow() throws Exception {
+    void blogHeaderHasNoFriendButtonOnlyOwnerCount() throws Exception {
         long me = member("frbtnme");
         long followed = member("frbtnfan");
-        member("frbtnother");
         follow(me, followed);
+        // 친한 친구는 설정에서만 고른다: 남의 블로그 상단에는 넣기 버튼이 없다(친구 신청처럼 보이지 않게)
         assertThat(mockMvc.perform(get("/frbtnfan").with(TestAuth.member(me))).andReturn().getResponse()
-                .getContentAsString()).contains("친구로 넣기");
-        assertThat(mockMvc.perform(get("/frbtnother").with(TestAuth.member(me))).andReturn().getResponse()
-                .getContentAsString()).doesNotContain("친구로 넣기").doesNotContain("친구 요청");
-        assertThat(mockMvc.perform(get("/frbtnfan")).andReturn().getResponse().getContentAsString()).doesNotContain("친구로 넣기");
-        // 087 후속: 내 블로그 숫자 줄에만 "친구 N" → 친구 관리
+                .getContentAsString()).doesNotContain("/frbtnfan/friend").doesNotContain("친한 친구로 넣기").doesNotContain("친구 요청");
+        // 087 후속: 내 블로그 숫자 줄에만 "친한 친구 N" → 친한 친구 관리
         members.addFriend(me, followed);
         assertThat(mockMvc.perform(get("/frbtnme").with(TestAuth.member(me))).andReturn().getResponse().getContentAsString())
-                .contains("href=\"/settings/friends\"").contains("친구 1");
+                .contains("href=\"/settings/friends\"").contains("친한 친구 1");
         assertThat(mockMvc.perform(get("/frbtnme").with(TestAuth.member(followed))).andReturn().getResponse().getContentAsString())
                 .doesNotContain("href=\"/settings/friends\"");
     }
@@ -214,7 +211,7 @@ class FriendIT extends IntegrationTestBase {
         members.addFriend(c, a);
         String page = mockMvc.perform(get("/settings/friends").with(TestAuth.member(a))).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertThat(page).contains("내 친구 1").contains("내가 팔로우하는 사람 1").contains(">frlistb<").contains(">frlistc<")
+        assertThat(page).contains("내 친한 친구 1").contains("내가 팔로우하는 사람 1").contains("친한 친구로 넣기").contains("친한 친구에서 빼기").contains(">frlistb<").contains(">frlistc<")
                 .doesNotContain("받은 친구 요청");
         assertThat(mockMvc.perform(get("/settings/friends")).andReturn().getResponse().getHeader("Location")).contains("/login");
         purgeStep.purge(a);
