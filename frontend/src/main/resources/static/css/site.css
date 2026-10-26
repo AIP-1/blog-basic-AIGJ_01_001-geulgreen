@@ -452,7 +452,9 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
 /* 사진 배너(static/images/hero.webp, 2172×724): 문구는 사진에 그려져 있으므로 글자는 화면 낭독용으로만 두고,
    검색창만 사진의 문구 아래(가로 18.5%, 세로 72%)에 얹는다. 비율을 그대로 지켜 문구 위치가 어긋나지 않게 한다 */
-.hero-photo { background: url("/images/hero.webp") center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
+/* 사진 주소는 --hero-photo 하나로 두고 다크 모드는 이 값만 바꾼다(폰에서는 ::before가 같은 값을 쓴다) */
+.hero-photo { --hero-photo: url("/images/hero.webp");
+    background: var(--hero-photo) center / 100% 100% no-repeat, var(--color-hero-from); aspect-ratio: 2172 / 724; }
 .hero-photo .hero-inner { position: absolute; inset: 0; max-width: none; padding: 0; min-height: 0; display: block; }
 .hero-photo .hero-slogan, .hero-photo .hero-sub { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hero-photo .hero-search { position: absolute; left: 18.5%; top: 70%; width: 34%; min-width: 240px; max-width: none; }
@@ -473,9 +475,11 @@ input[type=checkbox], input[type=radio] { accent-color: var(--color-brand-fill);
 @media (max-width: 720px) {
     .hero-inner { grid-template-columns: 1fr; padding: 32px 20px 8px; min-height: 0; }
     /* 좁은 화면: 사진 속 문구는 너무 작아 읽을 수 없으니 사진은 고양이 쪽(오른쪽)만 위에 보이고,
-       문구는 실제 글자로 사진 아래에 보여 준다. 검색창은 그 아래 */
-    .hero-photo { aspect-ratio: auto; background-size: auto 200px; background-position: 100% 0; padding-top: 200px; padding-bottom: 16px;
-        background-color: var(--color-hero-from); }
+       문구는 실제 글자로 사진 아래에 보여 준다. 검색창은 그 아래.
+       사진은 띠 가장자리에 붙이지 않고 12px 안쪽에 네 모서리를 둥글게 깎아 얹는다(chan 10-26: 네모 반듯해 보임) */
+    .hero-photo { aspect-ratio: auto; background: var(--color-hero-from); padding-top: 212px; padding-bottom: 16px; }
+    .hero-photo::before { content: ""; position: absolute; top: 12px; left: 12px; right: 12px; height: 200px; border-radius: 16px;
+        background: var(--hero-photo) 100% 0 / cover no-repeat; }
     .hero-photo .hero-inner { position: static; padding: 20px 20px 0; }
     .hero-photo .hero-slogan, .hero-photo .hero-sub { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; }
     .hero-photo .hero-slogan { font-size: 2em; margin-bottom: 8px; }
@@ -1569,11 +1573,11 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 .tag-sections-more.loading a { display: none; }
 /* 다크 모드는 같은 장면의 밤 그림(배너·고양이, chan이 준 그림 10-15). 시스템 다크 + 설정의 화면 테마 둘 다 따름 */
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .hero-photo { background-image: url("/images/hero-night.webp"); }
+    :root:not([data-theme="light"]) .hero-photo { --hero-photo: url("/images/hero-night.webp"); }
     :root:not([data-theme="light"]) img.art-day { display: none !important; }
 }
 @media not all and (prefers-color-scheme: dark) { :root:not([data-theme="dark"]) img.art-night { display: none !important; } }
-:root[data-theme="dark"] .hero-photo { background-image: url("/images/hero-night.webp"); }
+:root[data-theme="dark"] .hero-photo { --hero-photo: url("/images/hero-night.webp"); }
 :root[data-theme="dark"] img.art-day, :root[data-theme="light"] img.art-night { display: none !important; }
 /* 100 강성찬 개인 확장: 블로그 탭(홈·글·시리즈) — 폰에서도 한 줄 */
 .blog-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 16px 0 24px; }
@@ -1967,19 +1971,46 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-link-lead { margin: 16px 0 0; }
 .club-join-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
 .club-join-actions p { margin: 0; }
-/* 10-21 chan: 함께 쓰기 처음 화면(반·친구 예시, 세 단계)과 방 화면 "다음 할 일" */
-.club-onboard h1, .club-onboard h2 { margin: 0; font-size: 1.6em; }
 /* 10-22 개인 확장: 함께 쓰기 제목 → 탭 간격을 탐색 화면과 같게 */
 main.mission-page > h1:first-child { margin-bottom: 15px; }
 .club-onboard-lead { margin: 8px 0 0; color: var(--color-text-muted); line-height: 1.6; }
-.club-presets { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 20px; }
-.club-preset { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 18px; text-align: left; font: inherit; width: 100%; min-width: 0; box-sizing: border-box;
-  color: var(--color-text); background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: 16px; cursor: pointer; }
-.club-preset:hover { border-color: var(--color-brand); }
-.club-preset:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-.club-preset strong { font-size: 1.05em; }
-.club-preset .help { line-height: 1.5; }
-.club-preset-go { margin-top: 4px; font-weight: 600; color: var(--color-brand); }
+/* 10-26 chan: 방이 없을 때 처음 화면은 한 줄 설명 + [방 만들기]·[방 찾기]. 방 종류·세 단계는 만들기 창(dialog) 안 */
+.club-empty h2 { margin: 0; font-size: 1.3em; }
+.club-empty > .help { margin: 6px 0 0; line-height: 1.6; }
+.club-empty-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+.club-empty-actions > * { margin: 0; }
+dialog.club-dialog { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; box-sizing: border-box;
+  color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 20px 24px 24px; }
+dialog.club-dialog::backdrop { background: var(--color-overlay); }
+/* 스크립트가 없을 때: [방 만들기](#club-new)를 누르거나 잘못 낸 값이 있으면 창이 화면 안에 그냥 펼쳐진다 */
+dialog.club-dialog:target:not([open]):not(.is-enhanced),
+dialog.club-dialog[data-keep-open="true"]:not([open]):not(.is-enhanced) { display: block; position: static; margin: 16px auto 0; }
+.club-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.club-dialog-head h2 { margin: 0; font-size: 1.2em; }
+.club-dialog-head .btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; margin-right: -8px;
+  color: var(--color-text-muted); background: none; border: 0; border-radius: 50%; cursor: pointer; }
+.club-dialog-head .btn-icon:hover { background: var(--color-surface-muted); }
+.club-dialog-head .btn-icon .icon { width: 20px; height: 20px; }
+.club-dialog .club-form { margin-top: 14px; }
+.club-dialog .club-steps { margin-top: 20px; padding-top: 16px; }
+/* 공개방·비공개방: 둘 중 하나를 고르는 칸(고른 칸은 진한 테두리 + 체크) */
+.club-types { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.club-type { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px 16px; text-align: left; font: inherit;
+  width: 100%; min-width: 0; box-sizing: border-box; color: var(--color-text); background: var(--color-surface-muted); border: 1px solid var(--color-border);
+  border-radius: 14px; cursor: pointer; white-space: normal; overflow-wrap: anywhere; }
+.club-type:hover { border-color: var(--color-brand); }
+.club-type:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.club-type strong { font-size: 1.05em; padding-right: 26px; }
+.club-type .help { line-height: 1.5; word-break: keep-all; }
+.club-type::after { content: ""; position: absolute; top: 14px; right: 14px; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%;
+  border: 1.5px solid var(--color-control-border); }
+.club-type[aria-pressed="true"] { background: var(--color-brand-soft); border-color: var(--color-brand); box-shadow: inset 0 0 0 1px var(--color-brand); }
+.club-type[aria-pressed="true"]::after { border: 5px solid var(--color-brand-fill); }
+@media (max-width: 480px) {
+  dialog.club-dialog { width: calc(100% - 24px); padding: 16px 16px 20px; }
+  .club-type { padding: 12px; }
+  .club-type::after { top: 12px; right: 10px; }
+}
 /* 10-25 chan "맨 아래 설명 가운데 맞춤": 세 단계는 가운데 정렬, 번호 사이를 선으로 잇고, 휴대폰에서도 세 칸 한 줄 */
 .club-steps { list-style: none; counter-reset: step; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 24px 0 0; padding: 20px 0 0;
   border-top: 1px solid var(--color-border); }
@@ -1988,16 +2019,12 @@ main.mission-page > h1:first-child { margin-bottom: 15px; }
   display: grid; place-items: center; font-size: .85em; font-weight: 700; color: var(--color-on-fill); background: var(--color-brand-fill); }
 .club-steps li:not(:last-child)::after { content: ""; position: absolute; top: 14px; left: calc(50% + 22px); width: calc(100% - 44px); height: 1px; background: var(--color-border); }
 .club-steps .help { line-height: 1.5; word-break: keep-all; }
-.club-onboard-find { margin: 24px 0 0; text-align: center; }
-.club-onboard-find .link-btn { margin-top: 8px; }
 .club-more { margin-top: 12px; }
 .club-more > summary { display: flex; align-items: center; gap: 6px; padding: 8px 0; cursor: pointer; list-style: none; font-size: .9em; font-weight: 600; color: var(--color-text-muted); }
 .club-more > summary::-webkit-details-marker { display: none; }
 .club-more > summary .icon { width: 1em; height: 1em; }
 .club-more[open] > summary .icon { transform: rotate(90deg); }
 .club-more > * + * { margin-top: 12px; }
-@media (max-width: 640px) { .club-presets { grid-template-columns: 1fr; } }
-.club-preset, .club-preset * { white-space: normal; overflow-wrap: anywhere; }
 /* 10-18 강성찬 개인 확장(chan "기본 썸네일, 고양이 사진으로"): 사진 없는 글 카드의 기본 썸네일. 링크 미리보기(og:image)와 같은
    잠자는 고양이 사진을 16:10으로 잘라 쓰고, 어두운 화면은 같은 고양이의 밤 사진(소개 영역 hero-night의 오른쪽, 글자 없는 쪽).
    화면에서만 그리고 글에는 저장하지 않는다 */
