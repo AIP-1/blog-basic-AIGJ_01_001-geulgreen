@@ -7,7 +7,7 @@
 <body>
 <main class="list-page mission-page">
     <!-- 10-22 개인 확장: 탐색·태그·피드처럼 화면 제목(함께 쓰기) 아래에 탭. 안내 칸 제목은 h2로 -->
-    <!-- 10-21 chan: 함께 쓰기 — 참여 중인 방(이 화면)과 방 찾기를 탭으로 나눔. 처음 온 사람에게는 반·친구 예시와 세 단계만 -->
+    <!-- 10-21 chan: 함께 쓰기 — 참여 중인 방(이 화면)과 방 찾기를 탭으로 나눔. 처음 온 사람에게는 한 줄 설명과 [방 만들기]·[방 찾기](10-26) -->
     <h1>함께 쓰기</h1>
     <nav th:replace="~{mission/clubs :: clubTabs('mine')}"></nav>
     <p th:if="${clubNotice != null}" class="notice" role="status" data-toast="success" th:text="${clubNotice}">알림</p>
@@ -27,30 +27,14 @@
                 </li>
             </ul>
         </section>
-        <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계. 10-25 chan: 문구는 짧게, 세 단계는 가운데 정렬, 기간 없이 오픈채팅방처럼 -->
-        <section th:if="${rooms.isEmpty()}" class="mission-panel club-onboard" aria-labelledby="club-onboard-heading">
-            <h2 id="club-onboard-heading">함께 쓰면 꾸준해져요</h2>
-            <p class="club-onboard-lead">친구들 글이 한 방에 모여요.</p>
-            <div class="club-presets">
-                <button type="button" class="club-preset" data-preset data-open-club-form
-                        data-name="우리 반 글쓰기" data-intro="우리 반 이야기를 같이 써요" data-mode="APPROVAL" data-cap="30">
-                    <strong>반 친구들과</strong>
-                    <span class="help">선생님이 만들고, 글감을 올려 줘요.</span>
-                    <span class="club-preset-go">반 방 만들기</span>
-                </button>
-                <button type="button" class="club-preset" data-preset data-open-club-form
-                        data-name="" data-intro="서로 응원하며 써요" data-mode="LINK" data-cap="10">
-                    <strong>친구들과</strong>
-                    <span class="help">친구 몇 명과 쓰고 싶을 때 써요.</span>
-                    <span class="club-preset-go">친구 방 만들기</span>
-                </button>
+        <!-- 10-26 chan: 방이 없으면 한 줄 설명과 [방 만들기]·[방 찾기]만. 방 종류(공개방·비공개방)와 세 단계는 [방 만들기]를 누르면 뜨는 창 안으로 -->
+        <section th:if="${rooms.isEmpty()}" class="mission-panel club-empty" aria-labelledby="club-empty-heading">
+            <h2 id="club-empty-heading">함께 쓰면 꾸준해져요</h2>
+            <p class="help">친구들 글이 한 방에 모여요. 방을 만들거나, 열린 방을 찾아 들어가요.</p>
+            <div class="club-empty-actions">
+                <a href="#club-new" class="btn btn-primary btn-sm" data-open-club-form>방 만들기</a>
+                <a class="link-btn" href="/missions/clubs/find">방 찾기</a>
             </div>
-            <ol class="club-steps">
-                <li><strong>방 만들기</strong><span class="help">이름만 정해요</span></li>
-                <li><strong>초대하기</strong><span class="help">친구에게 링크를 보내요</span></li>
-                <li><strong>글 쓰기</strong><span class="help">쓰면 방에 올라와요</span></li>
-            </ol>
-            <p class="help club-onboard-find">이미 있는 방은 <a href="/missions/clubs/find">방 찾기</a>에서 찾아요</p>
         </section>
         <!-- 10-25 chan: 카톡 대화방 목록처럼 — 마지막 글, 시간, 새 글 수. 최근에 글이 올라온 방이 위 -->
         <section th:unless="${rooms.isEmpty()}" class="mission-panel" aria-labelledby="clubs-heading">
@@ -77,13 +61,29 @@
                 </li>
             </ul>
         </section>
-        <!-- 만들기: 꼭 필요한 것(이름·소개)만 보이고, 방 종류·정원은 "더 정하기" 안에. 10-25 기간·규칙 칸 없앰 -->
-        <section id="club-new" class="mission-panel" aria-labelledby="club-new-heading" data-club-form
-                 th:attr="data-keep-open=${clubError != null}">
-            <h2 id="club-new-heading">방 만들기</h2>
+        <!-- 만들기 창: [방 만들기]를 누르면 뜬다. 10-26 chan "공개방, 비공개방으로": 방 종류를 먼저 고르고(들어오는 방법·정원이 채워짐), 이름·소개.
+             세 단계 안내는 창 아래. 잘못 낸 값이 있으면 창이 열린 채로 -->
+        <dialog id="club-new" class="club-dialog" aria-labelledby="club-new-heading" data-club-form
+                th:attr="data-keep-open=${clubError != null}">
+            <div class="club-dialog-head">
+                <h2 id="club-new-heading">방 만들기</h2>
+                <button type="button" class="btn-icon" data-close-club-form aria-label="닫기"><th:block th:replace="~{fragments/icons :: close}"></th:block></button>
+            </div>
             <p th:if="${clubError != null}" class="notice" role="alert" data-toast="error" th:text="${clubError}">오류</p>
             <form method="post" action="/missions/clubs" class="club-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="club-types" role="group" aria-label="방 종류">
+                    <button type="button" class="club-type" data-club-type="public" data-mode="APPROVAL" data-cap="30"
+                            th:attr="aria-pressed=${form.joinMode() != 'LINK'}">
+                        <strong>공개방</strong>
+                        <span class="help">방 찾기에 보여요. 반·동아리처럼 여럿이 쓸 때</span>
+                    </button>
+                    <button type="button" class="club-type" data-club-type="private" data-mode="LINK" data-cap="10"
+                            th:attr="aria-pressed=${form.joinMode() == 'LINK'}">
+                        <strong>비공개방</strong>
+                        <span class="help">초대 링크로만 들어와요. 친구 몇 명끼리 쓸 때</span>
+                    </button>
+                </div>
                 <div class="club-form-row">
                     <label for="club-name">방 이름</label>
                     <input id="club-name" name="name" type="text" maxlength="30" required th:value="${form.name()}" placeholder="예: 4학년 2반 글쓰기, 주말 글친구">
@@ -103,13 +103,18 @@
                         <span class="club-inline"><input id="club-cap-new" name="memberCap" type="number" min="2" max="100" required th:value="${form.memberCap()}"> 명까지</span>
                     </div>
                 </details>
-                <p class="help">멤버들이 전체 공개로 쓴 글이 이 방에 저절로 올라와요. 끝나는 날은 없어요</p>
+                <p class="help">어느 방이든 멤버들이 블로그에 전체 공개로 쓴 글이 저절로 올라와요. 끝나는 날은 없어요</p>
                 <div class="club-form-actions">
-                    <button type="button" class="btn btn-sm" data-close-club-form hidden>닫기</button>
+                    <button type="button" class="btn btn-sm" data-close-club-form>닫기</button>
                     <button type="submit" class="btn btn-primary btn-sm">만들기</button>
                 </div>
             </form>
-        </section>
+            <ol class="club-steps">
+                <li><strong>방 만들기</strong><span class="help">이름만 정해요</span></li>
+                <li><strong>초대하기</strong><span class="help">친구에게 링크를 보내요</span></li>
+                <li><strong>글 쓰기</strong><span class="help">쓰면 방에 올라와요</span></li>
+            </ol>
+        </dialog>
     </div>
     <script th:src="@{/js/mission/club.js}" defer></script>
 </main>
@@ -121,7 +126,7 @@
 <!-- 111 후속: 방 종류 고르기 한 칸(만들기·방 관리 같이 씀) -->
 <label th:fragment="modeOption(mode, selected)" class="club-mode">
     <input type="radio" name="joinMode" th:value="${mode}" th:checked="${mode == selected}" required>
-    <span class="club-mode-text"><strong th:text="${mode == 'OPEN' ? '누구나 바로' : mode == 'APPROVAL' ? '승인 후 참여' : '링크로만'}">종류</strong>
+    <span class="club-mode-text"><strong th:text="${mode == 'OPEN' ? '공개방 · 누구나 바로' : mode == 'APPROVAL' ? '공개방 · 승인 후 참여' : '비공개방 · 링크로만'}">종류</strong>
         <span class="help" th:text="${mode == 'OPEN' ? '공개 목록에서 누르면 바로 들어와요. 오픈채팅처럼' : mode == 'APPROVAL' ? '공개 목록에 보여요. 링크나 초대로 와도 나나 관리자가 승인해야 들어와요' : '목록에 안 보여요. 초대 링크나 초대를 받은 사람만 들어와요'}">설명</span></span>
 </label>
 </body>
