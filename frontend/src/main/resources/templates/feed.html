@@ -10,7 +10,8 @@
 <main class="list-page feed-page">
     <div class="feed-head">
         <h1>피드</h1>
-        <span th:if="${followingCount > 0}" class="feed-count" th:text="${'팔로우 ' + followingCount + '명'}">팔로우 4명</span>
+        <a th:if="${followingCount > 0}" class="feed-count" th:href="${paths.blog(myHandle) + '/following'}"
+           th:text="${'팔로우 ' + followingCount + '명'}">팔로우 4명</a>
     </div>
     <ul th:if="${!feedPeople.isEmpty()}" class="feed-people" aria-label="팔로우한 사람">
         <li th:each="fp : ${feedPeople}" th:classappend="${fp.fresh()} ? 'fresh'">
@@ -18,6 +19,12 @@
                 <th:block th:replace="~{fragments/avatar :: avatar(${fp.avatar()}, 48)}"></th:block>
                 <span class="feed-people-id" th:text="${fp.handle()}">아이디</span>
                 <span th:if="${fp.fresh()}" class="visually-hidden">새 글 있음</span></a>
+        </li>
+        <!-- 10-26(chan "팔로우가 1000명이 넘어가면"): 줄에는 최근 글 쓴 순 20명, 나머지는 팔로잉 목록으로 -->
+        <li th:if="${followingCount > feedPeople.size()}" class="feed-people-more">
+            <a th:href="${paths.blog(myHandle) + '/following'}">
+                <span class="feed-people-plus" th:text="${'+' + (followingCount - feedPeople.size())}" aria-hidden="true">+980</span>
+                <span class="feed-people-id" th:text="${'전체 ' + followingCount + '명'}">전체 1000명</span></a>
         </li>
     </ul>
     <p th:if="${continued}"><a class="link-btn" href="/feed">처음부터 보기</a></p>
@@ -36,6 +43,7 @@
     <p th:if="${!cards.isEmpty()}" class="feed-end">팔로우한 글을 모두 보면 탐색에서 새 글을 찾아보세요 <a href="/explore" class="btn btn-sm">탐색</a></p>
     <script th:src="@{/js/post/list-more.js}" defer></script>
     <script th:src="@{/js/post/feed-seen.js}" defer></script>
+    <script th:src="@{/js/post/feed-fold.js}" defer></script>
 </main>
 </body>
 </html>

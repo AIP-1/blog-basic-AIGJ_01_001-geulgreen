@@ -51,19 +51,16 @@ public class FeedController {
         java.time.Instant now = clock.instant();
         CardModel.fill(model, page, now);
         java.util.Map<Long, String> days = new java.util.HashMap<>();
-        java.util.Set<String> fresh = new java.util.HashSet<>();
         for (com.team.blog.post.application.PostCard card : page.items()) {
             days.put(card.id(), com.team.blog.post.application.CardDates.day(card.firstPublicAt(), now));
-            if (card.firstPublicAt() != null && card.firstPublicAt().isAfter(now.minus(java.time.Duration.ofHours(24)))) {
-                fresh.add(card.author().handle());
-            }
         }
         model.addAttribute("cardDays", days);
         boolean continued = cursor != null && !cursor.isEmpty();
-        model.addAttribute("feedPeople", continued ? java.util.List.of() : people(user.memberId(), fresh));
+        model.addAttribute("feedPeople", continued ? java.util.List.of() : people(user.memberId(), now));
         model.addAttribute("continued", continued);
         long following = followQuery.counts(user.memberId()).following();
         model.addAttribute("followingCount", following);
+        model.addAttribute("myHandle", following > 0 ? followQuery.handleOf(user.memberId()) : null);
         model.addAttribute("followsAnyone", !page.items().isEmpty() || continued || following > 0);
         model.addAttribute("listApi", "/api/feed");
         return "feed";
@@ -73,11 +70,17 @@ public class FeedController {
     public record FeedPerson(String handle, com.team.blog.account.application.ProfileAvatar avatar, boolean fresh) {
     }
 
-    /** 팔로우한 사람(최근 팔로우 순 첫 묶음) 중 새 글이 있는 사람을 앞으로. */
-    private java.util.List<FeedPerson> people(long me, java.util.Set<String> fresh) {
-        return followQuery.page(me, false, me, null).items().stream()
-                .map(m -> new FeedPerson(m.handle(), m.avatar(), fresh.contains(m.handle())))
-                .sorted(java.util.Comparator.comparing(p -> !p.fresh()))
+    /** 얼굴 줄에 보이는 최대 인원. 나머지는 [전체 N명]으로 팔로잉 목록에. */
+    static final int PEOPLE_LIMIT = 20;
+
+    /**
+     * 10-26(chan "팔로우가 1000명이 넘어가면"): 최근 팔로우 순 20명이 아니라 마지막 글이 최근인 순 20명.
+     * 팔로우가 많아도 오늘 글 쓴 사람이 줄에서 빠지지 않는다. 24시간 안에 글이 있으면 테두리.
+     */
+    private java.util.List<FeedPerson> people(long me, java.time.Instant now) {
+        java.time.Instant since = now.minus(java.time.Duration.ofHours(24));
+        return followQuery.recentWriters(me, PEOPLE_LIMIT).stream()
+                .map(w -> new FeedPerson(w.handle(), w.avatar(), w.lastPostAt() != null && w.lastPostAt().isAfter(since)))
                 .toList();
     }
 

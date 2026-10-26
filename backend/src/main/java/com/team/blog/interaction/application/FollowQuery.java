@@ -52,6 +52,41 @@ public class FollowQuery {
                 followerId, followeeId));
     }
 
+    /** 피드 얼굴 줄 한 사람. {@code lastPostAt}은 마지막 공개 글 시각(없으면 null). */
+    public record RecentWriter(String handle, String nickname, String profileImageUrl, java.time.Instant lastPostAt) {
+
+        public com.team.blog.account.application.ProfileAvatar avatar() {
+            return new com.team.blog.account.application.ProfileAvatar(handle, nickname, profileImageUrl);
+        }
+    }
+
+    /**
+     * 10-26 강성찬 개인 확장(chan "팔로우가 1000명이 넘어가면 피드에서 어떻게"): 팔로우한 사람을 마지막 공개 글이 최근인 순으로
+     * {@code limit}명. 글이 없으면 최근 팔로우 순으로 뒤에. 사람마다 마지막 글 1개는 ix_post_blog로 바로 찾는다.
+     */
+    public List<RecentWriter> recentWriters(long memberId, int limit) {
+        return jdbc.query("""
+                SELECT m.handle, m.nickname, m.profile_image_url, lp.at
+                FROM follow f JOIN member m ON m.id = f.followee_id
+                LEFT JOIN LATERAL (SELECT p.first_public_at AS at FROM post p
+                                   WHERE p.author_id = m.id AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC'
+                                     AND p.deleted_at IS NULL AND p.hidden_at IS NULL
+                                   ORDER BY p.first_public_at DESC, p.id DESC LIMIT 1) lp ON true
+                WHERE f.follower_id = ? AND m.withdrawn_at IS NULL
+                ORDER BY lp.at DESC NULLS LAST, f.created_at DESC, m.id DESC
+                LIMIT ?
+                """, (rs, n) -> {
+            Timestamp at = rs.getTimestamp("at");
+            return new RecentWriter(rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url"),
+                    at == null ? null : at.toInstant());
+        }, memberId, limit);
+    }
+
+    /** 피드의 [전체 N명] 링크용: 내 아이디. */
+    public String handleOf(long memberId) {
+        return jdbc.queryForObject("SELECT handle FROM member WHERE id = ?", String.class, memberId);
+    }
+
     /** @param followers true면 그 회원의 팔로워, false면 그 회원이 팔로우한 사람 */
     public FollowPage page(long memberId, boolean followers, Long viewerId, String cursor) {
         Optional<FeedCursor> after = FeedCursor.decode(cursor);
