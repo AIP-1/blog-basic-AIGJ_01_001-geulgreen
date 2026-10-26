@@ -10,34 +10,44 @@
     });
   });
 })();
-// 목록 화면: 만들기 폼은 [함께 쓰기 만들기]를 눌러야 열린다(잘못 낸 값이 있으면 펼친 채)
+// 목록 화면: 만들기 창은 [방 만들기]를 눌러야 뜬다(잘못 낸 값이 있거나 주소가 #club-new면 열린 채로).
+// 10-26 chan: 창 안에서 공개방·비공개방을 고르면 들어오는 방법·정원이 채워지고, "더 정하기"에서 바꾸면 고른 칸도 따라간다
 (function () {
   'use strict';
-  var form = document.querySelector('[data-club-form]');
-  if (!form) { return; }
-  var close = form.querySelector('[data-close-club-form]');
-  var opens = document.querySelectorAll('[data-open-club-form]');
-  function show(open) {
-    form.hidden = !open;
-    Array.prototype.forEach.call(opens, function (b) { if (!b.hasAttribute('data-preset')) { b.hidden = open; } });
+  var dialog = document.querySelector('[data-club-form]');
+  if (!dialog || typeof dialog.showModal !== 'function') { return; }
+  var f = dialog.querySelector('form');
+  var types = dialog.querySelectorAll('[data-club-type]');
+  var radios = f.querySelectorAll('input[name="joinMode"]');
+  function mode() { var r = f.querySelector('input[name="joinMode"]:checked'); return r ? r.value : ''; }
+  function mark() {
+    var m = mode();
+    Array.prototype.forEach.call(types, function (t) {
+      t.setAttribute('aria-pressed', String(t.dataset.clubType === 'private' ? m === 'LINK' : m !== 'LINK'));
+    });
   }
-  show(form.dataset.keepOpen === 'true');
-  if (close) { close.hidden = false; close.addEventListener('click', function () { show(false); }); }
-  // 10-21: 처음 화면의 "반 방 만들기"·"친구 방 만들기"는 폼을 그 예시 값으로 채워 연다
-  function fill(b) {
-    var f = form.querySelector('form');
-    f.elements.name.value = b.dataset.name;
-    f.elements.intro.value = b.dataset.intro;
-    f.elements.memberCap.value = b.dataset.cap;
-    Array.prototype.forEach.call(f.querySelectorAll('input[name="joinMode"]'), function (r) { r.checked = r.value === b.dataset.mode; });
+  function open() {
+    if (!dialog.open) { dialog.showModal(); }
+    f.elements.name.focus();
   }
-  Array.prototype.forEach.call(opens, function (b) {
-    b.addEventListener('click', function (e) {
-      e.preventDefault();
-      if (b.hasAttribute('data-preset')) { fill(b); }
-      show(true);
-      form.scrollIntoView({ block: 'start' });
-      form.querySelector('input[name="name"]').focus();
+  Array.prototype.forEach.call(types, function (t) {
+    t.addEventListener('click', function () {
+      // 공개방에서 이미 "누구나 바로"를 골랐으면 그대로 둔다
+      if (!(t.dataset.clubType === 'public' && mode() === 'OPEN')) {
+        Array.prototype.forEach.call(radios, function (r) { r.checked = r.value === t.dataset.mode; });
+      }
+      f.elements.memberCap.value = t.dataset.cap;
+      mark();
     });
   });
+  Array.prototype.forEach.call(radios, function (r) { r.addEventListener('change', mark); });
+  Array.prototype.forEach.call(dialog.querySelectorAll('[data-close-club-form]'), function (b) {
+    b.addEventListener('click', function () { dialog.close(); });
+  });
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) { dialog.close(); } });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open-club-form]'), function (b) {
+    b.addEventListener('click', function (e) { e.preventDefault(); open(); });
+  });
+  mark();
+  if (dialog.dataset.keepOpen === 'true' || location.hash === '#club-new') { open(); }
 })();
