@@ -143,7 +143,8 @@ class EmailSignupIT extends IntegrationTestBase {
 
         MvcResult reserved = mockMvc.perform(signup("h2@x.com", "admin", "닉둘")).andReturn();
         assertThat(reserved.getResponse().getStatus()).isEqualTo(400);
-        assertThat(reserved.getResponse().getContentAsString()).contains("사용할 수 없는 주소예요").contains("admin_2");
+        // 10-25 chan: 가입 화면에 주소 칸이 없어 대안 버튼(admin_2)은 더 보이지 않고 안내만 남는다
+        assertThat(reserved.getResponse().getContentAsString()).contains("사용할 수 없는 주소예요");
 
         MvcResult nickname = mockMvc.perform(signup("h3@x.com", "goodhandle", "a")).andReturn();
         assertThat(nickname.getResponse().getStatus()).isEqualTo(400);

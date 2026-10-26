@@ -41,7 +41,7 @@
       });
     }).then(function (res) {
       if (!res.ok) { throw new Error('attach failed'); }
-      window.location.assign('/');
+      window.location.assign(holder.dataset.continuePath || '/'); // 10-25 chan: 초대 링크로 왔으면 그 초대로
     }).catch(fail);
   });
 })();

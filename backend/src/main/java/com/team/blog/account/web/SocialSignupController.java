@@ -17,6 +17,7 @@ import com.team.blog.shared.error.HandleTakenException;
 import com.team.blog.shared.error.HandleViolationException;
 import com.team.blog.shared.error.NicknameViolationException;
 import com.team.blog.shared.security.LoginSessionEstablisher;
+import com.team.blog.shared.web.PendingInvite;
 import com.team.blog.shared.web.Redirects;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -57,11 +58,14 @@ public class SocialSignupController {
     private final MessageSource messageSource;
     private final Clock clock;
     private final SocialPictureUrlPolicy pictureUrlPolicy;
+    private final com.team.blog.account.application.SignupProperties signupProperties;
 
     public SocialSignupController(SocialSignupService socialSignupService, SocialLoginService socialLoginService,
                                   HandleService handleService, NicknamePolicy nicknamePolicy,
                                   LoginSessionEstablisher loginSessionEstablisher, AuthProperties properties,
-                                  MessageSource messageSource, Clock clock, ProfileProperties profileProperties) {
+                                  MessageSource messageSource, Clock clock, ProfileProperties profileProperties,
+                                  com.team.blog.account.application.SignupProperties signupProperties) {
+        this.signupProperties = signupProperties;
         this.socialSignupService = socialSignupService;
         this.socialLoginService = socialLoginService;
         this.handleService = handleService;
@@ -118,7 +122,8 @@ public class SocialSignupController {
                 session.setAttribute(PENDING_PROFILE_PICTURE, picture.get());
                 return Redirects.seeOther("/settings/social-picture");
             }
-            return Redirects.seeOther("/");
+            // 10-25 chan: 초대 링크로 와서 가입했으면 초대한 사람·방으로
+            return Redirects.seeOther(PendingInvite.target(request, "/"));
         } catch (PendingExpiredException e) {
             clearPending(request);
             return Redirects.seeOther("/login?social");
@@ -168,6 +173,7 @@ public class SocialSignupController {
         view.addObject("providerName", providerName(pending.provider()));
         view.addObject("handlePrefix", HandlePrefix.of(pending.provider()).value());
         view.addObject("needsEmail", !pending.hasVerifiedEmail());
+        view.addObject("simpleSignup", signupProperties.simple());
         view.addObject("pictureUrl", picture(pending).orElse(null));
         view.addObject("sameEmailProviders", sameEmail.stream().map(SocialSignupController::providerName).toList());
         return view;

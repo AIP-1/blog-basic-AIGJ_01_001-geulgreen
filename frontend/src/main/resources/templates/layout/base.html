@@ -146,6 +146,8 @@
                     <a th:if="${currentAvatar != null}" th:href="${paths.blog(currentAvatar.handle())}" th:text="${currentAvatar.handle() + '의 블로그'}">내 블로그</a>
                     <a href="/manage/posts">내 글 관리</a>
                     <a href="/me/liked">모아보기</a>
+                    <!-- 10-25 chan: 친구 초대 링크(블로그·함께 쓰기 방) -->
+                    <a href="/me/invite" th:if="${inviteEnabled}">친구 초대</a>
                     <a href="/manage/stats">통계</a>
                     <a href="/settings">설정</a>
                     <!-- 10-25 chan: 관리자만 쓰는 관리는 위 메뉴 대신 프로필 메뉴에 -->
