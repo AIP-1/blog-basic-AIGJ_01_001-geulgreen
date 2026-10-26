@@ -7,6 +7,27 @@
 
 ---
 
+## [1.79.5] — 2026-10-26 · 개인 확장 (버튼 높이)
+
+- 버튼·알약 버튼 높이를 사이트 전체에서 두 단계(보통 38px, 작게 32px)로 맞춤
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기 빈 화면**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.5/v1795-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.5/v1795-club-after.png) |
+
+**블로그 홈**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.5/v1795-blog-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.5/v1795-blog-after.png) |
+
+---
+
 ## [1.79.4] — 2026-10-26 · 개인 확장 (피드 얼굴 줄 · 연속 글 접기)
 
 - 피드 얼굴 줄: 최근 글쓴이 20명, 더 있으면 +N·전체 N명
