@@ -35,8 +35,14 @@
         <span th:text="${missionTopic.hint()}">안내</span>
         <span class="help">제목은 바꿔도 돼요.</span>
     </p>
+    <!-- 10-25 강성찬 개인 확장: 함께 쓰기 방 글감으로 연 글 -->
+    <p th:if="${clubTopic != null}" class="notice mission-editor-note">
+        <strong th:text="${'방 글감: ' + clubTopic.title()}">방 글감</strong>
+        <span th:if="${!clubTopic.hint().isEmpty()}" th:text="${clubTopic.hint()}">안내</span>
+        <span class="help" th:text="${clubTopic.clubName() + ' 방에 올라가요. 전체 공개로 발행하면 멤버들이 봐요.'}">방</span>
+    </p>
     <!-- 10-21 강성찬 개인 확장: 오늘의 글감(미션 대신). 빈 새 글에만, 눌러서 그 글감으로 쓰거나 닫는다(닫으면 오늘은 다시 안 보임) -->
-    <div th:if="${todayTopic != null and missionTopic == null and !published and #strings.isEmpty(post.title()) and #strings.isEmpty(post.contentMd())}"
+    <div th:if="${todayTopic != null and missionTopic == null and clubTopic == null and !published and #strings.isEmpty(post.title()) and #strings.isEmpty(post.contentMd())}"
          class="topic-note" id="topic-note" th:data-day="${todayTopic.day()}">
         <form method="post" th:action="@{/missions/topics/{id}/write(id=${todayTopic.id()})}" class="topic-note-pick">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

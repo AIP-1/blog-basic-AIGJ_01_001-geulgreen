@@ -27,54 +27,57 @@
                 </li>
             </ul>
         </section>
-        <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계. 10-25 chan: 문구는 짧게, 세 단계는 가운데 정렬 -->
-        <section th:if="${clubs.isEmpty()}" class="mission-panel club-onboard" aria-labelledby="club-onboard-heading">
+        <!-- 처음 온 사람: 무엇을 하는 곳인지, 반·친구 예시, 세 단계. 10-25 chan: 문구는 짧게, 세 단계는 가운데 정렬, 기간 없이 오픈채팅방처럼 -->
+        <section th:if="${rooms.isEmpty()}" class="mission-panel club-onboard" aria-labelledby="club-onboard-heading">
             <h2 id="club-onboard-heading">함께 쓰면 꾸준해져요</h2>
-            <p class="club-onboard-lead">누가 썼는지 한눈에 보여요.</p>
+            <p class="club-onboard-lead">친구들 글이 한 방에 모여요.</p>
             <div class="club-presets">
                 <button type="button" class="club-preset" data-preset data-open-club-form
-                        data-name="우리 반 글쓰기" data-intro="한 주에 한 편, 우리 반 이야기를 써요" data-every="7" data-mode="APPROVAL" data-cap="30">
+                        data-name="우리 반 글쓰기" data-intro="우리 반 이야기를 같이 써요" data-mode="APPROVAL" data-cap="30">
                     <strong>반 친구들과</strong>
-                    <span class="help">선생님이 만들고, 일주일에 한 편씩 써요.</span>
+                    <span class="help">선생님이 만들고, 글감을 올려 줘요.</span>
                     <span class="club-preset-go">반 방 만들기</span>
                 </button>
                 <button type="button" class="club-preset" data-preset data-open-club-form
-                        data-name="" data-intro="사흘에 한 편, 서로 응원하며 써요" data-every="3" data-mode="LINK" data-cap="10">
+                        data-name="" data-intro="서로 응원하며 써요" data-mode="LINK" data-cap="10">
                     <strong>친구들과</strong>
-                    <span class="help">친구 몇 명과 사흘에 한 편씩 써요.</span>
+                    <span class="help">친구 몇 명과 쓰고 싶을 때 써요.</span>
                     <span class="club-preset-go">친구 방 만들기</span>
                 </button>
             </div>
             <ol class="club-steps">
-                <li><strong>방 만들기</strong><span class="help">이름과 규칙만 정해요</span></li>
+                <li><strong>방 만들기</strong><span class="help">이름만 정해요</span></li>
                 <li><strong>초대하기</strong><span class="help">친구에게 링크를 보내요</span></li>
-                <li><strong>글 쓰기</strong><span class="help">쓰면 저절로 세져요</span></li>
+                <li><strong>글 쓰기</strong><span class="help">쓰면 방에 올라와요</span></li>
             </ol>
             <p class="help club-onboard-find">이미 있는 방은 <a href="/missions/clubs/find">방 찾기</a>에서 찾아요</p>
         </section>
-        <section th:unless="${clubs.isEmpty()}" class="mission-panel" aria-labelledby="clubs-heading">
+        <!-- 10-25 chan: 카톡 대화방 목록처럼 — 마지막 글, 시간, 새 글 수. 최근에 글이 올라온 방이 위 -->
+        <section th:unless="${rooms.isEmpty()}" class="mission-panel" aria-labelledby="clubs-heading">
             <div class="club-list-head">
                 <h2 id="clubs-heading">참여 중인 방</h2>
                 <a href="#club-new" class="btn btn-primary btn-sm" data-open-club-form>방 만들기</a>
             </div>
-            <ul class="club-list">
-                <li th:each="c : ${clubs}">
-                    <a class="club-card" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
-                        <span class="club-card-top">
-                            <strong class="club-card-name" th:text="${c.name()}">함께 쓰기</strong>
-                            <span th:if="${today.isAfter(c.endDate())}" class="badge">끝남</span>
-                            <span th:unless="${today.isAfter(c.endDate())}" class="club-state" th:classappend="${wrote.contains(c.id())} ? 'is-done'"><th:block
-                                    th:if="${wrote.contains(c.id())}"><th:block th:replace="~{fragments/icons :: check}"></th:block>이번 기간 썼어요</th:block><th:block
-                                    th:unless="${wrote.contains(c.id())}">이번 기간 아직이에요</th:block></span>
+            <ul class="room-list">
+                <li th:each="r : ${rooms}" th:with="c=${r.club()}">
+                    <a class="room-row" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
+                        <span class="room-icon" th:classappend="${'room-c' + (c.id() % 8)}" aria-hidden="true" th:text="${c.name().substring(0, 1)}">방</span>
+                        <span class="room-row-text">
+                            <span class="room-row-top"><strong th:text="${c.name()}">함께 쓰기</strong><span class="help" th:text="${c.memberCount()}">1</span></span>
+                            <span class="room-row-last" th:if="${r.lastTitle() != null}" th:text="${r.lastAuthor() + ': ' + r.lastTitle()}">마지막 글</span>
+                            <span class="room-row-last" th:unless="${r.lastTitle() != null}" th:text="${c.intro().isEmpty() ? '아직 올라온 글이 없어요' : c.intro()}">소개</span>
+                            <span th:if="${r.topicTitle() != null}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block><span th:text="${'방 글감 · ' + r.topicTitle()}">방 글감</span></span>
                         </span>
-                        <span th:if="${!c.intro().isEmpty()}" class="club-card-intro" th:text="${c.intro()}">소개</span>
-                        <span class="help"><th:block th:replace="~{fragments/meta :: parts(${c.everyDays() + '일에 1편 · 멤버 ' + c.memberCount() + '명 · '
-                                + #temporals.format(c.startDate(), 'M월 d일') + ' ~ ' + #temporals.format(c.endDate(), 'M월 d일')})}"></th:block></span>
+                        <span class="room-row-side">
+                            <span class="help" th:text="${roomTimes.get(c.id())}">시간</span>
+                            <span th:if="${r.newCount() > 0}" class="room-new" th:text="${r.newCount() > 99 ? '99+' : r.newCount()}"
+                                  th:attr="aria-label=${'새 글 ' + r.newCount() + '편'}">1</span>
+                        </span>
                     </a>
                 </li>
             </ul>
         </section>
-        <!-- 만들기: 꼭 필요한 것(이름·규칙·기간)만 보이고, 방 종류·정원은 "더 정하기" 안에 -->
+        <!-- 만들기: 꼭 필요한 것(이름·소개)만 보이고, 방 종류·정원은 "더 정하기" 안에. 10-25 기간·규칙 칸 없앰 -->
         <section id="club-new" class="mission-panel" aria-labelledby="club-new-heading" data-club-form
                  th:attr="data-keep-open=${clubError != null}">
             <h2 id="club-new-heading">방 만들기</h2>
@@ -89,15 +92,6 @@
                     <label for="club-intro">한 줄 소개 <span class="help">(선택)</span></label>
                     <input id="club-intro" name="intro" type="text" maxlength="100" th:value="${form.intro()}" placeholder="예: 한 주에 한 편, 서로 댓글로 응원해요">
                 </div>
-                <div class="club-form-row">
-                    <label for="club-every">규칙</label>
-                    <span class="club-inline"><input id="club-every" name="everyDays" type="number" min="1" max="30" required th:value="${form.everyDays()}"> 일에 1편</span>
-                </div>
-                <div class="club-form-row">
-                    <label for="club-start">기간</label>
-                    <span class="club-inline"><input id="club-start" name="startDate" type="date" required th:value="${form.startDate()}"
-                            aria-label="시작 날짜"> ~ <input id="club-end" name="endDate" type="date" required th:value="${form.endDate()}" aria-label="끝 날짜"></span>
-                </div>
                 <details class="club-more" th:open="${clubError != null}">
                     <summary><span>더 정하기 · 들어오는 방법, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                     <fieldset class="club-modes">
@@ -109,7 +103,7 @@
                         <span class="club-inline"><input id="club-cap-new" name="memberCap" type="number" min="2" max="100" required th:value="${form.memberCap()}"> 명까지</span>
                     </div>
                 </details>
-                <p class="help">기간 안에 전체 공개로 쓴 글이 자동으로 1편으로 세져요. 따로 고를 것은 없어요</p>
+                <p class="help">멤버들이 전체 공개로 쓴 글이 이 방에 저절로 올라와요. 끝나는 날은 없어요</p>
                 <div class="club-form-actions">
                     <button type="button" class="btn btn-sm" data-close-club-form hidden>닫기</button>
                     <button type="submit" class="btn btn-primary btn-sm">만들기</button>
