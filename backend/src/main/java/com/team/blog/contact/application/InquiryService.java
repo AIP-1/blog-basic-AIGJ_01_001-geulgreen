@@ -191,9 +191,13 @@ public class InquiryService {
      */
     public boolean close(Optional<CurrentUser> current, long id, long seenLastMessageId) {
         get(current, id);
-        return jdbc.update("UPDATE inquiry SET status = 'DONE' WHERE id = ?"
-                + " AND (SELECT coalesce(max(m.id), 0) FROM inquiry_message m WHERE m.inquiry_id = ?) = ?", id, id,
-                seenLastMessageId) > 0;
+        // 먼저 문의 줄을 잠그고 다음 문장에서 확인한다(한 문장 안 부분 조회는 잠금을 기다린 뒤에도 예전 대화를 본다)
+        return Boolean.TRUE.equals(tx.execute(status -> {
+            lock(id);
+            return jdbc.update("UPDATE inquiry SET status = 'DONE' WHERE id = ?"
+                    + " AND (SELECT coalesce(max(m.id), 0) FROM inquiry_message m WHERE m.inquiry_id = ?) = ?", id, id,
+                    seenLastMessageId) > 0;
+        }));
     }
 
     /** 10-26 보낸 회원이 내 문의에서 다시 답한다: 대화에 더하고 새 문의로 돌려 관리자에게 알린다.
