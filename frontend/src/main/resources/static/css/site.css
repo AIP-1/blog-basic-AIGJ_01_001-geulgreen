@@ -1956,8 +1956,9 @@ main.mission-page > h1:first-child { margin-bottom: 15px; }
 dialog.club-dialog { width: min(640px, calc(100% - 32px)); max-height: calc(100vh - 48px); overflow: auto; margin: auto; box-sizing: border-box;
   color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; padding: 20px 24px 24px; }
 dialog.club-dialog::backdrop { background: var(--color-overlay); }
-/* 스크립트가 없을 때: [방 만들기](#club-new)를 누르면 창이 화면 안에 그냥 펼쳐진다 */
-dialog.club-dialog:target:not([open]):not(.is-enhanced) { display: block; position: static; margin: 16px auto 0; }
+/* 스크립트가 없을 때: [방 만들기](#club-new)를 누르거나 잘못 낸 값이 있으면 창이 화면 안에 그냥 펼쳐진다 */
+dialog.club-dialog:target:not([open]):not(.is-enhanced),
+dialog.club-dialog[data-keep-open="true"]:not([open]):not(.is-enhanced) { display: block; position: static; margin: 16px auto 0; }
 .club-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .club-dialog-head h2 { margin: 0; font-size: 1.2em; }
 .club-dialog-head .btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; margin-right: -8px;
