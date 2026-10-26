@@ -2171,6 +2171,23 @@ label[for="category-select"] { display: inline-flex; align-items: center; gap: 4
 .post-body + .post-tags-bottom + .series-box, .post-body + .series-box { margin-top: 24px; }
 #series-box { scroll-margin-top: 80px; }
 .series-line { margin: 24px 0 0; } /* 10-19: 글쓴이 줄과 본문 사이 가운데쯤 */
+/* 10-26 함께 쓰기 방 띠(제목 위)와 같은 글감 친구 글(본문 아래 화살표 줄) */
+.club-band { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0 0 18px; border-radius: 14px; background: var(--color-brand-soft); }
+.club-band-icon { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--color-surface); color: var(--color-brand); }
+.club-band-icon .icon { width: 18px; height: 18px; }
+.club-band-text { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.4; }
+.club-band-text strong { font-size: .95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.club-band-text span { font-size: .85em; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.club-band .btn { flex: none; background: var(--color-surface); }
+.club-band-posts { margin: 40px 0 0; padding-top: 20px; border-top: 1px solid var(--color-border); }
+.club-band-posts h2 { margin: 0 0 6px; font-size: 1.02em; }
+.club-band-posts ul { list-style: none; margin: 0; padding: 0; }
+.club-band-posts a { display: flex; align-items: center; gap: 12px; padding: 12px 4px; color: inherit; text-decoration: none; border-bottom: 1px solid var(--color-border); }
+.club-band-posts a:hover strong { color: var(--color-brand); }
+.club-band-post { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.club-band-post strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.club-band-post span { font-size: .85em; color: var(--color-text-muted); }
+.club-band-posts .icon { flex: none; color: var(--color-text-muted); }
 /* 10-19 시리즈 관리(강성찬 개인 확장): 오른쪽 위 버튼 줄, 글 넣기·설정 창(넓은 화면은 가운데 창, 휴대폰은 아래에서 올라오는 판) */
 .series-group-buttons { flex: none; display: inline-flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .series-group-buttons .btn { display: inline-flex; align-items: center; gap: 6px; }
@@ -2603,6 +2620,15 @@ main.set-page { max-width: 760px; }
 .room-bubble strong { font-size: 1.04em; line-height: 1.45; overflow-wrap: anywhere; }
 .room-ex { margin-top: 4px; color: var(--color-text-muted); font-size: .9em; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .room-bubble img { width: 120px; height: 80px; object-fit: cover; border-radius: 12px; }
+/* 10-26 먼저 쓰고 보기: 내가 이 글감으로 쓰기 전에는 흐린 자리표시 글 위에 자물쇠 한 줄(단추는 위 글감 줄 [쓰기] 하나만) */
+.room-bubble.is-locked { position: relative; overflow: hidden; }
+.room-bubble.is-locked:hover { box-shadow: 0 1px 3px var(--color-shadow); }
+.room-bubble.is-locked .room-bubble-text { filter: blur(6px); opacity: .7; user-select: none; }
+.room-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px;
+  font-weight: 600; font-size: .95em; text-align: center; background: color-mix(in srgb, var(--color-surface) 55%, transparent); }
+.room-lock .icon { flex: none; }
+.room-pin-state { display: flex; align-items: center; gap: 5px; font-size: .84em; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-pin-state.is-done .icon { width: 14px; height: 14px; flex: none; color: var(--color-brand); }
 .room-react { display: flex; gap: 12px; margin-top: 6px; padding-left: 4px; font-size: .8em; color: var(--color-text-muted); }
 .room-react .icon { width: 13px; height: 13px; vertical-align: -2px; }
 .room-chip { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; font-size: .78em; font-weight: 600; color: var(--color-brand);

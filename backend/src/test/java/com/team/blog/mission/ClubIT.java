@@ -111,7 +111,9 @@ class ClubIT extends IntegrationTestBase {
         // 발행하면 방에 "방 글감" 표시, 쓴 사람 수
         posts.publish(postId, NOW.plus(Duration.ofMinutes(10)));
         clock.set(NOW.plus(Duration.ofHours(1)));
-        assertThat(page(location, owner)).contains("class=\"room-chip\"").contains("· 1명 썼어요").contains("글감 내리기");
+        // 10-26 먼저 쓰고 보기: 방장은 아직 이 글감으로 안 써서 친구 글이 흐리게(글감 줄은 "내가 쓰면 열려요")
+        assertThat(page(location, owner)).contains("class=\"room-chip\"").contains("1명 썼어요 · 내가 쓰면 열려요").contains("글감 내리기")
+                .contains("room-bubble is-locked");
         assertThat(page("/missions/clubs", owner)).contains("방 글감 · 내 책상 위 풍경");
         // 새 글감을 올리면 이전 것은 지난 글감
         mockMvc.perform(post(location + "/topics").with(csrf()).with(TestAuth.member(owner)).param("title", "요즘 듣는 노래"));
@@ -120,6 +122,65 @@ class ClubIT extends IntegrationTestBase {
         mockMvc.perform(post(location + "/topics/" + topic + "/delete").with(csrf()).with(TestAuth.member(owner)));
         assertThat(page(location, mate)).doesNotContain("class=\"room-past\"").doesNotContain("class=\"room-chip\"").contains("내 책상 위 풍경");
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE id = ?", Integer.class, postId)).isEqualTo(1);
+    }
+
+    @Test
+    void writeFirstLocksTopicPostsUntilIWriteOrADayPasses() throws Exception {
+        clock.set(NOW);
+        long owner = members.localMember("firstowner", "먼저방장", "firstowner@example.com", "Blog#2026ok", true);
+        long mate = members.localMember("firstmate", "먼저친구", "firstmate@example.com", "Blog#2026ok", true);
+        long outsider = members.localMember("firstout", "먼저남남", "firstout@example.com", "Blog#2026ok", true);
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+                .param("name", "먼저 방").param("joinMode", "LINK")).andReturn().getResponse().getRedirectedUrl();
+        long club = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+        jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
+        mockMvc.perform(post(location + "/topics").with(csrf()).with(TestAuth.member(owner)).param("title", "요즘 듣는 노래"));
+        long topic = jdbc.queryForObject("SELECT id FROM writing_club_topic WHERE club_id = ?", Long.class, club);
+        String write = mockMvc.perform(post(location + "/topics/" + topic + "/write").with(csrf()).with(TestAuth.member(mate)))
+                .andReturn().getResponse().getRedirectedUrl();
+        long mates = Long.parseLong(write.substring(write.lastIndexOf('/') + 1));
+        posts.publish(mates, NOW.plus(Duration.ofMinutes(10)));
+        posts.published(mate, "자유롭게 쓴 글", "본문", 1, NOW.plus(Duration.ofMinutes(20)));
+        clock.set(NOW.plus(Duration.ofHours(1)));
+        // 방장은 아직 안 써서 친구의 글감 글은 제목 없이 흐린 자리표시, 자유 글은 그대로, [쓰기]는 강조
+        String board = page(location, owner);
+        assertThat(board).contains("room-bubble is-locked").contains("내가 이 글감으로 쓰면 열려요").contains("자유롭게 쓴 글")
+                .doesNotContain("/posts/" + mates + "\"").contains("btn btn-sm btn-primary");
+        // 쓴 사람 자신에게는 잠기지 않는다
+        assertThat(page(location, mate)).doesNotContain("room-bubble is-locked").contains("나도 썼어요 · 1명이 썼어요");
+        // 글 화면은 언제나 열려 있고, 위에 방 띠(비공개방이라 멤버만)
+        String postUrl = "/firstmate/posts/" + mates;
+        assertThat(page(postUrl, owner)).contains("먼저 방에서 함께 쓴 글").contains("방 글감 「요즘 듣는 노래」").contains("방 보기");
+        assertThat(page(postUrl, outsider)).doesNotContain("club-band");
+        // 방장도 그 글감으로 쓰면 열리고, 글 화면 아래에 같은 글감 친구 글
+        String mine = mockMvc.perform(post(location + "/topics/" + topic + "/write").with(csrf()).with(TestAuth.member(owner)))
+                .andReturn().getResponse().getRedirectedUrl();
+        long ownerPost = Long.parseLong(mine.substring(mine.lastIndexOf('/') + 1));
+        posts.publish(ownerPost, NOW.plus(Duration.ofMinutes(70)));
+        clock.set(NOW.plus(Duration.ofHours(2)));
+        assertThat(page(location, owner)).doesNotContain("room-bubble is-locked").contains("/posts/" + mates + "\"")
+                .contains("나도 썼어요 · 2명이 썼어요");
+        assertThat(page(postUrl, owner)).contains("같은 글감으로 쓴 친구 글 1편").contains("/posts/" + ownerPost);
+        // 공개방이면 멤버가 아니어도 띠가 보인다
+        mockMvc.perform(post(location + "/settings").with(csrf()).with(TestAuth.member(owner))
+                .param("joinMode", "APPROVAL").param("memberCap", "30").param("writeFirst", "true"));
+        assertThat(page(postUrl, outsider)).contains("먼저 방에서 함께 쓴 글");
+        // 새 글감: 하루가 지나면 안 쓴 사람에게도 열린다
+        mockMvc.perform(post(location + "/topics").with(csrf()).with(TestAuth.member(owner)).param("title", "내 책상"));
+        long topic2 = jdbc.queryForObject("SELECT max(id) FROM writing_club_topic WHERE club_id = ?", Long.class, club);
+        String w2 = mockMvc.perform(post(location + "/topics/" + topic2 + "/write").with(csrf()).with(TestAuth.member(mate)))
+                .andReturn().getResponse().getRedirectedUrl();
+        posts.publish(Long.parseLong(w2.substring(w2.lastIndexOf('/') + 1)), NOW.plus(Duration.ofHours(3)));
+        clock.set(NOW.plus(Duration.ofHours(4)));
+        assertThat(page(location, owner)).contains("room-bubble is-locked");
+        clock.set(NOW.plus(Duration.ofHours(27)));
+        assertThat(page(location, owner)).doesNotContain("room-bubble is-locked");
+        // 방장이 끄면(체크 해제) 잠금이 없다
+        clock.set(NOW.plus(Duration.ofHours(4)));
+        mockMvc.perform(post(location + "/settings").with(csrf()).with(TestAuth.member(owner))
+                .param("joinMode", "APPROVAL").param("memberCap", "30"));
+        assertThat(jdbc.queryForObject("SELECT write_first FROM writing_club WHERE id = ?", Boolean.class, club)).isFalse();
+        assertThat(page(location, owner)).doesNotContain("room-bubble is-locked");
     }
 
     @Test

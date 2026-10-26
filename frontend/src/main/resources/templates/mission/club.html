@@ -37,8 +37,14 @@
                 <details>
                     <summary>
                         <span class="room-pin-icon"><th:block th:replace="~{fragments/icons :: pin}"></th:block></span>
+                        <!-- 10-26 먼저 쓰고 보기: 내가 안 썼으면 "내가 쓰면 열려요", 썼으면 체크와 "나도 썼어요" -->
                         <span class="room-pin-text" th:if="${t != null}"><span class="room-pin-label">방 글감</span>
-                            <span class="room-pin-title"><span th:text="${t.title()}">글감</span> <span class="help" th:text="${'· ' + t.writers() + '명 썼어요'}">· 0명 썼어요</span></span></span>
+                            <span class="room-pin-title"><span th:text="${t.title()}">글감</span> <span class="help"
+                                    th:unless="${board.wroteTopic() or (board.topicLocked() and t.writers() > 0)}" th:text="${'· ' + t.writers() + '명 썼어요'}">· 0명 썼어요</span></span>
+                            <span th:if="${board.topicLocked() and t.writers() > 0}" class="room-pin-state"
+                                  th:text="${t.writers() + '명 썼어요 · 내가 쓰면 열려요'}">3명 썼어요 · 내가 쓰면 열려요</span>
+                            <span th:if="${board.wroteTopic()}" class="room-pin-state is-done"><th:block th:replace="~{fragments/icons :: check}"></th:block><span
+                                    th:text="${'나도 썼어요 · ' + t.writers() + '명이 썼어요'}">나도 썼어요</span></span></span>
                         <span class="room-pin-text" th:unless="${t != null}"><span class="room-pin-label">방 글감</span>
                             <span class="room-pin-title">글감을 올려 보세요 <span class="help">· 쓸 거리가 생겨요</span></span></span>
                     </summary>
@@ -78,8 +84,8 @@
                         </th:block>
                     </div>
                 </details>
-                <form th:if="${t != null}" method="post" th:action="@{/missions/clubs/{id}/topics/{tid}/write(id=${c.id()},tid=${t.id()})}" class="room-pin-write">
-                    <button type="submit" class="btn btn-sm"><span class="room-long">이 글감으로 </span>쓰기</button>
+                <form th:if="${t != null and !board.wroteTopic()}" method="post" th:action="@{/missions/clubs/{id}/topics/{tid}/write(id=${c.id()},tid=${t.id()})}" class="room-pin-write">
+                    <button type="submit" class="btn btn-sm" th:classappend="${board.topicLocked()} ? 'btn-primary'"><span class="room-long">이 글감으로 </span>쓰기</button>
                 </form>
             </div>
             <p th:if="${timeline.isEmpty()}" class="empty-state room-empty">아직 올라온 글이 없어요. 전체 공개로 쓰면 이 방에 저절로 올라와요</p>
@@ -93,10 +99,15 @@
                             <div class="room-msg-who"><strong th:text="${card.author().nickname() != null ? card.author().nickname() : card.author().handle()}">이름</strong>
                                 <span class="help" th:text="${line.time()}">시간</span>
                                 <span th:if="${line.topic()}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block>방 글감</span></div>
-                            <a class="room-bubble" th:classappend="${card.thumbnailUrl() == null} ? 'no-thumb'" th:href="${card.url()}">
+                            <a th:unless="${line.locked()}" class="room-bubble" th:classappend="${card.thumbnailUrl() == null} ? 'no-thumb'" th:href="${card.url()}">
                                 <span class="room-bubble-text"><strong th:text="${card.title()}">제목</strong><span class="room-ex" th:text="${card.excerpt()}">요약</span></span>
                                 <img th:if="${card.thumbnailUrl() != null}" th:src="${card.thumbnailUrl()}" alt="" loading="lazy">
                             </a>
+                            <!-- 10-26 먼저 쓰고 보기: 내가 이 글감으로 쓰기 전(글감 올리고 하루 안)에는 흐리게. 글 화면은 언제나 열려 있다 -->
+                            <div th:if="${line.locked()}" class="room-bubble is-locked no-thumb">
+                                <span class="room-bubble-text" aria-hidden="true"><strong>친구가 이 글감으로 쓴 글</strong><span class="room-ex">내가 같은 글감으로 쓰고 나면 여기에서 바로 읽을 수 있어요</span></span>
+                                <span class="room-lock"><th:block th:replace="~{fragments/icons :: lock}"></th:block>내가 이 글감으로 쓰면 열려요</span>
+                            </div>
                             <div class="room-react" th:if="${card.likeCount() > 0 or card.commentCount() > 0}">
                                 <span th:if="${card.likeCount() > 0}"><th:block th:replace="~{fragments/icons :: heart}"></th:block> <span th:text="${card.likeCount()}">0</span><span class="visually-hidden">좋아요</span></span>
                                 <span th:if="${card.commentCount() > 0}"><th:block th:replace="~{fragments/icons :: comment}"></th:block> <span th:text="${card.commentCount()}">0</span><span class="visually-hidden">댓글</span></span></div>
@@ -180,12 +191,17 @@
                     </ul>
                 </details>
                 <details th:if="${board.isOwner()}" class="club-more">
-                    <summary><span>방 설정 바꾸기 · 들어오는 방법, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                    <summary><span>방 설정 바꾸기 · 들어오는 방법, 먼저 쓰고 보기, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                     <form method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
                         <fieldset class="club-modes">
                             <legend>들어오는 방법</legend>
                             <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${c.joinMode()})}"></label></th:block>
                         </fieldset>
+                        <label class="club-mode">
+                            <input type="checkbox" name="writeFirst" value="true" th:checked="${c.writeFirst()}">
+                            <span class="club-mode-text"><strong>먼저 쓰고 보기</strong>
+                                <span class="help">방 글감으로 쓴 친구 글은 나도 그 글감으로 써야 방에서 열려요. 글감을 올리고 하루가 지나면 모두 열려요</span></span>
+                        </label>
                         <div class="club-form-row">
                             <label for="club-cap">정원</label>
                             <span class="club-inline"><input id="club-cap" name="memberCap" type="number" min="2" max="100" required th:value="${c.memberCap()}"> 명까지</span>
