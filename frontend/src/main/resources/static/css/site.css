@@ -1450,6 +1450,10 @@ main.list-page .home-cards { gap: 18px; }
 @media (min-width: 900px) {
     .explore-body.has-side { grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; }
     .explore-body.has-side .explore-side { order: 2; }
+    /* 10-25(chan "오른쪽에 몰아 넣은 건 스크롤하면 따라오게"): 머리말 바로 아래에 붙어 따라온다.
+       화면보다 길면 칸 안에서만 스크롤(아래가 잘리지 않게) */
+    .explore-body.has-side .explore-side { position: sticky; top: calc(var(--header-h, 64px) + 16px); align-self: start;
+        max-height: calc(100vh - var(--header-h, 64px) - 32px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-bottom: 4px; }
     .explore-side .people-list { flex-direction: column; overflow: visible; }
     .explore-side .person-row { justify-content: space-between; }
     .explore-side .rank-list a { grid-template-columns: 26px minmax(0, 1fr); padding: 10px 14px; }
