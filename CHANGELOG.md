@@ -7,6 +7,27 @@
 
 ---
 
+## [1.79.1] — 2026-10-26 · 개인 확장 (친구 초대 링크 · 간단 가입)
+
+- 초대 링크 `/i/주소[/방 코드]`: 가입하면 바로 팔로우·방 참여, 휴대폰 공유
+- 간단 가입: 가입 칸 줄이기, 약관 모두 동의 시 한 줄로 접기
+- README 기능 표: `blog.invite.enabled`, `blog.account.signup.simple`
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기 방 초대 칸**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-club-after.png) |
+
+**초대 링크 화면(새 화면)**
+
+![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-invite.png)
+
+---
+
 ## [1.79.0] — 2026-10-26 · 개인 확장 (함께 쓰기 오픈채팅방 · 탐색 오른쪽 칸 · 설정 하위 화면)
 
 - 함께 쓰기 방: 기간 없이 오픈채팅방처럼, 멤버 글이 대화처럼, 방 글감 고정, 방 목록에 새 글 수
