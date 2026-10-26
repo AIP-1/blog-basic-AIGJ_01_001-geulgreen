@@ -60,6 +60,9 @@ server:
     min-response-size: 1KB
 
 blog:
+  # 10-25 chan 친구 초대(개인 확장): /i/{아이디}[/{코드}] 초대 링크, /me/invite, 프로필 메뉴 [친구 초대]
+  invite:
+    enabled: true
   # 092 후속 카카오톡 공유: 카카오 개발자 앱의 JavaScript 키(환경 변수로만). 비우면 공유 메뉴에 카카오톡이 안 보인다
   reading:
     kakao-js-key: ${KAKAO_JS_KEY:}
@@ -92,6 +95,9 @@ blog:
       max-failures: 5
       lock-duration: 15m
   account:
+    # 10-25 chan 가입 칸 줄이기(개인 확장): 주소·비밀번호 확인 칸 없이 가입, 주소는 이메일 앞부분으로. false면 두 칸이 돌아온다
+    signup:
+      simple: true
     handle:
       prefill-max-body-length: 30
       suggestion-batch-size: 20

@@ -7,6 +7,113 @@
 
 ---
 
+## [1.79.1] — 2026-10-26 · 개인 확장 (친구 초대 링크 · 간단 가입)
+
+- 초대 링크 `/i/주소[/방 코드]`: 가입하면 바로 팔로우·방 참여, 휴대폰 공유
+- 간단 가입: 가입 칸 줄이기, 약관 모두 동의 시 한 줄로 접기
+- README 기능 표: `blog.invite.enabled`, `blog.account.signup.simple`
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**함께 쓰기 방 초대 칸**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-club-after.png) |
+
+**초대 링크 화면(새 화면)**
+
+![](https://github.com/practicech/blog/releases/download/v1.79.1/v1791-invite.png)
+
+---
+
+## [1.79.0] — 2026-10-26 · 개인 확장 (함께 쓰기 오픈채팅방 · 탐색 오른쪽 칸 · 설정 하위 화면)
+
+- 함께 쓰기 방: 기간 없이 오픈채팅방처럼, 멤버 글이 대화처럼, 방 글감 고정, 방 목록에 새 글 수
+- 탐색 추천 오른쪽 칸이 스크롤을 따라옴(PC)
+- 설정 하위 화면(비공개 계정·친한 친구·카테고리·연결·탈퇴) 카드형
+- DB: V36 방 글감 표·멤버 마지막 본 때 칸 추가(더하기만, 기간 칸은 남기고 안 씀)
+
+#### 전/후 사진
+
+**함께 쓰기 방이 오픈채팅방처럼**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-club-m-after.png) |
+
+**탐색 오른쪽 칸이 따라와요**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-ex-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-ex-after.png) |
+
+**설정 하위 화면도 카드형**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-spriv-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-spriv-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sfr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sfr-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sconn-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-sconn-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-swd-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-swd-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.0/v1790-scat-m-after.png) |
+
+---
+
+## [1.78.2] — 2026-10-25 · 개인 확장 (친한 친구)
+
+- "친구"를 "친한 친구"로, 설정에서 팔로우하는 사람 중에 고르기
+- 남의 블로그 머리에는 팔로우만([친구로 넣기] 뺌)
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**남의 블로그에는 팔로우만**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-blog-m-after.png) |
+
+**친구는 "친한 친구"로**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-fr-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.78.2/v1782-fr-after.png) |
+
+---
+
+## [1.78.1] — 2026-10-25 · 개인 확장 (알림 바로 저장 고침)
+
+- 설정 알림 바로 저장: 로그인이 풀려 로그인 화면으로 돌아가면 저장 실패로 보고 [저장] 다시 보이기
+- 화면 바뀜 없음, DB 바뀜 없음
+
+---
+
 ## [1.78.0] — 2026-10-25 · 개인 확장 (설정 새 디자인 · 피드·탐색 다듬기)
 
 - 설정: 기능별 탭과 카드형 화면, 알림 스위치는 누르면 바로 저장

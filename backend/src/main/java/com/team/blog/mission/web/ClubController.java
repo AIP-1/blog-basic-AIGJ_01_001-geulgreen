@@ -8,7 +8,6 @@ import com.team.blog.shared.error.NotFoundException;
 import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Controller;
@@ -21,12 +20,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
- * 111 후보(강성찬 개인 확장): 미션 화면의 [모임] 탭. 내 모임·만들기, 모임 화면(멤버만), 초대 링크로 들어오기,
- * 나가기·내보내기·삭제. 채팅·공개 모임 목록·랭킹은 없다.
+ * 111 후보(강성찬 개인 확장): 함께 쓰기. 내 방 목록·만들기, 방 화면(멤버만), 초대 링크로 들어오기, 나가기·내보내기·삭제.
+ * 10-25 chan: 기간 없이 오픈채팅방처럼 — 방 화면은 멤버들의 글과 방 소식이 시간 순으로, 위에 방 글감. 채팅·랭킹은 없다.
  */
 @Controller
 @ConditionalOnProperty(name = "blog.missions.enabled", havingValue = "true", matchIfMissing = true)
 public class ClubController {
+
+    private static final java.time.ZoneId SEOUL = java.time.ZoneId.of("Asia/Seoul");
 
     private final ClubService clubs;
     private final CurrentUserProvider currentUserProvider;
@@ -44,10 +45,12 @@ public class ClubController {
     @GetMapping("/missions/clubs")
     public String list(@RequestParam(value = "q", required = false) String q, Model model) {
         CurrentUser me = currentUserProvider.current().orElseThrow(LoginRequiredException::new);
-        java.util.List<ClubService.Club> mine = clubs.mine(me.memberId());
-        model.addAttribute("clubs", mine);
-        model.addAttribute("wrote", clubs.wroteThisPeriod(me.memberId(), mine));
-        model.addAttribute("today", clubs.today());
+        java.util.List<ClubService.Room> rooms = clubs.rooms(me.memberId());
+        model.addAttribute("rooms", rooms);
+        java.time.Instant now = clock.instant();
+        java.util.Map<Long, String> roomTimes = new java.util.HashMap<>();
+        rooms.forEach(r -> roomTimes.put(r.club().id(), r.lastAt() == null ? "" : com.team.blog.post.application.CardDates.label(r.lastAt(), now)));
+        model.addAttribute("roomTimes", roomTimes);
         // 111 후속: 받은 초대, 공개 목록(내가 든 것은 빼고)·검색
         model.addAttribute("invites", clubs.myInvites(me.memberId()));
         model.addAttribute("modes", ClubService.MODES);
@@ -56,9 +59,7 @@ public class ClubController {
             return "redirect:/missions/clubs/find?q=" + org.springframework.web.util.UriUtils.encodeQueryParam(q.strip(), java.nio.charset.StandardCharsets.UTF_8);
         }
         if (!model.containsAttribute("form")) {
-            LocalDate today = clubs.today();
-            model.addAttribute("form", new ClubService.Form("", "", 7, today, today.plusWeeks(4).minusDays(1),
-                    ClubService.APPROVAL, ClubService.DEFAULT_CAP));
+            model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP));
         }
         return "mission/clubs";
     }
@@ -76,11 +77,9 @@ public class ClubController {
 
     @PostMapping("/missions/clubs")
     public RedirectView create(@RequestParam("name") String name, @RequestParam(value = "intro", required = false) String intro,
-                               @RequestParam("everyDays") int everyDays, @RequestParam("startDate") String startDate,
-                               @RequestParam("endDate") String endDate,
                                @RequestParam(value = "joinMode", defaultValue = ClubService.APPROVAL) String joinMode,
                                @RequestParam(value = "memberCap", defaultValue = "30") int memberCap, RedirectAttributes flash) {
-        ClubService.Form form = new ClubService.Form(name, intro, everyDays, date(startDate), date(endDate), joinMode, memberCap);
+        ClubService.Form form = new ClubService.Form(name, intro, joinMode, memberCap);
         Optional<String> problem = ClubService.problem(form);
         if (problem.isPresent()) {
             flash.addFlashAttribute("clubError", problem.get());
@@ -105,22 +104,66 @@ public class ClubController {
             model.addAttribute("requests", clubs.requests(id));
             model.addAttribute("modes", ClubService.MODES);
         }
-        if (!board.ended()) {
-            model.addAttribute("candidates", clubs.inviteCandidates(me.memberId(), id));
-            model.addAttribute("invitesLeft", Math.max(0, ClubService.DAILY_INVITES - clubs.invitesToday(me.memberId())));
-        }
+        model.addAttribute("candidates", clubs.inviteCandidates(me.memberId(), id));
+        model.addAttribute("invitesLeft", Math.max(0, ClubService.DAILY_INVITES - clubs.invitesToday(me.memberId())));
         java.util.Map<Long, com.team.blog.post.application.PostCard> cards = listQuery.cardsByIds(board.postIds());
-        java.util.Map<Long, String> cardDates = new java.util.HashMap<>();
-        cards.values().forEach(c -> cardDates.put(c.id(), com.team.blog.post.application.CardDates.label(c.firstPublicAt(), clock.instant())));
+        java.util.List<com.team.blog.post.application.PostCard> ordered = board.postIds().stream().filter(cards::containsKey).map(cards::get).toList();
         model.addAttribute("board", board);
-        // 10-21 chan: "다음 할 일" — 이번 기간에 내가 썼는지, 다음 기간은 언제부터인지
-        model.addAttribute("myWrote", board.members().stream().anyMatch(m -> m.memberId() == me.memberId() && m.wrote()));
-        java.time.LocalDate nextStart = board.period().end().plusDays(1);
-        model.addAttribute("nextStart", nextStart.isAfter(board.club().endDate()) ? null : nextStart);
-        model.addAttribute("wroteCount", board.members().stream().filter(ClubService.Member::wrote).count());
-        model.addAttribute("cards", board.postIds().stream().filter(cards::containsKey).map(cards::get).toList());
-        model.addAttribute("cardDates", cardDates);
+        model.addAttribute("self", board.members().stream().filter(m -> m.memberId() == me.memberId()).findFirst().orElse(null));
+        model.addAttribute("timeline", timeline(ordered, board.notices(), board.topicPostIds(), ordered.size() >= ClubService.POSTS));
         return "mission/club";
+    }
+
+    /** 방 화면 한 줄: 글(card) 또는 방 소식(text). 날짜가 바뀌는 첫 줄에 {@code day}("오늘"·"어제"·"10월 24일 (금)"). */
+    public record Line(com.team.blog.post.application.PostCard card, String text, String time, String day, boolean topic) {
+    }
+
+    /** 글과 방 소식을 최근 순으로 섞는다. 글이 꽉 찼으면(더 옛날 글이 있음) 가장 옛 글보다 전 소식은 뺀다. */
+    java.util.List<Line> timeline(java.util.List<com.team.blog.post.application.PostCard> cards, java.util.List<ClubService.Notice> notices,
+                                  java.util.Set<Long> topicPostIds, boolean full) {
+        java.time.Instant now = clock.instant();
+        java.time.Instant oldest = full && !cards.isEmpty() ? cards.get(cards.size() - 1).firstPublicAt() : java.time.Instant.MIN;
+        record Item(java.time.Instant at, com.team.blog.post.application.PostCard card, String text) {
+        }
+        java.util.List<Item> items = new java.util.ArrayList<>();
+        cards.forEach(c -> items.add(new Item(c.firstPublicAt(), c, null)));
+        notices.stream().filter(n -> !n.at().isBefore(oldest)).forEach(n -> items.add(new Item(n.at(), null, n.text())));
+        items.sort(java.util.Comparator.comparing(Item::at).reversed());
+        LocalDate today = LocalDate.ofInstant(now, SEOUL);
+        java.util.List<Line> lines = new java.util.ArrayList<>();
+        LocalDate prev = null;
+        for (Item it : items) {
+            LocalDate d = LocalDate.ofInstant(it.at(), SEOUL);
+            String day = d.equals(prev) ? null : d.equals(today) ? "오늘" : d.equals(today.minusDays(1)) ? "어제" : MissionController.label(d);
+            prev = d;
+            lines.add(new Line(it.card(), it.text(), com.team.blog.post.application.CardDates.label(it.at(), now), day,
+                    it.card() != null && topicPostIds.contains(it.card().id())));
+        }
+        return lines;
+    }
+
+    // ----- 10-25 방 글감 -----
+
+    @PostMapping("/missions/clubs/{id}/topics")
+    public RedirectView addTopic(@PathVariable("id") long id, @RequestParam("title") String title,
+                                 @RequestParam(value = "hint", required = false) String hint, RedirectAttributes flash) {
+        return act(id, flash, () -> {
+            clubs.addTopic(currentUserProvider.current(), id, title, hint);
+            return "방 글감을 올렸어요";
+        });
+    }
+
+    @PostMapping("/missions/clubs/{id}/topics/{topicId}/delete")
+    public RedirectView deleteTopic(@PathVariable("id") long id, @PathVariable("topicId") long topicId, RedirectAttributes flash) {
+        return act(id, flash, () -> {
+            clubs.deleteTopic(currentUserProvider.current(), id, topicId);
+            return "방 글감을 내렸어요";
+        });
+    }
+
+    @PostMapping("/missions/clubs/{id}/topics/{topicId}/write")
+    public RedirectView writeTopic(@PathVariable("id") long id, @PathVariable("topicId") long topicId) {
+        return seeOther("/write/" + clubs.startTopic(currentUserProvider.current(), id, topicId));
     }
 
     /** 초대 링크: 로그인한 사람에게 모임 이름과 [참여하기]. 이미 멤버면 바로 모임으로. */
@@ -246,13 +289,5 @@ public class ClubController {
         clubs.delete(currentUserProvider.current(), id);
         flash.addFlashAttribute("clubNotice", "함께 쓰기를 지웠어요");
         return seeOther("/missions/clubs");
-    }
-
-    private static LocalDate date(String s) {
-        try {
-            return s == null || s.isBlank() ? null : LocalDate.parse(s);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
     }
 }

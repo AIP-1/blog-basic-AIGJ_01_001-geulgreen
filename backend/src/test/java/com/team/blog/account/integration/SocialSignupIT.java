@@ -41,7 +41,8 @@ class SocialSignupIT extends IntegrationTestBase {
         Browser browser = pendingGoogle("g-1", "kimmin@gmail.com", "Kim Min-seo");
         String page = browser.perform(get("/signup/social")).getResponse().getContentAsString();
         assertThat(page).contains("value=\"KimMinseo\"")
-                .contains("<strong>go-</strong>").contains("data-prefix-locked=\"go-\"").contains("value=\"kimmin\"")
+                // 10-25 chan: 주소 칸 없음 — 접두어 + 이메일 앞부분으로 만든다는 안내만
+                .contains("블로그 주소는 go- + 이메일 앞부분으로 만들어요").doesNotContain("name=\"handle\"")
                 .contains("이용약관에 동의해요").contains("개인정보 수집·이용에 동의해요")
                 // 003 FR-020: 허용 호스트가 아닌 사진(fixture의 example.com)은 화면에 넘기지 않는다 — 사진 칸은 SocialPictureIT에서 확인
                 .doesNotContain("프로필 사진 사용").doesNotContain("example.com/p.png")
@@ -157,7 +158,7 @@ class SocialSignupIT extends IntegrationTestBase {
         Browser browser = new Browser(mockMvc);
         browser.perform(socialLogin("GITHUB", "4242", null, "octocat"));
         String page = browser.perform(get("/signup/social")).getResponse().getContentAsString();
-        assertThat(page).contains("id=\"email\"").contains("<strong>gi-</strong>");
+        assertThat(page).contains("id=\"email\"").contains("블로그 주소는 gi- + 이메일 앞부분으로 만들어요");
 
         MvcResult missing = browser.perform(completeSocial("octocat", "옥토캣"));
         assertThat(missing.getResponse().getStatus()).isEqualTo(400);

@@ -45,13 +45,18 @@ public class FormLoginSuccessHandler implements AuthenticationSuccessHandler {
         AuthResponses.seeOther(request, response, target);
     }
 
-    /** 검증된 {@code redirect} → 저장된 요청(상대 경로로) → {@code /}. */
+    /** 검증된 {@code redirect} → 세션의 초대 경로 → 저장된 요청(상대 경로로) → {@code /}. */
     static String afterLoginTarget(HttpServletRequest request, HttpServletResponse response, RequestCache cache,
                                    String redirect) {
         SavedRequest saved = cache.getRequest(request, response);
         cache.removeRequest(request, response);
         if (redirect != null && !redirect.isBlank()) {
             return RedirectTargetValidator.sanitize(redirect);
+        }
+        // 10-25 chan: 초대 링크를 열어 두고 로그인했으면(소셜 포함) 그 초대로 돌아간다
+        String invite = com.team.blog.shared.web.PendingInvite.path(request.getSession(false));
+        if (invite != null) {
+            return invite;
         }
         if (saved != null) {
             try {

@@ -49,7 +49,8 @@
             <p class="field-error" th:if="${errors['nickname'] != null}" th:text="${errors['nickname']}" role="alert"></p>
         </div>
 
-        <div class="field">
+        <!-- 10-25 chan: 간소화(blog.account.signup.simple)를 끄면 돌아오는 주소 칸 -->
+        <div class="field" th:unless="${simpleSignup}">
             <label for="handle">블로그 주소</label>
             <div class="handle-input">
                 <span aria-hidden="true" th:text="${siteHost + '/'}">blog.example.com/</span>
@@ -85,9 +86,10 @@
             <ul class="field-error" th:if="${!passwordErrors.isEmpty()}" role="alert">
                 <li th:each="msg : ${passwordErrors}" th:text="${msg}">오류</li>
             </ul>
+            <p class="field-error" th:if="${simpleSignup and errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
         </div>
 
-        <div class="field">
+        <div class="field" th:unless="${simpleSignup}">
             <label for="passwordConfirm">비밀번호 확인</label>
             <input id="passwordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" required>
             <p class="field-error" th:if="${errors['passwordConfirm'] != null}" th:text="${errors['passwordConfirm']}" role="alert"></p>
@@ -112,11 +114,31 @@
             <legend>약관 동의 (필수)</legend>
             <p class="form-error" th:if="${errors['agreements'] != null}" th:text="${errors['agreements']}" role="alert" data-toast-inline></p>
             <label class="agree-all"><input type="checkbox" data-agree-all> 모두 동의해요</label>
-            <label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수) <a href="/terms" target="_blank" rel="noopener">약관 보기</a></label>
-            <label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수) <a href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></label>
+            <!-- 10-25 chan: 둘 다 켜지면 두 줄을 한 줄 요약으로 접고 [펼치기]로 다시 연다(signup-form.js). 칸은 숨길 뿐 그대로 보내진다 -->
+            <div class="agree-summary" data-agree-summary hidden>
+                <p>이용약관·개인정보 수집·이용에 동의했어요.</p>
+                <p class="agree-actions"><a class="link-btn" href="/terms" target="_blank" rel="noopener">약관 보기</a>
+                    <a class="link-btn" href="/privacy" target="_blank" rel="noopener">처리방침 보기</a>
+                    <button type="button" class="link-btn agree-expand" data-agree-expand>펼치기</button></p>
+            </div>
+            <div class="agree-items" data-agree-items>
+                <div class="agree-item"><label><input type="checkbox" name="agreeTerms" value="true" th:checked="${form.agreeTerms}"> 이용약관에 동의해요 (필수)</label>
+                    <a class="link-btn" href="/terms" target="_blank" rel="noopener">약관 보기</a></div>
+                <div class="agree-item"><label><input type="checkbox" name="agreePrivacy" value="true" th:checked="${form.agreePrivacy}"> 개인정보 수집·이용에 동의해요 (필수)</label>
+                    <a class="link-btn" href="/privacy" target="_blank" rel="noopener">처리방침 보기</a></div>
+            </div>
         </fieldset>
 
+        <p class="form-error" th:if="${simpleSignup and errors['handle'] != null}" role="alert" data-toast-inline><span th:text="${'블로그 주소를 만들지 못했어요: ' + errors['handle']}">오류</span><span
+                th:if="${handleSuggestion != null and !#strings.contains(errors['handle'], handleSuggestion)}" th:text="${' ' + handleSuggestion + '는 쓸 수 있어요'}"> 대안</span></p>
         <button type="submit" class="btn btn-primary btn-block">가입하기</button>
+        <!-- 10-25 chan: 주소·비밀번호 확인 칸을 뺐다. 주소는 이메일 앞부분으로 만들고 설정에서 바꾼다(EmailSignupService) -->
+        <!-- 주소 바꾸기는 074 인스타식 계정(blog.insta-account.enabled)에 딸린 기능이라 꺼져 있으면 "바꿀 수 없어요"로 -->
+        <!-- 문장마다 한 줄: 휴대폰에서 문장 중간이 끊기지 않게(span은 block) -->
+        <p class="help signup-handle-note" th:if="${simpleSignup}">
+            <span>블로그 주소는 이메일 앞부분으로 만들어요.</span>
+            <span th:text="${instaSignup} ? '가입 후 설정에서 바꿀 수 있어요.' : '가입 후에는 바꿀 수 없어요.'">가입 후 설정에서 바꿀 수 있어요.</span>
+        </p>
         </div>
     </form>
     <!-- 074: 소셜 가입도 같은 카드에서 -->
@@ -132,7 +154,7 @@
   </div>
 
     <script th:src="@{/js/account/availability.js}" defer></script>
-    <script th:src="@{/js/account/handle-field.js}" defer></script>
+    <script th:unless="${simpleSignup}" th:src="@{/js/account/handle-field.js}" defer></script>
     <script th:src="@{/js/auth/password-rules.js}" defer></script>
     <script th:src="@{/js/auth/signup-form.js}" defer></script>
     <script th:if="${instaSignup}" th:src="@{/js/auth/signup-code.js}" defer></script>

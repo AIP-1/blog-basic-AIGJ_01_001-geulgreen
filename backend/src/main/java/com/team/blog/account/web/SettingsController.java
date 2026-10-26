@@ -76,6 +76,8 @@ public class SettingsController {
         }
         session.removeAttribute(SocialSignupController.PENDING_PROFILE_PICTURE);
         model.addAttribute("pictureUrl", pictureUrl);
+        // 10-25 chan: 초대 링크로 가입했으면 사진을 붙인 뒤 처음 화면 대신 초대한 사람·방으로
+        model.addAttribute("continuePath", com.team.blog.shared.web.PendingInvite.target(request, "/"));
         return "settings/social-picture";
     }
 }

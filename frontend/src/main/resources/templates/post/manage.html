@@ -25,7 +25,7 @@
     <nav th:if="${tab == 'published'}" class="manage-filter" aria-label="공개 범위 필터">
         <a th:href="@{/manage/posts(tab='published')}" th:attr="aria-current=${visibility == '' ? 'page' : null}">전체</a>
         <a th:href="@{/manage/posts(tab='published',visibility='public')}" th:attr="aria-current=${visibility == 'public' ? 'page' : null}">공개</a>
-        <a th:href="@{/manage/posts(tab='published',visibility='friends')}" th:attr="aria-current=${visibility == 'friends' ? 'page' : null}">친구 공개</a>
+        <a th:href="@{/manage/posts(tab='published',visibility='friends')}" th:attr="aria-current=${visibility == 'friends' ? 'page' : null}">친한 친구만</a>
         <a th:href="@{/manage/posts(tab='published',visibility='link')}" th:attr="aria-current=${visibility == 'link' ? 'page' : null}">링크 공개</a>
         <a th:href="@{/manage/posts(tab='published',visibility='private')}" th:attr="aria-current=${visibility == 'private' ? 'page' : null}">비공개</a>
     </nav>
@@ -53,7 +53,7 @@
                     <summary>공개 범위 바꾸기</summary>
                     <div class="sort-menu-panel">
                         <button type="button" th:each="o : ${ {'PUBLIC','FRIENDS','LINK','GROUP','PRIVATE'} }" th:attr="data-bulk-visibility=${o}"
-                                th:text="${o == 'PRIVATE' ? '나만 보기' : (o == 'FRIENDS' ? '친구 공개' : (o == 'LINK' ? '링크 공개' : (o == 'GROUP' ? '그룹 공개' : '전체 공개')))}">전체 공개</button>
+                                th:text="${o == 'PRIVATE' ? '나만 보기' : (o == 'FRIENDS' ? '친한 친구만' : (o == 'LINK' ? '링크 공개' : (o == 'GROUP' ? '그룹 공개' : '전체 공개')))}">전체 공개</button>
                     </div>
                 </details>
                 <button type="button" class="btn btn-sm btn-danger" data-bulk-action="trash"><svg th:replace="~{fragments/icons :: trash}"></svg>휴지통으로</button>

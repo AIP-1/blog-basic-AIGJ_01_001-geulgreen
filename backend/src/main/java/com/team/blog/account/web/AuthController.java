@@ -19,6 +19,7 @@ import com.team.blog.shared.security.CurrentUser;
 import com.team.blog.shared.security.CurrentUserProvider;
 import com.team.blog.shared.security.LoginSessionEstablisher;
 import com.team.blog.shared.security.RedirectTargetValidator;
+import com.team.blog.shared.web.PendingInvite;
 import com.team.blog.shared.web.Redirects;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,10 +49,13 @@ public class AuthController {
     private final CurrentUserProvider currentUserProvider;
     private final MessageSource messageSource;
     private final InstaAccountProperties insta;
+    private final com.team.blog.account.application.SignupProperties signupProperties;
 
     public AuthController(EmailSignupService emailSignupService, EmailVerificationService emailVerificationService,
                           LoginSessionEstablisher loginSessionEstablisher, CurrentUserProvider currentUserProvider,
-                          MessageSource messageSource, InstaAccountProperties insta) {
+                          MessageSource messageSource, InstaAccountProperties insta,
+                          com.team.blog.account.application.SignupProperties signupProperties) {
+        this.signupProperties = signupProperties;
         this.insta = insta;
         this.emailSignupService = emailSignupService;
         this.emailVerificationService = emailVerificationService;
@@ -98,7 +102,8 @@ public class AuthController {
                 if (current != null) {
                     current.removeAttribute(SignupCodeApiController.VERIFIED_EMAIL);
                 }
-                return Redirects.seeOther("/");
+                // 10-25 chan: 초대 링크로 와서 가입했으면 초대한 사람·방으로
+                return Redirects.seeOther(PendingInvite.target(request, "/"));
             }
             return Redirects.seeOther("/signup/verify-sent");
         } catch (AgreementRequiredException e) {
@@ -203,10 +208,16 @@ public class AuthController {
     // ----- 인증 -----
 
     @GetMapping("/auth/verify")
-    public ModelAndView verify(@RequestParam(name = "token", required = false) String token) {
+    public ModelAndView verify(@RequestParam(name = "token", required = false) String token, HttpServletRequest request) {
         EmailVerificationService.VerifyResult result = emailVerificationService.verify(token);
+        boolean verified = result == EmailVerificationService.VerifyResult.VERIFIED;
+        // 10-25 chan: 초대 링크로 와서 메일 인증까지 마쳤으면 결과 화면 대신 그 초대로(방 참여는 인증 뒤에만 되므로 여기서 이어 준다)
+        String invite = verified ? PendingInvite.path(request.getSession(false)) : null;
+        if (invite != null) {
+            return new ModelAndView("redirect:" + invite);
+        }
         ModelAndView view = new ModelAndView("auth/verify-result");
-        view.addObject("verified", result == EmailVerificationService.VerifyResult.VERIFIED);
+        view.addObject("verified", verified);
         view.addObject("loggedIn", currentUserProvider.current().isPresent());
         return view;
     }
@@ -231,6 +242,7 @@ public class AuthController {
     /** 074: 가입 화면이 코드 단계를 보일지, 이 이메일을 이미 코드로 확인했는지. */
     private void addCodeState(ModelAndView view, HttpServletRequest request, String email) {
         view.addObject("instaSignup", insta.enabled());
+        view.addObject("simpleSignup", signupProperties.simple());
         HttpSession session = request.getSession(false);
         Object verified = session == null ? null : session.getAttribute(SignupCodeApiController.VERIFIED_EMAIL);
         view.addObject("codeVerifiedEmail", verified != null && (email == null || verified.equals(EmailRules.normalize(email)))
