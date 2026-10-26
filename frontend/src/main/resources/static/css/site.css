@@ -13,6 +13,9 @@ th { white-space: nowrap; }
 .meta-part { display: inline-block; }
 /* 목록 화면·머리말·꼬리말이 함께 쓰는 넓은 폭(넓은 모니터에서 여백만 크지 않게). 읽는 화면(main 기본 760px)은 그대로 */
 :root { --page-wide: 1440px; }
+/* 10-26 chan "높이 다르다 이런거 다 찾아서": 버튼·알약 높이는 두 단계로만. 나란히 놓인 버튼은 글자 크기·안쪽 여백이 달라도 같은 높이.
+   보통(--control-h): 기본 버튼·설정 버튼, 작게(--control-h-sm): .btn-sm·알약 링크(.link-btn)·글쓰기 도구 */
+:root { --control-h: 38px; --control-h-sm: 32px; }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
 img { max-width: 100%; height: auto; }
 /* 10-25 chan: 초록 글씨·밑줄 링크를 쓰지 않는다. 링크는 문장 밖으로 빼서 .link-btn(알약 + ›)·버튼·화살표 줄로,
@@ -361,8 +364,8 @@ main.list-page { max-width: var(--page-wide); }
    ================================================================ */
 /* 버튼: 기본은 테두리 둥근 보조 버튼, .btn-primary(세이지)·.btn-danger(분홍)·.btn-text */
 button, .btn, .button-link { font: inherit; font-size: .93em; font-weight: 600; line-height: 1.4; cursor: pointer;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 8px 16px; border-radius: 999px; border: 1px solid var(--color-control-border);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--control-h); vertical-align: middle;
+    padding: 7px 16px; border-radius: 999px; border: 1px solid var(--color-control-border);
     background: var(--color-surface); color: var(--color-text); text-decoration: none; white-space: nowrap; }
 button:hover, .btn:hover, .button-link:hover { background: var(--color-surface-muted); }
 button:disabled { opacity: .55; cursor: not-allowed; }
@@ -378,7 +381,9 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .btn-text, .report-button { background: none; border-color: transparent; color: var(--color-text-muted); padding: 6px 10px; }
 .btn-text:hover, .report-button:hover { background: var(--color-surface-muted); color: var(--color-text); }
 .reaction-row .report-button { margin-left: auto; }
-.btn-sm { padding: 6px 14px; font-size: .88em; }
+.btn-sm { min-height: var(--control-h-sm); padding: 5px 14px; font-size: .875rem; }
+/* 크기가 정해진 아이콘 버튼·글자만 있는 작은 버튼은 공통 높이를 따르지 않는다 */
+.notif-bell, .icon-btn, .btn-icon, .fmt-btn, .tag-row-arrows button, .hero-search-button, .menu-toggle { min-height: 0; }
 .btn-block { width: 100%; padding: 12px 16px; font-size: 1em; }
 a.follow-button { display: inline-flex; padding: 6px 16px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: .9em; }
 .follow-button[aria-pressed="true"] { color: var(--color-brand); border-color: var(--color-brand); }
@@ -541,8 +546,8 @@ main.auth-page { max-width: 960px; }
 .signup-agree .agree-item { margin: 6px 0 10px; }
 .signup-agree .agree-item > label { margin: 0; }
 .signup-agree .agree-item > .link-btn { margin: 6px 0 0 26px; }
-.signup-agree button.link-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
-    border-radius: 999px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .88rem; font-weight: 600; line-height: 1.4; white-space: nowrap; cursor: pointer; }
+.signup-agree button.link-btn { display: inline-flex; align-items: center; gap: 4px; min-height: var(--control-h-sm); padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
+    border-radius: 999px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .875rem; font-weight: 600; line-height: 1.4; white-space: nowrap; cursor: pointer; }
 .signup-agree button.link-btn::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
 .signup-agree button.link-btn:hover { background: var(--color-surface-muted); }
 main.auth-page-single { max-width: 560px; margin-top: 32px; margin-bottom: 32px; background: var(--color-surface);
@@ -597,7 +602,7 @@ main:has(> article.post) { max-width: 808px; }
 .author-card-stats a:hover { text-decoration: underline; }
 .author-card-actions { flex: none; display: flex; align-items: center; gap: 8px; }
 .author-card-actions .follow-form { margin: 0; }
-.author-card-actions .follow-button, .author-card-actions .btn { min-width: 96px; padding: 8px 18px; font-size: .93em; justify-content: center; }
+.author-card-actions .follow-button, .author-card-actions .btn { min-width: 96px; padding: 7px 18px; font-size: .93em; justify-content: center; }
 .author-card > .follow-message { flex-basis: 100%; margin: 0; }
 @media (max-width: 560px) { .author-card { padding: 16px; gap: 12px 14px; }
     .author-card-actions { flex-basis: 100%; }
@@ -624,11 +629,11 @@ main.editor { padding-top: 0; }
     background: var(--color-surface); border: 0;
     box-shadow: 0 0 0 100vmax var(--color-surface), 0 1px 0 100vmax var(--color-border); clip-path: inset(0 -100vmax -1px); }
 .editor-exit { flex: none; color: var(--color-text); text-decoration: none; font-weight: 600; }
-.editor-bar #discard-working-copy { flex: none; margin-left: -6px; font-size: .88em; }
+.editor-bar #discard-working-copy { flex: none; margin-left: -6px; min-height: var(--control-h-sm); padding-block: 5px; font-size: .88em; }
 .editor-bar .save-status { flex: 1; min-width: 0; text-align: right; font-size: .88em; }
 .editor-bar .editor-actions { flex: none; }
 .editor-tools { flex: none; display: flex; gap: 4px; padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--color-border); }
-.editor-tools button { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: .88em; border-color: transparent; background: none; }
+.editor-tools button { display: inline-flex; align-items: center; gap: 4px; min-height: var(--control-h-sm); padding: 5px 10px; font-size: .88em; border-color: transparent; background: none; }
 .editor-tools button:hover { background: var(--color-surface-muted); }
 /* 좁은 화면: "저장됨 시각"·"기기에 저장됨"은 숨기고(자동 저장은 그대로), 오프라인·충돌·오류는 버튼 아래 줄에 */
 @media (max-width: 560px) {
@@ -758,8 +763,9 @@ main.notes-page .note-list { background: var(--color-surface); border: 1px solid
 .mission-join { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 12px 0; }
 /* 035 AI 티저(강성찬 개인 확장) */
 .teaser-box h2 { margin: 0 0 4px; font-size: 1em; }
-.teaser-form { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.teaser-form { display: flex; gap: 8px; align-items: stretch; margin: 8px 0; }
 .teaser-form input { flex: 1; min-width: 0; }
+.teaser-form .btn { padding-inline: 20px; }
 /* 036 새로 온 작가(강성찬 개인 확장) */
 .newcomers { margin: 0 0 24px; }
 .newcomers h2 { font-size: 1.05em; margin: 0 0 10px; display: flex; gap: 8px; align-items: baseline; }
@@ -825,6 +831,8 @@ dialog.post-settings { width: min(560px, calc(100% - 32px)); max-height: calc(10
 .post-settings .post-category-form > label, .post-settings .series-form label[for="series-select"] { flex-basis: 100%; font-weight: 600; }
 .post-settings .post-category-form .field-hint { flex-basis: 100%; margin: -4px 0 2px; }
 .post-settings .series-form .inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* 고르기 칸·입력 칸 옆 [저장]은 칸 높이에 맞춘다(10-26) */
+.post-category-form > .btn, .series-form .inline-form > .btn { align-self: stretch; }
 .post-settings .series-form { display: block; }
 .post-settings .series-form .inline-form { width: 100%; }
 .post-settings .series-form #series-new { flex: 1 1 100%; min-width: 0; width: auto; }
@@ -1219,7 +1227,7 @@ main.list-page .home-cards { gap: 18px; }
 .count-chip { font-size: .62em; font-weight: 500; color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 999px;
     padding: 3px 12px; }
 .sort-menu { position: relative; }
-.sort-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-control-border); border-radius: 999px; padding: 6px 14px;
+.sort-menu summary { list-style: none; cursor: pointer; border: 1px solid var(--color-control-border); border-radius: 999px; padding: 8px 14px; line-height: 1.4; min-height: var(--control-h);
     font-size: .9em; color: var(--color-text-muted); background: var(--color-surface); }
 .sort-menu summary::-webkit-details-marker { display: none; }
 .sort-menu summary::before { content: "⇅ "; }
@@ -1453,7 +1461,7 @@ main.list-page .home-cards { gap: 18px; }
 .person-new { font-size: .72em; color: var(--color-brand); }
 .explore-people .follow-form { margin: 0; flex: none; }
 /* 팔로우는 작은 테두리 단추(글보다 눈에 띄지 않게) */
-.explore-people .follow-button, .explore-people .follow-button:not([aria-pressed="true"]) { padding: 3px 10px; font-size: .78em; background: transparent;
+.explore-people .follow-button, .explore-people .follow-button:not([aria-pressed="true"]) { min-height: 0; padding: 3px 10px; font-size: .78em; background: transparent;
     border: 1px solid var(--color-brand); color: var(--color-brand); }
 .explore-people .follow-button:not([aria-pressed="true"]):hover { background: var(--color-brand-soft); color: var(--color-brand); }
 /* 10-25(chan "많이 읽은 글·사람·태그는 오른쪽에 모두 묶어"): 넓은 화면은 왼쪽 추천 글 카드 + 오른쪽 한 칸, 좁은 화면은 이 칸이 카드 위 */
@@ -1514,8 +1522,8 @@ main.list-page .home-cards { gap: 18px; }
 .person-nickname { display: block; }
 .newcomer-who, .comment-author { max-width: 100%; min-width: 0; }
 /* 혼자 떨어진 동작용 링크(처음부터 보기, 돌아가기, 전체 보기 등)는 작은 알약 버튼 + 화살표(10-25: 문장 안 링크도 밑줄 대신 굵은 초록 글자). 색은 토큰만 */
-a.link-btn, .empty-state a:not([class]) { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
-    border-radius: 999px; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-size: .88rem; font-weight: 600;
+a.link-btn, .empty-state a:not([class]) { display: inline-flex; align-items: center; gap: 4px; min-height: var(--control-h-sm); padding: 5px 12px 5px 14px; border: 1px solid var(--color-control-border);
+    border-radius: 999px; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-size: .875rem; font-weight: 600;
     line-height: 1.4; white-space: nowrap; vertical-align: middle; transition: background .15s ease; }
 a.link-btn::after, .empty-state a:not([class])::after { content: "›"; font-size: 1.2em; line-height: 1; color: var(--color-text-muted); }
 a.link-btn:hover, .empty-state a:not([class]):hover { background: var(--color-surface-muted); text-decoration: none; }
@@ -1763,7 +1771,7 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .series-new-row[hidden] { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
-.series-new-row { align-items: center; }
+.series-new-row { align-items: stretch; }
 /* 10-26 예약 발행 카드(강성찬 개인 확장): 설정 화면 카드 줄처럼. 스위치 줄 + 날짜·시각 칸 + 알약 버튼, 잡힌 예약은 맨 위 줄 */
 .schedule-card { border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface); padding: 0 16px; }
 .schedule-card > * + * { border-top: 1px solid var(--color-border); }
@@ -1834,7 +1842,7 @@ button.schedule-pill:hover { background: var(--color-surface-muted); color: var(
 .club-card-intro { color: var(--color-text); }
 .club-empty { margin-top: 14px; padding: 28px 16px; border: 1px dashed var(--color-border); border-radius: 16px; text-align: center; }
 .club-empty p { margin: 0 0 6px; }
-.club-empty .btn { margin-top: 8px; }
+.club-empty > .btn { margin-top: 8px; }
 .club-form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
 .club-form-row { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 6px 16px; }
 .club-form-row > label { font-weight: 600; font-size: .92em; }
@@ -1865,7 +1873,7 @@ button.schedule-pill:hover { background: var(--color-surface-muted); color: var(
 .club-member-text > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .club-member-text .help { font-size: .85em; }
 .club-member-name { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.club-remove { font-size: .85em; color: var(--color-text-muted); white-space: nowrap; }
+.club-remove { min-height: var(--control-h-sm); padding-block: 5px; font-size: .85em; color: var(--color-text-muted); white-space: nowrap; }
 .club-invite-url { margin: 8px 0 0; font-size: .8em; word-break: break-all; }
 .club-join .btn { margin-top: 8px; }
 /* 강성찬 개인 확장(10-16): 처음 온 사람 안내 — 배너 아래 한 줄, 첫 글 전 "시작하기 3단계", 인증 완료 다음 단추 */
@@ -2393,7 +2401,7 @@ main.list-page.feed-page { max-width: 768px; }
 :is(.settings-layout, .set-page) form button[type=submit].set-btn { background: var(--color-surface); border-color: var(--color-control-border); color: var(--color-text); }
 :is(.settings-layout, .set-page) form button[type=submit].set-btn:hover { background: var(--color-surface-muted); color: var(--color-text); }
 :is(.settings-layout, .set-page) .set-btn, :is(.settings-layout, .set-page) .set-btn-danger { flex: none; }
-:is(.settings-layout, .set-page) a.set-btn-danger { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; text-decoration: none; white-space: nowrap;
+:is(.settings-layout, .set-page) a.set-btn-danger { display: inline-flex; align-items: center; min-height: var(--control-h); padding: 7px 16px; line-height: 1.4; font-size: .93em; border-radius: 999px; text-decoration: none; white-space: nowrap;
     border: 1px solid var(--color-danger-soft); background: var(--color-danger-soft); color: var(--color-danger); font-weight: 600; }
 :is(.settings-layout, .set-page) a.set-btn-danger:hover { border-color: var(--color-danger); text-decoration: none; }
 /* 체크 칸 = 스위치(알림) */
@@ -2449,7 +2457,7 @@ main.set-page { max-width: 760px; }
 .set-page section.set-card { padding-bottom: 8px; }
 .set-page .set-card-title { margin-bottom: 6px; }
 /* 줄 끝 글자 버튼(링크) */
-.set-page a.set-btn-link { flex: none; display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+.set-page a.set-btn-link { flex: none; display: inline-flex; align-items: center; min-height: var(--control-h); padding: 7px 14px; line-height: 1.4; border-radius: 999px; white-space: nowrap;
     border: 1px solid var(--color-control-border); background: var(--color-surface); color: var(--color-text); font-weight: 600; font-size: .9375rem; text-decoration: none; }
 .set-page a.set-btn-link:hover { background: var(--color-surface-muted); text-decoration: none; }
 /* 지금 상태 아이콘(공개 = 지구, 비공개 = 자물쇠) */
@@ -2477,7 +2485,7 @@ main.set-page { max-width: 760px; }
 /* 입력 + 버튼 한 줄 */
 .set-page .set-inline { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }
 .set-page .set-inline input[type=text], .set-page .set-inline select { flex: 1 1 auto; min-width: 0; max-width: none; margin: 0; }
-.set-page .set-inline .btn { flex: none; }
+.set-page .set-inline .btn { flex: none; align-self: stretch; padding-inline: 20px; }
 .set-page .set-search { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; padding: 0 4px 0 14px; border: 1px solid var(--color-control-border);
     border-radius: 999px; background: var(--color-surface); }
 .set-page .set-search:focus-within { outline: 2px solid var(--color-focus); outline-offset: 1px; }
