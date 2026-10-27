@@ -7,6 +7,32 @@
 
 ---
 
+## [1.80.0] — 2026-10-27 · 개인 확장 (함께 쓰기 먼저 쓰고 보기)
+
+- 먼저 쓰고 보기: 방 글감 글은 내가 쓰기 전까지 방 화면에서 흐리게(하루 지나면 열림, 방 설정에서 끄기)
+- 방 글에 방 띠, 방이 없을 때 열린 방과 [들어가기]
+- DB: V38 writing_club.write_first 칸 추가(더하기만)
+
+#### 전/후 사진
+
+**방이 없을 때 열린 방 바로 들어가기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-empty-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-empty-after.png) |
+
+**먼저 쓰고 보기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-club-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.80.0/v1800-club-m-after.png) |
+
+---
+
 ## [1.79.6] — 2026-10-27 · 개인 확장 (인스타그램 링크)
 
 - 사이트 맨 아래·휴대폰 메뉴에 글그린 인스타그램 링크
