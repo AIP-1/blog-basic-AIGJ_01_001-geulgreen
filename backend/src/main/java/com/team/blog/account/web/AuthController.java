@@ -166,6 +166,8 @@ public class AuthController {
         view.addObject("redirect", redirect != null && RedirectTargetValidator.isSafe(redirect) ? redirect : null);
         // 10-27 chan: 함께 쓰기 화면은 로그인해야 열려서 링크 미리보기가 이 화면을 읽는다. 방 이름은 보이지 않게 함께 쓰기 그림만
         if (redirect != null && redirect.startsWith("/missions/clubs")) {
+            // og:url이 그냥 로그인과 같으면 미리보기 캐시가 섞인다. 초대 코드는 빼고 함께 쓰기 주소로
+            view.addObject("ogUrlPath", "/missions/clubs");
             view.addObject("listMeta", new com.team.blog.shared.web.ListMeta("함께 쓰기 · 글그린",
                     "친구·반이 같이 글 쓰는 방이에요. 같은 글감으로 함께 쓰고 서로의 글을 읽어요.", "/images/og-clubs.png"));
         }

@@ -57,7 +57,7 @@ class ListMetaIT extends IntegrationTestBase {
                 .contains("/images/og-explore.png\">").doesNotContain("og-cat.jpg");
         // 함께 쓰기는 로그인 화면으로 넘어가므로 미리보기 도구는 로그인 화면을 읽는다
         assertThat(head("/login?redirect=/missions/clubs/join/abc")).contains("<meta property=\"og:title\" content=\"함께 쓰기 · 글그린\">")
-                .contains("/images/og-clubs.png\">");
+                .contains("/images/og-clubs.png\">").contains("/missions/clubs\">").doesNotContain("abc\">");
         assertThat(head("/login")).contains("og-cat.jpg");
         assertThat(head("/")).contains("og-cat.jpg");
     }
