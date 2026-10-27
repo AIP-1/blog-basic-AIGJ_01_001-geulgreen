@@ -33,9 +33,11 @@ public class ClubService {
     private static final LocalDate NO_END = LocalDate.of(9999, 12, 31);
     /** 지난 글감은 최근 것부터 이만큼. */
     static final int PAST_TOPICS = 10;
+    /** 먼저 쓰고 보기: 글감을 올리고 이만큼 지나면 안 쓴 사람에게도 방 글감 글이 열린다. */
+    static final java.time.Duration WRITE_FIRST_WINDOW = java.time.Duration.ofHours(24);
 
     public record Club(long id, long ownerId, String name, String intro, LocalDate startDate, String inviteCode, int memberCount,
-                       String joinMode, int memberCap) {
+                       String joinMode, int memberCap, boolean writeFirst) {
 
         public String modeLabel() {
             return ClubService.modeLabel(joinMode);
@@ -123,8 +125,13 @@ public class ClubService {
     public record Notice(java.time.Instant at, String text) {
     }
 
+    /**
+     * {@code lockedPostIds}: 먼저 쓰고 보기로 나에게 흐리게 보이는 글(남의 방 글감 글 중 내가 그 글감으로 아직 안 썼고 하루가 안 지난 것).
+     * {@code wroteTopic}: 지금 방 글감으로 내가 전체 공개했는지. {@code topicLocked}: 지금 방 글감 글이 나에게 잠겨 있는지(글감 줄 문구·[쓰기] 강조).
+     */
     public record Board(Club club, List<Member> members, List<Long> postIds, boolean isOwner, boolean isAdmin, Topic topic,
-                        List<Topic> pastTopics, Set<Long> topicPostIds, List<Notice> notices) {
+                        List<Topic> pastTopics, Set<Long> topicPostIds, List<Notice> notices, Set<Long> lockedPostIds,
+                        boolean wroteTopic, boolean topicLocked) {
 
         public long wroteToday() {
             return members.stream().filter(Member::wroteToday).count();
@@ -149,9 +156,13 @@ public class ClubService {
     private final org.springframework.context.ApplicationEventPublisher events;
     private final com.team.blog.post.application.PostDraftService drafts;
 
+    private final com.team.blog.post.application.PostAccessPolicy accessPolicy;
+
     public ClubService(JdbcTemplate jdbc, AccountGuard accountGuard, Clock clock,
                        org.springframework.context.ApplicationEventPublisher events,
-                       com.team.blog.post.application.PostDraftService drafts) {
+                       com.team.blog.post.application.PostDraftService drafts,
+                       com.team.blog.post.application.PostAccessPolicy accessPolicy) {
+        this.accessPolicy = accessPolicy;
         this.jdbc = jdbc;
         this.accountGuard = accountGuard;
         this.clock = clock;
@@ -212,7 +223,7 @@ public class ClubService {
     /** 10-25 방 목록(카톡 대화방 목록처럼): 마지막 글이 최근인 방부터, 새 글 수와 지금 글감. */
     public List<Room> rooms(long memberId) {
         return jdbc.query("""
-                SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap,
+                SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first,
                        (SELECT count(*) FROM writing_club_member m2 WHERE m2.club_id = c.id) AS member_count,
                        last.title AS last_title, last.first_public_at AS last_at, COALESCE(la.nickname, la.handle) AS last_author,
                        (SELECT count(*) FROM post p JOIN writing_club_member pm ON pm.member_id = p.author_id AND pm.club_id = c.id
@@ -307,11 +318,27 @@ public class ClubService {
                 SELECT tp.post_id FROM writing_club_topic_post tp JOIN writing_club_topic t ON t.id = tp.topic_id
                 WHERE t.club_id = ? AND tp.post_id = ANY (?)
                 """, Long.class, clubId, postIds.toArray(Long[]::new)));
+        // 10-26 먼저 쓰고 보기: 남이 방 글감으로 쓴 글 중 내가 그 글감으로 아직 전체 공개하지 않았고 글감이 하루 안 된 것
+        Set<Long> locked = !club.writeFirst() || topicPostIds.isEmpty() ? Set.of() : new java.util.HashSet<>(jdbc.queryForList("""
+                SELECT tp.post_id FROM writing_club_topic_post tp JOIN writing_club_topic t ON t.id = tp.topic_id
+                WHERE t.club_id = ? AND tp.post_id = ANY (?) AND tp.member_id <> ? AND t.created_at > ?
+                  AND NOT EXISTS (SELECT 1 FROM writing_club_topic_post mine JOIN post p ON p.id = mine.post_id
+                                   WHERE mine.topic_id = t.id AND mine.member_id = ? AND """ + " " + PUBLIC + """
+                                  )
+                """, Long.class, clubId, topicPostIds.toArray(Long[]::new), me.memberId(),
+                java.sql.Timestamp.from(now.minus(WRITE_FIRST_WINDOW)), me.memberId()));
+        Topic topic = topics.isEmpty() ? null : topics.get(0);
+        boolean wroteTopic = topic != null && Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS (SELECT 1 FROM writing_club_topic_post tp JOIN post p ON p.id = tp.post_id
+                               WHERE tp.topic_id = ? AND tp.member_id = ? AND """ + " " + PUBLIC + """
+                              )
+                """, Boolean.class, topic.id(), me.memberId()));
         jdbc.update("UPDATE writing_club_member SET last_seen_at = ? WHERE club_id = ? AND member_id = ?",
                 java.sql.Timestamp.from(now), clubId, me.memberId());
         return new Board(club, members, postIds, club.ownerId() == me.memberId(), isAdmin(clubId, me.memberId()),
-                topics.isEmpty() ? null : topics.get(0), topics.size() > 1 ? topics.subList(1, topics.size()) : List.of(),
-                topicPostIds, notices(clubId));
+                topic, topics.size() > 1 ? topics.subList(1, topics.size()) : List.of(),
+                topicPostIds, notices(clubId), locked, wroteTopic,
+                topic != null && club.writeFirst() && !wroteTopic && now.isBefore(topic.createdAt().plus(WRITE_FIRST_WINDOW)));
     }
 
     /** 멤버 줄의 "마지막으로 쓴 때": 오늘 씀, 어제, N일 전(한 달 안), 그보다 전이면 날짜, 없으면 "아직 없어요". */
@@ -420,6 +447,58 @@ public class ClubService {
                 .stream().findFirst();
     }
 
+    /** 글 화면 띠: 이 글을 쓴 방과 글감, 같은 글감으로 쓴 다른 멤버들의 전체 공개 글(최근 것부터 {@link #BAND_POSTS}편). */
+    public record Band(long clubId, String clubName, String topicTitle, List<BandPost> others) {
+    }
+
+    public record BandPost(long postId, String title, String handle, String nickname, String profileImageUrl, java.time.Instant at) {
+
+        public String name() {
+            return nickname == null ? handle : nickname;
+        }
+
+        public String url() {
+            return com.team.blog.shared.web.BlogPaths.of(handle) + "/posts/" + postId;
+        }
+
+        public com.team.blog.account.application.ProfileAvatar avatar() {
+            return new com.team.blog.account.application.ProfileAvatar(handle, nickname, profileImageUrl);
+        }
+    }
+
+    static final int BAND_POSTS = 5;
+
+    /**
+     * 10-26 글 화면 "○○에서 함께 쓴 글" 띠. 글쓴이가 아직 그 방 멤버일 때만. 비공개방(링크로만)은 방 멤버에게만 보이고,
+     * 공개방은 누구에게나 보인다([방 보기]는 멤버가 아니면 방 소개로).
+     */
+    public Optional<Band> band(long postId, long authorId, Optional<Long> viewerId) {
+        record Row(long clubId, String name, String joinMode, long topicId, String title) {
+        }
+        Optional<Row> row = jdbc.query("""
+                SELECT c.id, c.name, c.join_mode, t.id AS topic_id, t.title FROM writing_club_topic_post tp
+                JOIN writing_club_topic t ON t.id = tp.topic_id JOIN writing_club c ON c.id = t.club_id
+                JOIN writing_club_member m ON m.club_id = c.id AND m.member_id = tp.member_id
+                WHERE tp.post_id = ? AND tp.member_id = ? LIMIT 1
+                """, (rs, i) -> new Row(rs.getLong("id"), rs.getString("name"), rs.getString("join_mode"), rs.getLong("topic_id"),
+                rs.getString("title")), postId, authorId).stream().findFirst();
+        if (row.isEmpty() || (LINK.equals(row.get().joinMode()) && viewerId.map(v -> !isMember(row.get().clubId(), v)).orElse(true))) {
+            return Optional.empty();
+        }
+        Row r = row.get();
+        List<BandPost> others = jdbc.query("""
+                SELECT p.id, p.title, p.first_public_at, mb.handle, mb.nickname, mb.profile_image_url
+                FROM writing_club_topic_post tp JOIN post p ON p.id = tp.post_id JOIN member mb ON mb.id = p.author_id
+                JOIN writing_club_member m ON m.club_id = ? AND m.member_id = p.author_id
+                WHERE tp.topic_id = ? AND p.id <> ? AND p.first_public_at IS NOT NULL AND """ + " "
+                + accessPolicy.publicListingCondition("p", "mb") + """
+                 ORDER BY p.first_public_at DESC LIMIT
+                """ + " " + BAND_POSTS,
+                (rs, i) -> new BandPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getString("nickname"),
+                        rs.getString("profile_image_url"), rs.getTimestamp("first_public_at").toInstant()), r.clubId(), r.topicId(), postId);
+        return Optional.of(new Band(r.clubId(), r.name(), r.title(), others));
+    }
+
     /** 멤버가 나간다. 만든 사람은 나갈 수 없다(모임 삭제를 쓴다). */
     public void leave(Optional<CurrentUser> current, long clubId) {
         CurrentUser me = accountGuard.requireLoggedIn(current);
@@ -500,7 +579,37 @@ public class ClubService {
         return new Preview(club, state, invited);
     }
 
-    /** 공개 함께 쓰기에서 [참여하기](누구나 바로) 또는 [참여 요청](승인 후 참여). 들어갔으면 {@code true}. */
+    /**
+     * 10-26 글그린 공식 방: 운영자(관리자 계정)가 만든 공개방 중 가장 먼저 만든 것. 방이 없는 사람의 첫 화면 맨 위에 보이고,
+     * 승인 방식이어도 [들어가기] 한 번에 바로 들어온다(몰래 넣지는 않는다: 14세 미만 회원·방 알림·멤버 목록 노출).
+     */
+    public Optional<Club> official() {
+        return jdbc.query(SELECT + """
+                 JOIN member o ON o.id = c.owner_id
+                 WHERE c.join_mode <> 'LINK' AND o.role = 'ADMIN' AND o.status = 'ACTIVE' AND o.withdrawn_at IS NULL
+                 ORDER BY c.created_at, c.id LIMIT 1
+                """, (rs, i) -> club(rs)).stream().findFirst();
+    }
+
+    /** 방이 없는 사람의 첫 화면: 정원이 남은 공개방 최근 것부터 {@code limit}개({@code excludeId} 방은 빼고). */
+    public List<Club> openToJoin(long excludeId, int limit) {
+        return jdbc.query(SELECT + """
+                 WHERE c.join_mode <> 'LINK' AND c.id <> ?
+                   AND (SELECT count(*) FROM writing_club_member m3 WHERE m3.club_id = c.id) < c.member_cap
+                 ORDER BY c.created_at DESC, c.id DESC LIMIT ?
+                """, (rs, i) -> club(rs), excludeId, limit);
+    }
+
+    /** 방 소개 카드 한 줄: 오늘(한국 날짜) 이 방 멤버 중 전체 공개 글을 쓴 사람 수. */
+    public int wroteToday(long clubId) {
+        Integer n = jdbc.queryForObject("""
+                SELECT count(DISTINCT p.author_id) FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
+                WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date = ?",
+                Integer.class, clubId, Date.valueOf(today()));
+        return n == null ? 0 : n;
+    }
+
+    /** 공개 함께 쓰기에서 [참여하기](누구나 바로) 또는 [참여 요청](승인 후 참여). 들어갔으면 {@code true}. 공식 방은 언제나 바로. */
     @Transactional
     public boolean joinListed(Optional<CurrentUser> current, long clubId) {
         CurrentUser me = accountGuard.requireWritable(current);
@@ -508,7 +617,7 @@ public class ClubService {
         if (LINK.equals(club.joinMode())) {
             throw new NotFoundException();
         }
-        if (OPEN.equals(club.joinMode())) {
+        if (OPEN.equals(club.joinMode()) || official().map(o -> o.id() == clubId).orElse(false)) {
             addMember(club, me.memberId());
             return true;
         }
@@ -588,7 +697,7 @@ public class ClubService {
     }
 
     /** 만든 사람만: 참여 방식과 정원(지금 멤버 수보다 적게는 못 함). */
-    public void settings(Optional<CurrentUser> current, long clubId, String mode, int cap) {
+    public void settings(Optional<CurrentUser> current, long clubId, String mode, int cap, boolean writeFirst) {
         requireOwner(current, clubId);
         Club club = byId(clubId).orElseThrow(NotFoundException::new);
         if (!MODES.contains(mode)) {
@@ -597,7 +706,7 @@ public class ClubService {
         if (cap < Math.max(2, club.memberCount()) || cap > MAX_CAP) {
             throw new ClubException("정원은 지금 멤버 수(" + club.memberCount() + "명)부터 " + MAX_CAP + "명까지 정할 수 있어요");
         }
-        jdbc.update("UPDATE writing_club SET join_mode = ?, member_cap = ? WHERE id = ?", mode, cap, clubId);
+        jdbc.update("UPDATE writing_club SET join_mode = ?, member_cap = ?, write_first = ? WHERE id = ?", mode, cap, writeFirst, clubId);
     }
 
     /** 초대 고르기 후보: 나를 팔로우하는 사람과 내 친한 친구 중 아직 멤버·초대 대기가 아닌 사람(서로 팔로우가 먼저). */
@@ -708,13 +817,13 @@ public class ClubService {
             + " AND p.first_public_at IS NOT NULL";
 
     private static final String SELECT = """
-            SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap,
+            SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first,
                    (SELECT count(*) FROM writing_club_member m WHERE m.club_id = c.id) AS member_count
             FROM writing_club c""";
 
     private static Club club(java.sql.ResultSet rs) throws java.sql.SQLException {
         return new Club(rs.getLong("id"), rs.getLong("owner_id"), rs.getString("name"), rs.getString("intro"),
                 rs.getDate("start_date").toLocalDate(), rs.getString("invite_code"), rs.getInt("member_count"), rs.getString("join_mode"),
-                rs.getInt("member_cap"));
+                rs.getInt("member_cap"), rs.getBoolean("write_first"));
     }
 }

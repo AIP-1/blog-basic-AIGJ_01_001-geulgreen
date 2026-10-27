@@ -27,6 +27,9 @@ import org.springframework.web.servlet.view.RedirectView;
 @ConditionalOnProperty(name = "blog.missions.enabled", havingValue = "true", matchIfMissing = true)
 public class ClubController {
 
+    /** 방이 없는 사람의 첫 화면에 보여 줄 열린 방 수. */
+    static final int OPEN_ROOMS = 3;
+
     private static final java.time.ZoneId SEOUL = java.time.ZoneId.of("Asia/Seoul");
 
     private final ClubService clubs;
@@ -60,6 +63,16 @@ public class ClubController {
         }
         if (!model.containsAttribute("form")) {
             model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP));
+        }
+        // 10-26 chan: 방이 없으면 들어가도록 이끈다 — 맨 위 글그린 공식 방(큰 [들어가기]), 아래 열린 방 몇 개
+        if (rooms.isEmpty()) {
+            Optional<ClubService.Club> official = clubs.official();
+            official.ifPresent(o -> {
+                model.addAttribute("official", o);
+                model.addAttribute("officialToday", clubs.wroteToday(o.id()));
+                model.addAttribute("officialTopic", clubs.topics(o.id(), 1).stream().findFirst().orElse(null));
+            });
+            model.addAttribute("openRooms", clubs.openToJoin(official.map(ClubService.Club::id).orElse(0L), OPEN_ROOMS));
         }
         return "mission/clubs";
     }
@@ -110,17 +123,21 @@ public class ClubController {
         java.util.List<com.team.blog.post.application.PostCard> ordered = board.postIds().stream().filter(cards::containsKey).map(cards::get).toList();
         model.addAttribute("board", board);
         model.addAttribute("self", board.members().stream().filter(m -> m.memberId() == me.memberId()).findFirst().orElse(null));
-        model.addAttribute("timeline", timeline(ordered, board.notices(), board.topicPostIds(), ordered.size() >= ClubService.POSTS));
+        model.addAttribute("timeline", timeline(ordered, board.notices(), board.topicPostIds(), board.lockedPostIds(),
+                ordered.size() >= ClubService.POSTS));
         return "mission/club";
     }
 
-    /** 방 화면 한 줄: 글(card) 또는 방 소식(text). 날짜가 바뀌는 첫 줄에 {@code day}("오늘"·"어제"·"10월 24일 (금)"). */
-    public record Line(com.team.blog.post.application.PostCard card, String text, String time, String day, boolean topic) {
+    /**
+     * 방 화면 한 줄: 글(card) 또는 방 소식(text). 날짜가 바뀌는 첫 줄에 {@code day}("오늘"·"어제"·"10월 24일 (금)").
+     * {@code locked}: 10-26 먼저 쓰고 보기로 흐리게 보이는 방 글감 글.
+     */
+    public record Line(com.team.blog.post.application.PostCard card, String text, String time, String day, boolean topic, boolean locked) {
     }
 
     /** 글과 방 소식을 최근 순으로 섞는다. 글이 꽉 찼으면(더 옛날 글이 있음) 가장 옛 글보다 전 소식은 뺀다. */
     java.util.List<Line> timeline(java.util.List<com.team.blog.post.application.PostCard> cards, java.util.List<ClubService.Notice> notices,
-                                  java.util.Set<Long> topicPostIds, boolean full) {
+                                  java.util.Set<Long> topicPostIds, java.util.Set<Long> lockedPostIds, boolean full) {
         java.time.Instant now = clock.instant();
         java.time.Instant oldest = full && !cards.isEmpty() ? cards.get(cards.size() - 1).firstPublicAt() : java.time.Instant.MIN;
         record Item(java.time.Instant at, com.team.blog.post.application.PostCard card, String text) {
@@ -137,7 +154,7 @@ public class ClubController {
             String day = d.equals(prev) ? null : d.equals(today) ? "오늘" : d.equals(today.minusDays(1)) ? "어제" : MissionController.label(d);
             prev = d;
             lines.add(new Line(it.card(), it.text(), com.team.blog.post.application.CardDates.label(it.at(), now), day,
-                    it.card() != null && topicPostIds.contains(it.card().id())));
+                    it.card() != null && topicPostIds.contains(it.card().id()), it.card() != null && lockedPostIds.contains(it.card().id())));
         }
         return lines;
     }
@@ -229,9 +246,10 @@ public class ClubController {
 
     @PostMapping("/missions/clubs/{id}/settings")
     public RedirectView settings(@PathVariable("id") long id, @RequestParam("joinMode") String joinMode,
-                                 @RequestParam("memberCap") int memberCap, RedirectAttributes flash) {
+                                 @RequestParam("memberCap") int memberCap,
+                                 @RequestParam(value = "writeFirst", defaultValue = "false") boolean writeFirst, RedirectAttributes flash) {
         return act(id, flash, () -> {
-            clubs.settings(currentUserProvider.current(), id, joinMode, memberCap);
+            clubs.settings(currentUserProvider.current(), id, joinMode, memberCap, writeFirst);
             return "참여 방식을 저장했어요";
         });
     }
