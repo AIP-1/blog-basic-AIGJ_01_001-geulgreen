@@ -36,7 +36,10 @@ class ScreenAuditIT extends IntegrationTestBase {
                 .contains("<meta property=\"og:title\" content=\"글그린 블로그 - 매일 쓴 글이 잔디처럼 자라는 곳\">")
                 .contains("매일 쓴 글이 잔디처럼 쌓이는 블로그예요")
                 .contains("\"@type\":\"WebSite\",\"name\":\"글그린\",\"alternateName\":\"글그린 블로그\"")
+                .contains("\"sameAs\":[\"https://www.instagram.com/blogeulgreen/\"]")
                 .contains("naver-site-verification").contains("google-site-verification");
+        // 바닥글 인스타그램 링크: 새 탭
+        assertThat(home).contains("href=\"https://www.instagram.com/blogeulgreen/\" class=\"github-link\" target=\"_blank\" rel=\"noopener\"");
         String terms = mockMvc.perform(get("/terms")).andReturn().getResponse().getContentAsString();
         assertThat(terms).contains("og:site_name").doesNotContain("application/ld+json").doesNotContain("잔디처럼 쌓이는");
     }
