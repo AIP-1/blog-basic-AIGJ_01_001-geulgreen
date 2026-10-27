@@ -7,6 +7,27 @@
 
 ---
 
+## [1.79.6] — 2026-10-27 · 개인 확장 (인스타그램 링크)
+
+- 사이트 맨 아래·휴대폰 메뉴에 글그린 인스타그램 링크
+- DB 바뀜 없음
+
+#### 전/후 사진
+
+**사이트 맨 아래**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.6/v1796-foot-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.6/v1796-foot-after.png) |
+
+*휴대폰 메뉴*
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.79.6/v1796-menu-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.79.6/v1796-menu-m-after.png) |
+
+---
+
 ## [1.79.5] — 2026-10-26 · 개인 확장 (버튼 높이)
 
 - 버튼·알약 버튼 높이를 사이트 전체에서 두 단계(보통 38px, 작게 32px)로 맞춤

@@ -1166,12 +1166,12 @@ main.list-page .home-cards { gap: 18px; }
 .side-links a + a::before { content: "·"; margin: 0 4px; color: var(--color-text-muted); display: inline-block; text-decoration: none; }
 .side-links a:hover { color: var(--color-text); text-decoration: underline; }
 .home-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-/* 약관 옆 GitHub(조직 AIPKANG) 링크: 작은 마크 + 글자, 옆 링크와 같은 모양 */
+/* 약관 옆 GitHub(조직 AIPKANG)·Instagram(blogeulgreen) 링크: 작은 마크 + 글자, 옆 링크와 같은 모양 */
 .github-link { display: inline-flex; align-items: center; gap: 3px; }
 .github-link .icon { width: 1em; height: 1em; flex: none; }
 .menu-links { display: none; }
 @media (max-width: 640px) {
-    /* 10-22(chan): 약관·GitHub·처리방침·릴리스 노트·문의하기를 360px에서도 한 줄에(GitHub는 마크만) */
+    /* 10-22(chan): 약관·GitHub·Instagram·처리방침·릴리스 노트·문의하기를 360px에서도 한 줄에(GitHub·Instagram은 마크만) */
     .menu-links { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid var(--color-border); }
     .site-nav .menu-links a { font-size: .8125rem; color: var(--color-text-muted); padding: 6px 0; white-space: nowrap; flex: none; display: inline-flex; align-items: center; }
     .menu-links .github-text, .footer-links .github-text { display: none; }
