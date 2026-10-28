@@ -48,6 +48,20 @@ class ListMetaIT extends IntegrationTestBase {
         assertThat(head("/hikerkim")).contains("등산하는김씨님의 글그린 블로그. 최근 글: 「북한산 백운대 코스」, 「가을 설악산 단풍」");
     }
 
+    @Test
+    void mainPagesOwnPreviewImage() throws Exception {
+        clock.set(Instant.parse("2026-10-27T03:00:00Z"));
+        assertThat(head("/missions")).contains("<meta property=\"og:title\" content=\"오늘의 글감 · 글그린\">")
+                .contains("/images/og-missions.png\">").doesNotContain("og-cat.jpg");
+        assertThat(head("/explore")).contains("<meta property=\"og:title\" content=\"탐색 · 글그린\">")
+                .contains("/images/og-explore.png\">").doesNotContain("og-cat.jpg");
+        // 함께 쓰기는 로그인 화면으로 넘어가므로 미리보기 도구는 로그인 화면을 읽는다
+        assertThat(head("/login?redirect=/missions/clubs/join/abc")).contains("<meta property=\"og:title\" content=\"함께 쓰기 · 글그린\">")
+                .contains("/images/og-clubs.png\">").contains("/missions/clubs\">").doesNotContain("abc\">");
+        assertThat(head("/login")).contains("og-cat.jpg");
+        assertThat(head("/")).contains("og-cat.jpg");
+    }
+
     private String head(String url) throws Exception {
         String html = mockMvc.perform(get(url)).andReturn().getResponse().getContentAsString();
         return html.substring(0, html.indexOf("</head>"));

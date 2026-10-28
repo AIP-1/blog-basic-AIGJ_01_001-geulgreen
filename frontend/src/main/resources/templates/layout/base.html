@@ -48,7 +48,7 @@
         </th:block>
         <th:block th:if="${siteOrigin != null and !siteOrigin.isEmpty() and currentPath != null and !currentPath.startsWith('/error')}">
             <link rel="canonical" th:href="${siteOrigin + canonicalPath}">
-            <meta property="og:url" th:content="${siteOrigin + canonicalPath}">
+            <meta property="og:url" th:content="${siteOrigin + (ogUrlPath != null ? ogUrlPath : canonicalPath)}">
             <meta property="og:image" th:content="${listMeta != null and listMeta.imageUrl() != null
                     ? (listMeta.imageUrl().startsWith('/') ? siteOrigin + listMeta.imageUrl() : listMeta.imageUrl())
                     : siteOrigin + '/images/og-cat.jpg'}">
