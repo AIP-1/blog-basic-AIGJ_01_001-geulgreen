@@ -98,6 +98,10 @@ public class MissionController {
             missions.myToday(v.memberId()).ifPresent(p -> model.addAttribute("myTodayPost", p));
         });
         model.addAttribute("anyAi", topics.stream().anyMatch(MissionService.Topic::ai));
+        // 10-27 chan: 링크 미리보기는 고양이 대신 글감 그림
+        model.addAttribute("listMeta", new com.team.blog.shared.web.ListMeta("오늘의 글감 · 글그린",
+                "매일 새 글감이 올라와요. 오늘의 글감으로 한 편 쓰고, 같은 글감으로 쓴 다른 사람의 글도 읽어 보세요.",
+                "/images/og-missions.png"));
         return "mission/today";
     }
 

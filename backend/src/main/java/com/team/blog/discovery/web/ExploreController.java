@@ -66,6 +66,9 @@ public class ExploreController {
                           @RequestParam(value = "expired", required = false) String expired,
                           @RequestParam(value = "sort", required = false) String sort,
                           @RequestParam(value = "offset", required = false) Integer offset, Model model) {
+        // 10-27 chan: 링크 미리보기는 고양이 대신 탐색 그림
+        model.addAttribute("listMeta", new com.team.blog.shared.web.ListMeta("탐색 · 글그린",
+                "추천 글, 요즘 많이 읽는 글, 새로 온 블로그와 시리즈를 한곳에서 둘러보세요.", "/images/og-explore.png"));
         model.addAttribute("seriesTab", seriesService.enabled());
         if ("series".equals(tab) && seriesService.enabled()) {
             // 104 강성찬 개인 확장: 모든 블로그의 시리즈를 골라 보는 탭(정렬은 태그 모아 보기와 같은 인기순·최근순)
