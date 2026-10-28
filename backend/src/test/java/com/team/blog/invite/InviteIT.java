@@ -24,7 +24,7 @@ class InviteIT extends IntegrationTestBase {
 
     private long createLinkClub(long owner, String name) throws Exception {
         clock.set(Instant.parse("2026-10-16T03:00:00Z"));
-        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner)).param("name", name)
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner)).param("name", name)
                 .param("joinMode", "LINK"))
                 .andReturn().getResponse().getRedirectedUrl();
         return Long.parseLong(location.substring(location.lastIndexOf('/') + 1));

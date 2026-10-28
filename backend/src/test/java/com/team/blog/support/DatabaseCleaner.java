@@ -35,6 +35,8 @@ public class DatabaseCleaner {
             "post_bookmark",
             // 10-25 함께 쓰기 방 글감
             "writing_club_topic", "writing_club_topic_post",
+            // 10-28 방에 올린 글
+            "writing_club_post",
             // 강성찬 개인 확장(090)
             "inquiry", "inquiry_message",
             // 096 강성찬 개인 확장

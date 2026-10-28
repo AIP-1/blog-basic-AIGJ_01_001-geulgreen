@@ -62,7 +62,7 @@ public class ClubController {
             return "redirect:/missions/clubs/find?q=" + org.springframework.web.util.UriUtils.encodeQueryParam(q.strip(), java.nio.charset.StandardCharsets.UTF_8);
         }
         if (!model.containsAttribute("form")) {
-            model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP));
+            model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP, ""));
         }
         // 10-26 chan: 방이 없으면 들어가도록 이끈다 — 맨 위 글그린 공식 방(큰 [들어가기]), 아래 열린 방 몇 개
         if (rooms.isEmpty()) {
@@ -91,8 +91,9 @@ public class ClubController {
     @PostMapping("/missions/clubs")
     public RedirectView create(@RequestParam("name") String name, @RequestParam(value = "intro", required = false) String intro,
                                @RequestParam(value = "joinMode", defaultValue = ClubService.APPROVAL) String joinMode,
-                               @RequestParam(value = "memberCap", defaultValue = "30") int memberCap, RedirectAttributes flash) {
-        ClubService.Form form = new ClubService.Form(name, intro, joinMode, memberCap);
+                               @RequestParam(value = "memberCap", defaultValue = "30") int memberCap,
+                               @RequestParam(value = "subject", required = false) String subject, RedirectAttributes flash) {
+        ClubService.Form form = new ClubService.Form(name, intro, joinMode, memberCap, subject == null ? "" : subject);
         Optional<String> problem = ClubService.problem(form);
         if (problem.isPresent()) {
             flash.addFlashAttribute("clubError", problem.get());
@@ -181,6 +182,39 @@ public class ClubController {
     @PostMapping("/missions/clubs/{id}/topics/{topicId}/write")
     public RedirectView writeTopic(@PathVariable("id") long id, @PathVariable("topicId") long topicId) {
         return seeOther("/write/" + clubs.startTopic(currentUserProvider.current(), id, topicId));
+    }
+
+    // ----- 10-28 방 주제와 방에 올리기: 글쓴이가 고른 방에만 글이 올라간다 -----
+
+    /** 방 화면 [글 쓰기]: 이 방이 골라진 새 임시글. */
+    @PostMapping("/missions/clubs/{id}/write")
+    public RedirectView write(@PathVariable("id") long id) {
+        return seeOther("/write/" + clubs.startPost(currentUserProvider.current(), id));
+    }
+
+    /** 방장·관리자: 주제에 맞지 않는 글을 방에서 내린다(글은 블로그에 그대로). */
+    @PostMapping("/missions/clubs/{id}/posts/{postId}/remove")
+    public RedirectView takeDown(@PathVariable("id") long id, @PathVariable("postId") long postId, RedirectAttributes flash) {
+        return act(id, flash, () -> {
+            clubs.takeDown(currentUserProvider.current(), id, postId);
+            return "방에서 내렸어요. 글은 블로그에 그대로 있어요";
+        });
+    }
+
+    @PostMapping("/missions/clubs/{id}/subject")
+    public RedirectView subject(@PathVariable("id") long id, @RequestParam("subject") String subject, RedirectAttributes flash) {
+        return act(id, flash, () -> {
+            clubs.subject(currentUserProvider.current(), id, subject);
+            return "방 주제를 저장했어요";
+        });
+    }
+
+    /** 발행 설정 "올릴 방": 고르면 바로 저장(시리즈 칸처럼). 글쓰기 화면으로 돌려보낸다. */
+    @PostMapping("/posts/{postId}/clubs/{clubId}")
+    public RedirectView pick(@PathVariable("postId") long postId, @PathVariable("clubId") long clubId,
+                             @RequestParam(value = "on", defaultValue = "true") boolean on) {
+        clubs.pick(currentUserProvider.current(), postId, clubId, on);
+        return seeOther("/write/" + postId);
     }
 
     /** 초대 링크: 로그인한 사람에게 모임 이름과 [참여하기]. 이미 멤버면 바로 모임으로. */

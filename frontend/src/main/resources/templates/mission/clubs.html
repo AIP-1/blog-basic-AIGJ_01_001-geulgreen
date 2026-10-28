@@ -31,11 +31,12 @@
              아래 열린 방 몇 개(한 줄씩 [들어가기]/[참여 요청]), 맨 아래 [방 만들기]와 방 찾기 알약. 방 종류와 세 단계는 [방 만들기] 창 안 -->
         <section th:if="${rooms.isEmpty()}" class="club-welcome" aria-labelledby="club-empty-heading">
             <h2 id="club-empty-heading">친구들과 같이 쓰면 꾸준해져요</h2>
-            <p class="help">방에 들어가면 같은 글감으로 함께 쓰고, 서로 쓴 글이 한곳에 모여요.</p>
+            <p class="help">방마다 주제가 있어요. 주제에 맞는 글을 올리고, 댓글로 이야기 나눠요.</p>
             <div th:if="${official != null}" class="club-official">
                 <span class="room-icon club-official-icon" aria-hidden="true"><th:block th:replace="~{fragments/icons :: paw}"></th:block></span>
                 <div class="club-official-text">
                     <p class="club-official-name"><strong th:text="${official.name()}">글그린</strong><span class="badge">공식</span></p>
+                    <p th:if="${!official.subject().isEmpty()}" class="club-subject"><span class="club-subject-label">방 주제</span><span th:text="${official.subject()}">주제</span></p>
                     <p th:if="${!official.intro().isEmpty()}" class="club-official-intro" th:text="${official.intro()}">소개</p>
                     <p class="help club-official-meta"><th:block th:replace="~{fragments/meta :: parts(${'멤버 ' + official.memberCount() + '명'
                             + (officialToday > 0 ? ' · 오늘 ' + officialToday + '명이 썼어요' : '')
@@ -54,7 +55,7 @@
                         <a class="club-open-row" th:href="@{/missions/clubs/{id}(id=${c.id()})}">
                             <span class="room-icon" th:classappend="${'room-c' + (c.id() % 8)}" aria-hidden="true" th:text="${c.name().substring(0, 1)}">방</span>
                             <span class="club-open-text"><strong th:text="${c.name()}">방</strong>
-                                <span class="help" th:text="${(c.intro().isEmpty() ? '' : c.intro() + ' · ') + '멤버 ' + c.memberCount() + '명'}">소개</span></span>
+                                <span class="help" th:text="${(c.subject().isEmpty() ? (c.intro().isEmpty() ? '' : c.intro() + ' · ') : '주제 ' + c.subject() + ' · ') + '멤버 ' + c.memberCount() + '명'}">소개</span></span>
                         </a>
                         <form method="post" th:action="@{/missions/clubs/{id}/join(id=${c.id()})}">
                             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -85,7 +86,10 @@
                             <span class="room-row-top"><strong th:text="${c.name()}">함께 쓰기</strong><span class="help" th:text="${c.memberCount()}">1</span></span>
                             <span class="room-row-last" th:if="${r.lastTitle() != null}" th:text="${r.lastAuthor() + ': ' + r.lastTitle()}">마지막 글</span>
                             <span class="room-row-last" th:unless="${r.lastTitle() != null}" th:text="${c.intro().isEmpty() ? '아직 올라온 글이 없어요' : c.intro()}">소개</span>
-                            <span th:if="${r.topicTitle() != null}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block><span th:text="${'방 글감 · ' + r.topicTitle()}">방 글감</span></span>
+                            <!-- 10-28 방 주제(앞)와 지금 방 글감을 한 줄에 -->
+                            <span th:if="${!c.subject().isEmpty() or r.topicTitle() != null}" class="room-row-chips">
+                                <span th:if="${!c.subject().isEmpty()}" class="room-chip room-chip-subject" th:text="${c.subject()}">주제</span>
+                                <span th:if="${r.topicTitle() != null}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block><span th:text="${'방 글감 · ' + r.topicTitle()}">방 글감</span></span></span>
                         </span>
                         <span class="room-row-side">
                             <span class="help" th:text="${roomTimes.get(c.id())}">시간</span>
@@ -123,6 +127,11 @@
                     <label for="club-name">방 이름</label>
                     <input id="club-name" name="name" type="text" maxlength="30" required th:value="${form.name()}" placeholder="예: 4학년 2반 글쓰기, 주말 글친구">
                 </div>
+                <!-- 10-28 chan: 방마다 주제를 정하고, 멤버는 그 주제에 맞는 글만 골라 올린다 -->
+                <div class="club-form-row">
+                    <label for="club-subject">방 주제</label>
+                    <input id="club-subject" name="subject" type="text" maxlength="40" required th:value="${form.subject()}" placeholder="예: 마인크래프트 이야기, 요즘 읽는 책">
+                </div>
                 <div class="club-form-row">
                     <label for="club-intro">한 줄 소개 <span class="help">(선택)</span></label>
                     <input id="club-intro" name="intro" type="text" maxlength="100" th:value="${form.intro()}" placeholder="예: 한 주에 한 편, 서로 댓글로 응원해요">
@@ -138,16 +147,16 @@
                         <span class="club-inline"><input id="club-cap-new" name="memberCap" type="number" min="2" max="100" required th:value="${form.memberCap()}"> 명까지</span>
                     </div>
                 </details>
-                <p class="help">어느 방이든 멤버들이 블로그에 전체 공개로 쓴 글이 저절로 올라와요. 끝나는 날은 없어요</p>
+                <p class="help">글을 발행할 때 '올릴 방'에서 이 방을 고른 글만 올라와요. 끝나는 날은 없어요</p>
                 <div class="club-form-actions">
                     <button type="button" class="btn btn-sm" data-close-club-form>닫기</button>
                     <button type="submit" class="btn btn-primary btn-sm">만들기</button>
                 </div>
             </form>
             <ol class="club-steps">
-                <li><strong>방 만들기</strong><span class="help">이름만 정해요</span></li>
+                <li><strong>방 만들기</strong><span class="help">이름과 주제를 정해요</span></li>
                 <li><strong>초대하기</strong><span class="help">친구에게 링크를 보내요</span></li>
-                <li><strong>글 쓰기</strong><span class="help">쓰면 방에 올라와요</span></li>
+                <li><strong>글 올리기</strong><span class="help">주제에 맞는 글을 골라 올려요</span></li>
             </ol>
         </dialog>
     </div>
