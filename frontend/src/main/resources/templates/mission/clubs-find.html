@@ -14,8 +14,8 @@
             <h2 id="clubs-open-heading" class="club-sub-title">방 찾기</h2>
             <p class="help club-list-lead">공개된 방이에요. '누구나 바로'는 누르면 들어가고, '승인 후 참여'는 관리자가 승인하면 들어가요</p>
             <form method="get" action="/missions/clubs/find" role="search" class="club-search">
-                <label for="club-q" class="visually-hidden">방 이름·소개로 찾기</label>
-                <input id="club-q" type="search" name="q" maxlength="30" th:value="${q}" placeholder="방 이름·소개로 찾기">
+                <label for="club-q" class="visually-hidden">방 이름·주제로 찾기</label>
+                <input id="club-q" type="search" name="q" maxlength="30" th:value="${q}" placeholder="방 이름·주제로 찾기">
                 <button type="submit" class="btn btn-sm">찾기</button>
             </form>
             <div th:if="${listed.isEmpty()}" class="club-empty">
@@ -30,6 +30,7 @@
                             <strong class="club-card-name" th:text="${c.name()}">방</strong>
                             <span class="club-mode-badge" th:classappend="${c.joinMode() == 'OPEN'} ? 'is-open'" th:text="${c.modeLabel()}">방 종류</span>
                         </span>
+                        <span th:if="${!c.subject().isEmpty()}" class="club-subject"><span class="club-subject-label">방 주제</span><span th:text="${c.subject()}">주제</span></span>
                         <span th:if="${!c.intro().isEmpty()}" class="club-card-intro" th:text="${c.intro()}">소개</span>
                         <span class="help" th:text="${'멤버 ' + c.memberCount() + '/' + c.memberCap() + '명'}">멤버</span>
                     </a>

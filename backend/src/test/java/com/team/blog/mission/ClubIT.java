@@ -36,10 +36,10 @@ class ClubIT extends IntegrationTestBase {
         long friend = members.localMember("clubfriend", "반친구", "clubfriend@example.com", "Blog#2026ok", true);
         long stranger = members.localMember("clubstranger", "남남", "clubstranger@example.com", "Blog#2026ok", true);
         // 이름이 비면 만들지 않고 만들기 화면으로
-        assertThat(mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner)).param("name", " "))
+        assertThat(mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner)).param("name", " "))
                 .andReturn().getResponse().getRedirectedUrl()).isEqualTo("/missions/clubs");
         // 기간·규칙 없이 이름만으로 만든다(예전 칸은 자리값)
-        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner))
                 .param("name", "3반 모임").param("intro", "같이 써요").param("joinMode", "LINK")).andReturn().getResponse().getRedirectedUrl();
         long id = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
         assertThat(jdbc.queryForObject("SELECT start_date::text || ' ' || end_date::text FROM writing_club WHERE id = ?", String.class, id))
@@ -50,19 +50,25 @@ class ClubIT extends IntegrationTestBase {
         assertThat(page("/missions/clubs/join/" + code, friend)).contains("3반 모임").contains("참여하기").doesNotContain("일에 1편");
         mockMvc.perform(post("/missions/clubs/join/" + code).with(csrf()).with(TestAuth.member(friend)));
         // 방이 열린 날(10-16)부터의 공개 글만: 친구의 오늘 글은 보이고, 모임장의 지난주 글은 안 보임
-        posts.published(friend, "이번 주 글", "본문", 1, NOW.plus(Duration.ofMinutes(30)));
+        // 10-28 글쓴이가 고른 방에만: 친구는 이번 주 글을 방에 올리고, 다른 글은 안 올린다. 모임장의 지난주 글도 안 올림
+        long weekPost = posts.published(friend, "이번 주 글", "본문", 1, NOW.plus(Duration.ofMinutes(30)));
+        posts.published(friend, "방에 안 올린 글", "본문", 1, NOW.plus(Duration.ofMinutes(40)));
         posts.published(owner, "지난주 글", "본문", 1, NOW.minus(Duration.ofDays(6)));
+        mockMvc.perform(post("/posts/" + weekPost + "/clubs/" + id).with(csrf()).with(TestAuth.member(friend)));
+        // 남의 글이나 멤버가 아닌 방에는 못 올린다
+        assertThat(mockMvc.perform(post("/posts/" + weekPost + "/clubs/" + id).with(csrf()).with(TestAuth.member(owner)))
+                .andReturn().getResponse().getStatus()).isEqualTo(404);
         clock.set(NOW.plus(Duration.ofHours(1)));
         // 방 목록: 마지막 글과, 모임장이 마지막으로 본 뒤 올라온 남의 글 수
         assertThat(page("/missions/clubs", owner)).contains("3반 모임").contains("반친구: 이번 주 글").contains("aria-label=\"새 글 1편\"")
                 .contains("aria-current=\"page\">함께 쓰기</a>").doesNotContain("이번 기간");
         String board = page(location, friend);
-        assertThat(board).contains("오늘 <strong>1명</strong>이 썼어요").contains("이번 주 글").doesNotContain("지난주 글")
+        assertThat(board).contains("오늘 <strong>1명</strong>이 썼어요").contains("이번 주 글").doesNotContain("지난주 글").doesNotContain("방에 안 올린 글")
                 .contains("반친구님이 들어왔어요").contains("/i/").contains("/" + code).contains("링크 복사").contains("함께 쓰기에서 나가기")
                 .doesNotContain("함께 쓰기 삭제").doesNotContain("이번 기간").doesNotContain("번째");
-        // 멤버 줄: 마지막으로 쓴 때(친구 오늘, 모임장 6일 전)
+        // 멤버 줄: 이 방에 마지막으로 올린 때(친구 오늘, 모임장은 올린 글이 없음)
         assertThat(board).containsPattern("(?s)반친구</span>.*?</a>\\s*<span class=\"room-state is-today\">오늘 씀</span>")
-                .containsPattern("(?s)모임장</span>.*?</a>\\s*<span class=\"room-state\">6일 전</span>");
+                .containsPattern("(?s)모임장</span>.*?</a>\\s*<span class=\"room-state\">아직 없어요</span>");
         // 모임장이 방을 보면 새 글 수가 사라진다
         assertThat(page(location, owner)).contains("함께 쓰기 삭제").contains("내보내기");
         assertThat(page("/missions/clubs", owner)).doesNotContain("새 글 1편");
@@ -81,7 +87,7 @@ class ClubIT extends IntegrationTestBase {
         clock.set(NOW);
         long owner = members.localMember("topicowner", "글감방장", "topicowner@example.com", "Blog#2026ok", true);
         long mate = members.localMember("topicmate", "글감친구", "topicmate@example.com", "Blog#2026ok", true);
-        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner))
                 .param("name", "글감 방").param("joinMode", "LINK")).andReturn().getResponse().getRedirectedUrl();
         long club = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
         jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
@@ -130,7 +136,7 @@ class ClubIT extends IntegrationTestBase {
         long owner = members.localMember("firstowner", "먼저방장", "firstowner@example.com", "Blog#2026ok", true);
         long mate = members.localMember("firstmate", "먼저친구", "firstmate@example.com", "Blog#2026ok", true);
         long outsider = members.localMember("firstout", "먼저남남", "firstout@example.com", "Blog#2026ok", true);
-        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner))
                 .param("name", "먼저 방").param("joinMode", "LINK")).andReturn().getResponse().getRedirectedUrl();
         long club = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
         jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
@@ -140,7 +146,8 @@ class ClubIT extends IntegrationTestBase {
                 .andReturn().getResponse().getRedirectedUrl();
         long mates = Long.parseLong(write.substring(write.lastIndexOf('/') + 1));
         posts.publish(mates, NOW.plus(Duration.ofMinutes(10)));
-        posts.published(mate, "자유롭게 쓴 글", "본문", 1, NOW.plus(Duration.ofMinutes(20)));
+        long free = posts.published(mate, "자유롭게 쓴 글", "본문", 1, NOW.plus(Duration.ofMinutes(20)));
+        mockMvc.perform(post("/posts/" + free + "/clubs/" + club).with(csrf()).with(TestAuth.member(mate)));
         clock.set(NOW.plus(Duration.ofHours(1)));
         // 방장은 아직 안 써서 친구의 글감 글은 제목 없이 흐린 자리표시, 자유 글은 그대로, [쓰기]는 강조
         String board = page(location, owner);
@@ -191,11 +198,11 @@ class ClubIT extends IntegrationTestBase {
         long host = members.localMember("openhost", "열린방장", "openhost@example.com", "Blog#2026ok", true);
         long newbie = members.localMember("newbie", "새싹", "newbie@example.com", "Blog#2026ok", true);
         // 공식 방이 없으면 열린 방과 [방 만들기]만
-        String open = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(host))
+        String open = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(host))
                 .param("name", "고양이 일기").param("joinMode", "OPEN")).andReturn().getResponse().getRedirectedUrl();
         assertThat(page("/missions/clubs", newbie)).contains("친구들과 같이 쓰면 꾸준해져요").contains("고양이 일기").doesNotContain("club-official");
         // 운영자가 만든 공개방(승인 방식)이 공식 방: 맨 위 카드, [들어가기] 한 번에 승인 없이 바로 들어온다
-        String official = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(admin))
+        String official = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(admin))
                 .param("name", "글그린").param("intro", "모두 함께").param("joinMode", "APPROVAL")).andReturn().getResponse().getRedirectedUrl();
         String empty = page("/missions/clubs", newbie);
         assertThat(empty).contains("club-official").contains("글그린").contains(">공식<").contains("action=\"" + official + "/join\"")
@@ -207,7 +214,7 @@ class ClubIT extends IntegrationTestBase {
         // 방이 생기면 첫 화면 대신 방 목록
         assertThat(page("/missions/clubs", newbie)).doesNotContain("club-official").contains("참여 중인 방");
         // 운영자가 아닌 사람의 승인 방은 그대로 요청
-        String approval = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(host))
+        String approval = mockMvc.perform(post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(host))
                 .param("name", "책 한 줄").param("joinMode", "APPROVAL")).andReturn().getResponse().getRedirectedUrl();
         mockMvc.perform(post(approval + "/join").with(csrf()).with(TestAuth.member(newbie)));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_member m JOIN writing_club c ON c.id = m.club_id WHERE c.name = '책 한 줄' AND m.member_id = ?",
@@ -229,8 +236,54 @@ class ClubIT extends IntegrationTestBase {
         assertThat(page("/missions/clubs/find?q=지난", guest)).contains("지난 방");
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(guest)));
         assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_member WHERE club_id = ?", Integer.class, club)).isEqualTo(2);
-        posts.published(guest, "다시 연 방의 글", "본문", 1, NOW.plus(Duration.ofMinutes(5)));
+        long again = posts.published(guest, "다시 연 방의 글", "본문", 1, NOW.plus(Duration.ofMinutes(5)));
+        mockMvc.perform(post("/posts/" + again + "/clubs/" + club).with(csrf()).with(TestAuth.member(guest)));
         clock.set(NOW.plus(Duration.ofHours(1)));
         assertThat(page("/missions/clubs/" + club, owner)).contains("다시 연 방의 글").doesNotContain("끝났어요").doesNotContain("끝난");
+    }
+
+    @Test
+    void roomSubjectPickedRoomsAndTakeDown() throws Exception {
+        clock.set(NOW);
+        long owner = members.localMember("subjowner", "주제방장", "subjowner@example.com", "Blog#2026ok", true);
+        long mate = members.localMember("subjmate", "주제친구", "subjmate@example.com", "Blog#2026ok", true);
+        long outsider = members.localMember("subjout", "주제남남", "subjout@example.com", "Blog#2026ok", true);
+        // 10-28 방 주제 없이는 만들지 않는다
+        mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner)).param("name", "주제 없는 방").param("joinMode", "OPEN"));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club", Integer.class)).isZero();
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner)).param("name", "마크 방")
+                .param("subject", " 마인크래프트 이야기 ").param("joinMode", "OPEN")).andReturn().getResponse().getRedirectedUrl();
+        long club = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+        jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
+        assertThat(page(location, mate)).contains("class=\"room-subject\"").contains("마인크래프트 이야기").doesNotContain("방 주제 정하기");
+        assertThat(page("/missions/clubs/find?q=마인크래프트", outsider)).contains("마크 방");
+        // 올릴 방: 고르기 전에는 안 골라져 있고, 고르면 방에 보이고, 빼면 사라진다
+        long postId = posts.published(mate, "벚꽃 집 지었어요", "본문", 1, NOW.plus(Duration.ofMinutes(5)));
+        clock.set(NOW.plus(Duration.ofHours(1)));
+        assertThat(page("/write/" + postId, mate)).contains("올릴 방").doesNotContain("checked=\"checked\">\n");
+        assertThat(page(location, owner)).doesNotContain("벚꽃 집 지었어요");
+        mockMvc.perform(post("/posts/" + postId + "/clubs/" + club).with(csrf()).with(TestAuth.member(mate)));
+        assertThat(page(location, owner)).contains("벚꽃 집 지었어요").contains("방에서 내리기");
+        assertThat(page(location, mate)).doesNotContain("방에서 내리기");
+        // 글 화면 띠: 방 글감이 아니어도 "○○에 올린 글"과 방 주제
+        assertThat(page("/subjmate/posts/" + postId, outsider)).contains("마크 방에 올린 글").contains("방 주제 「마인크래프트 이야기」");
+        mockMvc.perform(post("/posts/" + postId + "/clubs/" + club).with(csrf()).with(TestAuth.member(mate)).param("on", "false"));
+        assertThat(page(location, owner)).doesNotContain("벚꽃 집 지었어요");
+        // 방장·관리자는 방에서 내린다(글은 그대로). 멤버는 못 내린다
+        mockMvc.perform(post("/posts/" + postId + "/clubs/" + club).with(csrf()).with(TestAuth.member(mate)));
+        assertThat(mockMvc.perform(post(location + "/posts/" + postId + "/remove").with(csrf()).with(TestAuth.member(mate)))
+                .andReturn().getResponse().getStatus()).isEqualTo(404);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_post", Integer.class)).isEqualTo(1);
+        mockMvc.perform(post(location + "/posts/" + postId + "/remove").with(csrf()).with(TestAuth.member(owner)));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club_post", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post WHERE id = ? AND deleted_at IS NULL", Integer.class, postId)).isEqualTo(1);
+        assertThat(page("/subjmate/posts/" + postId, outsider)).doesNotContain("club-band");
+        // 방장만 주제를 바꾼다
+        mockMvc.perform(post(location + "/subject").with(csrf()).with(TestAuth.member(mate)).param("subject", "몰래 바꿈"));
+        mockMvc.perform(post(location + "/subject").with(csrf()).with(TestAuth.member(owner)).param("subject", "마크 건축 자랑"));
+        assertThat(jdbc.queryForObject("SELECT subject FROM writing_club WHERE id = ?", String.class, club)).isEqualTo("마크 건축 자랑");
+        // 주제가 빈 예전 방: 방장에게 [방 주제 정하기]
+        jdbc.update("UPDATE writing_club SET subject = '' WHERE id = ?", club);
+        assertThat(page(location, owner)).contains("방 주제 정하기").doesNotContain("class=\"room-subject\"");
     }
 }

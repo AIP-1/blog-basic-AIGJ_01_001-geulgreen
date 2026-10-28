@@ -37,7 +37,7 @@ public class ClubService {
     static final java.time.Duration WRITE_FIRST_WINDOW = java.time.Duration.ofHours(24);
 
     public record Club(long id, long ownerId, String name, String intro, LocalDate startDate, String inviteCode, int memberCount,
-                       String joinMode, int memberCap, boolean writeFirst) {
+                       String joinMode, int memberCap, boolean writeFirst, String subject) {
 
         public String modeLabel() {
             return ClubService.modeLabel(joinMode);
@@ -147,8 +147,15 @@ public class ClubService {
     }
 
     /** 화면 값. 잘못 낸 값을 flash(세션)로 돌려보내서 Serializable. */
-    public record Form(String name, String intro, String joinMode, int memberCap) implements java.io.Serializable {
+    public record Form(String name, String intro, String joinMode, int memberCap, String subject) implements java.io.Serializable {
     }
+
+    /** 10-28 발행 설정의 "올릴 방" 한 칸: 내가 든 방과, 이 글이 그 방에 올라가 있는지. */
+    public record PostRoom(long clubId, String name, String subject, boolean picked) {
+    }
+
+    /** 방 주제 최대 글자 수(DB varchar(40)). */
+    public static final int SUBJECT_MAX = 40;
 
     private final JdbcTemplate jdbc;
     private final AccountGuard accountGuard;
@@ -179,6 +186,9 @@ public class ClubService {
         if (f.name() == null || f.name().isBlank() || f.name().strip().length() > 30) {
             return Optional.of("이름은 1~30자로 써 주세요");
         }
+        if (f.subject() == null || f.subject().isBlank() || f.subject().strip().length() > SUBJECT_MAX) {
+            return Optional.of("방 주제는 1~" + SUBJECT_MAX + "자로 써 주세요");
+        }
         if (f.intro() != null && f.intro().strip().length() > 100) {
             return Optional.of("한 줄 소개는 100자까지예요");
         }
@@ -201,10 +211,10 @@ public class ClubService {
         java.sql.Timestamp now = java.sql.Timestamp.from(clock.instant());
         // every_days·end_date는 더 쓰지 않지만 NOT NULL·CHECK가 있어 자리값을 넣는다
         Long id = jdbc.queryForObject("""
-                INSERT INTO writing_club (owner_id, name, intro, every_days, start_date, end_date, invite_code, join_mode, member_cap, created_at)
-                VALUES (?, ?, ?, 7, ?, ?, ?, ?, ?, ?) RETURNING id
+                INSERT INTO writing_club (owner_id, name, intro, every_days, start_date, end_date, invite_code, join_mode, member_cap, created_at, subject)
+                VALUES (?, ?, ?, 7, ?, ?, ?, ?, ?, ?, ?) RETURNING id
                 """, Long.class, me.memberId(), f.name().strip(), f.intro() == null ? "" : f.intro().strip(),
-                Date.valueOf(today()), Date.valueOf(NO_END), code, f.joinMode(), f.memberCap(), now);
+                Date.valueOf(today()), Date.valueOf(NO_END), code, f.joinMode(), f.memberCap(), now, f.subject().strip());
         jdbc.update("INSERT INTO writing_club_member (club_id, member_id, joined_at, last_seen_at) VALUES (?, ?, ?, ?)", id, me.memberId(), now, now);
         return id;
     }
@@ -223,20 +233,17 @@ public class ClubService {
     /** 10-25 방 목록(카톡 대화방 목록처럼): 마지막 글이 최근인 방부터, 새 글 수와 지금 글감. */
     public List<Room> rooms(long memberId) {
         return jdbc.query("""
-                SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first,
+                SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first, c.subject,
                        (SELECT count(*) FROM writing_club_member m2 WHERE m2.club_id = c.id) AS member_count,
                        last.title AS last_title, last.first_public_at AS last_at, COALESCE(la.nickname, la.handle) AS last_author,
-                       (SELECT count(*) FROM post p JOIN writing_club_member pm ON pm.member_id = p.author_id AND pm.club_id = c.id
-                         WHERE """ + " " + PUBLIC + """
-                           AND p.author_id <> ? AND p.first_public_at > COALESCE(me.last_seen_at, me.joined_at)
-                           AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date >= c.start_date) AS new_count,
+                       (SELECT count(*) FROM """ + " " + ROOM_POSTS + """
+                         WHERE cp.club_id = c.id AND """ + " " + PUBLIC + """
+                           AND p.author_id <> ? AND p.first_public_at > COALESCE(me.last_seen_at, me.joined_at)) AS new_count,
                        (SELECT t.title FROM writing_club_topic t WHERE t.club_id = c.id ORDER BY t.created_at DESC, t.id DESC LIMIT 1) AS topic_title
                 FROM writing_club_member me JOIN writing_club c ON c.id = me.club_id
                 LEFT JOIN LATERAL (
-                    SELECT p.title, p.first_public_at, p.author_id FROM post p
-                    JOIN writing_club_member pm ON pm.member_id = p.author_id AND pm.club_id = c.id
-                    WHERE """ + " " + PUBLIC + """
-                      AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date >= c.start_date
+                    SELECT p.title, p.first_public_at, p.author_id FROM """ + " " + ROOM_POSTS + """
+                    WHERE cp.club_id = c.id AND """ + " " + PUBLIC + """
                     ORDER BY p.first_public_at DESC LIMIT 1) last ON true
                 LEFT JOIN member la ON la.id = last.author_id
                 WHERE me.member_id = ?
@@ -296,7 +303,8 @@ public class ClubService {
         LocalDate today = today();
         List<Member> members = jdbc.query("""
                 SELECT mb.id, mb.handle, mb.nickname, mb.profile_image_url, m.role,
-                       (SELECT max(p.first_public_at) FROM post p WHERE p.author_id = mb.id AND """ + " " + PUBLIC + """
+                       (SELECT max(p.first_public_at) FROM writing_club_post cp JOIN post p ON p.id = cp.post_id
+                         WHERE cp.club_id = m.club_id AND p.author_id = mb.id AND """ + " " + PUBLIC + """
                        ) AS last_wrote
                 FROM writing_club_member m JOIN member mb ON mb.id = m.member_id
                 WHERE m.club_id = ? ORDER BY m.joined_at, mb.id
@@ -308,11 +316,9 @@ public class ClubService {
             return new Member(id, rs.getString("handle"), rs.getString("nickname"), rs.getString("profile_image_url"), last, wroteToday,
                     lastLabel(last, today), id == club.ownerId(), id == club.ownerId() || "ADMIN".equals(rs.getString("role")));
         }, clubId);
-        List<Long> postIds = jdbc.queryForList("""
-                SELECT p.id FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
-                WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date >= ?"
-                + " ORDER BY p.first_public_at DESC LIMIT " + POSTS,
-                Long.class, clubId, Date.valueOf(club.startDate()));
+        // 10-28 방에 올린 글만(글쓴이가 고른 방). 나간 멤버의 글은 빠진다
+        List<Long> postIds = jdbc.queryForList("SELECT p.id FROM " + ROOM_POSTS + " WHERE cp.club_id = ? AND " + PUBLIC
+                + " ORDER BY p.first_public_at DESC LIMIT " + POSTS, Long.class, clubId);
         List<Topic> topics = topics(clubId, PAST_TOPICS + 1);
         Set<Long> topicPostIds = postIds.isEmpty() ? Set.of() : new java.util.HashSet<>(jdbc.queryForList("""
                 SELECT tp.post_id FROM writing_club_topic_post tp JOIN writing_club_topic t ON t.id = tp.topic_id
@@ -434,7 +440,73 @@ public class ClubService {
         long postId = drafts.create(current, title, "");
         jdbc.update("INSERT INTO writing_club_topic_post (post_id, topic_id, member_id) VALUES (?, ?, ?) ON CONFLICT DO NOTHING",
                 postId, topicId, me.memberId());
+        sendTo(clubId, postId, me.memberId());
         return postId;
+    }
+
+    // ----- 10-28 방에 올리기: 글쓴이가 고른 방에만 글이 올라간다 -----
+
+    private void sendTo(long clubId, long postId, long memberId) {
+        jdbc.update("INSERT INTO writing_club_post (club_id, post_id, member_id, created_at) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING",
+                clubId, postId, memberId, java.sql.Timestamp.from(clock.instant()));
+    }
+
+    /** 방 화면 [글 쓰기]: 이 방에 올라갈 새 임시글. 글 번호. */
+    @Transactional
+    public long startPost(Optional<CurrentUser> current, long clubId) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        if (!isMember(clubId, me.memberId())) {
+            throw new NotFoundException();
+        }
+        long postId = drafts.create(current, "", "");
+        sendTo(clubId, postId, me.memberId());
+        return postId;
+    }
+
+    /** 발행 설정 "올릴 방": 내가 든 방(최근에 든 것부터)과 이 글이 올라가 있는지. */
+    public List<PostRoom> postRooms(long memberId, long postId) {
+        return jdbc.query("""
+                SELECT c.id, c.name, c.subject,
+                       EXISTS (SELECT 1 FROM writing_club_post cp WHERE cp.club_id = c.id AND cp.post_id = ?) AS picked
+                FROM writing_club_member m JOIN writing_club c ON c.id = m.club_id
+                WHERE m.member_id = ? ORDER BY m.joined_at DESC, c.id DESC
+                """, (rs, i) -> new PostRoom(rs.getLong("id"), rs.getString("name"), rs.getString("subject"), rs.getBoolean("picked")),
+                postId, memberId);
+    }
+
+    /** 글쓴이가 자기 글을 방에 올리거나 뺀다. 그 방 멤버이고 내 글일 때만. */
+    @Transactional
+    public void pick(Optional<CurrentUser> current, long postId, long clubId, boolean on) {
+        CurrentUser me = accountGuard.requireWritable(current);
+        Integer mine = jdbc.queryForObject("SELECT count(*) FROM post WHERE id = ? AND author_id = ? AND deleted_at IS NULL",
+                Integer.class, postId, me.memberId());
+        if (mine == null || mine == 0 || !isMember(clubId, me.memberId())) {
+            throw new NotFoundException();
+        }
+        if (on) {
+            sendTo(clubId, postId, me.memberId());
+        } else {
+            jdbc.update("DELETE FROM writing_club_post WHERE club_id = ? AND post_id = ?", clubId, postId);
+        }
+    }
+
+    /** 방장·관리자: 주제에 맞지 않는 글을 방에서 내린다(글은 블로그에 그대로). */
+    public void takeDown(Optional<CurrentUser> current, long clubId, long postId) {
+        CurrentUser me = accountGuard.requireLoggedIn(current);
+        if (!isAdmin(clubId, me.memberId())) {
+            throw new NotFoundException();
+        }
+        jdbc.update("DELETE FROM writing_club_post WHERE club_id = ? AND post_id = ?", clubId, postId);
+    }
+
+    /** 방장만: 방 주제 바꾸기. */
+    public void subject(Optional<CurrentUser> current, long clubId, String subject) {
+        requireOwner(current, clubId);
+        String s = subject == null ? "" : subject.strip();
+        if (s.isEmpty() || s.length() > SUBJECT_MAX) {
+            throw new ClubException("방 주제는 1~" + SUBJECT_MAX + "자로 써 주세요");
+        }
+        jdbc.update("UPDATE writing_club SET subject = ? WHERE id = ?", s, clubId);
     }
 
     /** 글쓰기 화면 안내: 이 글이 방 글감으로 연 글이면 방과 글감. */
@@ -448,7 +520,8 @@ public class ClubService {
     }
 
     /** 글 화면 띠: 이 글을 쓴 방과 글감, 같은 글감으로 쓴 다른 멤버들의 전체 공개 글(최근 것부터 {@link #BAND_POSTS}편). */
-    public record Band(long clubId, String clubName, String topicTitle, List<BandPost> others) {
+    /** {@code topicTitle}: 방 글감으로 쓴 글이면 그 글감, 아니면(방에만 올린 글) null. */
+    public record Band(long clubId, String clubName, String topicTitle, String subject, List<BandPost> others) {
     }
 
     public record BandPost(long postId, String title, String handle, String nickname, String profileImageUrl, java.time.Instant at) {
@@ -473,30 +546,43 @@ public class ClubService {
      * 공개방은 누구에게나 보인다([방 보기]는 멤버가 아니면 방 소개로).
      */
     public Optional<Band> band(long postId, long authorId, Optional<Long> viewerId) {
-        record Row(long clubId, String name, String joinMode, long topicId, String title) {
+        record Row(long clubId, String name, String joinMode, String subject, long topicId, String title) {
         }
-        Optional<Row> row = jdbc.query("""
-                SELECT c.id, c.name, c.join_mode, t.id AS topic_id, t.title FROM writing_club_topic_post tp
+        // 방에서 내린 글은 띠도 없다(writing_club_post 줄이 있어야 함)
+        Optional<Row> topicRow = jdbc.query("""
+                SELECT c.id, c.name, c.join_mode, c.subject, t.id AS topic_id, t.title FROM writing_club_topic_post tp
                 JOIN writing_club_topic t ON t.id = tp.topic_id JOIN writing_club c ON c.id = t.club_id
+                JOIN writing_club_post cp ON cp.club_id = c.id AND cp.post_id = tp.post_id
                 JOIN writing_club_member m ON m.club_id = c.id AND m.member_id = tp.member_id
                 WHERE tp.post_id = ? AND tp.member_id = ? LIMIT 1
-                """, (rs, i) -> new Row(rs.getLong("id"), rs.getString("name"), rs.getString("join_mode"), rs.getLong("topic_id"),
-                rs.getString("title")), postId, authorId).stream().findFirst();
+                """, (rs, i) -> new Row(rs.getLong("id"), rs.getString("name"), rs.getString("join_mode"), rs.getString("subject"),
+                rs.getLong("topic_id"), rs.getString("title")), postId, authorId).stream().findFirst();
+        // 10-28 방 글감이 아닌 글도 방에 올렸으면 "○○에 올린 글"과 방 주제(같은 글감 친구 글은 없음). 공개방을 먼저 고른다
+        Optional<Row> row = topicRow.isPresent() ? topicRow : jdbc.query("""
+                    SELECT c.id, c.name, c.join_mode, c.subject FROM writing_club_post cp JOIN writing_club c ON c.id = cp.club_id
+                    JOIN writing_club_member m ON m.club_id = c.id AND m.member_id = cp.member_id
+                    WHERE cp.post_id = ? AND cp.member_id = ? ORDER BY (c.join_mode = 'LINK'), cp.created_at LIMIT 1
+                    """, (rs, i) -> new Row(rs.getLong("id"), rs.getString("name"), rs.getString("join_mode"), rs.getString("subject"), 0, null),
+                    postId, authorId).stream().findFirst();
         if (row.isEmpty() || (LINK.equals(row.get().joinMode()) && viewerId.map(v -> !isMember(row.get().clubId(), v)).orElse(true))) {
             return Optional.empty();
         }
         Row r = row.get();
+        if (r.title() == null) {
+            return Optional.of(new Band(r.clubId(), r.name(), null, r.subject(), List.of()));
+        }
         List<BandPost> others = jdbc.query("""
                 SELECT p.id, p.title, p.first_public_at, mb.handle, mb.nickname, mb.profile_image_url
                 FROM writing_club_topic_post tp JOIN post p ON p.id = tp.post_id JOIN member mb ON mb.id = p.author_id
                 JOIN writing_club_member m ON m.club_id = ? AND m.member_id = p.author_id
+                JOIN writing_club_post cp ON cp.club_id = m.club_id AND cp.post_id = p.id
                 WHERE tp.topic_id = ? AND p.id <> ? AND p.first_public_at IS NOT NULL AND """ + " "
                 + accessPolicy.publicListingCondition("p", "mb") + """
                  ORDER BY p.first_public_at DESC LIMIT
                 """ + " " + BAND_POSTS,
                 (rs, i) -> new BandPost(rs.getLong("id"), rs.getString("title"), rs.getString("handle"), rs.getString("nickname"),
                         rs.getString("profile_image_url"), rs.getTimestamp("first_public_at").toInstant()), r.clubId(), r.topicId(), postId);
-        return Optional.of(new Band(r.clubId(), r.name(), r.title(), others));
+        return Optional.of(new Band(r.clubId(), r.name(), r.title(), r.subject(), others));
     }
 
     /** 멤버가 나간다. 만든 사람은 나갈 수 없다(모임 삭제를 쓴다). */
@@ -537,9 +623,9 @@ public class ClubService {
         String like = com.team.blog.discovery.application.SearchTerms.likePattern(term);
         return jdbc.query(SELECT + """
                  WHERE c.join_mode <> 'LINK'
-                   AND (? = '' OR c.name ILIKE ? ESCAPE '\\' OR c.intro ILIKE ? ESCAPE '\\')
+                   AND (? = '' OR c.name ILIKE ? ESCAPE '\\' OR c.intro ILIKE ? ESCAPE '\\' OR c.subject ILIKE ? ESCAPE '\\')
                  ORDER BY c.created_at DESC, c.id DESC LIMIT 30
-                """, (rs, i) -> club(rs), term, like, like);
+                """, (rs, i) -> club(rs), term, like, like, like);
     }
 
     public Optional<Club> byId(long clubId) {
@@ -603,8 +689,8 @@ public class ClubService {
     /** 방 소개 카드 한 줄: 오늘(한국 날짜) 이 방 멤버 중 전체 공개 글을 쓴 사람 수. */
     public int wroteToday(long clubId) {
         Integer n = jdbc.queryForObject("""
-                SELECT count(DISTINCT p.author_id) FROM post p JOIN writing_club_member m ON m.member_id = p.author_id AND m.club_id = ?
-                WHERE """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date = ?",
+                SELECT count(DISTINCT p.author_id) FROM """ + " " + ROOM_POSTS + """
+                WHERE cp.club_id = ? AND """ + " " + PUBLIC + " AND (p.first_public_at AT TIME ZONE 'Asia/Seoul')::date = ?",
                 Integer.class, clubId, Date.valueOf(today()));
         return n == null ? 0 : n;
     }
@@ -816,14 +902,18 @@ public class ClubService {
     private static final String PUBLIC = "p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL AND p.hidden_at IS NULL"
             + " AND p.first_public_at IS NOT NULL";
 
+    /** 10-28 방에 올린 글(p). 글쓴이가 지금 그 방 멤버인 것만(나간 사람의 글은 빠짐). 방은 {@code cp.club_id}로 고른다. */
+    private static final String ROOM_POSTS = "writing_club_post cp JOIN post p ON p.id = cp.post_id"
+            + " JOIN writing_club_member pm ON pm.member_id = p.author_id AND pm.club_id = cp.club_id ";
+
     private static final String SELECT = """
-            SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first,
+            SELECT c.id, c.owner_id, c.name, c.intro, c.start_date, c.invite_code, c.join_mode, c.member_cap, c.write_first, c.subject,
                    (SELECT count(*) FROM writing_club_member m WHERE m.club_id = c.id) AS member_count
             FROM writing_club c""";
 
     private static Club club(java.sql.ResultSet rs) throws java.sql.SQLException {
         return new Club(rs.getLong("id"), rs.getLong("owner_id"), rs.getString("name"), rs.getString("intro"),
                 rs.getDate("start_date").toLocalDate(), rs.getString("invite_code"), rs.getInt("member_count"), rs.getString("join_mode"),
-                rs.getInt("member_cap"), rs.getBoolean("write_first"));
+                rs.getInt("member_cap"), rs.getBoolean("write_first"), rs.getString("subject"));
     }
 }

@@ -22,7 +22,7 @@ class ClubJoinIT extends IntegrationTestBase {
     JdbcTemplate jdbc;
 
     private long create(long owner, String name, String mode) throws Exception {
-        var req = post("/missions/clubs").with(csrf()).with(TestAuth.member(owner)).param("name", name);
+        var req = post("/missions/clubs").with(csrf()).param("subject", "자유 주제").with(TestAuth.member(owner)).param("name", name);
         if (mode != null) {
             req = req.param("joinMode", mode);
         }
@@ -77,7 +77,8 @@ class ClubJoinIT extends IntegrationTestBase {
         assertThat(member(club, a)).isTrue();
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(b)));
         assertThat(member(club, b)).isFalse();
-        posts.published(a, "열린 글", "본문", 1, NOW.plus(Duration.ofMinutes(1)));
+        long opened = posts.published(a, "열린 글", "본문", 1, NOW.plus(Duration.ofMinutes(1)));
+        mockMvc.perform(post("/posts/" + opened + "/clubs/" + club).with(csrf()).with(TestAuth.member(a)));
         clock.set(NOW.plus(Duration.ofHours(1)));
         assertThat(page("/missions/clubs/" + club, a)).contains("오늘 <strong>1명</strong>이 썼어요").contains("열린 글");
     }
@@ -166,17 +167,22 @@ class ClubJoinIT extends IntegrationTestBase {
         // 처음 화면: 한 줄 설명과 [방 만들기]·[방 찾기]. 공개방·비공개방과 세 단계는 만들기 창(dialog) 안
         assertThat(page("/missions/clubs", me)).contains("친구들과 같이 쓰면 꾸준해져요").contains("class=\"link-btn\" href=\"/missions/clubs/find\"")
                 .containsPattern("(?s)<dialog id=\"club-new\".*공개방.*비공개방.*class=\"club-steps\".*</dialog>")
-                .doesNotContain("반 방 만들기").doesNotContain("방 이름·소개로 찾기");
+                .doesNotContain("반 방 만들기").doesNotContain("방 이름·주제로 찾기").contains("name=\"subject\"");
         // 만들기 폼은 csrf 칸을 직접 넣어야 한다(th:action이 아니어서)
         assertThat(page("/missions/clubs", me)).containsPattern("action=\"/missions/clubs\" class=\"club-form\">\\s*<input type=\"hidden\" name=\"_csrf\"");
-        assertThat(page("/missions/clubs/find", me)).contains("아직 공개된 방이 없어요").contains("방 만들기").contains("방 이름·소개로 찾기");
+        assertThat(page("/missions/clubs/find", me)).contains("아직 공개된 방이 없어요").contains("방 만들기").contains("방 이름·주제로 찾기");
         long club = create(me, "다음 할 일 방", "LINK");
-        // 빈 방: 아직 아무도 안 씀, 글 쓰기 단추(위·휴대폰 아래 고정)는 csrf 칸을 직접 넣는다
+        // 빈 방: 아직 아무도 안 씀. 10-28 글 쓰기 단추(위·휴대폰 아래 고정)는 이 방이 골라진 새 글
         assertThat(page("/missions/clubs/" + club, me)).contains("오늘은 아직 아무도 안 썼어요").contains("아직 올라온 글이 없어요")
-                .containsPattern("action=\"/write\">\\s*<input type=\"hidden\" name=\"_csrf\"")
-                .containsPattern("action=\"/write\" class=\"room-write-bar\">\\s*<input type=\"hidden\" name=\"_csrf\"");
+                .contains("action=\"/missions/clubs/" + club + "/write\"").containsPattern("action=\"/missions/clubs/" + club + "/write\" class=\"room-write-bar\"");
         jdbc.update("INSERT INTO writing_club_member (club_id, member_id) VALUES (?, ?)", club, mate);
-        posts.published(me, "오늘 쓴 글", "본문", 1, NOW.plus(Duration.ofMinutes(1)));
+        String write = mockMvc.perform(post("/missions/clubs/" + club + "/write").with(csrf()).with(TestAuth.member(me)))
+                .andReturn().getResponse().getRedirectedUrl();
+        long draft = Long.parseLong(write.substring(write.lastIndexOf('/') + 1));
+        // 발행 설정의 올릴 방: 이 방이 골라져 있다
+        assertThat(page(write, me)).contains("올릴 방").containsPattern("(?s)<input type=\"checkbox\" value=\"" + club + "\" checked=\"checked\">\\s*<span class=\"room-pick-text\"><strong>다음 할 일 방</strong>");
+        jdbc.update("UPDATE post SET title = '오늘 쓴 글' WHERE id = ?", draft);
+        posts.publish(draft, NOW.plus(Duration.ofMinutes(1)));
         clock.set(NOW.plus(Duration.ofHours(1)));
         assertThat(page("/missions/clubs/" + club, me)).contains("오늘 <strong>1명</strong>이 썼어요").contains("오늘 쓴 글");
         assertThat(page("/missions/clubs", me)).contains("참여 중인 방").contains("다음할일: 오늘 쓴 글");
