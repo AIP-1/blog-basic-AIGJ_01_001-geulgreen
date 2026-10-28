@@ -125,6 +125,19 @@
             <label><input type="radio" name="visibility" value="GROUP" th:checked="${visibility == 'GROUP'}"> 그룹 공개</label>
             <label><input type="radio" name="visibility" value="PRIVATE" th:checked="${visibility == 'PRIVATE'}"> 나만 보기</label>
         </fieldset>
+        <!-- 10-28 강성찬 개인 확장: 올릴 방(함께 쓰기). 처음엔 아무 방도 안 골라져 있고, 고른 방에만 올라간다. 누르면 바로 저장(시리즈 칸처럼) -->
+        <fieldset class="field room-pick-field" th:if="${editorRooms != null}" th:attr="data-post-id=${post.postId()}">
+            <legend>올릴 방</legend>
+            <p class="help field-hint">주제에 맞는 방을 골라 주세요. 전체 공개로 발행하면 고른 방에만 올라가요.</p>
+            <div class="room-picks">
+                <label th:each="r : ${editorRooms}" class="room-pick">
+                    <input type="checkbox" th:value="${r.clubId()}" th:checked="${r.picked()}">
+                    <span class="room-pick-text"><strong th:text="${r.name()}">방</strong>
+                        <span class="help" th:if="${!r.subject().isEmpty()}" th:text="${r.subject()}">주제</span></span>
+                </label>
+            </div>
+            <p class="help" id="room-pick-status" role="status"></p>
+        </fieldset>
         <div class="field">
             <label for="tag-input">태그</label>
             <!-- 10-18: 카테고리(내 블로그 폴더, 글 화면 ⋯ → 글 설정)와 헷갈리지 않게 한 줄 설명 -->
@@ -275,6 +288,7 @@
     <script th:src="@{/js/editor/publish.js}" defer></script>
     <script th:src="@{/js/editor/ai-tags.js}" defer></script>
     <script th:src="@{/js/editor/series.js}" defer></script>
+    <script th:src="@{/js/editor/room-pick.js}" defer></script>
     <script th:src="@{/js/editor/thumbnail.js}" defer></script>
     <script th:src="@{/js/editor/image-upload.js}" defer></script>
     <script th:if="${coverEnabled}" th:src="@{/js/editor/cover.js}" defer></script>

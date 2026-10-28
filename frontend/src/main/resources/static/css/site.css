@@ -1772,6 +1772,15 @@ dialog.publish-panel #publish-errors:empty { display: none; }
 .pp-visibility label { padding: 4px 12px; font-size: .92em; margin: 0 4px 6px 0; }
 dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; padding: 0 14px; white-space: nowrap; }
 .series-new-row { align-items: stretch; }
+/* 10-28 올릴 방(강성찬 개인 확장): 예약 발행 카드처럼 줄마다 방 이름·주제, 오른쪽 체크. 고른 줄은 연한 초록 바탕 */
+.room-picks { display: grid; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface); overflow: hidden; margin-top: 10px; }
+.room-pick { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 0; cursor: pointer; }
+.room-pick + .room-pick { border-top: 1px solid var(--color-border); }
+.room-pick:has(input:checked) { background: var(--color-brand-soft); }
+.room-pick-text { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; order: 1; }
+.room-pick-text strong { color: var(--color-text); font-weight: 600; }
+dialog.publish-panel .room-pick-text .help { margin: 0; font-size: .875rem; }
+.room-pick input { order: 2; flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--color-brand); }
 /* 10-26 예약 발행 카드(강성찬 개인 확장): 설정 화면 카드 줄처럼. 스위치 줄 + 날짜·시각 칸 + 알약 버튼, 잡힌 예약은 맨 위 줄 */
 .schedule-card { border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface); padding: 0 16px; }
 .schedule-card > * + * { border-top: 1px solid var(--color-border); }
@@ -2603,6 +2612,14 @@ main.set-page { max-width: 760px; }
 .room-head-text { flex: 1; min-width: 0; }
 .room-head h1 { margin: 0 0 6px; font-size: 1.75em; line-height: 1.25; }
 .room-head .help { margin: 0; }
+/* 10-28 방 주제: 이름 아래 한 줄. 작은 "방 주제" 꼬리표 + 주제 글자 */
+.room-subject { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-weight: 600; color: var(--color-text); min-width: 0; }
+.room-subject > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-subject-label, .club-subject-label { flex: none; display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+  background: var(--color-brand-soft); color: var(--color-brand); font-size: .78em; font-weight: 600; }
+.room-subject-empty { margin: 0 0 8px; }
+.room-msg-down { margin: 0 0 0 auto; }
+.room-msg-down .btn-text { font-size: .95em; white-space: nowrap; }
 .room-today { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: .92em; }
 .room-today-text { white-space: nowrap; }
 .room-faces { display: flex; }
@@ -2694,6 +2711,11 @@ main.set-page { max-width: 760px; }
 .room-row-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .room-row-top { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
 .room-row-top strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-row-chips { display: flex; gap: 6px; min-width: 0; align-self: flex-start; max-width: 100%; }
+.room-chip-subject { color: var(--color-text); background: var(--color-surface-muted); flex: 0 1 auto; }
+.room-row-chips .room-chip { min-width: 0; }
+.club-subject { display: flex; align-items: center; gap: 8px; margin: 2px 0; font-weight: 600; color: var(--color-text); min-width: 0; }
+.club-subject > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .room-row-last { color: var(--color-text-muted); font-size: .92em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .room-row-text .room-chip { align-self: flex-start; }
 .room-row-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: .85em; }

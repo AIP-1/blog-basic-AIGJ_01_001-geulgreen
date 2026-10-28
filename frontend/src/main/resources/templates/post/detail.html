@@ -62,8 +62,10 @@
             <!-- 10-26 강성찬 개인 확장: 함께 쓰기 방 글감으로 쓴 글이면 제목 위에 방 띠, 오른쪽 작은 버튼으로 방에(비공개방은 멤버에게만) -->
             <div th:if="${clubBand != null}" class="club-band">
                 <span class="club-band-icon"><svg th:replace="~{fragments/icons :: people}"></svg></span>
-                <span class="club-band-text"><strong th:text="${clubBand.clubName() + '에서 함께 쓴 글'}">방에서 함께 쓴 글</strong>
-                    <span th:text="${'방 글감 「' + clubBand.topicTitle() + '」'}">방 글감</span></span>
+                <!-- 10-28: 방 글감이 아닌 글도 방에 올렸으면 "○○에 올린 글"과 방 주제 -->
+                <span class="club-band-text"><strong th:text="${clubBand.clubName() + (clubBand.topicTitle() != null ? '에서 함께 쓴 글' : '에 올린 글')}">방에서 함께 쓴 글</strong>
+                    <span th:if="${clubBand.topicTitle() != null}" th:text="${'방 글감 「' + clubBand.topicTitle() + '」'}">방 글감</span>
+                    <span th:if="${clubBand.topicTitle() == null and !clubBand.subject().isEmpty()}" th:text="${'방 주제 「' + clubBand.subject() + '」'}">방 주제</span></span>
                 <a class="btn btn-sm" th:href="@{/missions/clubs/{id}(id=${clubBand.clubId()})}">방 보기<svg th:replace="~{fragments/icons :: chevron}"></svg></a>
             </div>
             <!-- 037·10-18: 카테고리는 이 블로그 안의 폴더(글마다 하나). 제목 위에 작은 글자 링크로, 누르면 이 블로그의 그 폴더 글 -->

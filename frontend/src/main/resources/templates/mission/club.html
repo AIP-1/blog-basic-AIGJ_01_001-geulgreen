@@ -15,6 +15,9 @@
             <header class="room-head">
                 <div class="room-head-text">
                     <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
+                    <!-- 10-28 chan: 방마다 주제. 게임 커뮤니티의 탭처럼, 이 주제에 맞는 글만 골라서 올린다 -->
+                    <p th:if="${!c.subject().isEmpty()}" class="room-subject"><span class="room-subject-label">방 주제</span><span th:text="${c.subject()}">주제</span></p>
+                    <a th:if="${c.subject().isEmpty() and board.isOwner()}" href="#room-subject" class="link-btn room-subject-empty" data-open-subject>방 주제 정하기</a>
                     <p class="help"><th:block th:replace="~{fragments/meta :: parts(${(c.intro().isEmpty() ? '' : c.intro() + ' · ') + '멤버 ' + board.members().size() + '명'})}"></th:block></p>
                     <div class="room-today">
                         <span class="room-faces" aria-hidden="true"><span th:each="m, s : ${board.members()}" th:if="${s.index < 6}"
@@ -26,8 +29,7 @@
                 </div>
                 <div class="room-head-actions">
                     <a href="#club-invite-heading" class="btn btn-sm"><th:block th:replace="~{fragments/icons :: link}"></th:block>초대</a>
-                    <form method="post" action="/write">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <form method="post" th:action="@{/missions/clubs/{id}/write(id=${c.id()})}">
                         <button type="submit" class="btn btn-primary btn-sm"><th:block th:replace="~{fragments/icons :: pen}"></th:block>글 쓰기</button>
                     </form>
                 </div>
@@ -88,7 +90,7 @@
                     <button type="submit" class="btn btn-sm" th:classappend="${board.topicLocked()} ? 'btn-primary'"><span class="room-long">이 글감으로 </span>쓰기</button>
                 </form>
             </div>
-            <p th:if="${timeline.isEmpty()}" class="empty-state room-empty">아직 올라온 글이 없어요. 전체 공개로 쓰면 이 방에 저절로 올라와요</p>
+            <p th:if="${timeline.isEmpty()}" class="empty-state room-empty">아직 올라온 글이 없어요. [글 쓰기]로 쓰거나, 발행할 때 '올릴 방'에서 이 방을 고르면 올라와요</p>
             <ol th:unless="${timeline.isEmpty()}" class="room-stream" aria-labelledby="club-heading">
                 <th:block th:each="line : ${timeline}">
                     <li th:if="${line.day() != null}" class="room-day"><span th:text="${line.day()}">오늘</span></li>
@@ -98,7 +100,12 @@
                         <div class="room-msg-body">
                             <div class="room-msg-who"><strong th:text="${card.author().nickname() != null ? card.author().nickname() : card.author().handle()}">이름</strong>
                                 <span class="help" th:text="${line.time()}">시간</span>
-                                <span th:if="${line.topic()}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block>방 글감</span></div>
+                                <span th:if="${line.topic()}" class="room-chip"><th:block th:replace="~{fragments/icons :: pin}"></th:block>방 글감</span>
+                                <!-- 10-28 방장·관리자: 주제에 맞지 않는 글은 방에서 내린다(글은 블로그에 그대로) -->
+                                <form th:if="${board.isAdmin()}" method="post" class="room-msg-down"
+                                      th:action="@{/missions/clubs/{id}/posts/{pid}/remove(id=${c.id()},pid=${card.id()})}"
+                                      data-confirm="이 글을 방에서 내릴까요? 글은 블로그에 그대로 남아요.">
+                                    <button type="submit" class="btn-text club-remove">방에서 내리기</button></form></div>
                             <a th:unless="${line.locked()}" class="room-bubble" th:classappend="${card.thumbnailUrl() == null} ? 'no-thumb'" th:href="${card.url()}">
                                 <span class="room-bubble-text"><strong th:text="${card.title()}">제목</strong><span class="room-ex" th:text="${card.excerpt()}">요약</span></span>
                                 <img th:if="${card.thumbnailUrl() != null}" th:src="${card.thumbnailUrl()}" alt="" loading="lazy">
@@ -190,6 +197,18 @@
                         </li>
                     </ul>
                 </details>
+                <details th:if="${board.isOwner()}" class="club-more" id="room-subject" th:open="${c.subject().isEmpty()}">
+                    <summary><span>방 주제 · 어떤 글을 올리는 방인지</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                    <form method="post" th:action="@{/missions/clubs/{id}/subject(id=${c.id()})}" class="club-form">
+                        <div class="club-form-row">
+                            <label for="room-subject-input">방 주제</label>
+                            <input id="room-subject-input" name="subject" type="text" maxlength="40" required th:value="${c.subject()}"
+                                   placeholder="예: 마인크래프트 이야기, 요즘 읽는 책">
+                        </div>
+                        <p class="help">멤버들이 글을 발행할 때 이 주제를 보고 방을 골라요</p>
+                        <div class="club-form-actions"><button type="submit" class="btn btn-sm">저장</button></div>
+                    </form>
+                </details>
                 <details th:if="${board.isOwner()}" class="club-more">
                     <summary><span>방 설정 바꾸기 · 들어오는 방법, 먼저 쓰고 보기, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                     <form method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
@@ -223,9 +242,8 @@
         </aside>
     </div>
     <!-- 휴대폰: 카톡 입력창처럼 아래에 고정 -->
-    <form method="post" action="/write" class="room-write-bar">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-        <span class="room-write-hint">쓴 글은 이 방에 저절로 올라와요</span>
+    <form method="post" th:action="@{/missions/clubs/{id}/write(id=${board.club().id()})}" class="room-write-bar">
+        <span class="room-write-hint" th:text="${board.club().subject().isEmpty() ? '쓴 글은 이 방에 올라가요' : board.club().subject() + ' 글을 써 보세요'}">쓴 글은 이 방에 올라가요</span>
         <button type="submit" class="btn btn-primary btn-sm"><th:block th:replace="~{fragments/icons :: pen}"></th:block>글 쓰기</button>
     </form>
     <script th:src="@{/js/mission/club.js}" defer></script>

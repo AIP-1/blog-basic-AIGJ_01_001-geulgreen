@@ -42,6 +42,18 @@ public class MissionEditorAdvice {
         return missions.ofPost(Long.parseLong(id)).orElse(null);
     }
 
+    /** 10-28 발행 설정 "올릴 방": 내가 든 방과 이 글이 올라가 있는지. 방이 없으면 칸을 안 보인다(null). */
+    @ModelAttribute("editorRooms")
+    public java.util.List<com.team.blog.mission.application.ClubService.PostRoom> editorRooms(HttpServletRequest request) {
+        if (!missions.enabled() || !(request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) instanceof Map<?, ?> vars)
+                || !(vars.get("postId") instanceof String id) || !id.matches("\\d{1,18}")) {
+            return null;
+        }
+        java.util.List<com.team.blog.mission.application.ClubService.PostRoom> rooms = currentUserProvider.current()
+                .map(u -> clubs.postRooms(u.memberId(), Long.parseLong(id))).orElse(java.util.List.of());
+        return rooms.isEmpty() ? null : rooms;
+    }
+
     /** 10-25 함께 쓰기 방 글감으로 연 글이면 위에 "방 글감" 안내. */
     @ModelAttribute("clubTopic")
     public com.team.blog.mission.application.ClubService.PostTopic clubTopic(HttpServletRequest request) {
