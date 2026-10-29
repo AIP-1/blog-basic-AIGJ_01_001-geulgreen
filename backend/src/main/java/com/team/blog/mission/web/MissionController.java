@@ -83,7 +83,9 @@ public class MissionController {
         model.addAttribute("cards", cards);
         model.addAttribute("cardDates", cardDates);
         model.addAttribute("prevDay", day.minusDays(1).toString());
-        model.addAttribute("prevLabel", label(day.minusDays(1)));
+        // 10-29 chan: 날짜만 쓴 단추가 글감 날짜처럼 읽혀 "하루 밀렸다"로 보였다. 단추 글자는 "어제 글감"·"전날", 날짜는 풍선 도움말로
+        model.addAttribute("prevLabel", day.equals(today) ? "어제 글감" : "전날");
+        model.addAttribute("prevTitle", label(day.minusDays(1)) + " 글감 보기");
         model.addAttribute("nextDay", day.isBefore(today) ? day.plusDays(1).toString() : null);
         YearMonth shownMonth = month(month, today);
         LocalDate shownDay = day;
