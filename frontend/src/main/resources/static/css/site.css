@@ -1250,7 +1250,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-eyebrow { margin: 0 0 6px; color: var(--color-brand); font-weight: 700; font-size: .85em; letter-spacing: .06em; }
 /* 오늘의 주제 3칸: 색 카드, 주제 칩, 아래 줄은 완료 수와 색 버튼 */
 .mission-days { display: flex; gap: 6px; flex-wrap: wrap; }
-.mission-days a { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-brand);
+.mission-days a { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text);
     text-decoration: none; font-weight: 600; font-size: .85em; }
 .mission-days a:hover { background: var(--color-surface-muted); }
 .topic-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }

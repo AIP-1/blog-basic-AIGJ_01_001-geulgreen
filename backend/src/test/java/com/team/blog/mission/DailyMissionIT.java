@@ -103,7 +103,10 @@ class DailyMissionIT extends IntegrationTestBase {
         mockMvc.perform(post("/missions/topics/{id}/write", topics.get(0).id()).with(csrf()).with(TestAuth.member(writer)))
                 .andExpect(status().isBadRequest());
         assertThat(page("/missions?date=2026-10-12", friend)).contains("그날의 글감과 글이에요").contains("오늘의 미션 글");
-        assertThat(page("/missions", friend)).contains("10월 12일");
+        // 10-29: 전날 단추는 날짜만 쓰지 않는다(글감 날짜로 읽혔다). 날짜는 풍선 도움말에만
+        assertThat(page("/missions", friend)).contains("10월 13일 (화) · 마음에 드는").contains("어제 글감</span>")
+                .contains("title=\"10월 12일 (월) 글감 보기\"").doesNotContain("<span>10월 12일 (월)</span>");
+        assertThat(page("/missions?date=2026-10-12", friend)).contains("전날</span>").contains("title=\"10월 11일 (일) 글감 보기\"");
         mockMvc.perform(get("/missions?date=2026-12-31")).andExpect(status().isNotFound());
     }
 

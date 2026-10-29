@@ -19,7 +19,7 @@
             </p>
         </div>
         <nav class="mission-days" aria-label="날짜 옮기기">
-            <a th:href="@{/missions(date=${prevDay})}"><svg th:replace="~{fragments/icons :: arrow-left}"></svg> <span th:text="${prevLabel}">전날</span></a>
+            <a th:href="@{/missions(date=${prevDay})}" th:title="${prevTitle}" th:attr="aria-label=${prevTitle}"><svg th:replace="~{fragments/icons :: arrow-left}"></svg> <span th:text="${prevLabel}">전날</span></a>
             <a th:if="${!isToday}" href="/missions">오늘</a>
             <a th:if="${nextDay != null}" th:href="@{/missions(date=${nextDay})}">다음날 <svg th:replace="~{fragments/icons :: arrow-right}"></svg></a>
         </nav>
