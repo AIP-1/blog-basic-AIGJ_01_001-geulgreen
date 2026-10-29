@@ -7,6 +7,35 @@
 
 ---
 
+## [1.81.0] — 2026-10-28 · 개인 확장 (함께 쓰기 방 주제)
+
+- 함께 쓰기 방마다 주제(만들 때 정하기, 예전 방은 방 설정에서)
+- 발행 설정 [올릴 방]: 고른 방에만 글이 올라감(전체 공개 글이 모든 방에 저절로 올라가던 것 바꿈)
+- 이미 방 글감으로 쓴 글은 그 방에 그대로, 나머지 글은 방 화면에서 빠짐(글은 블로그에 그대로)
+- DB: V39 writing_club.subject 칸·writing_club_post 표 추가(더하기만)
+
+#### 전/후 사진
+
+**함께 쓰기 방마다 주제**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-club-after.png) |
+
+**발행할 때 올릴 방 고르기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-pub-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-pub-after.png) |
+
+**방 찾기**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-find-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.81.0/v1810-find-after.png) |
+
+---
+
 ## [1.80.1] — 2026-10-28 · 개인 확장 (화면별 공유 미리보기)
 
 - 글감·탐색·함께 쓰기 초대 링크에 화면별 og:image와 설명(홈은 그대로)
