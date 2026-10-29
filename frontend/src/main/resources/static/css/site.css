@@ -2013,6 +2013,11 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-mode:has(input:checked) { border-color: var(--color-brand); background: var(--color-grass-0); }
 .club-mode input { margin-top: 3px; }
 .club-mode-text { display: flex; flex-direction: column; gap: 2px; }
+/* 10-28: 인원 제한을 켰을 때만 최대 인원 칸 */
+.club-cap { display: flex; flex-direction: column; gap: 10px; }
+.club-cap:not(:has(input[name=memberLimit]:checked)) .club-cap-row { display: none; }
+.club-cap-row > .help { grid-column: 2; margin: 0; }
+@media (max-width: 640px) { .club-cap-row > .help { grid-column: auto; } }
 .club-owner h2 { margin: 0; font-size: 1.15em; }
 .club-settings { margin-top: 16px; }
 .club-picker { margin-top: 12px; }

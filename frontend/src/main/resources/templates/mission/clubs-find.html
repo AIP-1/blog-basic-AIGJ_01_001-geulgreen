@@ -32,7 +32,7 @@
                         </span>
                         <span th:if="${!c.subject().isEmpty()}" class="club-subject"><span class="club-subject-label">방 주제</span><span th:text="${c.subject()}">주제</span></span>
                         <span th:if="${!c.intro().isEmpty()}" class="club-card-intro" th:text="${c.intro()}">소개</span>
-                        <span class="help" th:text="${'멤버 ' + c.memberCount() + '/' + c.memberCap() + '명'}">멤버</span>
+                        <span class="help" th:text="${c.memberLabel()}">멤버</span>
                     </a>
                 </li>
             </ul>

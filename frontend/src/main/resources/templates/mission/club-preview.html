@@ -16,7 +16,7 @@
             <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
             <p th:if="${!c.subject().isEmpty()}" class="club-subject"><span class="club-subject-label">방 주제</span><span th:text="${c.subject()}">주제</span></p>
             <p th:if="${!c.intro().isEmpty()}" class="club-intro" th:text="${c.intro()}">소개</p>
-            <p class="help club-meta" th:text="${'멤버 ' + c.memberCount() + '/' + c.memberCap() + '명'}">멤버</p>
+            <p class="help club-meta" th:text="${c.memberLabel()}">멤버</p>
             <p class="help club-list-lead">멤버들이 이 방 주제에 맞춰 올린 글이 시간 순으로 모여요. 멤버가 되면 글을 올리고 댓글로 이야기 나눌 수 있어요</p>
             <div class="club-join-actions">
                     <th:block th:if="${preview.invited()}">

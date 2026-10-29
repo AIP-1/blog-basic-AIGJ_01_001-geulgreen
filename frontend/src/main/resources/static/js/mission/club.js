@@ -11,7 +11,7 @@
   });
 })();
 // 목록 화면: 만들기 창은 [방 만들기]를 눌러야 뜬다(잘못 낸 값이 있거나 주소가 #club-new면 열린 채로).
-// 10-26 chan: 창 안에서 공개방·비공개방을 고르면 들어오는 방법·정원이 채워지고, "더 정하기"에서 바꾸면 고른 칸도 따라간다
+// 10-26 chan: 창 안에서 공개방·비공개방을 고르면 들어오는 방법이 채워지고, "더 정하기"에서 바꾸면 고른 칸도 따라간다
 (function () {
   'use strict';
   var dialog = document.querySelector('[data-club-form]');
@@ -37,7 +37,6 @@
       if (!(t.dataset.clubType === 'public' && mode() === 'OPEN')) {
         Array.prototype.forEach.call(radios, function (r) { r.checked = r.value === t.dataset.mode; });
       }
-      f.elements.memberCap.value = t.dataset.cap;
       mark();
     });
   });
