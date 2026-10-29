@@ -36,10 +36,13 @@ public class ClubController {
     private final CurrentUserProvider currentUserProvider;
     private final com.team.blog.post.application.PostListQuery listQuery;
     private final java.time.Clock clock;
+    private final com.team.blog.mission.application.ClubAiService clubAi;
 
     public ClubController(ClubService clubs, CurrentUserProvider currentUserProvider,
-                          com.team.blog.post.application.PostListQuery listQuery, java.time.Clock clock) {
+                          com.team.blog.post.application.PostListQuery listQuery, java.time.Clock clock,
+                          com.team.blog.mission.application.ClubAiService clubAi) {
         this.clubs = clubs;
+        this.clubAi = clubAi;
         this.currentUserProvider = currentUserProvider;
         this.listQuery = listQuery;
         this.clock = clock;
@@ -119,6 +122,10 @@ public class ClubController {
             model.addAttribute("requests", clubs.requests(id));
             model.addAttribute("modes", ClubService.MODES);
         }
+        if (board.isOwner()) { // 10-29 방 글감 [AI 연동하기]: 방장만(방장 키로 돈이 나간다)
+            model.addAttribute("aiEnabled", clubAi.enabled());
+            model.addAttribute("aiConnection", clubAi.connection(id).orElse(null));
+        }
         model.addAttribute("candidates", clubs.inviteCandidates(me.memberId(), id));
         model.addAttribute("invitesLeft", Math.max(0, ClubService.DAILY_INVITES - clubs.invitesToday(me.memberId())));
         java.util.Map<Long, com.team.blog.post.application.PostCard> cards = listQuery.cardsByIds(board.postIds());
@@ -170,6 +177,39 @@ public class ClubController {
             clubs.addTopic(currentUserProvider.current(), id, title, hint);
             return "방 글감을 올렸어요";
         });
+    }
+
+    // ----- 10-29 방 글감 AI 추천: 방장이 연결한 ChatGPT·Gemini·Claude -----
+
+    @PostMapping("/missions/clubs/{id}/ai")
+    public RedirectView connectAi(@PathVariable("id") long id, @RequestParam("provider") String provider,
+                                  @RequestParam("apiKey") String apiKey, RedirectAttributes flash) {
+        flash.addFlashAttribute("aiOpen", true);
+        return act(id, flash, () -> {
+            clubAi.connect(currentUserProvider.current(), id, provider, apiKey);
+            return com.team.blog.mission.application.ClubAiService.name(provider) + "를 연결했어요. 이제 [AI 추천받기]로 글감을 받을 수 있어요";
+        });
+    }
+
+    @PostMapping("/missions/clubs/{id}/ai/delete")
+    public RedirectView disconnectAi(@PathVariable("id") long id, RedirectAttributes flash) {
+        return act(id, flash, () -> {
+            clubAi.disconnect(currentUserProvider.current(), id);
+            return "AI 연결을 끊었어요. 저장해 둔 키도 지웠어요";
+        });
+    }
+
+    /** 후보는 방장 화면에만(JSON). 방장이 고쳐서 [올리기]를 눌러야 방 글감이 된다. */
+    @PostMapping(value = "/missions/clubs/{id}/ai/suggest", produces = "application/json")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> suggestTopics(@PathVariable("id") long id) {
+        try {
+            var list = clubAi.suggest(currentUserProvider.current(), id);
+            int left = clubAi.connection(id).map(com.team.blog.mission.application.ClubAiService.Connection::left).orElse(0);
+            return org.springframework.http.ResponseEntity.ok(java.util.Map.of("candidates", list, "left", left));
+        } catch (ClubService.ClubException e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/missions/clubs/{id}/topics/{topicId}/delete")

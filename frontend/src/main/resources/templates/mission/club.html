@@ -59,10 +59,16 @@
                                 <button type="submit" class="btn-text club-remove">글감 내리기</button>
                             </form>
                         </th:block>
-                        <form th:if="${board.isAdmin()}" method="post" th:action="@{/missions/clubs/{id}/topics(id=${c.id()})}" class="club-form room-topic-form">
+                        <form th:if="${board.isAdmin()}" method="post" th:action="@{/missions/clubs/{id}/topics(id=${c.id()})}" class="club-form room-topic-form"
+                              th:attr="data-current=${t != null ? t.title() : ''}">
                             <div class="club-form-row">
                                 <label for="room-topic-title" th:text="${t == null ? '글감' : '새 글감'}">새 글감</label>
-                                <input id="room-topic-title" name="title" type="text" maxlength="60" required placeholder="예: 내 책상 위 풍경, 요즘 듣는 노래">
+                                <!-- 10-29 chan: 글감 칸 오른쪽 [AI 연동하기](방장만) → 가이드를 따라 키를 연결하면 [AI 추천받기] -->
+                                <div class="room-topic-field">
+                                    <input id="room-topic-title" name="title" type="text" maxlength="60" required placeholder="예: 내 책상 위 풍경, 요즘 듣는 노래">
+                                    <a th:if="${board.isOwner() and aiEnabled}" href="#club-ai" class="btn btn-sm room-ai-btn" data-open-ai><th:block
+                                            th:replace="~{fragments/icons :: sparkle}"></th:block><span th:text="${aiConnection == null ? 'AI 연동하기' : 'AI 추천받기'}">AI 연동하기</span></a>
+                                </div>
                             </div>
                             <div class="club-form-row">
                                 <label for="room-topic-hint">한 줄 설명 <span class="help">(선택)</span></label>
@@ -90,6 +96,75 @@
                     <button type="submit" class="btn btn-sm" th:classappend="${board.topicLocked()} ? 'btn-primary'"><span class="room-long">이 글감으로 </span>쓰기</button>
                 </form>
             </div>
+            <!-- 10-29 chan: 방장이 ChatGPT·Gemini·Claude를 연결해 방 글감을 추천받는다. 연결 전에는 단계별 가이드, 연결 뒤에는 후보 5개.
+                 후보는 방장 화면에만 보이고, 고쳐서 [올리기]를 눌러야 방 글감이 된다 -->
+            <dialog th:if="${board.isOwner() and aiEnabled}" id="club-ai" class="club-dialog club-ai" aria-labelledby="club-ai-heading" data-club-ai
+                    th:attr="data-keep-open=${aiOpen != null},data-suggest-url=@{/missions/clubs/{id}/ai/suggest(id=${c.id()})}">
+                <div class="club-dialog-head">
+                    <h2 id="club-ai-heading" th:text="${aiConnection == null ? 'AI 연동하기' : 'AI로 글감 추천받기'}">AI 연동하기</h2>
+                    <button type="button" class="btn-icon" data-close-ai aria-label="닫기"><th:block th:replace="~{fragments/icons :: close}"></th:block></button>
+                </div>
+                <th:block th:if="${aiConnection == null}">
+                    <p class="help club-ai-lead">내 AI 계정의 API 키를 이 방에 연결하면, 방 주제를 보고 멤버들이 흥미를 가질 글감 5개를 바로 받아요.
+                        지난 1년 동안 올린 글감과는 겹치지 않게 받고, 방장님이 고른 것만 올라가요.</p>
+                    <form method="post" th:action="@{/missions/clubs/{id}/ai(id=${c.id()})}" class="club-form" data-ai-connect>
+                        <input type="hidden" name="provider" value="GEMINI">
+                        <div class="club-types club-ai-types" role="group" aria-label="연결할 AI">
+                            <button type="button" class="club-type" data-ai-provider="GEMINI" aria-pressed="true">
+                                <strong>Gemini</strong><span class="help">무료로 쓸 수 있어요</span></button>
+                            <button type="button" class="club-type" data-ai-provider="OPENAI" aria-pressed="false">
+                                <strong>ChatGPT</strong><span class="help">크레딧 충전이 필요해요</span></button>
+                            <button type="button" class="club-type" data-ai-provider="CLAUDE" aria-pressed="false">
+                                <strong>Claude</strong><span class="help">크레딧 충전이 필요해요</span></button>
+                        </div>
+                        <ol class="club-steps club-ai-guide" data-ai-guide="GEMINI">
+                            <li><strong>Google AI Studio 열기</strong><span class="help">Google 계정으로 로그인해요</span>
+                                <a class="link-btn" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">AI Studio 열기</a></li>
+                            <li><strong>[API 키 만들기] 누르기</strong><span class="help">결제 정보를 넣지 않으면 무료 한도 안에서만 써서 돈이 나가지 않아요</span></li>
+                            <li><strong>키를 복사해서 아래에 붙여 넣기</strong><span class="help">AIza로 시작하는 긴 글자예요</span></li>
+                        </ol>
+                        <ol class="club-steps club-ai-guide" data-ai-guide="OPENAI" hidden>
+                            <li><strong>OpenAI 플랫폼 열기</strong><span class="help">ChatGPT 계정으로 로그인해요. ChatGPT Plus 구독과는 따로 결제돼요</span>
+                                <a class="link-btn" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">OpenAI 플랫폼 열기</a></li>
+                            <li><strong>크레딧 충전하기</strong><span class="help">Billing에서 5달러부터 충전해요. 글감 5개를 한 번 받는 데 10원도 안 들어요</span>
+                                <a class="link-btn" href="https://platform.openai.com/settings/organization/billing/overview" target="_blank" rel="noopener noreferrer">결제 화면 열기</a></li>
+                            <li><strong>[Create new secret key] 누르고 복사하기</strong><span class="help">sk-로 시작해요. 한 번만 보이니 바로 붙여 넣어요</span></li>
+                        </ol>
+                        <ol class="club-steps club-ai-guide" data-ai-guide="CLAUDE" hidden>
+                            <li><strong>Claude Console 열기</strong><span class="help">만 18세 이상만 가입할 수 있어요. Claude Pro 구독과는 따로 결제돼요</span>
+                                <a class="link-btn" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">Claude Console 열기</a></li>
+                            <li><strong>크레딧 충전하기</strong><span class="help">Billing에서 5달러부터 충전해요. 글감 5개를 한 번 받는 데 10원도 안 들어요</span>
+                                <a class="link-btn" href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer">결제 화면 열기</a></li>
+                            <li><strong>[Create Key] 누르고 복사하기</strong><span class="help">sk-ant-로 시작해요. 한 번만 보이니 바로 붙여 넣어요</span></li>
+                        </ol>
+                        <div class="club-form-row">
+                            <label for="club-ai-key">API 키</label>
+                            <input id="club-ai-key" name="apiKey" type="password" required minlength="20" maxlength="300" autocomplete="off" spellcheck="false" placeholder="복사한 키를 붙여 넣어요">
+                        </div>
+                        <p class="help">키는 암호화해서 서버에만 두고 화면에는 끝 4자리만 보여요. 추천은 방마다 하루 10번까지예요. 연결을 끊으면 키도 지워져요</p>
+                        <div class="club-form-actions">
+                            <button type="button" class="btn btn-sm" data-close-ai>닫기</button>
+                            <button type="submit" class="btn btn-primary btn-sm">연결하기</button>
+                        </div>
+                    </form>
+                </th:block>
+                <th:block th:if="${aiConnection != null}">
+                    <p class="club-ai-status"><th:block th:replace="~{fragments/icons :: check}"></th:block><strong th:text="${aiConnection.name() + ' 연결됨'}">Gemini 연결됨</strong>
+                        <span class="help" th:text="${'키 끝 ' + aiConnection.tail() + ' · 오늘 ' + aiConnection.left() + '번 남음'}" data-ai-left>키 끝 · 오늘 10번 남음</span></p>
+                    <p class="help club-ai-lead">방 주제를 보고 지난 1년 글감과 겹치지 않게 5개를 받아요. 고칠 곳은 고친 뒤 [올리기]를 누르면 방 글감이 돼요.
+                        누르기 전에는 아무에게도 안 보여요</p>
+                    <button type="button" class="btn btn-primary btn-sm" data-ai-suggest th:disabled="${aiConnection.left() == 0}"><th:block
+                            th:replace="~{fragments/icons :: sparkle}"></th:block>글감 5개 받기</button>
+                    <p class="form-status" aria-live="polite" data-toast="error" data-ai-message></p>
+                    <ul class="club-ai-cands" data-ai-cands hidden></ul>
+                    <details class="club-more club-ai-manage">
+                        <summary><span>연결 끊기 · 다른 AI로 바꾸기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                        <p class="help">다른 AI로 바꾸려면 연결을 끊고 다시 연결해요. 끊으면 저장해 둔 키도 지워져요</p>
+                        <form method="post" th:action="@{/missions/clubs/{id}/ai/delete(id=${c.id()})}" data-confirm="AI 연결을 끊을까요? 저장해 둔 키도 지워져요.">
+                            <button type="submit" class="btn btn-sm club-remove">연결 끊기</button></form>
+                    </details>
+                </th:block>
+            </dialog>
             <p th:if="${timeline.isEmpty()}" class="empty-state room-empty">아직 올라온 글이 없어요. [글 쓰기]로 쓰거나, 발행할 때 '올릴 방'에서 이 방을 고르면 올라와요</p>
             <ol th:unless="${timeline.isEmpty()}" class="room-stream" aria-labelledby="club-heading">
                 <th:block th:each="line : ${timeline}">

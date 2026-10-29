@@ -16,6 +16,9 @@ spring:
             client-secret: ${GITHUB_CLIENT_SECRET:github-client-secret-not-set}
 
 blog:
+  # 10-29 로컬 전용 방 글감 AI 키 암호화 비밀값
+  club-ai:
+    secret: ${CLUB_AI_SECRET:dev-club-ai-secret-0123456789}
   auth:
     mail:
       from: no-reply@localhost

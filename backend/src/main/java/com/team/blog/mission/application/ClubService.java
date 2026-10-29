@@ -35,6 +35,8 @@ public class ClubService {
     static final int PAST_TOPICS = 10;
     /** 먼저 쓰고 보기: 글감을 올리고 이만큼 지나면 안 쓴 사람에게도 방 글감 글이 열린다. */
     static final java.time.Duration WRITE_FIRST_WINDOW = java.time.Duration.ofHours(24);
+    /** 방 글감이 겹치지 않아야 하는 기간. */
+    static final java.time.Duration YEAR = java.time.Duration.ofDays(365);
 
     public record Club(long id, long ownerId, String name, String intro, LocalDate startDate, String inviteCode, int memberCount,
                        String joinMode, Integer memberCap, boolean writeFirst, String subject) {
@@ -125,6 +127,10 @@ public class ClubService {
 
     /** 방 글감. {@code writers}는 이 글감으로 전체 공개한 사람 수. */
     public record Topic(long id, String title, String hint, String byName, java.time.Instant createdAt, int writers) {
+    }
+
+    /** 지난 1년 안에 올린 방 글감(겹침 확인·AI 질문용). */
+    public record YearTopic(String title, java.time.Instant createdAt) {
     }
 
     /** 방 소식 줄(글이 아닌 것): 들어온 사람, 올라온 글감. */
@@ -400,7 +406,14 @@ public class ClubService {
                 rs.getTimestamp("created_at").toInstant(), rs.getInt("writers")), clubId, limit);
     }
 
-    /** 만든 사람·관리자만: 새 글감을 올린다(이전 글감은 지난 글감으로). */
+    /** 10-29 chan "1년 동안은 주제가 겹치지 않게": 최근 1년 글감, 최근 것부터. */
+    public List<YearTopic> yearTopics(long clubId) {
+        return jdbc.query("SELECT title, created_at FROM writing_club_topic WHERE club_id = ? AND created_at > ? ORDER BY created_at DESC, id DESC",
+                (rs, i) -> new YearTopic(rs.getString("title"), rs.getTimestamp("created_at").toInstant()),
+                clubId, java.sql.Timestamp.from(clock.instant().minus(YEAR)));
+    }
+
+    /** 만든 사람·관리자만: 새 글감을 올린다(이전 글감은 지난 글감으로). 1년 안에 같은 글감(띄어쓰기·문장부호 무시)은 막는다. */
     public void addTopic(Optional<CurrentUser> current, long clubId, String title, String hint) {
         CurrentUser me = accountGuard.requireWritable(current);
         if (!isAdmin(clubId, me.memberId())) {
@@ -413,6 +426,13 @@ public class ClubService {
         }
         if (h.length() > 200) {
             throw new ClubException("글감 설명은 200자까지예요");
+        }
+        String key = ClubTopicPrompt.key(t);
+        Optional<YearTopic> same = yearTopics(clubId).stream().filter(y -> ClubTopicPrompt.key(y.title()).equals(key)).findFirst();
+        if (same.isPresent()) {
+            LocalDate d = LocalDate.ofInstant(same.get().createdAt(), SEOUL);
+            throw new ClubException("「" + same.get().title() + "」은 " + d.getMonthValue() + "월 " + d.getDayOfMonth()
+                    + "일에 올린 글감이에요. 1년 안에 올린 글감은 다시 올릴 수 없어요");
         }
         jdbc.update("INSERT INTO writing_club_topic (club_id, created_by, title, hint, created_at) VALUES (?, ?, ?, ?, ?)",
                 clubId, me.memberId(), t, h, java.sql.Timestamp.from(clock.instant()));
