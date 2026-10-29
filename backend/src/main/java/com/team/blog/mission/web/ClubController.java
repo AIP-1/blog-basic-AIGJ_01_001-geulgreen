@@ -62,7 +62,7 @@ public class ClubController {
             return "redirect:/missions/clubs/find?q=" + org.springframework.web.util.UriUtils.encodeQueryParam(q.strip(), java.nio.charset.StandardCharsets.UTF_8);
         }
         if (!model.containsAttribute("form")) {
-            model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, ClubService.DEFAULT_CAP, ""));
+            model.addAttribute("form", new ClubService.Form("", "", ClubService.APPROVAL, null, ""));
         }
         // 10-26 chan: 방이 없으면 들어가도록 이끈다 — 맨 위 글그린 공식 방(큰 [들어가기]), 아래 열린 방 몇 개
         if (rooms.isEmpty()) {
@@ -91,9 +91,10 @@ public class ClubController {
     @PostMapping("/missions/clubs")
     public RedirectView create(@RequestParam("name") String name, @RequestParam(value = "intro", required = false) String intro,
                                @RequestParam(value = "joinMode", defaultValue = ClubService.APPROVAL) String joinMode,
-                               @RequestParam(value = "memberCap", defaultValue = "30") int memberCap,
+                               @RequestParam(value = "memberLimit", defaultValue = "false") boolean memberLimit,
+                               @RequestParam(value = "memberCap", required = false) Integer memberCap,
                                @RequestParam(value = "subject", required = false) String subject, RedirectAttributes flash) {
-        ClubService.Form form = new ClubService.Form(name, intro, joinMode, memberCap, subject == null ? "" : subject);
+        ClubService.Form form = new ClubService.Form(name, intro, joinMode, cap(memberLimit, memberCap), subject == null ? "" : subject);
         Optional<String> problem = ClubService.problem(form);
         if (problem.isPresent()) {
             flash.addFlashAttribute("clubError", problem.get());
@@ -280,12 +281,22 @@ public class ClubController {
 
     @PostMapping("/missions/clubs/{id}/settings")
     public RedirectView settings(@PathVariable("id") long id, @RequestParam("joinMode") String joinMode,
-                                 @RequestParam("memberCap") int memberCap,
+                                 @RequestParam(value = "memberLimit", defaultValue = "false") boolean memberLimit,
+                                 @RequestParam(value = "memberCap", required = false) Integer memberCap,
                                  @RequestParam(value = "writeFirst", defaultValue = "false") boolean writeFirst, RedirectAttributes flash) {
         return act(id, flash, () -> {
-            clubs.settings(currentUserProvider.current(), id, joinMode, memberCap, writeFirst);
-            return "참여 방식을 저장했어요";
+            clubs.settings(currentUserProvider.current(), id, joinMode, cap(memberLimit, memberCap), writeFirst);
+            return clubs.byId(id).filter(ClubService.Club::full)
+                    .map(c -> "저장했어요. 지금 " + c.memberCount() + "명이라 새 멤버는 들어오지 못해요").orElse("저장했어요");
         });
+    }
+
+    /** 10-28 chan: [인원 제한]을 켰을 때만 최대 인원을 쓴다(꺼져 있으면 제한 없음). 켜고 비워 두면 범위 밖 값으로 넘겨 안내가 뜨게. */
+    private static Integer cap(boolean memberLimit, Integer memberCap) {
+        if (!memberLimit) {
+            return null;
+        }
+        return memberCap == null ? 0 : memberCap;
     }
 
     @PostMapping("/missions/clubs/{id}/invite")
