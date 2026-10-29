@@ -7,6 +7,41 @@
 
 ---
 
+## [1.82.0] — 2026-10-29 · 개인 확장 (함께 쓰기 방 화면 · 인원 제한 · 방 글감 AI · 어제 글감)
+
+- 방 화면 오른쪽을 멤버·초대하기·방 관리 카드로, 방 주제·설정·멤버 관리는 창으로
+- 방 인원 제한 기본 없음(방장이 켤 때만), 지금 방들의 정원도 모두 풀기
+- 방 글감 AI 추천: 방장이 자기 AI 키(ChatGPT·Gemini·Claude)를 방에 연결해 글감 후보 받기
+- 글감 화면 전날 단추 "어제 글감"
+- DB: V40 member_cap 비워 둘 수 있게·지금 방 정원 풀기, V41 writing_club_ai 표 추가(지우는 것 없음)
+- 서버: CLUB_AI_SECRET를 배포 스크립트가 처음 한 번 만들어 둠
+
+#### 전/후 사진
+
+**함께 쓰기 방 화면을 카드로 나눴어요**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-club-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-club-after.png) |
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-club-m-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-club-m-after.png) |
+
+**방 인원 제한은 기본 없음**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-find-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-find-after.png) |
+
+**글감 화면 "어제 글감"**
+
+| 전 | 후 |
+|---|---|
+| ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-gg-before.png) | ![](https://github.com/practicech/blog/releases/download/v1.82.0/v1820-gg-after.png) |
+
+---
+
 ## [1.81.0] — 2026-10-28 · 개인 확장 (함께 쓰기 방 주제)
 
 - 함께 쓰기 방마다 주제(만들 때 정하기, 예전 방은 방 설정에서)

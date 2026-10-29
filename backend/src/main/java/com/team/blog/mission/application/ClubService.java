@@ -35,16 +35,24 @@ public class ClubService {
     static final int PAST_TOPICS = 10;
     /** 먼저 쓰고 보기: 글감을 올리고 이만큼 지나면 안 쓴 사람에게도 방 글감 글이 열린다. */
     static final java.time.Duration WRITE_FIRST_WINDOW = java.time.Duration.ofHours(24);
+    /** 방 글감이 겹치지 않아야 하는 기간. */
+    static final java.time.Duration YEAR = java.time.Duration.ofDays(365);
 
     public record Club(long id, long ownerId, String name, String intro, LocalDate startDate, String inviteCode, int memberCount,
-                       String joinMode, int memberCap, boolean writeFirst, String subject) {
+                       String joinMode, Integer memberCap, boolean writeFirst, String subject) {
 
         public String modeLabel() {
             return ClubService.modeLabel(joinMode);
         }
 
+        /** 10-28: 인원 제한(memberCap)이 없으면 언제나 들어올 수 있다. */
         public boolean full() {
-            return memberCount >= memberCap;
+            return memberCap != null && memberCount >= memberCap;
+        }
+
+        /** 목록에 보일 멤버 수: 제한이 있으면 "멤버 3/30명", 없으면 "멤버 3명". */
+        public String memberLabel() {
+            return memberCap == null ? "멤버 " + memberCount + "명" : "멤버 " + memberCount + "/" + memberCap + "명";
         }
     }
 
@@ -52,9 +60,9 @@ public class ClubService {
     public static final String APPROVAL = "APPROVAL";
     public static final String OPEN = "OPEN";
     public static final List<String> MODES = List.of(APPROVAL, OPEN, LINK);
-    /** 새 함께 쓰기의 멤버 상한 기본값과 범위(만든 사람 포함). */
-    public static final int DEFAULT_CAP = 30;
-    public static final int MAX_CAP = 100;
+    /** 10-28 chan: 방은 기본으로 인원 제한이 없고, 방장이 켜면 이 범위에서 정한다(만든 사람 포함). 켤 때 처음 보이는 값은 SUGGESTED_CAP. */
+    public static final int SUGGESTED_CAP = 30;
+    public static final int MAX_CAP = 1000;
     /** 한 사람이 하루에 보낼 수 있는 초대 수(한국 날짜 기준). */
     public static final int DAILY_INVITES = 20;
     /** 거절된 참여 요청을 다시 보낼 수 있을 때까지. */
@@ -121,6 +129,10 @@ public class ClubService {
     public record Topic(long id, String title, String hint, String byName, java.time.Instant createdAt, int writers) {
     }
 
+    /** 지난 1년 안에 올린 방 글감(겹침 확인·AI 질문용). */
+    public record YearTopic(String title, java.time.Instant createdAt) {
+    }
+
     /** 방 소식 줄(글이 아닌 것): 들어온 사람, 올라온 글감. */
     public record Notice(java.time.Instant at, String text) {
     }
@@ -147,7 +159,7 @@ public class ClubService {
     }
 
     /** 화면 값. 잘못 낸 값을 flash(세션)로 돌려보내서 Serializable. */
-    public record Form(String name, String intro, String joinMode, int memberCap, String subject) implements java.io.Serializable {
+    public record Form(String name, String intro, String joinMode, Integer memberCap, String subject) implements java.io.Serializable {
     }
 
     /** 10-28 발행 설정의 "올릴 방" 한 칸: 내가 든 방과, 이 글이 그 방에 올라가 있는지. */
@@ -195,8 +207,8 @@ public class ClubService {
         if (!MODES.contains(f.joinMode())) {
             return Optional.of("참여 방식을 골라 주세요");
         }
-        if (f.memberCap() < 2 || f.memberCap() > MAX_CAP) {
-            return Optional.of("멤버 수는 2~" + MAX_CAP + "명으로 정해 주세요");
+        if (f.memberCap() != null && (f.memberCap() < 2 || f.memberCap() > MAX_CAP)) {
+            return Optional.of("최대 인원은 2~" + MAX_CAP + "명으로 정해 주세요");
         }
         return Optional.empty();
     }
@@ -394,7 +406,14 @@ public class ClubService {
                 rs.getTimestamp("created_at").toInstant(), rs.getInt("writers")), clubId, limit);
     }
 
-    /** 만든 사람·관리자만: 새 글감을 올린다(이전 글감은 지난 글감으로). */
+    /** 10-29 chan "1년 동안은 주제가 겹치지 않게": 최근 1년 글감, 최근 것부터. */
+    public List<YearTopic> yearTopics(long clubId) {
+        return jdbc.query("SELECT title, created_at FROM writing_club_topic WHERE club_id = ? AND created_at > ? ORDER BY created_at DESC, id DESC",
+                (rs, i) -> new YearTopic(rs.getString("title"), rs.getTimestamp("created_at").toInstant()),
+                clubId, java.sql.Timestamp.from(clock.instant().minus(YEAR)));
+    }
+
+    /** 만든 사람·관리자만: 새 글감을 올린다(이전 글감은 지난 글감으로). 1년 안에 같은 글감(띄어쓰기·문장부호 무시)은 막는다. */
     public void addTopic(Optional<CurrentUser> current, long clubId, String title, String hint) {
         CurrentUser me = accountGuard.requireWritable(current);
         if (!isAdmin(clubId, me.memberId())) {
@@ -407,6 +426,13 @@ public class ClubService {
         }
         if (h.length() > 200) {
             throw new ClubException("글감 설명은 200자까지예요");
+        }
+        String key = ClubTopicPrompt.key(t);
+        Optional<YearTopic> same = yearTopics(clubId).stream().filter(y -> ClubTopicPrompt.key(y.title()).equals(key)).findFirst();
+        if (same.isPresent()) {
+            LocalDate d = LocalDate.ofInstant(same.get().createdAt(), SEOUL);
+            throw new ClubException("「" + same.get().title() + "」은 " + d.getMonthValue() + "월 " + d.getDayOfMonth()
+                    + "일에 올린 글감이에요. 1년 안에 올린 글감은 다시 올릴 수 없어요");
         }
         jdbc.update("INSERT INTO writing_club_topic (club_id, created_by, title, hint, created_at) VALUES (?, ?, ?, ?, ?)",
                 clubId, me.memberId(), t, h, java.sql.Timestamp.from(clock.instant()));
@@ -641,7 +667,7 @@ public class ClubService {
         int n = jdbc.update("""
                 INSERT INTO writing_club_member (club_id, member_id, joined_at, last_seen_at)
                 SELECT c.id, ?, ?, ? FROM writing_club c WHERE c.id = ?
-                  AND (SELECT count(*) FROM writing_club_member m WHERE m.club_id = c.id) < c.member_cap
+                  AND (c.member_cap IS NULL OR (SELECT count(*) FROM writing_club_member m WHERE m.club_id = c.id) < c.member_cap)
                 ON CONFLICT DO NOTHING
                 """, memberId, java.sql.Timestamp.from(clock.instant()), java.sql.Timestamp.from(clock.instant()), club.id());
         if (n == 0 && !isMember(club.id(), memberId)) {
@@ -681,7 +707,7 @@ public class ClubService {
     public List<Club> openToJoin(long excludeId, int limit) {
         return jdbc.query(SELECT + """
                  WHERE c.join_mode <> 'LINK' AND c.id <> ?
-                   AND (SELECT count(*) FROM writing_club_member m3 WHERE m3.club_id = c.id) < c.member_cap
+                   AND (c.member_cap IS NULL OR (SELECT count(*) FROM writing_club_member m3 WHERE m3.club_id = c.id) < c.member_cap)
                  ORDER BY c.created_at DESC, c.id DESC LIMIT ?
                 """, (rs, i) -> club(rs), excludeId, limit);
     }
@@ -782,15 +808,18 @@ public class ClubService {
         }
     }
 
-    /** 만든 사람만: 참여 방식과 정원(지금 멤버 수보다 적게는 못 함). */
-    public void settings(Optional<CurrentUser> current, long clubId, String mode, int cap, boolean writeFirst) {
+    /**
+     * 만든 사람만: 참여 방식과 인원 제한({@code cap} null = 제한 없음). 10-28: 지금 멤버 수보다 적게 정해도 되고,
+     * 그러면 있는 멤버는 그대로 두고 새로 들어오는 것만 막는다.
+     */
+    public void settings(Optional<CurrentUser> current, long clubId, String mode, Integer cap, boolean writeFirst) {
         requireOwner(current, clubId);
         Club club = byId(clubId).orElseThrow(NotFoundException::new);
         if (!MODES.contains(mode)) {
             throw new ClubException("참여 방식을 골라 주세요");
         }
-        if (cap < Math.max(2, club.memberCount()) || cap > MAX_CAP) {
-            throw new ClubException("정원은 지금 멤버 수(" + club.memberCount() + "명)부터 " + MAX_CAP + "명까지 정할 수 있어요");
+        if (cap != null && (cap < 2 || cap > MAX_CAP)) {
+            throw new ClubException("최대 인원은 2~" + MAX_CAP + "명으로 정해 주세요");
         }
         jdbc.update("UPDATE writing_club SET join_mode = ?, member_cap = ?, write_first = ? WHERE id = ?", mode, cap, writeFirst, clubId);
     }
@@ -834,7 +863,7 @@ public class ClubService {
         if (targets.size() > left) {
             throw new ClubException("초대는 하루 " + DAILY_INVITES + "명까지 보낼 수 있어요(오늘 " + Math.max(0, left) + "명 남음)");
         }
-        if (club.memberCount() + targets.size() > club.memberCap()) {
+        if (club.memberCap() != null && club.memberCount() + targets.size() > club.memberCap()) {
             throw new ClubException("정원(" + club.memberCap() + "명)을 넘어서 초대할 수 없어요");
         }
         java.sql.Timestamp now = java.sql.Timestamp.from(clock.instant());
@@ -914,6 +943,6 @@ public class ClubService {
     private static Club club(java.sql.ResultSet rs) throws java.sql.SQLException {
         return new Club(rs.getLong("id"), rs.getLong("owner_id"), rs.getString("name"), rs.getString("intro"),
                 rs.getDate("start_date").toLocalDate(), rs.getString("invite_code"), rs.getInt("member_count"), rs.getString("join_mode"),
-                rs.getInt("member_cap"), rs.getBoolean("write_first"), rs.getString("subject"));
+                (Integer) rs.getObject("member_cap"), rs.getBoolean("write_first"), rs.getString("subject"));
     }
 }

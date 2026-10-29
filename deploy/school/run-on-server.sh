@@ -54,6 +54,11 @@ if [ ! -s "${WORK}/storage-secret" ]; then
   (umask 077; head -c 48 /dev/urandom | base64 | tr -d '\n=+/' > "${WORK}/storage-secret")
 fi
 
+# 10-29 방장 AI 키 암호화 비밀값: 처음 한 번 만들어 서버에만 둔다(DB와 따로 있어 DB만 새어도 키를 못 읽음. 바뀌면 방장이 다시 연결)
+if [ ! -s "${WORK}/club-ai-secret" ]; then
+  (umask 077; head -c 48 /dev/urandom | base64 | tr -d '\n=+/' > "${WORK}/club-ai-secret")
+fi
+
 # 앱 환경 변수 파일(0600). 값에 줄바꿈이 없다는 전제(키·비밀번호)
 ENV_FILE="${WORK}/app.env"
 (
@@ -81,6 +86,7 @@ ENV_FILE="${WORK}/app.env"
     echo "STORAGE_TYPE=local"
     echo "STORAGE_LOCAL_DIR=/app/data"
     echo "STORAGE_LOCAL_SECRET=$(cat "${WORK}/storage-secret")"
+    echo "CLUB_AI_SECRET=$(cat "${WORK}/club-ai-secret")"
   } > "${ENV_FILE}"
 )
 

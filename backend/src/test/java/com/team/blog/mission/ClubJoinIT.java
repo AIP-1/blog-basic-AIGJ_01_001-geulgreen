@@ -72,7 +72,7 @@ class ClubJoinIT extends IntegrationTestBase {
         long b = members.localMember("openguestb", "열린나", "openguestb@example.com", "Blog#2026ok", true);
         long club = create(owner, "누구나 일기방", "OPEN");
         mockMvc.perform(post("/missions/clubs/" + club + "/settings").with(csrf()).with(TestAuth.member(owner))
-                .param("joinMode", "OPEN").param("memberCap", "2"));
+                .param("joinMode", "OPEN").param("memberLimit", "true").param("memberCap", "2"));
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(a)));
         assertThat(member(club, a)).isTrue();
         mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(b)));
@@ -186,5 +186,50 @@ class ClubJoinIT extends IntegrationTestBase {
         clock.set(NOW.plus(Duration.ofHours(1)));
         assertThat(page("/missions/clubs/" + club, me)).contains("오늘 <strong>1명</strong>이 썼어요").contains("오늘 쓴 글");
         assertThat(page("/missions/clubs", me)).contains("참여 중인 방").contains("다음할일: 오늘 쓴 글");
+    }
+
+    @Test
+    void roomHasNoLimitByDefaultAndOwnerLimitKeepsExistingMembers() throws Exception {
+        clock.set(NOW);
+        long owner = members.localMember("limitowner", "제한방장", "limitowner@example.com", "Blog#2026ok", true);
+        long a = members.localMember("limitguesta", "제한가", "limitguesta@example.com", "Blog#2026ok", true);
+        long b = members.localMember("limitguestb", "제한나", "limitguestb@example.com", "Blog#2026ok", true);
+        long c = members.localMember("limitguestc", "제한다", "limitguestc@example.com", "Blog#2026ok", true);
+        long club = create(owner, "제한 없는 방", "OPEN");
+        assertThat(jdbc.queryForObject("SELECT member_cap FROM writing_club WHERE id = ?", Integer.class, club)).isNull();
+        mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(a)));
+        mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(b)));
+        assertThat(member(club, a)).isTrue();
+        assertThat(member(club, b)).isTrue();
+        assertThat(page("/missions/clubs/find", c)).contains("멤버 3명").doesNotContain("멤버 3/");
+        // 지금(3명)보다 적게 정해도 있는 멤버는 그대로, 새로 들어오는 것만 막힌다
+        mockMvc.perform(post("/missions/clubs/" + club + "/settings").with(csrf()).with(TestAuth.member(owner))
+                .param("joinMode", "OPEN").param("memberLimit", "true").param("memberCap", "2"));
+        assertThat(jdbc.queryForObject("SELECT member_cap FROM writing_club WHERE id = ?", Integer.class, club)).isEqualTo(2);
+        assertThat(member(club, b)).isTrue();
+        mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(c)));
+        assertThat(member(club, c)).isFalse();
+        assertThat(page("/missions/clubs/find", c)).contains("멤버 3/2명");
+        // 제한을 끄면 다시 들어올 수 있다
+        mockMvc.perform(post("/missions/clubs/" + club + "/settings").with(csrf()).with(TestAuth.member(owner))
+                .param("joinMode", "OPEN").param("memberCap", "2"));
+        assertThat(jdbc.queryForObject("SELECT member_cap FROM writing_club WHERE id = ?", Integer.class, club)).isNull();
+        mockMvc.perform(post("/missions/clubs/" + club + "/join").with(csrf()).with(TestAuth.member(c)));
+        assertThat(member(club, c)).isTrue();
+    }
+
+    @Test
+    void ownerCanSetLimitWhenCreating() throws Exception {
+        clock.set(NOW);
+        long owner = members.localMember("capmaker", "정원방장", "capmaker@example.com", "Blog#2026ok", true);
+        String location = mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+                .param("name", "다섯 명 방").param("subject", "자유 주제").param("joinMode", "APPROVAL")
+                .param("memberLimit", "true").param("memberCap", "5")).andReturn().getResponse().getRedirectedUrl();
+        long club = Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+        assertThat(jdbc.queryForObject("SELECT member_cap FROM writing_club WHERE id = ?", Integer.class, club)).isEqualTo(5);
+        // 켜고 범위 밖이면 만들지 않는다
+        mockMvc.perform(post("/missions/clubs").with(csrf()).with(TestAuth.member(owner))
+                .param("name", "한 명 방").param("subject", "자유 주제").param("memberLimit", "true").param("memberCap", "1"));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM writing_club WHERE name = '한 명 방'", Integer.class)).isZero();
     }
 }

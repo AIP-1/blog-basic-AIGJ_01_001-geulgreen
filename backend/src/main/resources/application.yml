@@ -331,6 +331,10 @@ blog:
     snapshot-retention: 30d
     cleanup-enabled: true
     cleanup-cron: "0 40 4 * * *"
+  # 10-29 방 글감 AI 추천: 방장이 연결한 API 키를 이 비밀값으로 암호화한다(배포 스크립트가 서버에서 한 번 만듦). 비어 있으면 연동을 받지 않는다
+  club-ai:
+    secret: ${CLUB_AI_SECRET:}
+    daily-limit: 10
   # 021-ai-tag-suggest: 34 §2~§5. 키는 환경 변수로만(GEMINI_API_KEY), 비어 있으면 Gemini를 건너뛰고 자체 AI만
   ai:
     tag-suggest:

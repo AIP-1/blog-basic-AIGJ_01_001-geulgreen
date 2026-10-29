@@ -100,7 +100,7 @@
                 </li>
             </ul>
         </section>
-        <!-- 만들기 창: [방 만들기]를 누르면 뜬다. 10-26 chan "공개방, 비공개방으로": 방 종류를 먼저 고르고(들어오는 방법·정원이 채워짐), 이름·소개.
+        <!-- 만들기 창: [방 만들기]를 누르면 뜬다. 10-26 chan "공개방, 비공개방으로": 방 종류를 먼저 고르고(들어오는 방법이 채워짐), 이름·소개.
              세 단계 안내는 창 아래. 잘못 낸 값이 있으면 창이 열린 채로 -->
         <dialog id="club-new" class="club-dialog" aria-labelledby="club-new-heading" data-club-form
                 th:attr="data-keep-open=${clubError != null}">
@@ -112,12 +112,12 @@
             <form method="post" action="/missions/clubs" class="club-form">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                 <div class="club-types" role="group" aria-label="방 종류">
-                    <button type="button" class="club-type" data-club-type="public" data-mode="APPROVAL" data-cap="30"
+                    <button type="button" class="club-type" data-club-type="public" data-mode="APPROVAL"
                             th:attr="aria-pressed=${form.joinMode() != 'LINK'}">
                         <strong>공개방</strong>
                         <span class="help">방 찾기에 보여요. 반·동아리처럼 여럿이 쓸 때</span>
                     </button>
-                    <button type="button" class="club-type" data-club-type="private" data-mode="LINK" data-cap="10"
+                    <button type="button" class="club-type" data-club-type="private" data-mode="LINK"
                             th:attr="aria-pressed=${form.joinMode() == 'LINK'}">
                         <strong>비공개방</strong>
                         <span class="help">초대 링크로만 들어와요. 친구 몇 명끼리 쓸 때</span>
@@ -137,15 +137,12 @@
                     <input id="club-intro" name="intro" type="text" maxlength="100" th:value="${form.intro()}" placeholder="예: 한 주에 한 편, 서로 댓글로 응원해요">
                 </div>
                 <details class="club-more" th:open="${clubError != null}">
-                    <summary><span>더 정하기 · 들어오는 방법, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                    <summary><span>더 정하기 · 들어오는 방법, 인원 제한</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                     <fieldset class="club-modes">
                         <legend>들어오는 방법</legend>
                         <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${form.joinMode()})}"></label></th:block>
                     </fieldset>
-                    <div class="club-form-row">
-                        <label for="club-cap-new">정원</label>
-                        <span class="club-inline"><input id="club-cap-new" name="memberCap" type="number" min="2" max="100" required th:value="${form.memberCap()}"> 명까지</span>
-                    </div>
+                    <div th:replace="~{mission/clubs :: capOption('club-cap-new', ${form.memberCap()}, null)}"></div>
                 </details>
                 <p class="help">글을 발행할 때 '올릴 방'에서 이 방을 고른 글만 올라와요. 끝나는 날은 없어요</p>
                 <div class="club-form-actions">
@@ -167,6 +164,19 @@
     <a href="/missions/clubs" th:attr="aria-current=${tab == 'mine' ? 'page' : null}">참여 중인 방</a>
     <a href="/missions/clubs/find" th:attr="aria-current=${tab == 'find' ? 'page' : null}">방 찾기</a>
 </nav>
+<!-- 10-28 chan: 인원 제한은 기본 꺼짐(제한 없음). 켜면 최대 인원 칸이 보인다(만들기·방 관리 같이 씀) -->
+<div th:fragment="capOption(id, cap, count)" class="club-cap">
+    <label class="club-mode">
+        <input type="checkbox" name="memberLimit" value="true" th:checked="${cap != null}">
+        <span class="club-mode-text"><strong>인원 제한</strong>
+            <span class="help">끄면 인원 상관없이 들어올 수 있어요. 켜면 정한 인원이 찼을 때 새로 들어오지 못해요</span></span>
+    </label>
+    <div class="club-form-row club-cap-row">
+        <label th:for="${id}">최대 인원</label>
+        <span class="club-inline"><input th:id="${id}" name="memberCap" type="number" min="2" max="1000" th:value="${cap == null ? 30 : cap}"> 명까지 (나 포함)</span>
+        <p class="help" th:if="${count != null}" th:text="${'지금 ' + count + '명이에요. 더 적게 정해도 있는 멤버는 그대로예요'}">지금 N명</p>
+    </div>
+</div>
 <!-- 111 후속: 방 종류 고르기 한 칸(만들기·방 관리 같이 씀) -->
 <label th:fragment="modeOption(mode, selected)" class="club-mode">
     <input type="radio" name="joinMode" th:value="${mode}" th:checked="${mode == selected}" required>
