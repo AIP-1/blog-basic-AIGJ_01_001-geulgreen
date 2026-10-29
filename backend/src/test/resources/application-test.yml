@@ -1,4 +1,6 @@
 blog:
+  club-ai:
+    secret: test-club-ai-secret-0123456789
   # 090: 관리자 지정 주소(개인 주소 역할)가 화면에 나오지 않는지 ContactIT가 본다
   admin:
     emails: private.admin@example.com
