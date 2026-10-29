@@ -2606,9 +2606,9 @@ main.set-page { max-width: 760px; }
     .set-page .set-category-name:focus-within + .set-row-actions { display: none; }
 }
 /* 10-25 강성찬 개인 확장: 함께 쓰기를 오픈채팅방처럼. 방 화면은 가운데 720px 대화창 + 오른쪽 260px(멤버·초대·관리), 휴대폰은 한 줄 + 아래 고정 [글 쓰기] */
-.room { display: grid; grid-template-columns: minmax(0, 720px) 260px; gap: 56px; justify-content: center; align-items: start; width: 100%; }
+.room { display: grid; grid-template-columns: minmax(0, 720px) 300px; gap: 40px; justify-content: center; align-items: start; width: 100%; }
 .room-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.room-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 4px 2px 0; }
+.room-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 4px 2px 20px; border-bottom: 1px solid var(--color-border); }
 .room-head-text { flex: 1; min-width: 0; }
 .room-head h1 { margin: 0 0 6px; font-size: 1.75em; line-height: 1.25; }
 .room-head .help { margin: 0; }
@@ -2684,11 +2684,16 @@ main.set-page { max-width: 760px; }
 .room-chip { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; font-size: .78em; font-weight: 600; color: var(--color-brand);
   background: var(--color-brand-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .room-chip .icon { width: 11px; height: 11px; flex: none; }
-.room-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 28px; padding-top: 8px; min-width: 0; }
-.room-side h2 { margin: 0; font-size: .85em; color: var(--color-text-muted); font-weight: 600; }
-.room-members > summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; margin-bottom: 12px; color: var(--color-text-muted); }
+/* 10-29 chan "구분이 안 돼서 보기 힘들어": 오른쪽은 카드(멤버 · 초대하기 · 방 관리)로 나누고, 방 관리는 화살표 줄 → 창 */
+.room-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.room-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; min-width: 0; }
+.room-card-head { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; }
+.room-card-head h2, .room-side h2 { margin: 0; font-size: .98em; font-weight: 700; color: var(--color-text); }
+.room-count { margin-left: 2px; font-weight: 600; color: var(--color-text-muted); }
+.room-members > summary { cursor: pointer; list-style: none; }
+.room-members:not([open]) > summary { margin-bottom: 0; }
 .room-members > summary::-webkit-details-marker { display: none; }
-.room-members > summary .icon { width: 1em; height: 1em; }
+.room-members > summary .icon { width: 16px; height: 16px; margin-left: auto; color: var(--color-text-muted); }
 .room-members[open] > summary .icon { transform: rotate(90deg); }
 .room-member-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .room-member-list li { display: flex; align-items: center; gap: 10px; font-size: .92em; }
@@ -2696,9 +2701,36 @@ main.set-page { max-width: 760px; }
 .room-member-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .room-state { font-size: .8em; color: var(--color-text-muted); white-space: nowrap; }
 .room-state.is-today { color: var(--color-brand); font-weight: 600; }
-.room-invite > .help { margin: 8px 0 0; font-size: .88em; }
-.room-owner h2 { margin-bottom: 4px; }
-.room-leave { display: flex; }
+.room-invite > .help { margin: 0; font-size: .88em; line-height: 1.55; }
+.room-invite .club-invite-link { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--color-surface-muted); }
+.room-invite .club-invite-url { margin: 0 0 10px; font-size: .82em; overflow-wrap: anywhere; line-height: 1.5; }
+.room-invite .club-picker { margin: 12px -18px -16px; border-top: 1px solid var(--color-border); }
+.room-invite .club-picker > details > :not(summary) { margin-left: 18px; margin-right: 18px; }
+.room-invite .club-picker > details[open] { padding-bottom: 16px; }
+.room-invite .club-picker > .club-members { margin-top: 0; }
+.room-invite .club-picker > .club-members > summary.room-set-row { padding: 12px 18px; color: var(--color-text); }
+.room-invite .club-picker > .club-members > summary.room-set-row .icon { width: 16px; height: 16px; }
+/* 화살표 줄: 왼쪽 이름 + 아래 지금 값, 오른쪽 › (카드 끝까지 눌리는 넓이) */
+.room-set-rows { list-style: none; margin: 0 -18px -16px; padding: 0; }
+.room-set-rows li + li { border-top: 1px solid var(--color-border); }
+.room-requests + .room-set-rows { border-top: 1px solid var(--color-border); margin-top: 14px; }
+.room-set-row { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: inherit; text-decoration: none; cursor: pointer; list-style: none; }
+.room-set-row::-webkit-details-marker { display: none; }
+.room-set-row:hover { background: var(--color-surface-muted); text-decoration: none; }
+.room-set-row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.room-set-rows li:last-child .room-set-row, .room-invite .club-picker > details:not([open]) > .room-set-row { border-radius: 0 0 15px 15px; }
+.room-set-row > .icon { flex: none; width: 16px; height: 16px; color: var(--color-text-muted); }
+details[open] > .room-set-row > .icon { transform: rotate(90deg); }
+.room-set-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.room-set-label strong { font-size: .92em; font-weight: 600; }
+.room-set-label .help { font-size: .82em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-set-label .help.is-empty { color: var(--color-brand); font-weight: 600; }
+.room-requests .club-sub { margin: 0; font-size: .85em; font-weight: 600; color: var(--color-text-muted); }
+.room-dialog { max-width: 520px; }
+.room-dialog > .help { margin: 10px 0 0; }
+.room-dialog > .club-board { margin-top: 12px; }
+.room-leave { display: flex; justify-content: center; padding-top: 2px; }
+.room-leave .btn-text { font-size: .85em; color: var(--color-text-muted); }
 .room-write-bar { display: none; }
 /* 방 목록: 카톡 대화방 목록처럼 */
 .room-list { list-style: none; margin: 8px 0 0; padding: 0; }

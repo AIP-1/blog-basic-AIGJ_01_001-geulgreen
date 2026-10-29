@@ -17,7 +17,7 @@
                     <h1 id="club-heading" th:text="${c.name()}">함께 쓰기</h1>
                     <!-- 10-28 chan: 방마다 주제. 게임 커뮤니티의 탭처럼, 이 주제에 맞는 글만 골라서 올린다 -->
                     <p th:if="${!c.subject().isEmpty()}" class="room-subject"><span class="room-subject-label">방 주제</span><span th:text="${c.subject()}">주제</span></p>
-                    <a th:if="${c.subject().isEmpty() and board.isOwner()}" href="#room-subject" class="link-btn room-subject-empty" data-open-subject>방 주제 정하기</a>
+                    <a th:if="${c.subject().isEmpty() and board.isOwner()}" href="#room-subject" class="link-btn room-subject-empty" data-open-room-dialog>방 주제 정하기</a>
                     <p class="help"><th:block th:replace="~{fragments/meta :: parts(${(c.intro().isEmpty() ? '' : c.intro() + ' · ') + '멤버 ' + board.members().size() + '명'})}"></th:block></p>
                     <div class="room-today">
                         <span class="room-faces" aria-hidden="true"><span th:each="m, s : ${board.members()}" th:if="${s.index < 6}"
@@ -123,10 +123,11 @@
                 </th:block>
             </ol>
         </div>
+        <!-- 10-29 chan "명확하게 구분이 안 돼서 보기 힘들어": 오른쪽은 카드 세 장(멤버 · 초대하기 · 방 관리). 방 관리는 줄만 보이고, 누르면 창이 뜬다 -->
         <aside class="room-side">
-            <section aria-labelledby="room-members-heading">
+            <section class="room-card" aria-labelledby="room-members-heading">
                 <details class="room-members" th:open="${board.members().size() <= 8}">
-                    <summary><h2 id="room-members-heading" th:text="${'멤버 ' + board.members().size()}">멤버</h2><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                    <summary class="room-card-head"><h2 id="room-members-heading">멤버 <span class="room-count" th:text="${board.members().size()}">1</span></h2><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                     <ul class="room-member-list">
                         <li th:each="m : ${board.members()}">
                             <a th:href="${paths.blog(m.handle())}" class="room-member">
@@ -138,8 +139,8 @@
                     </ul>
                 </details>
             </section>
-            <section class="room-invite" aria-labelledby="club-invite-heading">
-                <h2 id="club-invite-heading">초대하기</h2>
+            <section class="room-card room-invite" aria-labelledby="club-invite-heading">
+                <div class="room-card-head"><h2 id="club-invite-heading">초대하기</h2></div>
                 <p class="help" th:text="${c.joinMode() == 'APPROVAL' ? '링크를 보내면 참여 요청이 오고, 관리자가 승인하면 들어와요' : '링크를 받은 사람은 누르면 바로 들어와요'}">링크 안내</p>
                 <!-- 10-25 chan: 링크는 /i/내아이디/코드 — 친구가 가입하면 나를 팔로우하고 이 방에 들어온다. 휴대폰에서는 [공유하기]도 -->
                 <div class="club-invite-link" th:with="inviteUrl=${inviteEnabled and currentAvatar != null ? siteOrigin + '/i/' + currentAvatar.handle() + '/' + c.inviteCode() : siteOrigin + '/missions/clubs/join/' + c.inviteCode()}"
@@ -149,7 +150,7 @@
                 </div>
                 <form th:if="${!candidates.isEmpty()}" method="post" th:action="@{/missions/clubs/{id}/invite(id=${c.id()})}" class="club-picker">
                     <details class="club-members">
-                        <summary><span th:text="${'글그린 친구 고르기 · ' + candidates.size() + '명'}">고르기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
+                        <summary class="room-set-row"><span class="room-set-label"><strong>글그린 친구 고르기</strong><span class="help" th:text="${candidates.size() + '명'}">3명</span></span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
                         <p class="help" th:text="${'나를 팔로우하는 사람과 친한 친구예요. ' + (c.joinMode() == 'APPROVAL' and !board.isAdmin() ? '수락하면 관리자 승인 뒤 들어와요' : '수락하면 바로 들어와요') + ' · 오늘 ' + invitesLeft + '명 더 보낼 수 있어요'}">설명</p>
                         <ul class="club-board">
                             <li th:each="p : ${candidates}"><label class="club-member">
@@ -163,9 +164,9 @@
                 </form>
             </section>
             <!-- 관리자(만든 사람·부방장)는 참여 요청 승인·거절, 멤버 관리·방 설정은 만든 사람만 -->
-            <section th:if="${board.isAdmin() and (board.isOwner() or !requests.isEmpty())}" class="room-owner" aria-labelledby="club-owner-heading">
-                <h2 id="club-owner-heading">방 관리</h2>
-                <th:block th:if="${!requests.isEmpty()}">
+            <section th:if="${board.isAdmin() and (board.isOwner() or !requests.isEmpty())}" class="room-card room-owner" aria-labelledby="club-owner-heading">
+                <div class="room-card-head"><h2 id="club-owner-heading">방 관리</h2></div>
+                <div th:if="${!requests.isEmpty()}" class="room-requests">
                     <h3 class="club-sub" th:text="${'참여 요청 ' + requests.size() + '명'}">참여 요청</h3>
                     <ul class="club-board club-requests">
                         <li th:each="r : ${requests}">
@@ -178,56 +179,17 @@
                                 <button type="submit" class="btn btn-primary btn-sm">승인</button></form>
                         </li>
                     </ul>
-                </th:block>
-                <details th:if="${board.isOwner() and board.members().size() > 1}" class="club-more">
-                    <summary><span>멤버 관리 · 관리자 정하기, 내보내기</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
-                    <ul class="club-board">
-                        <li th:each="m : ${board.members()}" th:unless="${m.owner()}">
-                            <span class="club-member"><th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 28)}"></th:block>
-                                <span class="club-member-name" th:text="${m.name()}">이름</span></span>
-                            <form class="inline-form" method="post"
-                                  th:action="${'/missions/clubs/' + c.id() + '/members/' + m.memberId() + (m.admin() ? '/member' : '/admin')}">
-                                <button type="submit" class="btn-text club-remove" th:text="${m.admin() ? '관리자 해제' : '관리자로'}">관리자로</button>
-                            </form>
-                            <form class="inline-form" method="post"
-                                  th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
-                                  th:attr="data-confirm=${m.name() + ' 님을 함께 쓰기에서 내보낼까요?'}">
-                                <button type="submit" class="btn-text club-remove">내보내기</button>
-                            </form>
-                        </li>
-                    </ul>
-                </details>
-                <details th:if="${board.isOwner()}" class="club-more" id="room-subject" th:open="${c.subject().isEmpty()}">
-                    <summary><span>방 주제 · 어떤 글을 올리는 방인지</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
-                    <form method="post" th:action="@{/missions/clubs/{id}/subject(id=${c.id()})}" class="club-form">
-                        <div class="club-form-row">
-                            <label for="room-subject-input">방 주제</label>
-                            <input id="room-subject-input" name="subject" type="text" maxlength="40" required th:value="${c.subject()}"
-                                   placeholder="예: 마인크래프트 이야기, 요즘 읽는 책">
-                        </div>
-                        <p class="help">멤버들이 글을 발행할 때 이 주제를 보고 방을 골라요</p>
-                        <div class="club-form-actions"><button type="submit" class="btn btn-sm">저장</button></div>
-                    </form>
-                </details>
-                <details th:if="${board.isOwner()}" class="club-more">
-                    <summary><span>방 설정 바꾸기 · 들어오는 방법, 먼저 쓰고 보기, 정원</span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></summary>
-                    <form method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
-                        <fieldset class="club-modes">
-                            <legend>들어오는 방법</legend>
-                            <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${c.joinMode()})}"></label></th:block>
-                        </fieldset>
-                        <label class="club-mode">
-                            <input type="checkbox" name="writeFirst" value="true" th:checked="${c.writeFirst()}">
-                            <span class="club-mode-text"><strong>먼저 쓰고 보기</strong>
-                                <span class="help">방 글감으로 쓴 친구 글은 나도 그 글감으로 써야 방에서 열려요. 글감을 올리고 하루가 지나면 모두 열려요</span></span>
-                        </label>
-                        <div class="club-form-row">
-                            <label for="club-cap">정원</label>
-                            <span class="club-inline"><input id="club-cap" name="memberCap" type="number" min="2" max="100" required th:value="${c.memberCap()}"> 명까지</span>
-                        </div>
-                        <div class="club-form-actions"><button type="submit" class="btn btn-sm">저장</button></div>
-                    </form>
-                </details>
+                </div>
+                <ul th:if="${board.isOwner()}" class="room-set-rows">
+                    <li><a href="#room-subject" class="room-set-row" data-open-room-dialog>
+                        <span class="room-set-label"><strong>방 주제</strong><span class="help" th:classappend="${c.subject().isEmpty()} ? 'is-empty'"
+                                th:text="${c.subject().isEmpty() ? '아직 안 정했어요' : c.subject()}">주제</span></span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></a></li>
+                    <li><a href="#room-settings" class="room-set-row" data-open-room-dialog>
+                        <span class="room-set-label"><strong>방 설정</strong><span class="help"
+                                th:text="${(c.joinMode() == 'OPEN' ? '누구나 바로' : c.joinMode() == 'APPROVAL' ? '승인 후 참여' : '링크로만') + (c.writeFirst() ? ' · 먼저 쓰고 보기' : '') + ' · ' + (c.memberCap() == null ? '인원 제한 없음' : c.memberCap() + '명까지')}">승인 후 참여</span></span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></a></li>
+                    <li th:if="${board.members().size() > 1}"><a href="#room-members-manage" class="room-set-row" data-open-room-dialog>
+                        <span class="room-set-label"><strong>멤버 관리</strong><span class="help">관리자 정하기, 내보내기</span></span><th:block th:replace="~{fragments/icons :: chevron}"></th:block></a></li>
+                </ul>
             </section>
             <section class="room-leave">
                 <form th:if="${!board.isOwner()}" method="post" th:action="@{/missions/clubs/{id}/leave(id=${c.id()})}"
@@ -241,6 +203,66 @@
             </section>
         </aside>
     </div>
+    <!-- 방 관리 창: [방 관리]의 줄을 누르면 뜬다(스크립트가 없으면 #주소로 화면 안에 펼쳐진다) -->
+    <th:block th:if="${board.isOwner()}" th:with="c=${board.club()}">
+        <dialog id="room-subject" class="club-dialog room-dialog" aria-labelledby="room-subject-title" data-room-dialog>
+            <div class="club-dialog-head"><h2 id="room-subject-title">방 주제</h2>
+                <button type="button" class="btn-icon" aria-label="닫기" data-close-room-dialog><th:block th:replace="~{fragments/icons :: close}"></th:block></button></div>
+            <form method="post" th:action="@{/missions/clubs/{id}/subject(id=${c.id()})}" class="club-form">
+                <div class="club-form-row">
+                    <label for="room-subject-input">어떤 글을 올리는 방인지</label>
+                    <input id="room-subject-input" name="subject" type="text" maxlength="40" required th:value="${c.subject()}"
+                           placeholder="예: 마인크래프트 이야기, 요즘 읽는 책">
+                </div>
+                <p class="help">멤버들이 글을 발행할 때 이 주제를 보고 방을 골라요</p>
+                <div class="club-form-actions">
+                    <button type="button" class="btn btn-sm" data-close-room-dialog>닫기</button>
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button></div>
+            </form>
+        </dialog>
+        <dialog id="room-settings" class="club-dialog room-dialog" aria-labelledby="room-settings-title" data-room-dialog>
+            <div class="club-dialog-head"><h2 id="room-settings-title">방 설정</h2>
+                <button type="button" class="btn-icon" aria-label="닫기" data-close-room-dialog><th:block th:replace="~{fragments/icons :: close}"></th:block></button></div>
+            <form method="post" th:action="@{/missions/clubs/{id}/settings(id=${c.id()})}" class="club-form club-settings">
+                <fieldset class="club-modes">
+                    <legend>들어오는 방법</legend>
+                    <th:block th:each="mode : ${modes}"><label th:replace="~{mission/clubs :: modeOption(${mode}, ${c.joinMode()})}"></label></th:block>
+                </fieldset>
+                <label class="club-mode">
+                    <input type="checkbox" name="writeFirst" value="true" th:checked="${c.writeFirst()}">
+                    <span class="club-mode-text"><strong>먼저 쓰고 보기</strong>
+                        <span class="help">방 글감으로 쓴 친구 글은 나도 그 글감으로 써야 방에서 열려요. 글감을 올리고 하루가 지나면 모두 열려요</span></span>
+                </label>
+                <div class="club-form-row">
+                    <label for="club-cap">정원</label>
+                    <span class="club-inline"><input id="club-cap" name="memberCap" type="number" min="2" max="100" required th:value="${c.memberCap()}"> 명까지</span>
+                </div>
+                <div class="club-form-actions">
+                    <button type="button" class="btn btn-sm" data-close-room-dialog>닫기</button>
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button></div>
+            </form>
+        </dialog>
+        <dialog th:if="${board.members().size() > 1}" id="room-members-manage" class="club-dialog room-dialog" aria-labelledby="room-members-manage-title" data-room-dialog>
+            <div class="club-dialog-head"><h2 id="room-members-manage-title">멤버 관리</h2>
+                <button type="button" class="btn-icon" aria-label="닫기" data-close-room-dialog><th:block th:replace="~{fragments/icons :: close}"></th:block></button></div>
+            <p class="help">관리자는 참여 요청을 승인하고 방 글감을 올릴 수 있어요</p>
+            <ul class="club-board">
+                <li th:each="m : ${board.members()}" th:unless="${m.owner()}">
+                    <span class="club-member"><th:block th:replace="~{fragments/avatar :: avatar(${m.avatar()}, 28)}"></th:block>
+                        <span class="club-member-name" th:text="${m.name()}">이름</span></span>
+                    <form class="inline-form" method="post"
+                          th:action="${'/missions/clubs/' + c.id() + '/members/' + m.memberId() + (m.admin() ? '/member' : '/admin')}">
+                        <button type="submit" class="btn-text club-remove" th:text="${m.admin() ? '관리자 해제' : '관리자로'}">관리자로</button>
+                    </form>
+                    <form class="inline-form" method="post"
+                          th:action="@{/missions/clubs/{id}/members/{mid}/remove(id=${c.id()},mid=${m.memberId()})}"
+                          th:attr="data-confirm=${m.name() + ' 님을 함께 쓰기에서 내보낼까요?'}">
+                        <button type="submit" class="btn-text club-remove">내보내기</button>
+                    </form>
+                </li>
+            </ul>
+        </dialog>
+    </th:block>
     <!-- 휴대폰: 카톡 입력창처럼 아래에 고정 -->
     <form method="post" th:action="@{/missions/clubs/{id}/write(id=${board.club().id()})}" class="room-write-bar">
         <span class="room-write-hint" th:text="${board.club().subject().isEmpty() ? '쓴 글은 이 방에 올라가요' : board.club().subject() + ' 글을 써 보세요'}">쓴 글은 이 방에 올라가요</span>
