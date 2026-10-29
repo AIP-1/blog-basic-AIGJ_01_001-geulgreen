@@ -1250,7 +1250,7 @@ main.list-page .home-cards { gap: 18px; }
 .mission-eyebrow { margin: 0 0 6px; color: var(--color-brand); font-weight: 700; font-size: .85em; letter-spacing: .06em; }
 /* 오늘의 주제 3칸: 색 카드, 주제 칩, 아래 줄은 완료 수와 색 버튼 */
 .mission-days { display: flex; gap: 6px; flex-wrap: wrap; }
-.mission-days a { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-brand);
+.mission-days a { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--color-border); color: var(--color-text);
     text-decoration: none; font-weight: 600; font-size: .85em; }
 .mission-days a:hover { background: var(--color-surface-muted); }
 .topic-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
@@ -2013,6 +2013,11 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .club-mode:has(input:checked) { border-color: var(--color-brand); background: var(--color-grass-0); }
 .club-mode input { margin-top: 3px; }
 .club-mode-text { display: flex; flex-direction: column; gap: 2px; }
+/* 10-28: 인원 제한을 켰을 때만 최대 인원 칸 */
+.club-cap { display: flex; flex-direction: column; gap: 10px; }
+.club-cap:not(:has(input[name=memberLimit]:checked)) .club-cap-row { display: none; }
+.club-cap-row > .help { grid-column: 2; margin: 0; }
+@media (max-width: 640px) { .club-cap-row > .help { grid-column: auto; } }
 .club-owner h2 { margin: 0; font-size: 1.15em; }
 .club-settings { margin-top: 16px; }
 .club-picker { margin-top: 12px; }
@@ -2606,9 +2611,9 @@ main.set-page { max-width: 760px; }
     .set-page .set-category-name:focus-within + .set-row-actions { display: none; }
 }
 /* 10-25 강성찬 개인 확장: 함께 쓰기를 오픈채팅방처럼. 방 화면은 가운데 720px 대화창 + 오른쪽 260px(멤버·초대·관리), 휴대폰은 한 줄 + 아래 고정 [글 쓰기] */
-.room { display: grid; grid-template-columns: minmax(0, 720px) 260px; gap: 56px; justify-content: center; align-items: start; width: 100%; }
+.room { display: grid; grid-template-columns: minmax(0, 720px) 300px; gap: 40px; justify-content: center; align-items: start; width: 100%; }
 .room-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.room-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 4px 2px 0; }
+.room-head { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 4px 2px 20px; border-bottom: 1px solid var(--color-border); }
 .room-head-text { flex: 1; min-width: 0; }
 .room-head h1 { margin: 0 0 6px; font-size: 1.75em; line-height: 1.25; }
 .room-head .help { margin: 0; }
@@ -2647,6 +2652,41 @@ main.set-page { max-width: 760px; }
 .room-pin-body > p { margin: 0; }
 .room-pin-body > form > .btn-text { padding-left: 0; padding-right: 0; }
 .room-topic-form { padding-top: 12px; border-top: 1px solid var(--color-border); }
+/* 10-29 방 글감 칸 오른쪽 [AI 연동하기](방장만) */
+.room-topic-field { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.room-topic-field input { flex: 1; min-width: 0; }
+.room-ai-btn { flex: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.room-ai-btn .icon, .club-ai [data-ai-suggest] .icon { width: 16px; height: 16px; }
+.club-ai input[type=password] { width: 100%; box-sizing: border-box; }
+.club-ai-lead { margin: 12px 0 0; line-height: 1.6; word-break: keep-all; }
+.club-ai-types { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* 가이드: 세로 단계(번호 왼쪽), 단계마다 열기 알약 버튼 */
+.club-dialog .club-ai-guide { display: flex; flex-direction: column; gap: 14px; margin: 4px 0 0; padding: 16px 0 0; }
+.club-ai-guide li { align-items: flex-start; padding: 0 0 0 40px; text-align: left; gap: 4px; min-height: 28px; }
+.club-ai-guide li::before { top: 0; left: 0; transform: none; }
+.club-ai-guide li:not(:last-child)::after { top: 34px; left: 14px; width: 1px; height: calc(100% - 26px); }
+.club-ai-guide .link-btn { margin-top: 4px; }
+.club-ai-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-brand-soft); }
+.club-ai-status .icon { color: var(--color-brand); }
+.club-ai [data-ai-suggest] { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; }
+.club-ai-cands { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.club-ai-cand { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px;
+  background: var(--color-surface-muted); }
+.club-ai-cand input, .club-ai-cand textarea { width: 100%; box-sizing: border-box; grid-column: 1; }
+.club-ai-cand textarea { resize: vertical; line-height: 1.5; }
+.club-ai-cand .club-ai-title { font-weight: 600; }
+.club-ai-cand .club-ai-near { grid-column: 1; margin: 0; }
+.club-ai-cand .btn { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.club-ai-manage form { margin-top: 8px; }
+@media (max-width: 480px) {
+  /* 휴대폰: 세 AI를 한 줄씩(동그라미 왼쪽, 이름과 설명 한 줄) */
+  .club-ai-types { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .club-ai-types .club-type { flex-direction: row; justify-content: flex-start; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; padding: 12px 12px 12px 42px; }
+  .club-ai-types .club-type strong { padding-right: 0; }
+  .club-ai-types .club-type::after { top: 50%; right: auto; left: 14px; transform: translateY(-50%); }
+  .club-ai-cand { grid-template-columns: minmax(0, 1fr); }
+  .club-ai-cand .btn { grid-column: 1; grid-row: auto; justify-self: end; }
+}
 .room-sub { margin: 6px 0 0; font-size: .85em; color: var(--color-text-muted); font-weight: 600; }
 .room-past { list-style: none; margin: 0; padding: 0; }
 .room-past li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--color-border); font-size: .92em; }
@@ -2684,11 +2724,16 @@ main.set-page { max-width: 760px; }
 .room-chip { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; font-size: .78em; font-weight: 600; color: var(--color-brand);
   background: var(--color-brand-soft); border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .room-chip .icon { width: 11px; height: 11px; flex: none; }
-.room-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 28px; padding-top: 8px; min-width: 0; }
-.room-side h2 { margin: 0; font-size: .85em; color: var(--color-text-muted); font-weight: 600; }
-.room-members > summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; margin-bottom: 12px; color: var(--color-text-muted); }
+/* 10-29 chan "구분이 안 돼서 보기 힘들어": 오른쪽은 카드(멤버 · 초대하기 · 방 관리)로 나누고, 방 관리는 화살표 줄 → 창 */
+.room-side { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.room-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px 18px; min-width: 0; }
+.room-card-head { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; }
+.room-card-head h2, .room-side h2 { margin: 0; font-size: .98em; font-weight: 700; color: var(--color-text); }
+.room-count { margin-left: 2px; font-weight: 600; color: var(--color-text-muted); }
+.room-members > summary { cursor: pointer; list-style: none; }
+.room-members:not([open]) > summary { margin-bottom: 0; }
 .room-members > summary::-webkit-details-marker { display: none; }
-.room-members > summary .icon { width: 1em; height: 1em; }
+.room-members > summary .icon { width: 16px; height: 16px; margin-left: auto; color: var(--color-text-muted); }
 .room-members[open] > summary .icon { transform: rotate(90deg); }
 .room-member-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .room-member-list li { display: flex; align-items: center; gap: 10px; font-size: .92em; }
@@ -2696,9 +2741,36 @@ main.set-page { max-width: 760px; }
 .room-member-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .room-state { font-size: .8em; color: var(--color-text-muted); white-space: nowrap; }
 .room-state.is-today { color: var(--color-brand); font-weight: 600; }
-.room-invite > .help { margin: 8px 0 0; font-size: .88em; }
-.room-owner h2 { margin-bottom: 4px; }
-.room-leave { display: flex; }
+.room-invite > .help { margin: 0; font-size: .88em; line-height: 1.55; }
+.room-invite .club-invite-link { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--color-surface-muted); }
+.room-invite .club-invite-url { margin: 0 0 10px; font-size: .82em; overflow-wrap: anywhere; line-height: 1.5; }
+.room-invite .club-picker { margin: 12px -18px -16px; border-top: 1px solid var(--color-border); }
+.room-invite .club-picker > details > :not(summary) { margin-left: 18px; margin-right: 18px; }
+.room-invite .club-picker > details[open] { padding-bottom: 16px; }
+.room-invite .club-picker > .club-members { margin-top: 0; }
+.room-invite .club-picker > .club-members > summary.room-set-row { padding: 12px 18px; color: var(--color-text); }
+.room-invite .club-picker > .club-members > summary.room-set-row .icon { width: 16px; height: 16px; }
+/* 화살표 줄: 왼쪽 이름 + 아래 지금 값, 오른쪽 › (카드 끝까지 눌리는 넓이) */
+.room-set-rows { list-style: none; margin: 0 -18px -16px; padding: 0; }
+.room-set-rows li + li { border-top: 1px solid var(--color-border); }
+.room-requests + .room-set-rows { border-top: 1px solid var(--color-border); margin-top: 14px; }
+.room-set-row { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: inherit; text-decoration: none; cursor: pointer; list-style: none; }
+.room-set-row::-webkit-details-marker { display: none; }
+.room-set-row:hover { background: var(--color-surface-muted); text-decoration: none; }
+.room-set-row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -2px; }
+.room-set-rows li:last-child .room-set-row, .room-invite .club-picker > details:not([open]) > .room-set-row { border-radius: 0 0 15px 15px; }
+.room-set-row > .icon { flex: none; width: 16px; height: 16px; color: var(--color-text-muted); }
+details[open] > .room-set-row > .icon { transform: rotate(90deg); }
+.room-set-label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.room-set-label strong { font-size: .92em; font-weight: 600; }
+.room-set-label .help { font-size: .82em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.room-set-label .help.is-empty { color: var(--color-brand); font-weight: 600; }
+.room-requests .club-sub { margin: 0; font-size: .85em; font-weight: 600; color: var(--color-text-muted); }
+.room-dialog { max-width: 520px; }
+.room-dialog > .help { margin: 10px 0 0; }
+.room-dialog > .club-board { margin-top: 12px; }
+.room-leave { display: flex; justify-content: center; padding-top: 2px; }
+.room-leave .btn-text { font-size: .85em; color: var(--color-text-muted); }
 .room-write-bar { display: none; }
 /* 방 목록: 카톡 대화방 목록처럼 */
 .room-list { list-style: none; margin: 8px 0 0; padding: 0; }
