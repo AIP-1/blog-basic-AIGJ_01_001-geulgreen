@@ -51,3 +51,28 @@
   mark();
   if (dialog.dataset.keepOpen === 'true' || location.hash === '#club-new') { open(); }
 })();
+// 10-29 방 화면: [방 관리]의 방 주제·방 설정·멤버 관리 줄을 누르면 창으로(스크립트가 없으면 #주소로 화면 안에 펼쳐진다)
+(function () {
+  'use strict';
+  var dialogs = document.querySelectorAll('[data-room-dialog]');
+  if (!dialogs.length || typeof dialogs[0].showModal !== 'function') { return; }
+  Array.prototype.forEach.call(dialogs, function (d) {
+    d.classList.add('is-enhanced');
+    d.addEventListener('click', function (e) { if (e.target === d) { d.close(); } });
+    Array.prototype.forEach.call(d.querySelectorAll('[data-close-room-dialog]'), function (b) {
+      b.addEventListener('click', function () { d.close(); });
+    });
+  });
+  function open(id) {
+    var d = document.getElementById(id);
+    if (!d || !d.hasAttribute('data-room-dialog')) { return false; }
+    if (!d.open) { d.showModal(); }
+    var first = d.querySelector('input[type="text"], input:not([type="hidden"]), button[type="submit"]');
+    if (first) { first.focus(); }
+    return true;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-open-room-dialog]'), function (a) {
+    a.addEventListener('click', function (e) { if (open(a.getAttribute('href').slice(1))) { e.preventDefault(); } });
+  });
+  if (location.hash) { open(location.hash.slice(1)); }
+})();
